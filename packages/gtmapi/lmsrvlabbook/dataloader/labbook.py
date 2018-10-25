@@ -22,7 +22,7 @@ from typing import List
 from promise import Promise
 from promise.dataloader import DataLoader
 
-from gtmcore.labbook import LabBook
+from gtmcore.labbook import InventoryManager
 from lmsrvcore.auth.user import get_logged_in_author
 
 
@@ -36,11 +36,8 @@ class LabBookLoader(DataLoader):
     def get_labbook_instance(key: str):
         # Get identifying info from key
         username, owner_name, labbook_name = key.split('&')
-
-        # Create Labbook instance
-        lb = LabBook(author=get_logged_in_author())
-        lb.from_name(username, owner_name, labbook_name)
-
+        lb = InventoryManager().load_labbook(username, owner_name, labbook_name,
+                                             author=get_logged_in_author())
         return lb
 
     def batch_load_fn(self, keys: List[str]):

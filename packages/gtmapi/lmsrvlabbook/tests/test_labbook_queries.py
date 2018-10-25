@@ -31,7 +31,7 @@ import pprint
 import graphene
 
 import gtmcore
-from gtmcore.labbook import LabBook
+from gtmcore.labbook import LabBook, InventoryManager
 from gtmcore.fixtures import remote_labbook_repo
 from gtmcore.gitlib.git import GitAuthor
 
@@ -152,9 +152,8 @@ class TestLabBookServiceQueries(object):
                 """
         snapshot.assert_match(fixture_working_dir_populated_scoped[2].execute(query))
 
-        # Modify a labbook
-        lb = LabBook()
-        lb.from_name("default", "default", "labbook4")
+        im = InventoryManager(fixture_working_dir_populated_scoped[0])
+        lb = im.load_labbook("default", "default", "labbook4")
         with open(os.path.join(lb.root_dir, "code", "test.txt"), 'wt') as tf:
             tf.write("asdfasdf")
         lb.git.add_all()
@@ -1132,8 +1131,8 @@ class TestLabBookServiceQueries(object):
                      "revision": ENV_UNIT_TEST_REV}
         snapshot.assert_match(fixture_working_dir_env_repo_scoped[2].execute(query, variable_values=variables))
 
-        lb = LabBook(fixture_working_dir_env_repo_scoped[0])
-        lb.from_name("default","default", "labbook-page-test")
+        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        lb = im.load_labbook("default","default", "labbook-page-test")
         FileOperations.insert_file(lb, "code", fixture_test_file)
 
         # Get all records at once with no pagination args and verify cursors look OK directly

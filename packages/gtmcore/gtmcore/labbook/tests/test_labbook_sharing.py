@@ -22,7 +22,7 @@ import pytest
 import os
 
 
-from gtmcore.labbook import LabBook, LabbookException
+from gtmcore.labbook import LabBook, LabbookException, InventoryManager
 from gtmcore.files import FileOperations
 from gtmcore.fixtures import (mock_config_file, mock_labbook_lfs_disabled, remote_labbook_repo)
 
@@ -130,8 +130,7 @@ class TestLabBook(object):
         assert r[1] == 0
 
 
-        remote_lb = LabBook(mock_config_file[0])
-        remote_lb.from_directory(remote_labbook_repo)
+        remote_lb = InventoryManager(mock_config_file[0]).load_labbook_from_directory(remote_labbook_repo)
         remote_lb.checkout_branch("testing-branch")
         FileOperations.delete_file(remote_lb, "code", "codefile.c")
 

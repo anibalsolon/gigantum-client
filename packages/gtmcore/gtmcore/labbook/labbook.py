@@ -106,7 +106,7 @@ class LabBook(object):
 
         # If author is set, update git interface
         if author:
-            self.git.update_author(author=author)
+            self.author = author
 
         # LabBook Properties
         self._root_dir: Optional[str] = None  # The root dir is the location of the labbook this instance represents
@@ -238,6 +238,15 @@ class LabBook(object):
             raise ValueError("No ID assigned to Lab Book.")
 
     @property
+    def author(self) -> Optional[GitAuthor]:
+        return self.git.author
+
+    @author.setter
+    def author(self, value: Optional[GitAuthor]) -> None:
+        if value:
+            self.git.update_author(author=value)
+
+    @property
     def name(self) -> str:
         if self._data:
             return self._data["labbook"]["name"]
@@ -278,6 +287,8 @@ class LabBook(object):
     @property
     def key(self) -> str:
         """Return a unique key for identifying and locating a labbbok.
+
+        DEPRECATED
 
         Note: A labbook does not exist notionally outside of a directory structure, therefore
         part of the key is determined by this structure. """
@@ -1139,79 +1150,6 @@ class LabBook(object):
                 raise ValueError(f"active_branch should be '{user_workspace_branch}'")
 
             return self.root_dir
-
-    def from_key(self, key: str) -> None:
-        """Method to populate labbook from a unique key.
-
-        Args:
-            key(str): Encoded key of labbook
-
-        Returns:
-            None (Populates this labbook instance)
-        """
-
-        logger.debug(f"Populating LabBook from key {key}")
-
-        if len(key.split("|")) != 3:
-            raise ValueError(f"Invalid LabBook key `{key}`")
-
-        user_key, owner_key, lb_name_key = key.split("|")
-        self.from_name(user_key, owner_key, lb_name_key)
-
-    def from_directory(self, root_dir: str) -> None:
-        """Method to populate a LabBook instance from a directory
-
-        Args:
-            root_dir(str): The absolute path to the directory containing the LabBook
-
-        Returns:
-            None
-        """
-        self._set_root_dir(root_dir)
-        self._load_labbook_data()
-        self._validate_labbook_data()
-
-    def from_name(self, username: str, owner: str, labbook_name: str):
-        """Method to populate a LabBook instance based on the user and name of the labbook
-
-        Args:
-            username(str): The username of the logged in user
-            owner(str): The username/org name of the owner of the LabBook
-            labbook_name(str): the name of the LabBook
-
-        Returns:
-            LabBook
-        """
-
-        if not username:
-            raise ValueError("username cannot be None or empty")
-
-        if not owner:
-            raise ValueError("owner cannot be None or empty")
-
-        if not labbook_name:
-            raise ValueError("labbook_name cannot be None or empty")
-
-        labbook_path = os.path.expanduser(os.path.join(self.labmanager_config.config["git"]["working_directory"],
-                                                       username,
-                                                       owner,
-                                                       "labbooks",
-                                                       labbook_name))
-
-        # Make sure directory exists
-        if not os.path.isdir(labbook_path):
-            raise ValueError("LabBook `{}` not found locally.".format(labbook_name))
-
-        # Update root dir
-        self._set_root_dir(labbook_path)
-
-        # Load LabBook data file
-        self._load_labbook_data()
-
-        # Make sure name matches directory name.
-        dname = [t for t in self.root_dir.split(os.sep) if t][-1]
-        if self.name != dname:
-            raise ValueError(f"Labbook name {self.name} does not match directory name {dname}")
 
     def log(self, username: str = None, max_count: int = 10):
         """Method to list commit history of a Labbook

@@ -27,7 +27,7 @@ from typing import Callable, Optional
 
 from gtmcore.configuration import get_docker_client
 from gtmcore.logging import LMLogger
-from gtmcore.labbook import LabBook
+from gtmcore.labbook import LabBook, InventoryManager
 from gtmcore.container.utils import infer_docker_image_name
 from gtmcore.container.exceptions import ContainerBuildException
 
@@ -147,8 +147,7 @@ def build_docker_image(root_dir: str, override_image_tag: Optional[str],
         raise ValueError(f'Expected env directory `{root_dir}` does not exist.')
 
     env_dir = os.path.join(root_dir, '.gigantum', 'env')
-    lb = LabBook()
-    lb.from_directory(root_dir)
+    lb = InventoryManager().load_labbook_from_directory(root_dir)
 
     # Build image
     image_name = override_image_tag or infer_docker_image_name(labbook_name=lb.name,
@@ -213,8 +212,7 @@ def start_labbook_container(labbook_root: str, config_path: str,
     if username and override_image_id:
         raise ValueError('Argument username and override_image_id cannot both be set')
 
-    lb = LabBook(config_path)
-    lb.from_directory(labbook_root)
+    lb = InventoryManager(config_file=config_path).load_labbook_from_directory(labbook_root)
     if not override_image_id:
         tag = infer_docker_image_name(lb.name, lb.owner['username'], username)
     else:

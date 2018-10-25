@@ -32,7 +32,7 @@ from gtmcore.dispatcher import jobs
 import gtmcore.fixtures
 from gtmcore.fixtures import mock_config_file, mock_config_with_repo
 from gtmcore.environment import ComponentManager, RepositoryManager
-from gtmcore.labbook import LabBook
+from gtmcore.labbook import LabBook, InventoryManager
 from gtmcore.imagebuilder import ImageBuilder
 
 
@@ -76,8 +76,7 @@ class TestJobs(object):
 
             # New path should reflect username of new owner and user.
             assert imported_lb_path == lb_root.replace('/unittester/unittester/', '/unittester2/unittester2/')
-            import_lb = LabBook(mock_config_with_repo[0])
-            import_lb.from_directory(imported_lb_path)
+            import_lb = InventoryManager(mock_config_with_repo[0]).load_labbook_from_directory(imported_lb_path)
 
             ib = ImageBuilder(import_lb)
             ib.assemble_dockerfile(write=True)
@@ -97,8 +96,7 @@ class TestJobs(object):
 
             # New path should reflect username of new owner and user.
             assert user_import_lb
-            import_lb2 = LabBook(mock_config_with_repo[0])
-            import_lb2.from_directory(user_import_lb)
+            import_lb2 = InventoryManager(mock_config_with_repo[0]).load_labbook_from_directory(user_import_lb)
             assert import_lb2.data['owner']['username'] == 'unittester'
             # After importing, the new user (in this case "cat") should be the current, active workspace.
             # And be created, if necessary.
@@ -161,8 +159,7 @@ class TestJobs(object):
 
             # New path should reflect username of new owner and user.
             assert imported_lb_path == lb_root.replace('/unittester/unittester/', '/unittester2/unittester2/')
-            import_lb = LabBook(mock_config_with_repo[0])
-            import_lb.from_directory(imported_lb_path)
+            import_lb = InventoryManager(mock_config_with_repo[0]).load_labbook_from_directory(imported_lb_path)
 
             ib = ImageBuilder(import_lb)
             ib.assemble_dockerfile(write=True)

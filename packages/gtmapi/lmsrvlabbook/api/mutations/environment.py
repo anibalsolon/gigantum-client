@@ -24,7 +24,7 @@ import confhttpproxy
 from gtmcore.configuration import Configuration, get_docker_client
 from gtmcore.imagebuilder import ImageBuilder
 from gtmcore.dispatcher import Dispatcher, jobs
-from gtmcore.labbook import LabBook
+from gtmcore.labbook import LabBook, InventoryManager
 from gtmcore.container.container import ContainerOperations
 from gtmcore.container.utils import infer_docker_image_name
 from gtmcore.workflows import GitWorkflow
@@ -75,11 +75,8 @@ class BuildImage(graphene.relay.ClientIDMutation):
         if BuildImage.get_container_status(labbook_name, owner, username):
             raise ValueError(f'Cannot build image for running container {owner}/{labbook_name}')
 
-        labbook_dir = os.path.expanduser(os.path.join(Configuration().config['git']['working_directory'],
-                                         username, owner, 'labbooks', labbook_name))
-
-        lb = LabBook(author=get_logged_in_author())
-        lb.from_directory(labbook_dir)
+        lb = InventoryManager().load_labbook(username, owner, labbook_name,
+                                             author=get_logged_in_author())
 
         # Generate Dockerfile
         # TODO - Move to build_image ??
@@ -89,7 +86,7 @@ class BuildImage(graphene.relay.ClientIDMutation):
         # Kick off building in a background thread
         d = Dispatcher()
         build_kwargs = {
-            'path': labbook_dir,
+            'path': lb.root_dir,
             'username': username,
             'nocache': no_cache
         }
@@ -116,8 +113,8 @@ class StartContainer(graphene.relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, owner, labbook_name, client_mutation_id=None):
         username = get_logged_in_username()
-        lb = LabBook(author=get_logged_in_author())
-        lb.from_name(username, owner, labbook_name)
+        lb = InventoryManager().load_labbook(username, owner, labbook_name,
+                                             author=get_logged_in_author())
 
         with lb.lock_labbook():
             lb, container_id = ContainerOperations.start_container(
@@ -166,8 +163,8 @@ class StopContainer(graphene.relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, owner, labbook_name, client_mutation_id=None):
         username = get_logged_in_username()
-        lb = LabBook(author=get_logged_in_author())
-        lb.from_name(username, owner, labbook_name)
+        lb = InventoryManager().load_labbook(username, owner, labbook_name,
+                                             author=get_logged_in_author())
 
         with lb.lock_labbook():
             cls._stop_container(lb, username)

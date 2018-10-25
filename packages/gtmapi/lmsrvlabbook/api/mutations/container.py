@@ -25,7 +25,7 @@ import requests
 import graphene
 import confhttpproxy
 
-from gtmcore.labbook import LabBook, LabbookException
+from gtmcore.labbook import LabBook, LabbookException, InventoryManager
 from gtmcore.container.container import ContainerOperations
 from gtmcore.container.jupyter import check_jupyter_reachable
 from gtmcore.logging import LMLogger
@@ -103,8 +103,8 @@ class StartDevTool(graphene.relay.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, owner, labbook_name, dev_tool,
                                container_override_id=None, client_mutation_id=None):
         username = get_logged_in_username()
-        lb = LabBook(author=get_logged_in_author())
-        lb.from_name(username, owner, labbook_name)
+        lb = InventoryManager().load_labbook(username, owner, labbook_name,
+                                             author=get_logged_in_author())
 
         # TODO - Fail fast if already locked
         with lb.lock_labbook(failfast=True):

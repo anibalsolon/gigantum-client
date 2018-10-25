@@ -119,8 +119,7 @@ class ZipExporter(object):
         if not os.path.isdir(lb_export_directory):
             os.makedirs(lb_export_directory, exist_ok=True)
 
-        labbook: LabBook = LabBook(config_file)
-        labbook.from_directory(labbook_path)
+        labbook = InventoryManager(config_file).load_labbook_from_directory(labbook_path)
         core.sync_locally(labbook)
 
         labbook_dir, _ = labbook.root_dir.rsplit(os.path.sep, 1)
@@ -176,9 +175,7 @@ class ZipExporter(object):
                 raise ValueError("Expected only one directory unzipped")
             unzipped_path = os.path.join(tdir, 'project', pdirs[0])
 
-            lb = LabBook(config_file)
-            lb.from_directory(unzipped_path)
-
+            lb = InventoryManager(config_file).load_labbook_from_directory(unzipped_path)
             statusmsg = f'{statusmsg}\nCreating workspace branch...'
             update_meta(statusmsg)
 

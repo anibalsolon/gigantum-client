@@ -265,3 +265,85 @@ class TestInventory(object):
         assert labbooks[1].name == 'hhghg'
         assert labbooks[2].name == 'labbook1'
         assert labbooks[3].name == 'labbook3'
+
+    def test_load_labbook_from_directory(self, mock_config_file):
+        """Test loading a labbook from a directory"""
+        lb = LabBook(mock_config_file[0])
+
+        labbook_dir = lb.new(username="test", name="labbook1", description="my first labbook",
+                             owner={"username": "test"})
+
+        assert labbook_dir == os.path.join(mock_config_file[1], "test", "test", "labbooks", "labbook1")
+        assert type(lb) == LabBook
+
+        # Validate directory structure
+        assert os.path.isdir(os.path.join(labbook_dir, "code")) is True
+        assert os.path.isdir(os.path.join(labbook_dir, "input")) is True
+        assert os.path.isdir(os.path.join(labbook_dir, "output")) is True
+        assert os.path.isdir(os.path.join(labbook_dir, ".gigantum")) is True
+        assert os.path.isdir(os.path.join(labbook_dir, ".gigantum", "env")) is True
+        assert os.path.isdir(os.path.join(labbook_dir, ".gigantum", "activity")) is True
+        assert os.path.isdir(os.path.join(labbook_dir, ".gigantum", "activity", "log")) is True
+        assert os.path.isdir(os.path.join(labbook_dir, ".gigantum", "activity", "index")) is True
+
+        # Validate labbook data file
+        with open(os.path.join(labbook_dir, ".gigantum", "labbook.yaml"), "rt") as data_file:
+            data = yaml.load(data_file)
+
+        assert data["labbook"]["name"] == "labbook1"
+        assert data["labbook"]["description"] == "my first labbook"
+        assert "id" in data["labbook"]
+        assert data["owner"]["username"] == "test"
+
+        lb_loaded = InventoryManager(mock_config_file[0]).load_labbook_from_directory(labbook_dir)
+        assert lb.active_branch == 'gm.workspace-test'
+
+        assert lb_loaded.root_dir == os.path.join(mock_config_file[1], "test", "test", "labbooks", "labbook1")
+        assert type(lb) == LabBook
+
+        # Validate labbook data file
+        assert lb_loaded.root_dir == lb.root_dir
+        assert lb_loaded.id == lb.id
+        assert lb_loaded.name == lb.name
+        assert lb_loaded.description == lb.description
+
+    def test_load_labbook(self, mock_config_file):
+        """Test loading a labbook from a directory"""
+        lb = LabBook(mock_config_file[0])
+        labbook_dir = lb.new(username="test", name="labbook1", description="my first labbook",
+                             owner={"username": "test"})
+
+        assert labbook_dir == os.path.join(mock_config_file[1], "test", "test", "labbooks", "labbook1")
+        assert type(lb) == LabBook
+
+        # Validate directory structure
+        assert os.path.isdir(os.path.join(labbook_dir, "code")) is True
+        assert os.path.isdir(os.path.join(labbook_dir, "input")) is True
+        assert os.path.isdir(os.path.join(labbook_dir, "output")) is True
+        assert os.path.isdir(os.path.join(labbook_dir, ".gigantum")) is True
+        assert os.path.isdir(os.path.join(labbook_dir, ".gigantum", "env")) is True
+        assert os.path.isdir(os.path.join(labbook_dir, ".gigantum", "activity")) is True
+        assert os.path.isdir(os.path.join(labbook_dir, ".gigantum", "activity", "log")) is True
+        assert os.path.isdir(os.path.join(labbook_dir, ".gigantum", "activity", "index")) is True
+
+        # Validate labbook data file
+        with open(os.path.join(labbook_dir, ".gigantum", "labbook.yaml"), "rt") as data_file:
+            data = yaml.load(data_file)
+
+        assert data["labbook"]["name"] == "labbook1"
+        assert data["labbook"]["description"] == "my first labbook"
+        assert "id" in data["labbook"]
+        assert data["owner"]["username"] == "test"
+
+        im = InventoryManager(mock_config_file[0])
+        lb_loaded = im.load_labbook("test", "test", "labbook1")
+        assert lb_loaded.active_branch == 'gm.workspace-test'
+        assert lb_loaded.root_dir == os.path.join(mock_config_file[1], "test", "test", "labbooks", "labbook1")
+        assert type(lb) == LabBook
+
+        # Validate labbook data file
+        assert lb_loaded.root_dir == lb.root_dir
+        assert lb_loaded.id == lb.id
+        assert lb_loaded.name == lb.name
+        assert lb_loaded.description == lb.description
+        assert lb_loaded.key == 'test|test|labbook1'

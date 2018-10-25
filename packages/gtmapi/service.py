@@ -36,7 +36,7 @@ from gtmcore.logging import LMLogger
 from gtmcore.environment import RepositoryManager
 from gtmcore.auth.identity import AuthenticationError, get_identity_manager
 from gtmcore.labbook.lock import reset_all_locks
-from gtmcore.labbook import LabBook
+from gtmcore.labbook import LabBook, InventoryManager
 from lmsrvcore.auth.user import get_logged_in_author
 
 
@@ -128,8 +128,8 @@ def savehook(username, owner, labbook_name):
             logger.info(f"Skipping jupyter savehook for {username}/{owner}/{labbook_name} due to active kernel")
             return 'success'
 
-        lb = LabBook(author=get_logged_in_author())
-        lb.from_name(username, owner, labbook_name)
+        lb = InventoryManager().load_labbook(username, owner, labbook_name,
+                                             author=get_logged_in_author())
         with lb.lock_labbook():
             lb.sweep_uncommitted_changes()
 

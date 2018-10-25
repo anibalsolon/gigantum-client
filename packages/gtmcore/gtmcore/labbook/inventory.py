@@ -4,6 +4,7 @@ from natsort import natsorted
 
 from typing import Optional, Generator, List, Tuple
 
+from gtmcore.gitlib import GitAuthor
 from gtmcore.logging import LMLogger
 from gtmcore.configuration import Configuration
 from gtmcore.configuration.utils import call_subprocess
@@ -38,8 +39,7 @@ class InventoryManager(object):
 
     def _put_labbook(self, path: str, username: str, owner: str) -> LabBook:
         # Validate that given path contains labbook
-        temp_lb = LabBook(self.config_file)
-        temp_lb.from_directory(path)
+        temp_lb = self.load_labbook_from_directory(path)
 
         p = os.path.join(self.inventory_root, username, owner, 'labbooks')
         dname = os.path.basename(path)
@@ -56,9 +56,7 @@ class InventoryManager(object):
         assert os.path.dirname(final_path) != 'labbooks', \
                f"shutil.move used incorrectly"
 
-        lb = LabBook(self.config_file)
-        lb.from_directory(final_path)
-
+        lb = self.load_labbook_from_directory(final_path)
         return lb
 
     def put_labbook(self, path: str, username: str, owner: str) -> LabBook:
@@ -79,12 +77,37 @@ class InventoryManager(object):
             logger.error(e)
             raise InventoryException(e)
 
-    def load_labbook(self, username: str, owner: str, labbook_name: str) -> LabBook:
+    def load_labbook_from_directory(self, path: str) -> LabBook:
+        """ Load and return a LabBook object from a given path on disk
+
+        Warning - Deprecated !! Use load_labbook instead
+
+        Args:
+            path: Full path on disk to LabBook
+
+        Returns:
+            LabBook object
+        """
+        try:
+            lb = LabBook(config_file=self.config_file)
+            lb._set_root_dir(path)
+            lb._load_labbook_data()
+            lb._validate_labbook_data()
+            return lb
+        except Exception as e:
+            logger.error(e)
+            raise InventoryException(e)
+
+    def load_labbook(self, username: str, owner: str, labbook_name: str,
+                     author: Optional[GitAuthor] = None) -> LabBook:
         try:
             lb = LabBook(self.config_file)
             lbroot = os.path.join(self.inventory_root, username,
                                   owner, 'labbooks', labbook_name)
-            lb.from_directory(lbroot)
+            lb._set_root_dir(lbroot)
+            lb._load_labbook_data()
+            lb._validate_labbook_data()
+            lb.author = author
             return lb
         except Exception as e:
             raise InventoryException(f"Cannot retrieve "

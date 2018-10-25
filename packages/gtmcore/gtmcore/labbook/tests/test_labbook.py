@@ -24,7 +24,7 @@ import yaml
 import time
 
 from gtmcore.files import FileOperations
-from gtmcore.labbook import LabBook, LabbookException
+from gtmcore.labbook import LabBook, LabbookException, InventoryManager
 from gtmcore.gitlib.git import GitAuthor
 from gtmcore.fixtures import mock_config_file, mock_labbook, remote_labbook_repo, sample_src_file
 
@@ -152,91 +152,6 @@ class TestLabBook(object):
         # New ID should be created
         assert checkout_id_1 != lb.checkout_id
 
-    def test_load_from_directory(self, mock_config_file):
-        """Test loading a labbook from a directory"""
-        lb = LabBook(mock_config_file[0])
-
-        labbook_dir = lb.new(username="test", name="labbook1", description="my first labbook",
-                             owner={"username": "test"})
-
-        assert labbook_dir == os.path.join(mock_config_file[1], "test", "test", "labbooks", "labbook1")
-        assert type(lb) == LabBook
-
-        # Validate directory structure
-        assert os.path.isdir(os.path.join(labbook_dir, "code")) is True
-        assert os.path.isdir(os.path.join(labbook_dir, "input")) is True
-        assert os.path.isdir(os.path.join(labbook_dir, "output")) is True
-        assert os.path.isdir(os.path.join(labbook_dir, ".gigantum")) is True
-        assert os.path.isdir(os.path.join(labbook_dir, ".gigantum", "env")) is True
-        assert os.path.isdir(os.path.join(labbook_dir, ".gigantum", "activity")) is True
-        assert os.path.isdir(os.path.join(labbook_dir, ".gigantum", "activity", "log")) is True
-        assert os.path.isdir(os.path.join(labbook_dir, ".gigantum", "activity", "index")) is True
-
-        # Validate labbook data file
-        with open(os.path.join(labbook_dir, ".gigantum", "labbook.yaml"), "rt") as data_file:
-            data = yaml.load(data_file)
-
-        assert data["labbook"]["name"] == "labbook1"
-        assert data["labbook"]["description"] == "my first labbook"
-        assert "id" in data["labbook"]
-        assert data["owner"]["username"] == "test"
-
-        lb_loaded = LabBook(mock_config_file[0])
-        lb_loaded.from_directory(labbook_dir)
-        assert lb.active_branch == 'gm.workspace-test'
-
-        assert lb_loaded.root_dir == os.path.join(mock_config_file[1], "test", "test", "labbooks", "labbook1")
-        assert type(lb) == LabBook
-
-        # Validate labbook data file
-        assert lb_loaded.root_dir == lb.root_dir
-        assert lb_loaded.id == lb.id
-        assert lb_loaded.name == lb.name
-        assert lb_loaded.description == lb.description
-
-    def test_load_from_name(self, mock_config_file):
-        """Test loading a labbook from a directory"""
-        lb = LabBook(mock_config_file[0])
-
-        labbook_dir = lb.new(username="test", name="labbook1", description="my first labbook",
-                             owner={"username": "test"})
-
-        assert labbook_dir == os.path.join(mock_config_file[1], "test", "test", "labbooks", "labbook1")
-        assert type(lb) == LabBook
-
-        # Validate directory structure
-        assert os.path.isdir(os.path.join(labbook_dir, "code")) is True
-        assert os.path.isdir(os.path.join(labbook_dir, "input")) is True
-        assert os.path.isdir(os.path.join(labbook_dir, "output")) is True
-        assert os.path.isdir(os.path.join(labbook_dir, ".gigantum")) is True
-        assert os.path.isdir(os.path.join(labbook_dir, ".gigantum", "env")) is True
-        assert os.path.isdir(os.path.join(labbook_dir, ".gigantum", "activity")) is True
-        assert os.path.isdir(os.path.join(labbook_dir, ".gigantum", "activity", "log")) is True
-        assert os.path.isdir(os.path.join(labbook_dir, ".gigantum", "activity", "index")) is True
-
-        # Validate labbook data file
-        with open(os.path.join(labbook_dir, ".gigantum", "labbook.yaml"), "rt") as data_file:
-            data = yaml.load(data_file)
-
-        assert data["labbook"]["name"] == "labbook1"
-        assert data["labbook"]["description"] == "my first labbook"
-        assert "id" in data["labbook"]
-        assert data["owner"]["username"] == "test"
-
-        lb_loaded = LabBook(mock_config_file[0])
-        lb_loaded.from_name("test", "test", "labbook1")
-        assert lb_loaded.active_branch == 'gm.workspace-test'
-
-        assert lb_loaded.root_dir == os.path.join(mock_config_file[1], "test", "test", "labbooks", "labbook1")
-        assert type(lb) == LabBook
-
-        # Validate labbook data file
-        assert lb_loaded.root_dir == lb.root_dir
-        assert lb_loaded.id == lb.id
-        assert lb_loaded.name == lb.name
-        assert lb_loaded.description == lb.description
-        assert lb_loaded.key == 'test|test|labbook1'
-
     def test_change_properties(self, mock_config_file):
         """Test loading a labbook from a directory"""
         lb = LabBook(mock_config_file[0])
@@ -246,8 +161,9 @@ class TestLabBook(object):
         lb.description = "an updated description"
 
         # Reload and see changes
-        lb_loaded = LabBook(mock_config_file[0])
-        lb_loaded.from_name("test", "test", "new-labbook-1")
+
+        im = InventoryManager(mock_config_file[0])
+        lb_loaded = im.load_labbook("test", "test", "new-labbook-1")
         assert lb_loaded.active_branch == 'gm.workspace-test'
 
         assert lb_loaded.root_dir == os.path.join(mock_config_file[1], "test", "test", "labbooks", "new-labbook-1")
@@ -302,11 +218,6 @@ class TestLabBook(object):
         lb = LabBook(mock_config_file[0])
         lb.new(owner={"username": "test"}, name="test-lb-key", description="validate tests.")
         assert lb.key == 'test|test|test-lb-key'
-
-        lb1key = lb.key
-        lb2 = LabBook(mock_config_file[0])
-        lb2.from_key(lb1key)
-        assert lb.active_branch == 'gm.workspace-test'
 
     def test_sweep_uncommitted_changes(self, mock_config_file):
         """ Test sweep covers Added, Removed, and """

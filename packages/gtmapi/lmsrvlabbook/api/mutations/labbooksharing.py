@@ -22,7 +22,7 @@ import base64
 import graphene
 
 from gtmcore.configuration import Configuration
-from gtmcore.labbook import LabBook
+from gtmcore.labbook import LabBook, InventoryManager
 from gtmcore.dispatcher import Dispatcher, jobs
 from gtmcore.logging import LMLogger
 from gtmcore.gitlib.gitlab import GitLabManager
@@ -51,11 +51,8 @@ class PublishLabbook(graphene.relay.ClientIDMutation):
                                client_mutation_id=None):
         # Load LabBook
         username = get_logged_in_username()
-        working_directory = Configuration().config['git']['working_directory']
-        inferred_lb_directory = os.path.join(working_directory, username, owner, 'labbooks', labbook_name)
-        lb = LabBook(author=get_logged_in_author())
-        lb.from_directory(inferred_lb_directory)
-
+        lb = InventoryManager().load_labbook(username, owner, labbook_name,
+                                             author=get_logged_in_author())
         # Extract valid Bearer token
         if "HTTP_AUTHORIZATION" in info.context.headers.environ:
             token = parse_token(info.context.headers.environ["HTTP_AUTHORIZATION"])
@@ -89,11 +86,8 @@ class SyncLabbook(graphene.relay.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, owner, labbook_name, force=False, client_mutation_id=None):
         # Load LabBook
         username = get_logged_in_username()
-        working_directory = Configuration().config['git']['working_directory']
-        inferred_lb_directory = os.path.join(working_directory, username, owner, 'labbooks',
-                                             labbook_name)
-        lb = LabBook(author=get_logged_in_author())
-        lb.from_directory(inferred_lb_directory)
+        lb = InventoryManager().load_labbook(username, owner, labbook_name,
+                                             author=get_logged_in_author())
 
         # Extract valid Bearer token
         token = None
@@ -144,12 +138,8 @@ class SetVisibility(graphene.relay.ClientIDMutation):
                                client_mutation_id=None):
         # Load LabBook
         username = get_logged_in_username()
-        working_directory = Configuration().config['git']['working_directory']
-        inferred_lb_directory = os.path.join(working_directory, username, owner, 'labbooks',
-                                             labbook_name)
-        lb = LabBook(author=get_logged_in_author())
-        lb.from_directory(inferred_lb_directory)
-
+        lb = InventoryManager().load_labbook(username, owner, labbook_name,
+                                             author=get_logged_in_author())
         # Extract valid Bearer token
         token = None
         if hasattr(info.context.headers, 'environ'):

@@ -31,7 +31,7 @@ from rq import get_current_job
 from gtmcore.activity.monitors.devenv import DevEnvMonitorManager
 from gtmcore.configuration import Configuration
 from gtmcore.configuration.utils import call_subprocess
-from gtmcore.labbook import LabBook
+from gtmcore.labbook import LabBook, InventoryManager
 from gtmcore.logging import LMLogger
 from gtmcore.workflows import sync_locally, GitWorkflow, ZipExporter
 from gtmcore.container.core import (build_docker_image as build_image,
@@ -62,8 +62,7 @@ def publish_labbook(labbook_path: str, username: str, access_token: str,
         job.save_meta()
 
     try:
-        labbook: LabBook = LabBook()
-        labbook.from_directory(labbook_path)
+        labbook = InventoryManager().load_labbook_from_directory(labbook_path)
 
         with labbook.lock_labbook():
             wf = GitWorkflow(labbook)
@@ -91,8 +90,7 @@ def sync_labbook(labbook_path: str, username: str, remote: str = "origin",
         job.save_meta()
 
     try:
-        labbook: LabBook = LabBook()
-        labbook.from_directory(labbook_path)
+        labbook = InventoryManager().load_labbook_from_directory(labbook_path)
 
         with labbook.lock_labbook():
             wf = GitWorkflow(labbook)
@@ -111,8 +109,7 @@ def export_labbook_as_zip(labbook_path: str, lb_export_directory: str) -> str:
     logger.info(f"(Job {p}) Starting export_labbook_as_zip({labbook_path})")
 
     try:
-        lb = LabBook()
-        lb.from_directory(labbook_path)
+        lb = InventoryManager().load_labbook_from_directory(labbook_path)
         with lb.lock_labbook():
             path = ZipExporter.export_zip(lb.root_dir, lb_export_directory)
         return path

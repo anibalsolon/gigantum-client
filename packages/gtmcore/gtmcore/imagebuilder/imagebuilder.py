@@ -201,11 +201,6 @@ class ImageBuilder(object):
         dockerfile_name = os.path.join(self.labbook.root_dir, ".gigantum", "env", "Dockerfile")
         if write:
             logger.info("Writing Dockerfile to {}".format(dockerfile_name))
-
-            # Get a LabBook instance
-            lb = LabBook()
-            lb.from_directory(self.labbook.root_dir)
-
             with open(dockerfile_name, "w") as dockerfile:
                 dockerfile.write(os.linesep.join(docker_lines))
         else:

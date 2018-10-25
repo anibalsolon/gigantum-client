@@ -30,7 +30,7 @@ from werkzeug.wrappers import Request
 
 from gtmcore.fixtures import (remote_labbook_repo, remote_bare_repo, mock_labbook,
                                mock_config_file, _MOCK_create_remote_repo2)
-from gtmcore.labbook import LabBook, loaders
+from gtmcore.labbook import LabBook, loaders, InventoryManager
 from gtmcore.workflows import GitWorkflow
 from gtmcore.files import FileOperations
 
@@ -76,8 +76,8 @@ class TestLabbookShareProtocol(object):
         env = builder.get_environ()
         req = Request(environ=env)
 
-        test_user_lb = LabBook(mock_create_labbooks_no_lfs[0])
-        test_user_lb.from_name('default', 'default', 'labbook1')
+        im = InventoryManager(mock_create_labbooks_no_lfs[0])
+        test_user_lb = im.load_labbook('default', 'default', 'labbook1')
 
         publish_query = f"""
         mutation c {{
@@ -103,8 +103,8 @@ class TestLabbookShareProtocol(object):
         responses.add(responses.GET, 'https://usersrv.gigantum.io/key',
                       json={'key': 'afaketoken'}, status=200)
 
-        test_user_lb = LabBook(mock_create_labbooks_no_lfs[0])
-        test_user_lb.from_name('default', 'default', 'labbook1')
+        im = InventoryManager(mock_create_labbooks_no_lfs[0])
+        test_user_lb = im.load_labbook('default', 'default', 'labbook1')
         test_user_wf = GitWorkflow(test_user_lb)
         test_user_wf.publish('default')
 

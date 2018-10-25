@@ -18,7 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import responses
-from gtmcore.labbook import LabBook
+from gtmcore.labbook import LabBook, InventoryManager
 
 from snapshottest import snapshot
 from lmsrvlabbook.tests.fixtures import fixture_working_dir
@@ -137,6 +137,8 @@ class TestLabBookRemoteOperations(object):
                             }],
                       status=204)
 
+        lb = LabBook(fixture_working_dir[0])
+        lb.new(owner={'username': 'default'}, name='new-labbook', username='default')
         delete_query = f"""
         mutation delete {{
             deleteRemoteLabbook(input: {{
@@ -148,14 +150,14 @@ class TestLabBookRemoteOperations(object):
             }}
         }}
         """
+
         r = fixture_working_dir[2].execute(delete_query)
         assert 'errors' not in r
         assert r['data']['deleteRemoteLabbook']['success'] is True
 
-        # Try deleting again, which should return an eror
-        r = fixture_working_dir[2].execute(delete_query)
-        assert 'errors' in r
-        assert r['errors'][0]['message'] == 'Cannot remove remote repository that does not exist'
+        # Try deleting again, which should return an error
+        r2 = fixture_working_dir[2].execute(delete_query)
+        assert 'errors' in r2
 
     def test_list_remote_labbooks_invalid_args(self, fixture_working_dir, snapshot):
         """test list labbooks"""
@@ -208,6 +210,7 @@ class TestLabBookRemoteOperations(object):
                     }
                     }"""
         r = fixture_working_dir[2].execute(list_query)
+
         assert 'errors' in r
         snapshot.assert_match(r)
 

@@ -8,7 +8,7 @@ import pytest
 from graphene.test import Client
 from werkzeug.datastructures import FileStorage
 
-from gtmcore.labbook import LabBook
+from gtmcore.labbook import LabBook, InventoryManager
 from gtmcore.files import FileOperations
 from gtmcore.fixtures import remote_labbook_repo, mock_config_file
 from lmsrvcore.middleware import LabBookLoaderMiddleware
@@ -62,8 +62,7 @@ class TestUploadFilesMutations(object):
 
         target_file = os.path.join(mock_create_labbooks[1], 'default', 'default', 'labbooks',
                                    'labbook1', 'code', 'newdir', "myValidFile.dat")
-        lb = LabBook(mock_create_labbooks[0])
-        lb.from_directory(os.path.join(mock_create_labbooks[1], 'default', 'default', 'labbooks', 'labbook1'))
+        lb = InventoryManager(mock_create_labbooks[0]).load_labbook('default', 'default', 'labbook1')
         FileOperations.makedir(lb, 'code/newdir', create_activity_record=True)
 
         txid = "000-unitest-transaction"
@@ -158,8 +157,7 @@ class TestUploadFilesMutations(object):
             os.remove(target_file)
         except:
             pass
-        lb = LabBook(mock_create_labbooks[0])
-        lb.from_directory(os.path.join(mock_create_labbooks[1], 'default', 'default', 'labbooks', 'labbook1'))
+        lb = InventoryManager(mock_create_labbooks[0]).load_labbook('default', 'default', 'labbook1')
         FileOperations.makedir(lb, 'code/newdir', create_activity_record=True)
 
         with open(test_file, 'rb') as tf:

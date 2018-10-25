@@ -43,7 +43,7 @@ from gtmcore.configuration import Configuration
 from gtmcore.dispatcher.jobs import export_labbook_as_zip
 from gtmcore.files import FileOperations
 from gtmcore.fixtures import remote_labbook_repo, mock_config_file
-from gtmcore.labbook import LabBook
+from gtmcore.labbook import LabBook, InventoryManager
 
 from lmsrvcore.middleware import error_middleware, LabBookLoaderMiddleware
 
@@ -417,9 +417,8 @@ class TestLabBookServiceMutations(object):
         assert os.path.exists(filepath) is False
 
     def test_delete_dir(self, mock_create_labbooks):
-
-        lb = LabBook(mock_create_labbooks[0])
-        lb.from_name('default', 'default', 'labbook1')
+        im = InventoryManager(mock_create_labbooks[0])
+        lb = im.load_labbook('default', 'default', 'labbook1')
         FileOperations.makedir(lb, 'code/subdir')
         lb.git.add_all('code/')
         lb.git.commit("blah")
