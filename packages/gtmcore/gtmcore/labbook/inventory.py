@@ -1,9 +1,14 @@
 import os
 import shutil
+import uuid
+import json
+import datetime
 from natsort import natsorted
+from pkg_resources import resource_filename
 
-from typing import Optional, Generator, List, Tuple
+from typing import Optional, Generator, List, Tuple, Dict
 
+from gtmcore.labbook.schemas import CURRENT_SCHEMA
 from gtmcore.gitlib import GitAuthor
 from gtmcore.logging import LMLogger
 from gtmcore.configuration import Configuration
@@ -77,13 +82,14 @@ class InventoryManager(object):
             logger.error(e)
             raise InventoryException(e)
 
-    def load_labbook_from_directory(self, path: str) -> LabBook:
+    def load_labbook_from_directory(self, path: str, author: Optional[GitAuthor] = None) -> LabBook:
         """ Load and return a LabBook object from a given path on disk
 
         Warning - Deprecated !! Use load_labbook instead
 
         Args:
             path: Full path on disk to LabBook
+            author: Labbook Author of commits
 
         Returns:
             LabBook object
@@ -93,6 +99,7 @@ class InventoryManager(object):
             lb._set_root_dir(path)
             lb._load_labbook_data()
             lb._validate_labbook_data()
+            lb.author = author
             return lb
         except Exception as e:
             logger.error(e)
@@ -171,3 +178,183 @@ class InventoryManager(object):
             return sorted(local_labbooks, key=lambda lb: lb.creation_date)
         else:
             raise InventoryException(f"Invalid sort mode {sort_mode}")
+
+    def create_labbook_disabled_lfs(self, username: str, owner: str, labbook_name: str,
+                                    description: Optional[str] = None,
+                                    author: Optional[GitAuthor] = None):
+        path = self._new_labbook(username=username, owner={'username': owner},
+                                 name=labbook_name, description=description,
+                                 author=author, bypass_lfs=True)
+        return self.load_labbook_from_directory(path, author=author)
+
+    def create_labbook(self, username: str, owner: str, labbook_name: str,
+                       description: Optional[str] = None, author: Optional[GitAuthor] = None) -> LabBook:
+        """Create a new LabBook in this Gigantum working directory.
+
+        Args:
+            username: Active username
+            owner: Namespace in which to place this LabBook
+            labbook_name: Name of labbook
+            description: Optional brief description of LabBook
+            author: Optional Git Author
+
+        Returns:
+            Newly created LabBook instance
+
+        """
+        path = self._new_labbook(username=username, owner={'username': owner},
+                                 name=labbook_name, description=description,
+                                 author=author, bypass_lfs=False)
+        return self.load_labbook_from_directory(path, author=author)
+
+
+    def _new_labbook(self, owner: Dict[str, str], name: str,
+                     username: Optional[str] = None,
+                     description: Optional[str] = None,
+                     bypass_lfs: bool = False,
+                     author: Optional[GitAuthor] = None) -> str:
+        """Method to create a new minimal LabBook instance on disk
+
+        NOTE: This is the exact same as the old LabBook.new() method.
+        This method is deprecated and will be re-worked in the near future.
+
+        Args:
+            owner(dict): Owner information. Can be a user or a team/org.
+            name(str): Name of the LabBook
+            username(str): Username of the logged in user. Used to store the LabBook in the proper location. If omitted
+                           the owner username is used
+            description(str): A short description of the LabBook
+            bypass_lfs: If True does not use LFS to track input and output dirs.
+            author: Git author for commits
+
+        Returns:
+            str: Path to the LabBook contents
+        """
+
+        if not username:
+            logger.warning("Using owner username `{}` when making new labbook".format(owner['username']))
+            username = owner["username"]
+
+        labbook = LabBook(config_file=self.config_file, author=author)
+
+        # Build data file contents
+        labbook._data = {
+            "cuda_version": None,
+            "labbook": {"id": uuid.uuid4().hex,
+                        "name": name,
+                        "description": labbook._santize_input(description or '')},
+            "owner": owner,
+            "schema": CURRENT_SCHEMA
+        }
+
+        # Validate data
+        labbook._validate_labbook_data()
+
+        logger.info("Creating new labbook on disk for {}/{}/{} ...".format(username, owner, name))
+
+        # lock while creating initial directory
+        with labbook.lock_labbook(lock_key=f"new_labbook_lock|{username}|{owner['username']}|{name}"):
+            # Verify or Create user subdirectory
+            # Make sure you expand a user dir string
+            starting_dir = os.path.expanduser(labbook.labmanager_config.config["git"]["working_directory"])
+            user_dir = os.path.join(starting_dir, username)
+            if not os.path.isdir(user_dir):
+                os.makedirs(user_dir)
+
+            # Create owner dir - store LabBooks in working dir > logged in user > owner
+            owner_dir = os.path.join(user_dir, owner["username"])
+            if not os.path.isdir(owner_dir):
+                os.makedirs(owner_dir)
+
+                # Create `labbooks` subdir in the owner dir
+                owner_dir = os.path.join(owner_dir, "labbooks")
+            else:
+                owner_dir = os.path.join(owner_dir, "labbooks")
+
+            # Verify name not already in use
+            if os.path.isdir(os.path.join(owner_dir, name)):
+                raise ValueError(f"LabBook `{name}` already exists locally. Choose a new LabBook name")
+
+            # Create LabBook subdirectory
+            new_root_dir = os.path.join(owner_dir, name)
+            os.makedirs(new_root_dir)
+            labbook._set_root_dir(new_root_dir)
+
+            # Init repository
+            labbook.git.initialize()
+
+            # Setup LFS
+            if labbook.labmanager_config.config["git"]["lfs_enabled"] and not bypass_lfs:
+                # Make sure LFS install is setup and rack input and output directories
+                call_subprocess(["git", "lfs", "install"], cwd=new_root_dir)
+                call_subprocess(["git", "lfs", "track", "input/**"], cwd=new_root_dir)
+                call_subprocess(["git", "lfs", "track", "output/**"], cwd=new_root_dir)
+
+                # Commit .gitattributes file
+                labbook.git.add(os.path.join(labbook.root_dir, ".gitattributes"))
+                labbook.git.commit("Configuring LFS")
+
+            # Create Directory Structure
+            dirs = [
+                'code', 'input', 'output', '.gigantum',
+                os.path.join('.gigantum', 'env'),
+                os.path.join('.gigantum', 'env', 'base'),
+                os.path.join('.gigantum', 'env', 'custom'),
+                os.path.join('.gigantum', 'env', 'package_manager'),
+                os.path.join('.gigantum', 'activity'),
+                os.path.join('.gigantum', 'activity', 'log'),
+                os.path.join('.gigantum', 'activity', 'index'),
+                os.path.join('.gigantum', 'activity', 'importance'),
+            ]
+
+            for d in dirs:
+                p = os.path.join(labbook.root_dir, d, '.gitkeep')
+                os.makedirs(os.path.dirname(p), exist_ok=True)
+                with open(p, 'w') as gk:
+                    gk.write("This file is necessary to keep this directory tracked by Git"
+                             " and archivable by compression tools. Do not delete or modify!")
+                    labbook.git.add(p)
+
+            # Create labbook.yaml file
+            labbook._save_labbook_data()
+
+            # Save build info
+            try:
+                buildinfo = Configuration(self.config_file).config['build_info']
+            except KeyError:
+                logger.warning("Could not obtain build_info from config")
+                buildinfo = None
+            buildinfo = {
+                'creation_utc': datetime.datetime.utcnow().isoformat(),
+                'build_info': buildinfo
+            }
+
+            buildinfo_path = os.path.join(labbook.root_dir, '.gigantum', 'buildinfo')
+            with open(buildinfo_path, 'w') as f:
+                json.dump(buildinfo, f)
+                labbook.git.add(buildinfo_path)
+
+            # Create .gitignore default file
+            shutil.copyfile(os.path.join(resource_filename('gtmcore', 'labbook'), 'gitignore.default'),
+                            os.path.join(labbook.root_dir, ".gitignore"))
+
+            # Commit
+            for s in ['code', 'input', 'output', '.gigantum']:
+                labbook.git.add_all(os.path.join(labbook.root_dir, s))
+            labbook.git.add(os.path.join(labbook.root_dir, ".gigantum", "labbook.yaml"))
+            labbook.git.add(os.path.join(labbook.root_dir, ".gitignore"))
+            labbook.git.create_branch(name="gm.workspace")
+
+            # NOTE: this string is used to indicate there are no more activity records to get. Changing the string will
+            # break activity paging.
+            # TODO: Improve method for detecting the first activity record
+            labbook.git.commit(f"Creating new empty LabBook: {name}")
+
+            user_workspace_branch = f"gm.workspace-{username}"
+            labbook.git.create_branch(user_workspace_branch)
+            labbook.checkout_branch(branch_name=user_workspace_branch)
+
+            if labbook.active_branch != user_workspace_branch:
+                raise ValueError(f"active_branch should be '{user_workspace_branch}'")
+
+            return labbook.root_dir

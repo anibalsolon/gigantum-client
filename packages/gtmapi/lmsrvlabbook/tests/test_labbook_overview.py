@@ -31,7 +31,7 @@ from gtmcore.activity import ActivityStore, ActivityDetailRecord, ActivityDetail
 
 import graphene
 
-from gtmcore.labbook import LabBook
+from gtmcore.labbook import LabBook, InventoryManager
 from gtmcore.fixtures import remote_labbook_repo
 from gtmcore.gitlib.git import GitAuthor
 
@@ -40,8 +40,8 @@ class TestLabBookOverviewQueries(object):
     def test_empty_package_counts(self, fixture_working_dir_env_repo_scoped, snapshot):
         """Test getting the a LabBook's package manager dependencies"""
         # Create labbook
-        lb = LabBook(fixture_working_dir_env_repo_scoped[0])
-        lb.new(owner={"username": "default"}, name="labbook4", description="my first labbook10000")
+        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        lb = im.create_labbook("default", "default", "labbook4", description="my first labbook10000")
 
         query = """
                     {
@@ -61,8 +61,8 @@ class TestLabBookOverviewQueries(object):
     def test_package_counts(self, fixture_working_dir_env_repo_scoped, snapshot):
         """Test getting the a LabBook's package manager dependencies"""
         # Create labbook
-        lb = LabBook(fixture_working_dir_env_repo_scoped[0])
-        lb.new(owner={"username": "default"}, name="labbook5", description="my first labbook10000")
+        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        lb = im.create_labbook("default", "default", "labbook5", description="my first labbook10000")
 
         cm = ComponentManager(lb)
         # Add packages
@@ -98,8 +98,10 @@ class TestLabBookOverviewQueries(object):
 
     def test_get_recent_activity(self, fixture_working_dir, snapshot, fixture_test_file):
         """Test paging through activity records"""
-        lb = LabBook(fixture_working_dir[0], author=GitAuthor(name="tester", email="tester@test.com"))
-        lb.new(owner={"username": "default"}, name="labbook11", description="my test description")
+        im = InventoryManager(fixture_working_dir[0])
+        lb = im.create_labbook("default", "default", "labbook11", description="my test description",
+                               author=GitAuthor(name="tester", email="tester@test.com"))
+
         FileOperations.insert_file(lb, "code", fixture_test_file)
 
         # fake activity
@@ -159,8 +161,8 @@ class TestLabBookOverviewQueries(object):
     def test_no_remote_url(self, fixture_working_dir_env_repo_scoped, snapshot):
         """Test getting the a LabBook's remote url without publish"""
         # Create labbook
-        lb = LabBook(fixture_working_dir_env_repo_scoped[0])
-        lb.new(owner={"username": "default"}, name="labbook6", description="my first labbook10000")
+        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        lb = im.create_labbook("default", "default", "labbook6", description="my first labbook10000")
 
         query = """
                     {

@@ -23,16 +23,16 @@ from lmsrvlabbook.tests.fixtures import fixture_working_dir
 from promise import Promise
 
 from lmsrvlabbook.dataloader.labbook import LabBookLoader
-from gtmcore.labbook import LabBook
+from gtmcore.labbook import LabBook, InventoryManager
 
 
 class TestDataloaderLabBook(object):
 
     def test_load_one(self, fixture_working_dir):
         """Test loading 1 labbook"""
-        lb = LabBook(fixture_working_dir[0])
-        lb.new(owner={"username": "default"}, name="labbook1", description="my first labbook1")
-        lb.new(owner={"username": "default"}, name="labbook2", description="my first labbook2")
+        im = InventoryManager(fixture_working_dir[0])
+        im.create_labbook("default", "default", "labbook1", description="my first labbook1")
+        im.create_labbook("default", "default", "labbook2", description="my first labbook2")
         loader = LabBookLoader()
 
         key = f"default&default&labbook1"
@@ -45,10 +45,10 @@ class TestDataloaderLabBook(object):
 
     def test_load_many(self, fixture_working_dir):
         """Test loading many labbooks"""
-        lb = LabBook(fixture_working_dir[0])
-        lb.new(owner={"username": "default"}, name="labbook1", description="my first labbook1")
-        lb.new(owner={"username": "default"}, name="labbook2", description="my first labbook2")
-        lb.new(username="default", owner={"username": "test3"}, name="labbook2", description="my first labbook3")
+        im = InventoryManager(fixture_working_dir[0])
+        im.create_labbook("default", "default", "labbook1", description="my first labbook1")
+        im.create_labbook("default", "default", "labbook2", description="my first labbook2")
+        im.create_labbook("default", "test3", "labbook2", description="my first labbook3")
 
         loader = LabBookLoader()
 

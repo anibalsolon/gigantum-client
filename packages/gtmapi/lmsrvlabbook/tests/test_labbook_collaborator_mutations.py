@@ -29,14 +29,14 @@ from lmsrvlabbook.tests.fixtures import fixture_working_dir, property_mocks_fixt
 import pytest
 
 from gtmcore.configuration import get_docker_client
-from gtmcore.labbook import LabBook
+from gtmcore.labbook import LabBook, InventoryManager
 
 
 @pytest.fixture()
 def mock_create_labbooks(fixture_working_dir):
     # Create a labbook in the temporary directory
-    lb = LabBook(fixture_working_dir[0])
-    lb.new(owner={"username": "default"}, name="labbook1", description="Test labbook 1")
+    im = InventoryManager(fixture_working_dir[0])
+    lb = im.create_labbook("default", "default", "labbook1", "Test labbook 1")
 
     yield fixture_working_dir
 

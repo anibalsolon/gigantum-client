@@ -30,7 +30,7 @@ from mock import patch
 from gtmcore.auth.identity import get_identity_manager
 from gtmcore.configuration import Configuration
 from gtmcore.workflows import BranchManager
-from gtmcore.labbook import LabBook
+from gtmcore.labbook import LabBook, InventoryManager
 from gtmcore.files import FileOperations
 
 from lmsrvcore.middleware import LabBookLoaderMiddleware, error_middleware
@@ -46,8 +46,8 @@ UT_LBNAME = "unittest-workflow-branch-1"
 def mock_create_labbooks(fixture_working_dir):
     # Create a labbook in the temporary directory
     config_file = fixture_working_dir[0]
-    lb = LabBook(fixture_working_dir[0])
-    lb.new(owner={"username": UT_USERNAME}, name=UT_LBNAME, description="Cats labbook 1")
+    im = InventoryManager(fixture_working_dir[0])
+    lb = im.create_labbook(UT_USERNAME, UT_USERNAME, UT_LBNAME, description="Cats labbook 1")
 
     # Create a file in the dir
     with open(os.path.join(fixture_working_dir[1], 'unittest-examplefile'), 'w') as sf:

@@ -69,15 +69,19 @@ class CreateLabbook(graphene.relay.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, name, description, repository, base_id, revision,
                                is_untracked=False, client_mutation_id=None):
         username = get_logged_in_username()
-
-        # Create a new empty LabBook
-        lb = LabBook(author=get_logged_in_author())
-        # TODO: Set owner/namespace properly once supported fully
-        lb.new(owner={"username": username},
-               username=username,
-               name=name,
-               description=description,
-               bypass_lfs=is_untracked)
+        inv_manager = InventoryManager()
+        if is_untracked:
+            lb = inv_manager.create_labbook_disabled_lfs(username=username,
+                                                         owner=username,
+                                                         labbook_name=name,
+                                                         description=description,
+                                                         author=get_logged_in_author())
+        else:
+            lb = inv_manager.create_labbook(username=username,
+                                            owner=username,
+                                            labbook_name=name,
+                                            description=description,
+                                            author=get_logged_in_author())
 
         if is_untracked:
             FileOperations.set_untracked(lb, 'input')
@@ -89,10 +93,6 @@ class CreateLabbook(graphene.relay.ClientIDMutation):
             if not lb.is_repo_clean:
                 raise ValueError(f'{str(lb)} should have clean Git state after setting for untracked')
 
-        # Create a Activity Store instance
-        store = ActivityStore(lb)
-
-        # Create detail record
         adr = ActivityDetailRecord(ActivityDetailType.LABBOOK, show=False, importance=0)
         adr.add_value('text/plain', f"Created new LabBook: {username}/{name}")
 
@@ -104,14 +104,12 @@ class CreateLabbook(graphene.relay.ClientIDMutation):
                             linked_commit=lb.git.commit_hash)
         ar.add_detail_object(adr)
 
-        # Store
+        store = ActivityStore(lb)
         store.create_activity_record(ar)
 
-        # Add Base component
         cm = ComponentManager(lb)
         cm.add_base(repository, base_id, revision)
 
-        # Get a graphene instance of the newly created LabBook
         return CreateLabbook(labbook=Labbook(owner=username, name=lb.name))
 
 
@@ -210,6 +208,7 @@ class DeleteRemoteLabbook(graphene.ClientIDMutation):
                 logger.error(response.json())
             else:
                 logger.info(f"Deleted remote repository {owner}/{labbook_name} from cloud index")
+
 
             # Remove locally any references to that cloud repo that's just been deleted.
             try:

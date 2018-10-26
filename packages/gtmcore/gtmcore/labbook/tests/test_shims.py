@@ -21,7 +21,7 @@ import pytest
 import os
 import copy
 
-from gtmcore.labbook import LabBook
+from gtmcore.labbook import LabBook, InventoryManager
 from gtmcore.activity import ActivityType, ActivityRecord, ActivityDetailType
 
 from gtmcore.labbook.shims import process_sweep_status
@@ -31,8 +31,8 @@ from gtmcore.fixtures import mock_config_file
 
 @pytest.fixture
 def mock_lb(mock_config_file):
-    lb = LabBook(mock_config_file[0])
-    lb.new(username="test", name="sweep-test", description="sweepin", owner={"username": "test"})
+    im = InventoryManager(mock_config_file[0])
+    lb = im.create_labbook('test', 'test', 'sweep-test', description='sweepin')
     yield lb
     
     

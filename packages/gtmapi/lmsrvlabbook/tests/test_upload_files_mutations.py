@@ -18,8 +18,8 @@ from lmsrvlabbook.tests.fixtures import fixture_working_dir_env_repo_scoped, fix
 @pytest.fixture()
 def mock_create_labbooks(fixture_working_dir):
     # Create a labbook in the temporary directory
-    lb = LabBook(fixture_working_dir[0])
-    lb.new(owner={"username": "default"}, name="labbook1", description="Cats labbook 1")
+    im = InventoryManager(fixture_working_dir[0])
+    lb = im.create_labbook("default", "default", "labbook1", description="Cats labbook 1")
 
     # Create a file in the dir
     with open(os.path.join(fixture_working_dir[1], 'sillyfile'), 'w') as sf:

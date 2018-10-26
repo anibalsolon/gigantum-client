@@ -32,7 +32,7 @@ import graphene
 
 import gtmcore
 from gtmcore.labbook import LabBook, InventoryManager
-from gtmcore.fixtures import remote_labbook_repo
+from gtmcore.fixtures import remote_labbook_repo, mock_labbook
 from gtmcore.gitlib.git import GitAuthor
 
 
@@ -403,9 +403,9 @@ class TestLabBookServiceQueries(object):
 
     def test_get_labbook(self, fixture_working_dir):
         """Test listing labbooks"""
-        # Create labbooks
-        lb = LabBook(fixture_working_dir[0])
-        lb.new(owner={"username": "default"}, name="labbook1", description="my first labbook1")
+        im = InventoryManager(fixture_working_dir[0])
+        lb = im.create_labbook('default', 'default', 'labbook1', description="my test description",
+                               author=GitAuthor(name="tester", email="tester@test.com"))
 
         # Get LabBooks for a single user - Don't get the ID field since it is a UUID
         query = """
@@ -439,13 +439,15 @@ class TestLabBookServiceQueries(object):
         """Test listing labbooks"""
         # Create labbooks
         monkeypatch.setattr(gtmcore.files.FileOperations, 'content_size', lambda labbook: (2**32)*34)
-        lb = LabBook(fixture_working_dir[0])
-        lb.new(owner={"username": "default"}, name="unittest-labbook1", description="my first labbook1")
+        im = InventoryManager(fixture_working_dir[0])
+        lb = im.create_labbook('default', 'default', 'unittest-labbook-1',
+                               description="my test description",
+                               author=GitAuthor(name="tester", email="tester@test.com"))
 
         # Get LabBooks for a single user - Don't get the ID field since it is a UUID
         query = """
         {
-          labbook(name: "unittest-labbook1", owner: "default") {
+          labbook(name: "unittest-labbook-1", owner: "default") {
             sizeBytes
           }
         }
@@ -456,39 +458,39 @@ class TestLabBookServiceQueries(object):
 
     def test_list_labbooks_container_status(self, fixture_working_dir, snapshot):
         """Test listing labbooks"""
-        lb = LabBook(fixture_working_dir[0])
-        lb.new(owner={"username": "default"}, name="labbook1", description="my first labbook1")
-        lb.new(owner={"username": "default"}, name="labbook2", description="my first labbook2")
-        lb.new(owner={"username": "test3"}, name="labbook2", description="my first labbook3")
+        im = InventoryManager(fixture_working_dir[0])
+        im.create_labbook('default', 'default', 'labbook1', description="my first labbook1")
+        im.create_labbook('default', 'default', 'labbook2', description="my first labbook2")
+        im.create_labbook('test3', 'test3', 'labbook2', description="my first labbook3")
 
         # Get LabBooks for the "logged in user" - Currently just "default"
         query = """
         {
-        labbookList{
-            localLabbooks {
-                edges {
-                    node {
-                        name
-                        description
-                        environment{
-                            imageStatus
-                            containerStatus
+            labbookList{
+                localLabbooks {
+                    edges {
+                        node {
+                            name
+                            description
+                            environment{
+                                imageStatus
+                                containerStatus
+                            }
                         }
-                    }
-                    cursor
+                        cursor
+                    }   
                 }
             }
-        }
         }
         """
         snapshot.assert_match(fixture_working_dir[2].execute(query))
 
     def test_list_local_by_id(self, fixture_working_dir, snapshot):
         """Test listing labbooks"""
-        lb = LabBook(fixture_working_dir[0])
-        lb.new(owner={"username": "default"}, name="labbook1", description="my first labbook1")
-        lb.new(owner={"username": "default"}, name="labbook2", description="my first labbook2")
-        lb.new(owner={"username": "default"}, name="labbook3", description="my first labbook3")
+        im = InventoryManager(fixture_working_dir[0])
+        im.create_labbook('default', 'default', 'labbook1', description="my first labbook1")
+        im.create_labbook('default', 'default', 'labbook2', description="my first labbook2")
+        im.create_labbook('default', 'default', 'labbook3', description="my first labbook3")
 
         query = """
         {
@@ -506,17 +508,17 @@ class TestLabBookServiceQueries(object):
         result1 = fixture_working_dir[2].execute(query)
 
         query = """
-               {
-               labbookList{
-                   localById(ids: ["TGFiYm9vazpkZWZhdWx0JmxhYmJvb2sx", "TGFiYm9vazpkZWZhdWx0JmxhYmJvb2sz", "notanid"]){
-                      id
-                      name
-                      owner
-                      description
-                    }
-                 }
-               }
-               """
+        {
+            labbookList{
+                localById(ids: ["TGFiYm9vazpkZWZhdWx0JmxhYmJvb2sx", "TGFiYm9vazpkZWZhdWx0JmxhYmJvb2sz", "notanid"]){
+                    id
+                    name
+                    owner
+                    description
+                }
+            }
+        }
+        """
         result2 = fixture_working_dir[2].execute(query)
         snapshot.assert_match(result2)
 
@@ -528,28 +530,28 @@ class TestLabBookServiceQueries(object):
         # Get LabBooks for the "logged in user" - Currently just "default"
         query = """
         {
-        labbookList{
-            localLabbooks {
-                edges {
-                    node {
-                        name
-                        description
-                        environment{
-                            imageStatus
-                            containerStatus
+            labbookList{
+                localLabbooks {
+                    edges {
+                        node {
+                            name
+                            description
+                            environment {
+                                imageStatus
+                                containerStatus
+                            }
                         }
-                    }
                     cursor
+                    }
                 }
             }
-        }
         }
         """
         snapshot.assert_match(fixture_working_dir[2].execute(query))
 
     def test_list_files_code(self, fixture_working_dir, snapshot):
-        lb = LabBook(fixture_working_dir[0])
-        lb.new(owner={"username": "default"}, name="labbook1", description="my first labbook1")
+        im = InventoryManager(fixture_working_dir[0])
+        lb = im.create_labbook('default', 'default', 'labbook1', description='my first labbook1')
 
         # Write data in code
         with open(os.path.join(lb.root_dir, 'code', "test_file1.txt"), 'wt') as tf:
@@ -567,46 +569,46 @@ class TestLabBookServiceQueries(object):
             tf.write("asdfasdf")
 
         query = """
-                    {
-                      labbook(name: "labbook1", owner: "default") {
-                        name
-                        code{
-                            files {
-                                edges {
-                                    node {
-                                        id
-                                        key
-                                        size
-                                        isDir
-                                    }
-                                }
+        {
+            labbook(name: "labbook1", owner: "default") {
+                name
+                code {
+                    files {
+                        edges {
+                            node {
+                                id
+                                key
+                                size
+                                isDir
                             }
                         }
-                      }
                     }
-                    """
+                }
+            }
+        }
+        """
         snapshot.assert_match(fixture_working_dir[2].execute(query))
 
         # Just get the files in the sub-directory "js"
         query = """
-                    {
-                      labbook(name: "labbook1", owner: "default") {
-                        name
-                        code{
-                            files(rootDir: "src") {
-                                edges {
-                                    node {
-                                        id
-                                        key
-                                        size
-                                        isDir
-                                    }
-                                }
+        {
+            labbook(name: "labbook1", owner: "default") {
+                name
+                code {
+                    files(rootDir: "src") {
+                        edges {
+                            node {
+                                id
+                                key
+                                size
+                                isDir
                             }
                         }
-                      }
                     }
-                    """
+                }
+            }
+        }
+        """
         snapshot.assert_match(fixture_working_dir[2].execute(query))
 
         # Just get the files in the sub-directory "js"
@@ -633,8 +635,8 @@ class TestLabBookServiceQueries(object):
 
     def test_list_files_many(self, fixture_working_dir, snapshot):
         # Add some extra files for listing
-        lb = LabBook(fixture_working_dir[0])
-        lb.new(owner={"username": "default"}, name="labbook1", description="my first labbook1")
+        im = InventoryManager(fixture_working_dir[0])
+        lb = im.create_labbook('default', 'default', 'labbook1',  description="my first labbook1")
 
         # Write data in code
         with open(os.path.join(lb.root_dir, 'code', "test_file1.txt"), 'wt') as tf:
@@ -743,9 +745,9 @@ class TestLabBookServiceQueries(object):
                 """
         snapshot.assert_match(fixture_working_dir[2].execute(query))
 
-    def test_check_updates_available_from_remote(self, remote_labbook_repo, fixture_working_dir, snapshot):
-        lb = LabBook(fixture_working_dir[0])
-        lb.new(owner={"username": "default"}, name="labbook1", description="my first labbook1")
+    def test_check_updates_available_from_remote(self, remote_labbook_repo, fixture_working_dir):
+        im = InventoryManager(fixture_working_dir[0])
+        lb = im.create_labbook('default', 'default', 'labbook1', description="my first labbook1")
 
         query = f"""
         {{
@@ -760,8 +762,8 @@ class TestLabBookServiceQueries(object):
     def test_list_favorites(self, fixture_working_dir, snapshot):
         """Test listing labbook favorites"""
 
-        lb = LabBook(fixture_working_dir[0])
-        lb.new(owner={"username": "default"}, name="labbook1", description="my first labbook1")
+        im = InventoryManager(fixture_working_dir[0])
+        lb = im.create_labbook('default', 'default', 'labbook1', description="my first labbook1")
 
         # Setup some favorites in code
         with open(os.path.join(lb.root_dir, 'code', 'test1.txt'), 'wt') as test_file:
@@ -907,9 +909,8 @@ class TestLabBookServiceQueries(object):
 
     def test_page_favorites(self, fixture_working_dir, snapshot):
         """Test listing labbook favorites"""
-
-        lb = LabBook(fixture_working_dir[0])
-        lb.new(owner={"username": "default"}, name="labbook1", description="my first labbook1")
+        im = InventoryManager(fixture_working_dir[0])
+        lb = im.create_labbook('default', 'default', 'labbook1', description="my first labbook1")
 
         # Setup some favorites in code
         with open(os.path.join(lb.root_dir, 'code', 'test1.txt'), 'wt') as test_file:
@@ -994,8 +995,9 @@ class TestLabBookServiceQueries(object):
 
     def test_list_favorite_and_files(self, fixture_working_dir, snapshot):
         """Test listing labbook favorites"""
-        lb = LabBook(fixture_working_dir[0])
-        lb.new(owner={"username": "default"}, name="labbook1", description="my first labbook1")
+
+        im = InventoryManager(fixture_working_dir[0])
+        lb = im.create_labbook('default', 'default', 'labbook1', description="my first labbook1")
 
         # Setup some favorites in code
         with open(os.path.join(lb.root_dir, 'code', 'test1.txt'), 'wt') as test_file:
@@ -1045,8 +1047,8 @@ class TestLabBookServiceQueries(object):
 
     def test_list_all_files_many(self, fixture_working_dir, snapshot):
         # Add some extra files for listing
-        lb = LabBook(fixture_working_dir[0])
-        lb.new(owner={"username": "default"}, name="labbook1", description="my first labbook1")
+        im = InventoryManager(fixture_working_dir[0])
+        lb = im.create_labbook("default", "default", "labbook1", description="my first labbook1")
 
         # Write data in code
         with open(os.path.join(lb.root_dir, 'code', "test_file1.txt"), 'wt') as tf:
@@ -1173,10 +1175,11 @@ class TestLabBookServiceQueries(object):
         assert result['data']['labbook']['activityRecords']['pageInfo']['hasPreviousPage'] is False
         assert result['data']['labbook']['activityRecords']['edges'][-1]['node']['type'] == 'LABBOOK'
 
-    def test_get_activity_records(self, fixture_working_dir, snapshot, fixture_test_file):
+    def test_get_activity_records(self, fixture_working_dir, mock_labbook, snapshot, fixture_test_file):
         """Test paging through activity records"""
-        lb = LabBook(fixture_working_dir[0], author=GitAuthor(name="tester", email="tester@test.com"))
-        lb.new(owner={"username": "default"}, name="labbook11", description="my test description")
+        im = InventoryManager(fixture_working_dir[0])
+        lb = im.create_labbook('default', 'default', 'labbook11', description="my test description",
+                               author=GitAuthor(name="tester", email="tester@test.com"))
         open('/tmp/test_file.txt', 'w').write("xxxx")
         FileOperations.insert_file(lb, "code", '/tmp/test_file.txt')
         open('/tmp/test_file.txt', 'w').write("xxxx")
@@ -1341,9 +1344,8 @@ class TestLabBookServiceQueries(object):
         snapshot.assert_match(fixture_working_dir[2].execute(query))
 
     def test_get_activity_records_reverse_error(self, fixture_working_dir, snapshot):
-        # Create labbooks
-        lb = LabBook(fixture_working_dir[0])
-        lb.new(owner={"username": "default"}, name="labbook12", description="my first labbook1")
+        im = InventoryManager(fixture_working_dir[0])
+        lb = im.create_labbook('default', 'default', 'labbook12', description="my test description")
 
         # Get all records
         query = """
@@ -1423,8 +1425,8 @@ class TestLabBookServiceQueries(object):
 
     def test_get_activity_records_with_details(self, fixture_working_dir, snapshot, fixture_test_file):
         """Test getting activity records with detail records"""
-        lb = LabBook(fixture_working_dir[0])
-        lb.new(owner={"username": "default"}, name="labbook11", description="my test description")
+        im = InventoryManager(fixture_working_dir[0])
+        lb = im.create_labbook('default', 'default', 'labbook11', description="my test description")
         open('/tmp/test_file.txt', 'w').write("xxx" * 50)
         FileOperations.insert_file(lb, "code", '/tmp/test_file.txt')
         open('/tmp/test_file.txt', 'w').write("xxx" * 50)
@@ -1505,8 +1507,8 @@ class TestLabBookServiceQueries(object):
 
     def test_get_detail_record(self, fixture_working_dir, snapshot, fixture_test_file):
         """Test getting detail record directly after an initial activity record query"""
-        lb = LabBook(fixture_working_dir[0])
-        lb.new(owner={"username": "default"}, name="labbook11", description="my test description")
+        im = InventoryManager(fixture_working_dir[0])
+        lb = im.create_labbook('default', 'default', 'labbook11', description="my test description")
         FileOperations.insert_file(lb, "code", fixture_test_file)
 
         # Get all records at once and verify varying fields exist properly
@@ -1579,8 +1581,8 @@ class TestLabBookServiceQueries(object):
 
     def test_get_detail_records(self, fixture_working_dir, snapshot, fixture_test_file):
         """Test getting multiple detail records directly after an initial activity record query"""
-        lb = LabBook(fixture_working_dir[0])
-        lb.new(owner={"username": "default"}, name="labbook11", description="my test description")
+        im = InventoryManager(fixture_working_dir[0])
+        lb = im.create_labbook("default", "default", "labbook11", description="my test description")
         open('/tmp/test_file.txt', 'w').write("xxxx")
         FileOperations.insert_file(lb, "code", '/tmp/test_file.txt')
         open('/tmp/test_file.txt', 'w').write("xxxx")
@@ -1636,8 +1638,8 @@ class TestLabBookServiceQueries(object):
     def test_get_labbook_readme(self, fixture_working_dir, snapshot):
         """Test getting a labbook's readme document"""
         # Create labbooks
-        lb = LabBook(fixture_working_dir[0])
-        lb.new(owner={"username": "default"}, name="labbook1", description="my first labbook1")
+        im = InventoryManager(fixture_working_dir[0])
+        lb = im.create_labbook('default', 'default', 'labbook1', description="my test description")
 
         query = """
         {

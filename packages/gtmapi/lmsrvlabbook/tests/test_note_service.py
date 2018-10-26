@@ -27,15 +27,16 @@ import graphene
 from mock import patch
 
 from gtmcore.configuration import Configuration
-from gtmcore.labbook import LabBook
+from gtmcore.labbook import LabBook, InventoryManager
 
 
 class TestNoteService(object):
     def test_create_user_note_no_body(self, fixture_working_dir, snapshot):
         """Test creating and getting a user note"""
         # Create labbook
-        lb = LabBook(fixture_working_dir[0])
-        lb.new(owner={"username": "default"}, name="user-note-test", description="testing user notes")
+        im = InventoryManager(fixture_working_dir[0])
+        lb = im.create_labbook("default", "default", "user-note-test",
+                               description="testing user notes")
 
         # Create a user note
         query = """
@@ -71,8 +72,9 @@ class TestNoteService(object):
         """Test creating a full user note"""
 
         # Create labbook
-        lb = LabBook(fixture_working_dir[0])
-        lb.new(owner={"username": "default"}, name="user-note-test", description="testing user notes")
+        lb = InventoryManager(fixture_working_dir[0]).create_labbook("default", "default",
+                                                                     "user-note-test",
+                                                                     description="testing user notes")
 
         # Create a user note
         query = """
@@ -109,8 +111,9 @@ class TestNoteService(object):
     def test_create_user_note_check_vals(self, fixture_working_dir, snapshot):
         """Test to make sure keys and IDs are getting set OK"""
         # Create labbook
-        lb = LabBook(fixture_working_dir[0])
-        lb.new(owner={"username": "default"}, name="user-note-test", description="testing user notes")
+        im = InventoryManager(fixture_working_dir[0])
+        lb = im.create_labbook("default", "default", "user-note-test",
+                               description="testing user notes")
 
         # Create a user note
         query = """

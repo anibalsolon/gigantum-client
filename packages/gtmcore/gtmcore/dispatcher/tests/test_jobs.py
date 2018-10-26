@@ -40,9 +40,10 @@ class TestJobs(object):
     def test_success_import_export_zip(self, mock_config_with_repo):
 
         # Create new LabBook to be exported
-        lb = LabBook(mock_config_with_repo[0])
-        labbook_dir = lb.new(name="unittest-lb-for-export-import-test", description="Testing import-export.",
-                             owner={"username": 'unittester'})
+        im = InventoryManager(mock_config_with_repo[0])
+        lb = InventoryManager.create_labbook('unittester', 'unittester',
+                                             "unittest-lb-for-export-import-test",
+                                             description="Testing import-export.")
         cm = ComponentManager(lb)
         cm.add_base(gtmcore.fixtures.ENV_UNIT_TEST_REPO, gtmcore.fixtures.ENV_UNIT_TEST_BASE,
                     gtmcore.fixtures.ENV_UNIT_TEST_REV)
@@ -104,7 +105,7 @@ class TestJobs(object):
             assert not import_lb2.has_remote
 
             build_kwargs = {
-                'path': labbook_dir,
+                'path': lb.root_dir,
                 'username': 'unittester',
                 'nocache': True
             }
@@ -119,9 +120,9 @@ class TestJobs(object):
     def test_success_import_export_lbk(self, mock_config_with_repo):
         """Test legacy .lbk extension still works"""
         # Create new LabBook to be exported
-        lb = LabBook(mock_config_with_repo[0])
-        labbook_dir = lb.new(name="unittest-lb-for-export-import-test-lbk", description="Testing import-export.",
-                             owner={"username": 'unittester'})
+        lb = InventoryManager(mock_config_with_repo[0]).create_labbook('unittester', 'unittester',
+                                                                       "unittest-lb-for-export-import-test-lbk",
+                                                                       description="Testing import-export.")
         cm = ComponentManager(lb)
         cm.add_base(gtmcore.fixtures.ENV_UNIT_TEST_REPO, gtmcore.fixtures.ENV_UNIT_TEST_BASE,
                     gtmcore.fixtures.ENV_UNIT_TEST_REV)
@@ -175,9 +176,9 @@ class TestJobs(object):
     def test_fail_import_export_zip(self, mock_config_with_repo):
 
         # Create new LabBook to be exported
-        lb = LabBook(mock_config_with_repo[0])
-        labbook_dir = lb.new(name="lb-fail-export-import-test", description="Failing import-export.",
-                             owner={"username": "test"})
+        lb = InventoryManager(mock_config_with_repo[0]).create_labbook('test', 'test',
+                                                                       "lb-fail-export-import-test",
+                                                                       description="Failing import-export.")
         cm = ComponentManager(lb)
         cm.add_base(gtmcore.fixtures.ENV_UNIT_TEST_REPO, gtmcore.fixtures.ENV_UNIT_TEST_BASE,
                     gtmcore.fixtures.ENV_UNIT_TEST_REV)

@@ -24,7 +24,7 @@ import getpass
 import pprint
 
 from gtmcore.configuration import get_docker_client
-from gtmcore.labbook import LabBook
+from gtmcore.labbook import LabBook, InventoryManager
 from lmsrvlabbook.tests.fixtures import fixture_working_dir_env_repo_scoped
 from lmsrvcore.auth.user import get_logged_in_username
 from gtmcore.environment import ComponentManager
@@ -62,10 +62,9 @@ class TestEnvironmentMutations(object):
     @pytest.mark.parametrize('reset_images', ["labbook-build1"], indirect=['reset_images'])
     def test_build_image(self, fixture_working_dir_env_repo_scoped, reset_images):
         """Test building a labbook's image"""
-        # Create labbook
-        lb = LabBook(fixture_working_dir_env_repo_scoped[0])
-        lb.new(owner={"username": "default"}, name="labbook-build1", description="building an env")
-        # add a base
+        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        lb = im.create_labbook("default", "default", "labbook-build1",
+                               description="building an env")
         cm = ComponentManager(lb)
         cm.add_base(ENV_UNIT_TEST_REPO, "ut-busybox", 0)
 
@@ -152,10 +151,9 @@ class TestEnvironmentMutations(object):
     @pytest.mark.parametrize('reset_images', ["labbook-build2"], indirect=['reset_images'])
     def test_build_image_no_cache(self, fixture_working_dir_env_repo_scoped, reset_images):
         """Test building a labbook's image"""
-        # Create labbook
-        lb = LabBook(fixture_working_dir_env_repo_scoped[0])
-        lb.new(owner={"username": "default"}, name="labbook-build2", description="building an env")
-        # add a base
+        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        lb = im.create_labbook("default", "default", "labbook-build2",
+                               description="building an env")
         cm = ComponentManager(lb)
         cm.add_base(ENV_UNIT_TEST_REPO, "ut-busybox", 0)
 

@@ -26,7 +26,7 @@ import pprint
 from gtmcore.configuration import get_docker_client
 from gtmcore.container.container import ContainerOperations
 from gtmcore.environment import ComponentManager
-from gtmcore.labbook import LabBook
+from gtmcore.labbook import LabBook, InventoryManager
 from gtmcore.imagebuilder import ImageBuilder
 from gtmcore.fixtures.fixtures import mock_config_with_repo, ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV
 
@@ -37,9 +37,9 @@ REQUESTS_LATEST_VERSION = "2.20.0"
 @pytest.fixture(scope='function')
 def build_lb_image_for_jupyterlab(mock_config_with_repo):
     # Create a labook
-    lb = LabBook(mock_config_with_repo[0])
-    labbook_dir = lb.new(name="containerunittestbook", description="Testing docker building.",
-                         owner={"username": "unittester"})
+    im = InventoryManager(mock_config_with_repo[0])
+    lb = im.create_labbook('unittester', 'unittester', "containerunittestbook")
+
     # Create Component Manager
     cm = ComponentManager(lb)
     # Add a component
@@ -94,9 +94,10 @@ def build_lb_image_for_jupyterlab(mock_config_with_repo):
 @pytest.fixture(scope='class')
 def build_lb_image_for_env(mock_config_with_repo):
     # Create a labook
-    lb = LabBook(mock_config_with_repo[0])
-    labbook_dir = lb.new(name="containerunittestbookenv", description="Testing environment functions.",
-                         owner={"username": "unittester"})
+    im = InventoryManager(mock_config_with_repo[0])
+    lb = im.create_labbook('unittester', 'unittester', "containerunittestbookenv",
+                           description="Testing environment functions.")
+
     # Create Component Manager
     cm = ComponentManager(lb)
     # Add a component
@@ -125,9 +126,9 @@ def build_lb_image_for_env(mock_config_with_repo):
 @pytest.fixture(scope='class')
 def build_lb_image_for_env_conda(mock_config_with_repo):
     """A fixture that installs an old version of matplotlib and latest version of requests to increase code coverage"""
-    lb = LabBook(mock_config_with_repo[0])
-    labbook_dir = lb.new(name="containerunittestbookenvconda", description="Testing environment functions.",
-                         owner={"username": "unittester"})
+    im = InventoryManager(mock_config_with_repo[0])
+    lb = im.create_labbook('unittester', 'unittester', "containerunittestbookenvconda",
+                           description="Testing environment functions.")
     cm = ComponentManager(lb)
     cm.add_base(ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV)
     cm.add_packages('conda3', [{'package': 'matplotlib', 'version': '2.0.0'},

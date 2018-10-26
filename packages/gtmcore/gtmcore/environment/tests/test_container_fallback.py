@@ -25,7 +25,7 @@ from gtmcore.fixtures import mock_config_with_repo, ENV_UNIT_TEST_REPO, ENV_UNIT
 from gtmcore.configuration import get_docker_client
 
 from gtmcore.environment import ComponentManager
-from gtmcore.labbook import LabBook
+from gtmcore.labbook import LabBook, InventoryManager
 from gtmcore.imagebuilder import ImageBuilder
 from gtmcore.container.container import ContainerOperations
 
@@ -33,12 +33,11 @@ from gtmcore.container.container import ContainerOperations
 class TestContainerFallback(object):
     def test_list_versions_from_fallback(self, mock_config_with_repo):
         """Test list_versions command"""
-        username = "unittester"
+        username = "unittest"
+        im = InventoryManager(mock_config_with_repo[0])
+        lb = im.create_labbook('unittest', 'unittest', 'labbook-unittest-01',
+                               description="From mock_config_from_repo fixture")
 
-        # Create a labook
-        lb = LabBook(mock_config_with_repo[0])
-        labbook_dir = lb.new(name="containerfallbacktestenv", description="Testing environment functions with fallback.",
-                             owner={"username": username})
         # Create Component Manager
         cm = ComponentManager(lb)
         # Add a component
