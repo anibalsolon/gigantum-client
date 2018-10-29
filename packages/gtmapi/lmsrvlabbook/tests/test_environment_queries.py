@@ -20,7 +20,7 @@
 import graphene
 import pprint
 
-from gtmcore.labbook import LabBook, InventoryManager
+from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.fixtures import ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV
 from gtmcore.environment import ComponentManager
 

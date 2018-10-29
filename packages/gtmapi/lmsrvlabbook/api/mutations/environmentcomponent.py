@@ -23,7 +23,8 @@ import os
 import base64
 
 from gtmcore.logging import LMLogger
-from gtmcore.labbook import LabBook, InventoryManager
+
+from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.environment import ComponentManager
 from gtmcore.labbook.schemas import CURRENT_SCHEMA
 from lmsrvcore.auth.user import get_logged_in_username, get_logged_in_author
@@ -78,7 +79,7 @@ class AddPackageComponents(graphene.relay.ClientIDMutation):
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
 
-        with lb.lock_labbook():
+        with lb.lock():
             new_edges = cls._add_package_components(lb, packages)
 
         return AddPackageComponents(new_package_component_edges=new_edges)
@@ -102,7 +103,7 @@ class RemovePackageComponents(graphene.relay.ClientIDMutation):
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
 
-        with lb.lock_labbook():
+        with lb.lock():
             cm = ComponentManager(lb)
             cm.remove_packages(package_manager=manager, package_names=packages)
 
@@ -123,7 +124,7 @@ class AddCustomDocker(graphene.relay.ClientIDMutation):
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
 
-        with lb.lock_labbook():
+        with lb.lock():
             docker_lines = [n for n in docker_content.strip().split('\n') if n]
             cm = ComponentManager(lb)
             cm.add_docker_snippet(cm.DEFAULT_CUSTOM_DOCKER_NAME, docker_lines)
@@ -143,7 +144,7 @@ class RemoveCustomDocker(graphene.relay.ClientIDMutation):
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
         # TODO - Should we cehck if a custom docker component already exists?
-        with lb.lock_labbook():
+        with lb.lock():
             cm = ComponentManager(lb)
             cm.remove_docker_snippet(cm.DEFAULT_CUSTOM_DOCKER_NAME)
         return RemoveCustomDocker(updated_environment=Environment(owner=owner, name=labbook_name))

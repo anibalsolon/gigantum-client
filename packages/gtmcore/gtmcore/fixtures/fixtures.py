@@ -29,7 +29,7 @@ import pytest
 
 from gtmcore.configuration import Configuration
 from gtmcore.environment import RepositoryManager, ComponentManager
-from gtmcore.labbook import LabBook, InventoryManager
+from gtmcore.inventory.inventory  import InventoryManager
 from gtmcore.activity.detaildb import ActivityDetailDB
 from gtmcore.activity import ActivityStore
 from gtmcore.gitlib.git import GitAuthor

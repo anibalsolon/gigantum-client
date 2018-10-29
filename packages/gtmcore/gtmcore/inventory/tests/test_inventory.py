@@ -4,18 +4,14 @@ import os
 import yaml
 import time
 
-from gtmcore.files import FileOperations
-from gtmcore.labbook import LabBook, LabbookException
-from gtmcore.labbook.inventory import InventoryManager, InventoryException
+from gtmcore.labbook import LabBook
+from gtmcore.inventory.inventory import InventoryManager, InventoryException
 from gtmcore.gitlib.git import GitAuthor
-from gtmcore.fixtures import mock_config_file, mock_labbook, remote_labbook_repo, sample_src_file
+
+from gtmcore.fixtures import mock_config_file
 
 
 class TestInventory(object):
-
-    def test_testabc(self):
-        time.sleep(2)
-
     def test_uses_config(self, mock_config_file):
         i = InventoryManager(mock_config_file[0])
         assert i.inventory_root == mock_config_file[1]

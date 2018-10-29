@@ -36,7 +36,7 @@ from gtmcore.logging import LMLogger
 from gtmcore.environment import RepositoryManager
 from gtmcore.auth.identity import AuthenticationError, get_identity_manager
 from gtmcore.labbook.lock import reset_all_locks
-from gtmcore.labbook import LabBook, InventoryManager
+from gtmcore.inventory.inventory import InventoryManager
 from lmsrvcore.auth.user import get_logged_in_author
 
 
@@ -130,7 +130,7 @@ def savehook(username, owner, labbook_name):
 
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
-        with lb.lock_labbook():
+        with lb.lock():
             lb.sweep_uncommitted_changes()
 
         logger.info(f"Jupyter save hook saved {changed_file} from {str(lb)}")

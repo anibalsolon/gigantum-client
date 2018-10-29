@@ -43,7 +43,8 @@ from gtmcore.configuration import Configuration
 from gtmcore.dispatcher.jobs import export_labbook_as_zip
 from gtmcore.files import FileOperations
 from gtmcore.fixtures import remote_labbook_repo, mock_config_file
-from gtmcore.labbook import LabBook, InventoryManager
+
+from gtmcore.inventory.inventory import InventoryManager
 
 from lmsrvcore.middleware import error_middleware, LabBookLoaderMiddleware
 

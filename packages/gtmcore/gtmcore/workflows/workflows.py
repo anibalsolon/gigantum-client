@@ -17,19 +17,14 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-import datetime
-import subprocess
-import shutil
 import time
 import os
 
 from tempfile import TemporaryDirectory
 from typing import Optional, Callable
 
-
-from gtmcore.configuration import Configuration
 from gtmcore.configuration.utils import call_subprocess
-from gtmcore.labbook.inventory import InventoryManager, InventoryException
+from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.labbook import LabBook
 from gtmcore.logging import LMLogger
 from gtmcore.workflows import core
@@ -183,7 +178,7 @@ class ZipExporter(object):
             core.sync_locally(lb, username=username)
 
             lb._data['owner']['username'] = owner
-            lb._save_labbook_data()
+            lb._save_gigantum_data()
             if not lb.is_repo_clean:
                 lb.git.add('.gigantum/labbook.yaml')
                 lb.git.commit(message="Updated owner in labbook.yaml")

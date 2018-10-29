@@ -52,15 +52,15 @@ class ActivityStore(object):
         self.labbook = labbook
 
         self.detaildb = ActivityDetailDB(labbook.root_dir, labbook.checkout_id,
-                                         logfile_limit=labbook.labmanager_config.config['detaildb']['logfile_limit'])
+                                         logfile_limit=labbook.client_config.config['detaildb']['logfile_limit'])
 
         # Note record commit messages follow a special structure
         self.note_regex = re.compile(r"(?s)_GTM_ACTIVITY_START_.*?_GTM_ACTIVITY_END_")
 
         # Params used during detail object serialization
-        if self.labbook.labmanager_config.config['detaildb']['options']['compress']:
-            self.compress_details: bool = self.labbook.labmanager_config.config['detaildb']['options']['compress']
-            self.compress_min_bytes = self.labbook.labmanager_config.config['detaildb']['options']['compress_min_bytes']
+        if self.labbook.client_config.config['detaildb']['options']['compress']:
+            self.compress_details: bool = self.labbook.client_config.config['detaildb']['options']['compress']
+            self.compress_min_bytes = self.labbook.client_config.config['detaildb']['options']['compress_min_bytes']
         else:
             self.compress_details: bool = False
             self.compress_min_bytes: int = 0

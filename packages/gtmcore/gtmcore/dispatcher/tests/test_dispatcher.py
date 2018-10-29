@@ -40,7 +40,8 @@ from gtmcore.environment import ComponentManager, RepositoryManager
 from gtmcore.fixtures import mock_config_file
 import gtmcore.fixtures
 from gtmcore.dispatcher import Dispatcher
-from gtmcore.labbook import LabBook, InventoryManager
+from gtmcore.labbook import LabBook
+from gtmcore.inventory.inventory import InventoryManager
 
 import gtmcore.dispatcher.jobs as bg_jobs
 
@@ -276,7 +277,7 @@ class TestDispatcher(object):
 
         startc_kwargs = {
             'root': lb.root_dir,
-            'config_path': lb.labmanager_config.config_file,
+            'config_path': lb.client_config.config_file,
             'username': 'unittester'
         }
         # Start the docker container, and then wait till it's done.

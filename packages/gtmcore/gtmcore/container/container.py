@@ -26,7 +26,8 @@ import docker.errors
 
 from gtmcore.configuration import get_docker_client
 from gtmcore.logging import LMLogger
-from gtmcore.labbook import LabBook, LabbookException
+from gtmcore.labbook import LabBook
+from gtmcore.exceptions import GigantumException
 
 from gtmcore.container.utils import infer_docker_image_name
 from gtmcore.container.exceptions import ContainerException
@@ -169,7 +170,7 @@ class ContainerOperations(object):
             raise ValueError("Environment variable HOST_WORK_DIR must be set")
 
         container_id = start_labbook_container(labbook_root=labbook.root_dir,
-                                               config_path=labbook.labmanager_config.config_file,
+                                               config_path=labbook.client_config.config_file,
                                                override_image_id=override_image_tag, username=username)
         return labbook, container_id
 
@@ -238,7 +239,7 @@ class ContainerOperations(object):
         # A dictionary of dev tools and the port IN THE CONTAINER
         supported_dev_tools = ['jupyterlab']
         if dev_tool_name not in supported_dev_tools:
-            raise LabbookException(f"'{dev_tool_name}' not currently supported")
+            raise GigantumException(f"'{dev_tool_name}' not currently supported")
         suffix = start_jupyter(labbook, username, tag, check_reachable,
                                proxy_prefix)
         return labbook, suffix

@@ -43,7 +43,7 @@ from werkzeug.datastructures import FileStorage
 from gtmcore.configuration import Configuration
 from gtmcore.dispatcher.jobs import export_labbook_as_zip
 from gtmcore.fixtures import remote_labbook_repo, mock_config_file
-from gtmcore.labbook import LabBook, InventoryManager
+from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.files import FileOperations
 
 @pytest.fixture()

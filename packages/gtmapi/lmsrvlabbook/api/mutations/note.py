@@ -19,7 +19,7 @@
 # SOFTWARE.
 import graphene
 
-from gtmcore.labbook import InventoryManager
+from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.logging import LMLogger
 
 from gtmcore.activity import ActivityStore, ActivityDetailRecord, ActivityDetailType, ActivityRecord, ActivityType
@@ -73,7 +73,7 @@ class CreateUserNote(graphene.relay.ClientIDMutation):
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
 
-        with lb.lock_labbook():
+        with lb.lock():
             ar = cls._create_user_note(lb, title, body, tags)
 
         return CreateUserNote(new_activity_record_edge=ActivityConnection.Edge(

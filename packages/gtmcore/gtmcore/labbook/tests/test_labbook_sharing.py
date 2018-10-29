@@ -17,12 +17,11 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
 import pytest
 import os
 
-
-from gtmcore.labbook import LabBook, LabbookException, InventoryManager
+from gtmcore.inventory.inventory import InventoryManager
+from gtmcore.exceptions import GigantumException
 from gtmcore.files import FileOperations
 from gtmcore.fixtures import (mock_config_file, mock_labbook_lfs_disabled, remote_labbook_repo)
 
@@ -52,7 +51,7 @@ class TestLabBook(object):
         assert lb.active_branch == "test-branch"
         lb.checkout_branch("gm.workspace-test")
         assert lb.active_branch == "gm.workspace-test"
-        with pytest.raises(LabbookException):
+        with pytest.raises(GigantumException):
             lb.checkout_branch("test-branch", new=True)
             assert lb.active_branch == "test-branch"
 
@@ -75,7 +74,7 @@ class TestLabBook(object):
         with open(os.path.join(lb.root_dir, 'input', 'catfile'), 'wb') as f:
             f.write(b"data.")
 
-        with pytest.raises(LabbookException):
+        with pytest.raises(GigantumException):
             # We should not be allowed to switch branches when there are uncommitted changes
             lb.checkout_branch("branchy", new=True)
         assert lb.active_branch == "gm.workspace-test"
@@ -101,7 +100,7 @@ class TestLabBook(object):
 
     def test_checkout_make_sure_new_must_be_true_when_making_new_branch(self, mock_labbook_lfs_disabled):
         lb = mock_labbook_lfs_disabled[2]
-        with pytest.raises(LabbookException):
+        with pytest.raises(GigantumException):
             lb.checkout_branch("new-branch", new=False)
         assert lb.active_branch == 'gm.workspace-test'
 

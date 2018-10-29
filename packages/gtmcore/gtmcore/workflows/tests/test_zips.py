@@ -24,7 +24,8 @@ import subprocess
 import os
 from pkg_resources import resource_filename
 
-from gtmcore.labbook import LabBook, loaders, InventoryException, InventoryManager
+from gtmcore.labbook import LabBook, loaders
+from gtmcore.inventory.inventory  import InventoryManager, InventoryException
 from gtmcore.configuration import Configuration
 from gtmcore.workflows import ZipExporter, ZipWorkflowException
 from gtmcore.files import FileOperations

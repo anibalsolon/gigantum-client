@@ -24,7 +24,8 @@ import pprint
 import uuid
 from gtmcore.environment import ComponentManager, RepositoryManager
 from gtmcore.fixtures import mock_config_file, mock_labbook, mock_config_with_repo
-from gtmcore.labbook import LabBook, InventoryManager
+from gtmcore.labbook import LabBook
+from gtmcore.inventory.inventory  import InventoryManager
 import gtmcore.fixtures
 
 

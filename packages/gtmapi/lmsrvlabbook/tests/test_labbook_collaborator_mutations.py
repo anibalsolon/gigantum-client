@@ -29,7 +29,7 @@ from lmsrvlabbook.tests.fixtures import fixture_working_dir, property_mocks_fixt
 import pytest
 
 from gtmcore.configuration import get_docker_client
-from gtmcore.labbook import LabBook, InventoryManager
+from gtmcore.inventory.inventory import InventoryManager
 
 
 @pytest.fixture()
@@ -41,11 +41,11 @@ def mock_create_labbooks(fixture_working_dir):
     yield fixture_working_dir
 
 
-@pytest.mark.skipif(getpass.getuser() == 'circleci', reason="Cannot use responses on CircleCI")
+#@pytest.mark.skipif(getpass.getuser() == 'circleci', reason="Cannot use responses on CircleCI")
 class TestLabBookCollaboratorMutations(object):
 
     @responses.activate
-    def test_add_collaborator(self, mock_create_labbooks, property_mocks_fixture, snapshot, docker_socket_fixture):
+    def test_add_collaborator(self, mock_create_labbooks, property_mocks_fixture, snapshot):
         """Test adding a collaborator to a LabBook"""
         # Setup REST mocks
         responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/users?username=person100',
@@ -53,7 +53,7 @@ class TestLabBookCollaboratorMutations(object):
                                 {
                                     "id": 100,
                                     "name": "New Person",
-                                    "username": "person100",
+                                    "username": "default",
                                     "state": "active",
                                 }
                             ],
@@ -62,7 +62,7 @@ class TestLabBookCollaboratorMutations(object):
                       json={
                                 "id": 100,
                                 "name": "New Person",
-                                "username": "person100",
+                                "username": "default",
                                 "state": "active",
                             },
                       status=201)
@@ -102,7 +102,7 @@ class TestLabBookCollaboratorMutations(object):
             input: {
               owner: "default",
               labbookName: "labbook1",
-              username: "person100"
+              username: "default"
             }) {
               updatedLabbook {
                 collaborators
@@ -114,8 +114,7 @@ class TestLabBookCollaboratorMutations(object):
         snapshot.assert_match(mock_create_labbooks[2].execute(query, context_value=req))
 
     @responses.activate
-    def test_add_collaborator_as_owner(self, mock_create_labbooks, property_mocks_fixture, snapshot,
-                                       docker_socket_fixture):
+    def test_add_collaborator_as_owner(self, mock_create_labbooks, property_mocks_fixture, snapshot):
         """Test adding a collaborator to a LabBook"""
         # Setup REST mocks
         responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/users?username=person100',
@@ -123,7 +122,7 @@ class TestLabBookCollaboratorMutations(object):
                                 {
                                     "id": 100,
                                     "name": "New Person",
-                                    "username": "person100",
+                                    "username": "default",
                                     "state": "active",
                                 }
                             ],
@@ -132,7 +131,7 @@ class TestLabBookCollaboratorMutations(object):
                       json={
                                 "id": 100,
                                 "name": "New Person",
-                                "username": "person100",
+                                "username": "default",
                                 "state": "active",
                             },
                       status=201)
@@ -173,7 +172,7 @@ class TestLabBookCollaboratorMutations(object):
             input: {
               owner: "default",
               labbookName: "labbook1",
-              username: "person100"
+              username: "default"
             }) {
               updatedLabbook {
                 collaborators
@@ -194,7 +193,7 @@ class TestLabBookCollaboratorMutations(object):
                                 {
                                     "id": 100,
                                     "name": "New Person",
-                                    "username": "person100",
+                                    "username": "default",
                                     "state": "active",
                                 }
                             ],
@@ -230,7 +229,7 @@ class TestLabBookCollaboratorMutations(object):
             input: {
               owner: "default",
               labbookName: "labbook1",
-              username: "person100"
+              username: "default"
             }) {
               updatedLabbook {
                 collaborators

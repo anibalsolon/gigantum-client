@@ -31,7 +31,8 @@ import pprint
 import graphene
 
 import gtmcore
-from gtmcore.labbook import LabBook, InventoryManager
+
+from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.fixtures import remote_labbook_repo, mock_labbook
 from gtmcore.gitlib.git import GitAuthor
 

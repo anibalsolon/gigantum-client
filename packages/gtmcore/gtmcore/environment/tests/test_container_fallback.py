@@ -25,7 +25,7 @@ from gtmcore.fixtures import mock_config_with_repo, ENV_UNIT_TEST_REPO, ENV_UNIT
 from gtmcore.configuration import get_docker_client
 
 from gtmcore.environment import ComponentManager
-from gtmcore.labbook import LabBook, InventoryManager
+from gtmcore.inventory.inventory  import InventoryManager
 from gtmcore.imagebuilder import ImageBuilder
 from gtmcore.container.container import ContainerOperations
 

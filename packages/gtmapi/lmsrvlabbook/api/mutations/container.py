@@ -17,15 +17,13 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-import os
 import uuid
-import time
 
-import requests
 import graphene
 import confhttpproxy
 
-from gtmcore.labbook import LabBook, LabbookException, InventoryManager
+from gtmcore.inventory.inventory import InventoryManager
+from gtmcore.exceptions import GigantumException
 from gtmcore.container.container import ContainerOperations
 from gtmcore.container.jupyter import check_jupyter_reachable
 from gtmcore.logging import LMLogger
@@ -52,7 +50,7 @@ class StartDevTool(graphene.relay.ClientIDMutation):
         lb_port = 8888
         lb_endpoint = f'http://{lb_ip}:{lb_port}'
 
-        pr = confhttpproxy.ProxyRouter.get_proxy(lb.labmanager_config.config['proxy'])
+        pr = confhttpproxy.ProxyRouter.get_proxy(lb.client_config.config['proxy'])
         routes = pr.routes
 
         est_target = [k for k in routes.keys()
@@ -69,7 +67,7 @@ class StartDevTool(graphene.relay.ClientIDMutation):
             try:
                 check_jupyter_reachable(lb_ip, lb_port, suffix)
                 start_jupyter = False
-            except LabbookException:
+            except GigantumException:
                 logger.warning(f'Detected stale route. Attempting to restart Jupyter and clean up route table.')
                 pr.remove(suffix[1:])
 
@@ -91,7 +89,7 @@ class StartDevTool(graphene.relay.ClientIDMutation):
                                   author=get_logged_in_author())
 
         # Don't include the port in the path if running on 80
-        apparent_proxy_port = lb.labmanager_config.config['proxy']["apparent_proxy_port"]
+        apparent_proxy_port = lb.client_config.config['proxy']["apparent_proxy_port"]
         if apparent_proxy_port == 80:
             path = suffix
         else:
@@ -107,7 +105,7 @@ class StartDevTool(graphene.relay.ClientIDMutation):
                                              author=get_logged_in_author())
 
         # TODO - Fail fast if already locked
-        with lb.lock_labbook(failfast=True):
+        with lb.lock(failfast=True):
             path = cls._start_dev_tool(lb, username, "jupyterlab")
 
         return StartDevTool(path=path)

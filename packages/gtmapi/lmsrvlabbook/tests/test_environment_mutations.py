@@ -24,7 +24,7 @@ import getpass
 import pprint
 
 from gtmcore.configuration import get_docker_client
-from gtmcore.labbook import LabBook, InventoryManager
+from gtmcore.inventory.inventory import InventoryManager
 from lmsrvlabbook.tests.fixtures import fixture_working_dir_env_repo_scoped
 from lmsrvcore.auth.user import get_logged_in_username
 from gtmcore.environment import ComponentManager

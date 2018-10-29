@@ -21,10 +21,11 @@ import os
 import graphene
 import confhttpproxy
 
-from gtmcore.configuration import Configuration, get_docker_client
+from gtmcore.configuration import get_docker_client
 from gtmcore.imagebuilder import ImageBuilder
 from gtmcore.dispatcher import Dispatcher, jobs
-from gtmcore.labbook import LabBook, InventoryManager
+
+from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.container.container import ContainerOperations
 from gtmcore.container.utils import infer_docker_image_name
 from gtmcore.workflows import GitWorkflow
@@ -32,7 +33,7 @@ from gtmcore.logging import LMLogger
 from gtmcore.activity.services import stop_labbook_monitor
 
 from lmsrvcore.auth.user import get_logged_in_username, get_logged_in_author
-from lmsrvlabbook.api.objects.environment import Environment, ContainerStatus
+from lmsrvlabbook.api.objects.environment import Environment
 
 
 logger = LMLogger.get_logger()
@@ -116,7 +117,7 @@ class StartContainer(graphene.relay.ClientIDMutation):
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
 
-        with lb.lock_labbook():
+        with lb.lock():
             lb, container_id = ContainerOperations.start_container(
                 labbook=lb, username=username)
         logger.info(f'Started new {lb} container ({container_id})')
@@ -144,7 +145,7 @@ class StopContainer(graphene.relay.ClientIDMutation):
         lb_port = 8888
         lb_endpoint = f'http://{lb_ip}:{lb_port}'
 
-        pr = confhttpproxy.ProxyRouter.get_proxy(lb.labmanager_config.config['proxy'])
+        pr = confhttpproxy.ProxyRouter.get_proxy(lb.client_config.config['proxy'])
         routes = pr.routes
         est_target = [k for k in routes.keys()
                       if lb_endpoint in routes[k]['target']
@@ -166,7 +167,7 @@ class StopContainer(graphene.relay.ClientIDMutation):
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
 
-        with lb.lock_labbook():
+        with lb.lock():
             cls._stop_container(lb, username)
 
         return StopContainer(environment=Environment(owner=owner, name=labbook_name))

@@ -25,7 +25,7 @@ import redis
 from gtmcore.activity import ActivityRecord, ActivityStore, ActivityType
 from gtmcore.activity.processors.processor import ActivityProcessor, ExecutionData
 from gtmcore.configuration import get_docker_client
-from gtmcore.labbook import LabBook, InventoryManager
+from gtmcore.inventory.inventory  import InventoryManager
 from gtmcore.gitlib.git import GitAuthor
 from gtmcore.container.utils import infer_docker_image_name
 

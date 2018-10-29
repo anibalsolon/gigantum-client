@@ -23,7 +23,9 @@ import os
 from typing import Optional, Callable
 
 from gtmcore.gitlib.gitlab import GitLabManager
-from gtmcore.labbook import LabBook, LabbookException, LabbookMergeException
+from gtmcore.labbook import LabBook
+from gtmcore.exceptions import GigantumException
+
 from gtmcore.logging import LMLogger
 from gtmcore.configuration.utils import call_subprocess
 
@@ -97,11 +99,11 @@ def create_remote_gitlab_repo(labbook: LabBook, username: str, visibility: str,
 
     Note: It may make more sense to factor this out later on. """
 
-    default_remote = labbook.labmanager_config.config['git']['default_remote']
+    default_remote = labbook.client_config.config['git']['default_remote']
     admin_service = None
-    for remote in labbook.labmanager_config.config['git']['remotes']:
+    for remote in labbook.client_config.config['git']['remotes']:
         if default_remote == remote:
-            admin_service = labbook.labmanager_config.config['git']['remotes'][remote]['admin_service']
+            admin_service = labbook.client_config.config['git']['remotes'][remote]['admin_service']
             break
 
     if not admin_service:
@@ -166,7 +168,7 @@ def publish_to_remote(labbook: LabBook, username: str, remote: str,
     call_subprocess(['git', 'push', '--set-upstream', 'origin', 'gm.workspace'], cwd=labbook.root_dir)
 
     feedback_callback("Pushing up large objects...")
-    if labbook.labmanager_config.config["git"]["lfs_enabled"] is True:
+    if labbook.client_config.config["git"]["lfs_enabled"] is True:
         t0 = time.time()
         call_subprocess(['git', 'lfs', 'push', '--all', 'origin', 'gm.workspace'], cwd=labbook.root_dir)
         logger.info(f"Ran in {str(labbook)} `git lfs push --all` in {t0-time.time()}s")
@@ -192,7 +194,7 @@ def sync_with_remote(labbook: LabBook, username: str, remote: str,
         int: Number of commits pulled from remote (0 implies no upstream changes pulled in).
 
     Raises:
-        LabbookException on any problems.
+        GigantumException on any problems.
     """
 
     # Note, BVB: For now, this method only supports the initial branching workflow of having
@@ -219,14 +221,14 @@ def sync_with_remote(labbook: LabBook, username: str, remote: str,
         try:
             feedback_callback("Pulling any upstream changes...")
             call_subprocess(tokens if not force else tokens_force, cwd=labbook.root_dir)
-            if labbook.labmanager_config.config["git"]["lfs_enabled"] is True:
+            if labbook.client_config.config["git"]["lfs_enabled"] is True:
                 feedback_callback("Pulling large files...")
                 call_subprocess(['git', 'lfs', 'pull', 'origin', 'gm.workspace'], cwd=labbook.root_dir)
         except subprocess.CalledProcessError as x:
             logger.error(f"{str(labbook)} cannot merge with remote; resetting to revision {checkpoint}...")
             call_subprocess(['git', 'merge', '--abort'], cwd=labbook.root_dir)
             call_subprocess(['git', 'reset', '--hard', checkpoint], cwd=labbook.root_dir)
-            raise LabbookMergeException('Merge conflict pulling upstream changes')
+            raise GigantumException('Merge conflict pulling upstream changes')
 
         feedback_callback("Merging with upstream changes...")
         checkpoint2 = labbook.git.commit_hash
@@ -236,7 +238,7 @@ def sync_with_remote(labbook: LabBook, username: str, remote: str,
 
         feedback_callback("Pushing local changes back to remote...")
         call_subprocess(['git', 'push', 'origin', 'gm.workspace'], cwd=labbook.root_dir)
-        if labbook.labmanager_config.config["git"]["lfs_enabled"] is True:
+        if labbook.client_config.config["git"]["lfs_enabled"] is True:
             t0 = time.time()
             call_subprocess(['git', 'lfs', 'push', '--all', 'origin', 'gm.workspace'], cwd=labbook.root_dir)
             logger.info(f'Ran in {str(labbook)} `git lfs push all` in {t0-time.time()}s')
@@ -250,7 +252,7 @@ def sync_with_remote(labbook: LabBook, username: str, remote: str,
         # Return 1 if there have been updates made
         return updates
 
-    except LabbookMergeException as m:
+    except GigantumException as m:
         raise MergeError(m)
     except Exception as e:
         raise WorkflowsException(e)
@@ -271,7 +273,7 @@ def sync_locally(labbook: LabBook, username: Optional[str] = None) -> None:
         None
 
     Raises:
-        LabbookException
+        GigantumException
     """
     try:
         labbook.sweep_uncommitted_changes()
@@ -291,4 +293,4 @@ def sync_locally(labbook: LabBook, username: Optional[str] = None) -> None:
             labbook.checkout_branch(orig_branch)
     except Exception as e:
         logger.error(e)
-        raise LabbookException(e)
+        raise GigantumException(e)

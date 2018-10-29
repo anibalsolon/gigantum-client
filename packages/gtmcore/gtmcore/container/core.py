@@ -27,7 +27,8 @@ from typing import Callable, Optional
 
 from gtmcore.configuration import get_docker_client
 from gtmcore.logging import LMLogger
-from gtmcore.labbook import LabBook, InventoryManager
+from gtmcore.labbook import LabBook
+from gtmcore.inventory.inventory  import InventoryManager
 from gtmcore.container.utils import infer_docker_image_name
 from gtmcore.container.exceptions import ContainerBuildException
 
@@ -232,8 +233,8 @@ def start_labbook_container(labbook_root: str, config_path: str,
 
     # Get resource limits
     resource_args = dict()
-    memory_limit = lb.labmanager_config.config['container']['memory']
-    cpu_limit = lb.labmanager_config.config['container']['cpu']
+    memory_limit = lb.client_config.config['container']['memory']
+    cpu_limit = lb.client_config.config['container']['cpu']
     if memory_limit:
         # If memory_limit not None, pass to Docker to limit memory allocation to container
         resource_args["mem_limit"] = memory_limit
@@ -246,7 +247,7 @@ def start_labbook_container(labbook_root: str, config_path: str,
 
     # run with nvidia if we have GPU support in the labmanager 
     # CUDA must be set (not None) and version must match between labbook and labmanager
-    cudav = lb.labmanager_config.config["container"].get("cuda_version")
+    cudav = lb.client_config.config["container"].get("cuda_version")
     logger.info(f"Host CUDA version {cudav}, LabBook CUDA ver {lb.cuda_version}")
     if cudav and lb.cuda_version:
         logger.info(f"Launching container with GPU support CUDA version {lb.cuda_version}")

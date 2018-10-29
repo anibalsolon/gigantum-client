@@ -21,7 +21,7 @@ import graphene
 
 from gtmcore.configuration import Configuration
 from gtmcore.gitlib.gitlab import GitLabManager
-from gtmcore.labbook import InventoryManager, InventoryException
+from gtmcore.inventory.inventory import InventoryManager, InventoryException
 
 from lmsrvcore.api.interfaces import GitRepository
 from lmsrvcore.auth.user import get_logged_in_username

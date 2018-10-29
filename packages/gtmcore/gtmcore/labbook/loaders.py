@@ -5,7 +5,8 @@ import time
 import os
 
 from gtmcore.configuration.utils import call_subprocess
-from gtmcore.labbook.labbook import LabBook, LabbookException
+from gtmcore.labbook.labbook import LabBook
+from gtmcore.exceptions import GigantumException
 from gtmcore.logging import LMLogger
 
 logger = LMLogger.get_logger()
@@ -35,7 +36,7 @@ def from_remote(remote_url: str, username: str, owner: str,
         # If labbook instance is not passed in, make a new one with blank conf
         labbook = LabBook()
 
-    lbconf = labbook.labmanager_config.config["git"]["working_directory"]
+    lbconf = labbook.client_config.config["git"]["working_directory"]
     starting_dir = os.path.expanduser(lbconf)
 
     # Expected full path of the newly imported labbook.
@@ -48,7 +49,7 @@ def from_remote(remote_url: str, username: str, owner: str,
 
     os.makedirs(lb_dir, exist_ok=True)
 
-    if labbook.labmanager_config.config["git"]["lfs_enabled"] is True:
+    if labbook.client_config.config["git"]["lfs_enabled"] is True:
         logger.info(f"Cloning labbook with `git lfs clone ...` from remote `{remote_url}` into `{est_root_dir}...")
         t0 = time.time()
         try:
@@ -70,7 +71,7 @@ def from_remote(remote_url: str, username: str, owner: str,
     labbook.git.checkout("gm.workspace")
 
     labbook._set_root_dir(est_root_dir)
-    labbook._load_labbook_data()
+    labbook._load_gigantum_data()
 
     logger.info(f"Checking out gm.workspace-{username}")
     if f'origin/gm.workspace-{username}' in labbook.get_branches()['remote']:
@@ -80,12 +81,12 @@ def from_remote(remote_url: str, username: str, owner: str,
 
     if make_owner:
         logger.info(f"Cloning public repo; changing owner to {username}")
-        labbook._load_labbook_data()
+        labbook._load_gigantum_data()
         if labbook._data:
             labbook._data['owner']['username'] = username
         else:
-            raise LabbookException("LabBook _data not defined")
-        labbook._save_labbook_data()
+            raise GigantumException("LabBook _data not defined")
+        labbook._save_gigantum_data()
         labbook.remove_remote('origin')
         msg = f"Imported and changed owner to {username}"
         labbook.sweep_uncommitted_changes(extra_msg=msg)

@@ -27,7 +27,8 @@ import graphene
 from mock import patch
 
 from gtmcore.configuration import Configuration
-from gtmcore.labbook import LabBook, InventoryManager
+
+from gtmcore.inventory.inventory import InventoryManager
 
 
 class TestNoteService(object):

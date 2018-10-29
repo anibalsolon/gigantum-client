@@ -24,7 +24,10 @@ import yaml
 import time
 
 from gtmcore.files import FileOperations
-from gtmcore.labbook import LabBook, LabbookException, InventoryManager
+from gtmcore.labbook import LabBook
+from gtmcore.exceptions import GigantumException
+
+from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.gitlib.git import GitAuthor
 from gtmcore.fixtures import mock_config_file, mock_labbook, remote_labbook_repo, sample_src_file
 

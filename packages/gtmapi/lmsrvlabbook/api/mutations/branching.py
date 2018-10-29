@@ -21,7 +21,8 @@ import os
 import graphene
 
 from gtmcore.logging import LMLogger
-from gtmcore.labbook import LabBook, InventoryManager
+
+from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.workflows import BranchManager
 from gtmcore.activity import ActivityStore, ActivityDetailRecord, ActivityDetailType, ActivityRecord, ActivityType
 
@@ -58,7 +59,7 @@ class CreateExperimentalBranch(graphene.relay.ClientIDMutation):
             # Update the description on branch creation
             lb.description = description
 
-            with lb.lock_labbook():
+            with lb.lock():
                 lb.git.add(os.path.join(lb.root_dir, '.gigantum/labbook.yaml'))
                 commit = lb.git.commit('Updating description')
 
@@ -98,7 +99,7 @@ class DeleteExperimentalBranch(graphene.relay.ClientIDMutation):
         username = get_logged_in_username()
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
-        with lb.lock_labbook():
+        with lb.lock():
             bm = BranchManager(labbook=lb, username=username)
             bm.remove_branch(target_branch=branch_name)
         logger.info(f'Removed experimental branch {branch_name} from {str(lb)}')
@@ -122,7 +123,7 @@ class WorkonBranch(graphene.relay.ClientIDMutation):
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
         # TODO - fail fast if already locked.
-        with lb.lock_labbook():
+        with lb.lock():
             bm = BranchManager(labbook=lb, username=username)
             bm.workon_branch(branch_name=branch_name)
         return WorkonBranch(labbook=Labbook(id="{}&{}".format(owner, labbook_name),
@@ -146,7 +147,7 @@ class MergeFromBranch(graphene.relay.ClientIDMutation):
         username = get_logged_in_username()
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
-        with lb.lock_labbook():
+        with lb.lock():
             bm = BranchManager(labbook=lb, username=username)
             bm.merge_from(other_branch=other_branch_name, force=force)
 

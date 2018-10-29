@@ -34,7 +34,8 @@ from graphene.test import Client
 from gtmcore.environment import RepositoryManager
 from gtmcore.configuration import Configuration, get_docker_client
 from gtmcore.auth.identity import get_identity_manager
-from gtmcore.labbook import LabBook, InventoryManager
+
+from gtmcore.inventory.inventory import InventoryManager
 from lmsrvcore.middleware import LabBookLoaderMiddleware, error_middleware
 from lmsrvcore.tests.fixtures import insert_cached_identity
 

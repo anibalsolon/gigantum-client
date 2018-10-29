@@ -97,8 +97,8 @@ class InventoryManager(object):
         try:
             lb = LabBook(config_file=self.config_file)
             lb._set_root_dir(path)
-            lb._load_labbook_data()
-            lb._validate_labbook_data()
+            lb._load_gigantum_data()
+            lb._validate_gigantum_data()
             lb.author = author
             return lb
         except Exception as e:
@@ -112,8 +112,8 @@ class InventoryManager(object):
             lbroot = os.path.join(self.inventory_root, username,
                                   owner, 'labbooks', labbook_name)
             lb._set_root_dir(lbroot)
-            lb._load_labbook_data()
-            lb._validate_labbook_data()
+            lb._load_gigantum_data()
+            lb._validate_gigantum_data()
             lb.author = author
             return lb
         except Exception as e:
@@ -242,21 +242,21 @@ class InventoryManager(object):
             "cuda_version": None,
             "labbook": {"id": uuid.uuid4().hex,
                         "name": name,
-                        "description": labbook._santize_input(description or '')},
+                        "description": description or ''},
             "owner": owner,
             "schema": CURRENT_SCHEMA
         }
 
         # Validate data
-        labbook._validate_labbook_data()
+        labbook._validate_gigantum_data()
 
         logger.info("Creating new labbook on disk for {}/{}/{} ...".format(username, owner, name))
 
         # lock while creating initial directory
-        with labbook.lock_labbook(lock_key=f"new_labbook_lock|{username}|{owner['username']}|{name}"):
+        with labbook.lock(lock_key=f"new_labbook_lock|{username}|{owner['username']}|{name}"):
             # Verify or Create user subdirectory
             # Make sure you expand a user dir string
-            starting_dir = os.path.expanduser(labbook.labmanager_config.config["git"]["working_directory"])
+            starting_dir = os.path.expanduser(labbook.client_config.config["git"]["working_directory"])
             user_dir = os.path.join(starting_dir, username)
             if not os.path.isdir(user_dir):
                 os.makedirs(user_dir)
@@ -284,7 +284,7 @@ class InventoryManager(object):
             labbook.git.initialize()
 
             # Setup LFS
-            if labbook.labmanager_config.config["git"]["lfs_enabled"] and not bypass_lfs:
+            if labbook.client_config.config["git"]["lfs_enabled"] and not bypass_lfs:
                 # Make sure LFS install is setup and rack input and output directories
                 call_subprocess(["git", "lfs", "install"], cwd=new_root_dir)
                 call_subprocess(["git", "lfs", "track", "input/**"], cwd=new_root_dir)
@@ -316,7 +316,7 @@ class InventoryManager(object):
                     labbook.git.add(p)
 
             # Create labbook.yaml file
-            labbook._save_labbook_data()
+            labbook._save_gigantum_data()
 
             # Save build info
             try:

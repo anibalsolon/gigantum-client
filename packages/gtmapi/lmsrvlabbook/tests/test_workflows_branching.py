@@ -30,7 +30,9 @@ from mock import patch
 from gtmcore.auth.identity import get_identity_manager
 from gtmcore.configuration import Configuration
 from gtmcore.workflows import BranchManager
-from gtmcore.labbook import LabBook, InventoryManager
+from gtmcore.labbook import LabBook
+from gtmcore.inventory.inventory import InventoryManager
+
 from gtmcore.files import FileOperations
 
 from lmsrvcore.middleware import LabBookLoaderMiddleware, error_middleware

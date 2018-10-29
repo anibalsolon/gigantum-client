@@ -30,7 +30,9 @@ from werkzeug.wrappers import Request
 
 from gtmcore.fixtures import (remote_labbook_repo, remote_bare_repo, mock_labbook,
                                mock_config_file, _MOCK_create_remote_repo2)
-from gtmcore.labbook import LabBook, loaders, InventoryManager
+from gtmcore.labbook import LabBook, loaders
+from gtmcore.inventory.inventory import InventoryManager
+
 from gtmcore.workflows import GitWorkflow
 from gtmcore.files import FileOperations
 

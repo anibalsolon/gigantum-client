@@ -32,7 +32,8 @@ from gtmcore.dispatcher import jobs
 import gtmcore.fixtures
 from gtmcore.fixtures import mock_config_file, mock_config_with_repo
 from gtmcore.environment import ComponentManager, RepositoryManager
-from gtmcore.labbook import LabBook, InventoryManager
+from gtmcore.labbook import LabBook
+from gtmcore.inventory.inventory  import InventoryManager
 from gtmcore.imagebuilder import ImageBuilder
 
 
@@ -52,7 +53,7 @@ class TestJobs(object):
         ib.assemble_dockerfile()
 
         # Make sure the destination user exists locally
-        working_dir = lb.labmanager_config.config['git']['working_directory']
+        working_dir = lb.client_config.config['git']['working_directory']
         os.makedirs(os.path.join(working_dir, 'unittester2', 'unittester2', 'labbooks'), exist_ok=True)
 
         lb_root = lb.root_dir
@@ -131,7 +132,7 @@ class TestJobs(object):
         ib.assemble_dockerfile()
 
         # Make sure the destination user exists locally
-        working_dir = lb.labmanager_config.config['git']['working_directory']
+        working_dir = lb.client_config.config['git']['working_directory']
         os.makedirs(os.path.join(working_dir, 'unittester2', 'unittester2', 'labbooks'), exist_ok=True)
 
         lb_root = lb.root_dir

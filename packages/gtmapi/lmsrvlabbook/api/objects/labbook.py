@@ -427,11 +427,11 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
 
         """
         # TODO: Future work will look up remote in LabBook data, allowing user to select remote.
-        default_remote = labbook.labmanager_config.config['git']['default_remote']
+        default_remote = labbook.client_config.config['git']['default_remote']
         admin_service = None
-        for remote in labbook.labmanager_config.config['git']['remotes']:
+        for remote in labbook.client_config.config['git']['remotes']:
             if default_remote == remote:
-                admin_service = labbook.labmanager_config.config['git']['remotes'][remote]['admin_service']
+                admin_service = labbook.client_config.config['git']['remotes'][remote]['admin_service']
                 break
 
         # Extract valid Bearer token
@@ -562,11 +562,11 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
     @staticmethod
     def helper_resolve_visibility(labbook, info):
         # TODO: Future work will look up remote in LabBook data, allowing user to select remote.
-        default_remote = labbook.labmanager_config.config['git']['default_remote']
+        default_remote = labbook.client_config.config['git']['default_remote']
         admin_service = None
-        for remote in labbook.labmanager_config.config['git']['remotes']:
+        for remote in labbook.client_config.config['git']['remotes']:
             if default_remote == remote:
-                admin_service = labbook.labmanager_config.config['git']['remotes'][remote]['admin_service']
+                admin_service = labbook.client_config.config['git']['remotes'][remote]['admin_service']
                 break
 
         # Extract valid Bearer token

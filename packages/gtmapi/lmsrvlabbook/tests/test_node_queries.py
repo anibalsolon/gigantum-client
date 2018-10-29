@@ -26,7 +26,7 @@ from graphene.test import Client
 import graphene
 from mock import patch
 
-from gtmcore.labbook import LabBook, InventoryManager
+from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.files import FileOperations
 from gtmcore.configuration import Configuration
 

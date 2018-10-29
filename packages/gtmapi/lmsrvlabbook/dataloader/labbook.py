@@ -22,7 +22,7 @@ from typing import List
 from promise import Promise
 from promise.dataloader import DataLoader
 
-from gtmcore.labbook import InventoryManager
+from gtmcore.inventory.inventory import InventoryManager
 from lmsrvcore.auth.user import get_logged_in_author
 
 

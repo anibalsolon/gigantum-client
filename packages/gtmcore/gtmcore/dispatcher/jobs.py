@@ -31,7 +31,8 @@ from rq import get_current_job
 from gtmcore.activity.monitors.devenv import DevEnvMonitorManager
 from gtmcore.configuration import Configuration
 from gtmcore.configuration.utils import call_subprocess
-from gtmcore.labbook import LabBook, InventoryManager
+from gtmcore.labbook import LabBook
+from gtmcore.inventory.inventory  import InventoryManager
 from gtmcore.logging import LMLogger
 from gtmcore.workflows import sync_locally, GitWorkflow, ZipExporter
 from gtmcore.container.core import (build_docker_image as build_image,
@@ -64,7 +65,7 @@ def publish_labbook(labbook_path: str, username: str, access_token: str,
     try:
         labbook = InventoryManager().load_labbook_from_directory(labbook_path)
 
-        with labbook.lock_labbook():
+        with labbook.lock():
             wf = GitWorkflow(labbook)
             wf.publish(username=username, access_token=access_token, remote=remote or "origin",
                        public=public, feedback_callback=update_meta)
@@ -92,7 +93,7 @@ def sync_labbook(labbook_path: str, username: str, remote: str = "origin",
     try:
         labbook = InventoryManager().load_labbook_from_directory(labbook_path)
 
-        with labbook.lock_labbook():
+        with labbook.lock():
             wf = GitWorkflow(labbook)
             cnt = wf.sync(username=username, remote=remote, force=force,
                           feedback_callback=update_meta)
@@ -110,7 +111,7 @@ def export_labbook_as_zip(labbook_path: str, lb_export_directory: str) -> str:
 
     try:
         lb = InventoryManager().load_labbook_from_directory(labbook_path)
-        with lb.lock_labbook():
+        with lb.lock():
             path = ZipExporter.export_zip(lb.root_dir, lb_export_directory)
         return path
     except Exception as e:
@@ -202,7 +203,7 @@ def start_labbook_container(root: str, config_path: str, username: Optional[str]
 
     Args:
         root: Root directory of labbook
-        config_path: Path to config file (labbook.labmanager_config.config_file)
+        config_path: Path to config file (labbook.client_config.config_file)
         username: Username of active user
         override_image_id: Force using this name of docker image (do not infer)
 

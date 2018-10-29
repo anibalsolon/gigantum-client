@@ -25,7 +25,7 @@ import flask
 from lmsrvlabbook.api.connections.labbook import LabbookConnection, Labbook
 from lmsrvlabbook.api.connections.remotelabbook import RemoteLabbookConnection, RemoteLabbook
 
-from gtmcore.labbook import LabBook, InventoryManager
+from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.configuration import Configuration
 
 from lmsrvcore.auth.user import get_logged_in_username

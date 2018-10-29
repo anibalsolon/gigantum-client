@@ -31,7 +31,7 @@ from gtmcore.activity import ActivityStore, ActivityDetailRecord, ActivityDetail
 
 import graphene
 
-from gtmcore.labbook import LabBook, InventoryManager
+from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.fixtures import remote_labbook_repo
 from gtmcore.gitlib.git import GitAuthor
 

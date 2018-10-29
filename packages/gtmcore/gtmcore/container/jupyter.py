@@ -11,7 +11,8 @@ from gtmcore.logging import LMLogger
 from gtmcore.configuration import get_docker_client
 from gtmcore.environment import ComponentManager
 from gtmcore.container.core import infer_docker_image_name, get_container_ip
-from gtmcore.labbook import LabBook, LabbookException
+from gtmcore.labbook import LabBook
+from gtmcore.exceptions import GigantumException
 
 logger = LMLogger.get_logger()
 
@@ -33,7 +34,7 @@ def start_jupyter(labbook: LabBook, username: str, tag: Optional[str] = None,
     docker_client = get_docker_client()
     lb_container = docker_client.containers.get(lb_key)
     if lb_container.status != 'running':
-        raise LabbookException(f"{str(labbook)} container is not running. Start it before launch a dev tool.")
+        raise GigantumException(f"{str(labbook)} container is not running. Start it before launch a dev tool.")
 
     search_sh = f'sh -c "ps aux | grep \'jupyter lab\' | grep -v \' grep \'"'
     ec, jupyter_tokens = lb_container.exec_run(search_sh)
@@ -48,7 +49,7 @@ def start_jupyter(labbook: LabBook, username: str, tag: Optional[str] = None,
         # Get token from PS in container
         t = re.search("token='?([a-zA-Z\d-]+)'?", jupyter_ps[0])
         if not t:
-            raise LabbookException('Cannot detect Jupyter Lab token')
+            raise GigantumException('Cannot detect Jupyter Lab token')
         token = t.groups()[0]
         suffix = f'{proxy_prefix or ""}/lab/tree/code?token={token}'
 
@@ -135,4 +136,4 @@ def check_jupyter_reachable(ip_address: str, port: int, prefix: str):
             # Assume API isn't up at all yet, so no connection can be made
             time.sleep(0.5)
     else:
-        raise LabbookException(f'Could not reach JupyterLab at {test_url} after timeout')
+        raise GigantumException(f'Could not reach JupyterLab at {test_url} after timeout')
