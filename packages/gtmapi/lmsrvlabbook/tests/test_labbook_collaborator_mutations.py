@@ -17,7 +17,6 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-import getpass
 import responses
 
 from werkzeug.test import EnvironBuilder
@@ -27,8 +26,6 @@ from snapshottest import snapshot
 from lmsrvlabbook.tests.fixtures import fixture_working_dir, property_mocks_fixture, docker_socket_fixture
 
 import pytest
-
-from gtmcore.configuration import get_docker_client
 from gtmcore.inventory.inventory import InventoryManager
 
 
@@ -41,9 +38,7 @@ def mock_create_labbooks(fixture_working_dir):
     yield fixture_working_dir
 
 
-#@pytest.mark.skipif(getpass.getuser() == 'circleci', reason="Cannot use responses on CircleCI")
 class TestLabBookCollaboratorMutations(object):
-
     @responses.activate
     def test_add_collaborator(self, mock_create_labbooks, property_mocks_fixture, snapshot):
         """Test adding a collaborator to a LabBook"""
