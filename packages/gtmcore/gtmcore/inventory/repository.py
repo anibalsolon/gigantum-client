@@ -167,11 +167,11 @@ class Repository(object):
                 if config['expire']:
                     if (time.time() - start_time) > config['expire']:
                         logger.error(
-                            f"LabBook task took more than {config['expire']}s. File locking possibly invalid.")
+                            f"Task took more than {config['expire']}s. File locking possibly invalid.")
             else:
                 if failfast:
                     raise GigantumLockedException("Cannot interrupt operation in progress")
-                raise IOError(f"Could not acquire Project lock within {config['timeout']} seconds.")
+                raise IOError(f"Could not acquire file system lock within {config['timeout']} seconds.")
 
         except Exception as e:
             logger.error(e)

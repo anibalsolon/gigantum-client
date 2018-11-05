@@ -8,12 +8,14 @@ from pkg_resources import resource_filename
 
 from typing import Optional, Generator, List, Tuple, Dict
 
-from gtmcore.labbook.schemas import CURRENT_SCHEMA
+from gtmcore.labbook.schemas import CURRENT_SCHEMA as LABBOOK_CURRENT_SCHEMA
+from gtmcore.dataset.schemas import CURRENT_SCHEMA as DATASET_CURRENT_SCHEMA
 from gtmcore.gitlib import GitAuthor
 from gtmcore.logging import LMLogger
 from gtmcore.configuration import Configuration
 from gtmcore.configuration.utils import call_subprocess
 from gtmcore.labbook.labbook import LabBook
+from gtmcore.dataset.dataset import Dataset
 
 logger = LMLogger.get_logger()
 
@@ -120,20 +122,24 @@ class InventoryManager(object):
             raise InventoryException(f"Cannot retrieve "
                                      f"({username}, {owner}, {labbook_name}): {e}")
 
-    def list_labbook_ids(self, username) -> List[Tuple[str, str, str]]:
-        """Return a list of (username, owner, labbook-name) tuples corresponding
-           to all labbooks whose existence is inferred. Since this method does not
-           actually load the labbooks, it returns quite fast.
+    def list_repository_ids(self, username: str, repository_type: str) -> List[Tuple[str, str, str]]:
+        """Return a list of (username, owner, labbook or dataset name) tuples corresponding
+           to all repositories (labbook or datasets) whose existence is inferred. Since this method does not
+           actually load the repositories, it returns quite fast.
 
-           Warnings - there *may* exist corrupted labbooks in the returned set -
+           Warnings - there *may* exist corrupted repositories in the returned set -
             no validation is guaranteed.
 
         Args:
-            username: Active username to crawl for
+            username(str): Active username to crawl for
+            repository_type(str): type of repository to list (labbook or dataset)
 
         Returns:
             List of 3-tuples containing (username, owner, labook-name)
         """
+        if repository_type not in ["labbook", "dataset"]:
+            raise ValueError(f"Unsupported repository type: {repository_type}")
+
         user_root = os.path.join(self.inventory_root, username)
         if not os.path.exists(user_root):
             return []
@@ -141,16 +147,16 @@ class InventoryManager(object):
         owner_dirs = sorted([os.path.join(user_root, d)
                              for d in os.listdir(user_root)
                              if os.path.isdir(os.path.join(user_root, d))])
-        labbook_paths = []
+        repository_paths = []
         for owner_dir in owner_dirs:
-            labbook_dirs = sorted([os.path.join(owner_dir, 'labbooks', l)
-                                   for l in os.listdir(os.path.join(owner_dir, 'labbooks'))
-                                   if os.path.isdir(os.path.join(owner_dir, 'labbooks', l))])
-            for labbook_dir in labbook_dirs:
-                labbook_paths.append((username,
-                                      os.path.basename(owner_dir),
-                                      os.path.basename(labbook_dir)))
-        return labbook_paths
+            repository_dirs = sorted([os.path.join(owner_dir, f'{repository_type}s', l)
+                                      for l in os.listdir(os.path.join(owner_dir, f'{repository_type}s'))
+                                      if os.path.isdir(os.path.join(owner_dir, f'{repository_type}s', l))])
+            for repository_dir in repository_dirs:
+                repository_paths.append((username,
+                                         os.path.basename(owner_dir),
+                                         os.path.basename(repository_dir)))
+        return repository_paths
 
     def list_labbooks(self, username: str, sort_mode: str = "name") -> List[LabBook]:
         """ Return list of all available labbooks for a given user
@@ -163,7 +169,7 @@ class InventoryManager(object):
             Sorted list of LabBook objects
         """
         local_labbooks = []
-        for username, owner, lbname in self.list_labbook_ids(username):
+        for username, owner, lbname in self.list_repository_ids(username, 'labbook'):
             try:
                 labbook = self.load_labbook(username, owner, lbname)
                 local_labbooks.append(labbook)
@@ -207,7 +213,6 @@ class InventoryManager(object):
                                  author=author, bypass_lfs=False)
         return self.load_labbook_from_directory(path, author=author)
 
-
     def _new_labbook(self, owner: Dict[str, str], name: str,
                      username: Optional[str] = None,
                      description: Optional[str] = None,
@@ -244,7 +249,7 @@ class InventoryManager(object):
                         "name": name,
                         "description": description or ''},
             "owner": owner,
-            "schema": CURRENT_SCHEMA
+            "schema": LABBOOK_CURRENT_SCHEMA
         }
 
         # Validate data
@@ -313,7 +318,6 @@ class InventoryManager(object):
                 with open(p, 'w') as gk:
                     gk.write("This file is necessary to keep this directory tracked by Git"
                              " and archivable by compression tools. Do not delete or modify!")
-                    labbook.git.add(p)
 
             # Create labbook.yaml file
             labbook._save_gigantum_data()
@@ -332,17 +336,13 @@ class InventoryManager(object):
             buildinfo_path = os.path.join(labbook.root_dir, '.gigantum', 'buildinfo')
             with open(buildinfo_path, 'w') as f:
                 json.dump(buildinfo, f)
-                labbook.git.add(buildinfo_path)
 
             # Create .gitignore default file
             shutil.copyfile(os.path.join(resource_filename('gtmcore', 'labbook'), 'gitignore.default'),
                             os.path.join(labbook.root_dir, ".gitignore"))
 
             # Commit
-            for s in ['code', 'input', 'output', '.gigantum']:
-                labbook.git.add_all(os.path.join(labbook.root_dir, s))
-            labbook.git.add(os.path.join(labbook.root_dir, ".gigantum", "labbook.yaml"))
-            labbook.git.add(os.path.join(labbook.root_dir, ".gitignore"))
+            labbook.git.add_all()
             labbook.git.create_branch(name="gm.workspace")
 
             # NOTE: this string is used to indicate there are no more activity records to get. Changing the string will
@@ -358,3 +358,178 @@ class InventoryManager(object):
                 raise ValueError(f"active_branch should be '{user_workspace_branch}'")
 
             return labbook.root_dir
+
+    def create_dataset(self, username: str, owner: str, dataset_name: str, storage_type: str,
+                       description: Optional[str] = None, author: Optional[GitAuthor] = None) -> Dataset:
+        """Create a new Dataset in this Gigantum working directory.
+
+        Args:
+            username: Active username
+            owner: Namespace in which to place this Dataset
+            dataset_name: Name of the Dataset
+            storage_type: String identifying the type of Dataset to instantiate
+            description: Optional brief description of Dataset
+            author: Optional Git Author
+
+        Returns:
+            Newly created LabBook instance
+
+        """
+        dataset = Dataset(config_file=self.config_file, author=author)
+
+        try:
+            build_info = Configuration(self.config_file).config['build_info']
+        except KeyError:
+            logger.warning("Could not obtain build_info from config")
+            build_info = None
+
+        # Build data file contents
+        dataset._data = {
+            "schema": DATASET_CURRENT_SCHEMA,
+            "id": uuid.uuid4().hex,
+            "name": dataset_name,
+            "storage_type": storage_type,
+            "description": description or '',
+            "created_on": datetime.datetime.utcnow().isoformat(),
+            "build_info": build_info
+        }
+        dataset._validate_gigantum_data()
+
+        logger.info("Creating new Dataset on disk for {}/{}/{}".format(username, owner, dataset_name))
+        # lock while creating initial directory
+        with dataset.lock(lock_key=f"new_dataset_lock|{username}|{owner}|{dataset_name}"):
+            # Verify or Create user subdirectory
+            # Make sure you expand a user dir string
+            starting_dir = os.path.expanduser(dataset.client_config.config["git"]["working_directory"])
+            user_dir = os.path.join(starting_dir, username)
+            if not os.path.isdir(user_dir):
+                os.makedirs(user_dir)
+
+            # Create owner dir - store LabBooks in working dir > logged in user > owner
+            owner_dir = os.path.join(user_dir, owner)
+            if not os.path.isdir(owner_dir):
+                os.makedirs(owner_dir)
+
+                # Create `datasets` subdir in the owner dir
+                owner_dir = os.path.join(owner_dir, "datasets")
+            else:
+                owner_dir = os.path.join(owner_dir, "datasets")
+
+            # Verify name not already in use
+            if os.path.isdir(os.path.join(owner_dir, dataset_name)):
+                raise ValueError(f"Dataset `{dataset_name}` already exists locally. Choose a new Dataset name")
+
+            # Create Dataset subdirectory
+            new_root_dir = os.path.join(owner_dir, dataset_name)
+            os.makedirs(new_root_dir)
+            dataset._set_root_dir(new_root_dir)
+
+            # Init repository
+            dataset.git.initialize()
+
+            # Create Directory Structure
+            dirs = [
+                'manifest', 'metadata', '.gigantum',
+                os.path.join('.gigantum', 'favorites'),
+                os.path.join('.gigantum', 'activity'),
+                os.path.join('.gigantum', 'activity', 'log')
+            ]
+
+            for d in dirs:
+                p = os.path.join(dataset.root_dir, d, '.gitkeep')
+                os.makedirs(os.path.dirname(p), exist_ok=True)
+                with open(p, 'w') as gk:
+                    gk.write("This file is necessary to keep this directory tracked by Git"
+                             " and archivable by compression tools. Do not delete or modify!")
+
+            # Create labbook.yaml file
+            dataset._save_gigantum_data()
+
+            # Create an empty storage.json file
+            dataset.storage_config = {}
+
+            # Create .gitignore default file
+            shutil.copyfile(os.path.join(resource_filename('gtmcore', 'dataset'), 'gitignore.default'),
+                            os.path.join(dataset.root_dir, ".gitignore"))
+
+            # Commit
+            dataset.git.add_all()
+
+            # NOTE: this string is used to indicate there are no more activity records to get. Changing the string will
+            # break activity paging.
+            # TODO: Improve method for detecting the first activity record
+            dataset.git.commit(f"Creating new empty Dataset: {dataset_name}")
+
+            # TODO: Move to branch manager class
+            dataset.git.create_branch(name="workspace")
+
+            return dataset
+
+    def delete_dataset(self, username: str, owner: str, dataset_name: str) -> None:
+        """Delete a Dataset from this Gigantum working directory.
+
+        Args:
+            username: Active username
+            owner: Namespace in which to place this Dataset
+            dataset_name: Name of the Datasets
+
+        Returns:
+            None
+
+        """
+        ds = self.load_dataset(username, owner, dataset_name)
+        shutil.rmtree(ds.root_dir, ignore_errors=True)
+
+    def load_dataset(self, username: str, owner: str, dataset_name: str,
+                     author: Optional[GitAuthor] = None) -> Dataset:
+        """Method to load a dataset from disk
+
+        Args:
+            username(str): Username of user logged in
+            owner(str): Username of the owner (namespace) of the Dataset
+            dataset_name(str): Name of the dataset
+            author(GitAuthor): GitAuthor object
+
+        Returns:
+            Dataset
+        """
+        try:
+            ds = Dataset(self.config_file, author=author)
+
+            ds_root = os.path.join(self.inventory_root, username,
+                                   owner, 'datasets', dataset_name)
+            ds._set_root_dir(ds_root)
+            ds._load_gigantum_data()
+            ds._validate_gigantum_data()
+            return ds
+        except Exception as e:
+            raise InventoryException(f"Cannot retrieve ({username}, {owner}, {dataset_name}): {e}")
+
+    def list_datasets(self, username: str, sort_mode: str = "name") -> List[Dataset]:
+        """ Return list of all available datasets for a given user
+
+        This will result in sorting a-z and with the oldest to newest.
+
+        Args:
+            username: Active username
+            sort_mode: One of "name", "modified_on" or "created_on"
+
+        Returns:
+            Sorted list of Dataset objects
+        """
+        local_datasets = []
+        for username, owner, dsname in self.list_repository_ids(username, 'dataset'):
+            try:
+                dataset = self.load_dataset(username, owner, dsname)
+                local_datasets.append(dataset)
+            except Exception as e:
+                logger.error(e)
+
+        if sort_mode == "name":
+            return natsorted(local_datasets, key=lambda ds: ds.name)
+        elif sort_mode == 'modified_on':
+            return sorted(local_datasets, key=lambda ds: ds.modified_on)
+        elif sort_mode == 'created_on':
+            return sorted(local_datasets, key=lambda ds: ds.creation_date)
+        else:
+            raise InventoryException(f"Invalid sort mode {sort_mode}")

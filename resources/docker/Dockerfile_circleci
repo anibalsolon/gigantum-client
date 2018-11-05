@@ -45,6 +45,9 @@ RUN mkdir -p /mnt/gigantum && chown -R circleci:circleci /mnt/gigantum && \
     mkdir /mnt/share && chown -R circleci:circleci /mnt/share && \
     mkdir /opt/redis && chown -R circleci:circleci /opt/redis
 
+# Setup gtmcore config file - should be written by automation before copy
+COPY build/circleci/labmanager.yaml /etc/gigantum/labmanager.yaml
+
 # Finish setting up user
 USER circleci
 WORKDIR /home/circleci

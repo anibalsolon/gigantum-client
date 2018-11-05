@@ -47,10 +47,14 @@ class ActivityType(Enum):
     BRANCH = 6
     # A record for any high-level labbook ops
     LABBOOK = 7
+    # A record for any high-level dataset ops
+    DATASET = 8
 
 
 class ActivityDetailType(Enum):
     """Enumeration representing the type of Activity Detail Record"""
+    # Any dataset level changes (e.g. create, rename)
+    DATASET = 8
     # User generated Notes
     NOTE = 7
     # Any labbook level changes (e.g. create, rename)

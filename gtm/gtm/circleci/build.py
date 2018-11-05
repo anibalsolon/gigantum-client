@@ -24,6 +24,7 @@ import sys
 from git import Repo
 import docker
 from docker.errors import NotFound
+import yaml
 
 from gtm.common import get_client_root, get_resources_root
 
@@ -49,7 +50,33 @@ class CircleCIImageBuilder(object):
         """
         return "{}-{}".format(self._get_current_commit_hash()[:10], str(datetime.utcnow().date()))
 
-    def _build_image(self, verbose: bool=False, no_cache: bool=False) -> str:
+    def _generate_config_file(self) -> None:
+        """
+
+        Returns:
+
+        """
+        # Write updated config file
+        base_config_file = os.path.join(get_client_root(), "packages", 'gtmcore', 'gtmcore',
+                                        'configuration', 'config', 'labmanager.yaml.default')
+        output_dir = os.path.join(get_client_root(), "build", 'circleci')
+
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        with open(base_config_file, "rt") as cf:
+            base_data = yaml.load(cf)
+
+        # Add Build Info
+        base_data['build_info'] = {'application': "LabManager",
+                                   'built_on': str(datetime.utcnow()),
+                                   'revision': self._get_current_commit_hash()}
+
+        # Write out updated config file
+        with open(os.path.join(output_dir, 'labmanager.yaml'), "wt") as cf:
+            cf.write(yaml.dump(base_data, default_flow_style=False))
+
+    def _build_image(self, verbose: bool=True, no_cache: bool=False) -> str:
         """
 
         Args:
@@ -65,6 +92,8 @@ class CircleCIImageBuilder(object):
         named_tag = "{}:{}".format(base_tag, self._generate_image_tag_suffix())
 
         docker_file = os.path.join(get_resources_root(), 'docker', 'Dockerfile_circleci')
+
+        self._generate_config_file()
 
         if verbose:
             [print(ln[list(ln.keys())[0]], end='') for ln in client.api.build(path=get_client_root(),
@@ -85,7 +114,7 @@ class CircleCIImageBuilder(object):
 
         return named_tag
 
-    def _publish_image(self, image_tag: str, verbose=False) -> None:
+    def _publish_image(self, image_tag: str, verbose=True) -> None:
         """Private method to push images to the logged in server (e.g hub.docker.com)
 
         Args:
@@ -117,7 +146,7 @@ class CircleCIImageBuilder(object):
         else:
             client.images.push(image, tag=tag)
 
-    def update(self, verbose=False, no_cache=False) -> None:
+    def update(self, verbose=True, no_cache=False) -> None:
         """Method to circleCI container
 
         Args:
