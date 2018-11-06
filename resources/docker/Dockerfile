@@ -5,11 +5,8 @@ MAINTAINER Gigantum <support@gigantum.com>
 # Install system level dependencies
 RUN apt-get -y update && apt-get -y install git curl gosu nodejs npm
 
-# Install Yarn
-RUN npm install yarn --global
-
 # Install babel-node
-RUN npm install -g babel-cli@6.26.0 jest@21.2.1 relay-compiler@1.6.0 webpack@3.3.0 jsdom-global@3.0.2 jsdom@>=10.0.0
+RUN npm install -g babel-cli@6.26.0 jest@21.2.1 relay-compiler@1.6.0 jsdom-global@3.0.2 jsdom@>=10.0.0
 
 # Make build location dir
 RUN mkdir /opt/ui
