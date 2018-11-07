@@ -24,7 +24,8 @@ import subprocess
 import os
 from pkg_resources import resource_filename
 
-from gtmcore.labbook import LabBook, loaders, InventoryException
+from gtmcore.labbook import LabBook, loaders
+from gtmcore.inventory.inventory  import InventoryManager, InventoryException
 from gtmcore.configuration import Configuration
 from gtmcore.workflows import ZipExporter, ZipWorkflowException
 from gtmcore.files import FileOperations
@@ -147,9 +148,8 @@ class TestLabbookImportZipping(object):
 
 
     def test_success_export_then_import_different_users(self, mock_config_file):
-        lb = LabBook(mock_config_file[0])
-        lb.new(name='unittest-zip', owner={'username': 'unittester'},
-               username='unittester')
+        inv_manager = InventoryManager(mock_config_file[0])
+        lb = inv_manager.create_labbook('unittester', 'unittester', 'unittest-zip')
 
         with tempfile.TemporaryDirectory() as tempd:
             path = ZipExporter.export_zip(lb.root_dir, tempd)

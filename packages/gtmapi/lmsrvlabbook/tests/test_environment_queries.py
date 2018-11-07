@@ -20,7 +20,7 @@
 import graphene
 import pprint
 
-from gtmcore.labbook import LabBook
+from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.fixtures import ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV
 from gtmcore.environment import ComponentManager
 
@@ -30,9 +30,8 @@ from lmsrvlabbook.tests.fixtures import fixture_working_dir_env_repo_scoped, fix
 class TestEnvironmentServiceQueries(object):
     def test_get_environment_status(self, fixture_working_dir, snapshot):
         """Test getting the a LabBook's environment status"""
-        # Create labbooks
-        lb = LabBook(fixture_working_dir[0])
-        lb.new(owner={"username": "default"}, name="labbook10", description="my first labbook10000")
+        im = InventoryManager(fixture_working_dir[0])
+        lb = im.create_labbook("default", "default", "labbook10", description="my first labbook10000")
 
         query = """
         {
@@ -103,8 +102,8 @@ class TestEnvironmentServiceQueries(object):
     def test_get_package_manager(self, fixture_working_dir_env_repo_scoped, snapshot):
         """Test getting the a LabBook's package manager dependencies"""
         # Create labbook
-        lb = LabBook(fixture_working_dir_env_repo_scoped[0])
-        lb.new(owner={"username": "default"}, name="labbook4", description="my first labbook10000")
+        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        lb = im.create_labbook("default", "default", "labbook4", description="my first labbook10000")
 
         query = """
                     {
@@ -177,8 +176,8 @@ class TestEnvironmentServiceQueries(object):
     def test_package_query_with_errors(self, snapshot, fixture_working_dir_env_repo_scoped):
         """Test querying for package info"""
         # Create labbook
-        lb = LabBook(fixture_working_dir_env_repo_scoped[0])
-        lb.new(owner={"username": "default"}, name="labbook5", description="my first labbook10000")
+        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        lb = im.create_labbook("default", "default", "labbook5", description="my first labbook10000")
 
         query = """
                     {
@@ -203,9 +202,8 @@ class TestEnvironmentServiceQueries(object):
 
     def test_package_query(self, snapshot, fixture_working_dir_env_repo_scoped):
         """Test querying for package info"""
-        # Create labbook
-        lb = LabBook(fixture_working_dir_env_repo_scoped[0])
-        lb.new(owner={"username": "default"}, name="labbook6", description="my first labbook10000")
+        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        lb = im.create_labbook("default", "default", "labbook6", description="my first labbook10000")
 
         query = """
                     {

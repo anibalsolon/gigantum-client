@@ -22,20 +22,15 @@ import os
 import pprint
 import pytest
 import shutil
-import tempfile
-import threading
 import time
-import uuid
 
 import graphene
 from mock import patch
 import requests
 
-from gtmcore.environment import ComponentManager, RepositoryManager
+from gtmcore.environment import ComponentManager
 from gtmcore.dispatcher import Dispatcher, JobKey
-from gtmcore.labbook import LabBook
-from lmsrvlabbook.api.mutation import LabbookMutations
-from lmsrvlabbook.api.query import LabbookQuery
+from gtmcore.inventory.inventory import InventoryManager
 from lmsrvlabbook.tests.fixtures import fixture_working_dir_env_repo_scoped, fixture_working_dir
 from gtmcore.fixtures import ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV
 
@@ -112,9 +107,8 @@ class TestLabbookMutation(object):
         assert api_server_proc.is_alive()
 
         lb_name = "mutation-export-import-unittest"
-        lb = LabBook(fixture_working_dir_env_repo_scoped[0])
-        lb.new(name=lb_name, description="Import/Export Mutation Testing.",
-               owner={"username": "default"})
+        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        lb = im.create_labbook("default", "default", lb_name, description="Import/Export Mutation Testing.")
         cm = ComponentManager(lb)
         cm.add_base(ENV_UNIT_TEST_REPO, 'ut-busybox', 0)
 

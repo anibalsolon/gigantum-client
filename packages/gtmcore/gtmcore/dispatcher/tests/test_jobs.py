@@ -33,6 +33,7 @@ import gtmcore.fixtures
 from gtmcore.fixtures import mock_config_file, mock_config_with_repo
 from gtmcore.environment import ComponentManager, RepositoryManager
 from gtmcore.labbook import LabBook
+from gtmcore.inventory.inventory  import InventoryManager
 from gtmcore.imagebuilder import ImageBuilder
 
 
@@ -40,9 +41,9 @@ class TestJobs(object):
     def test_success_import_export_zip(self, mock_config_with_repo):
 
         # Create new LabBook to be exported
-        lb = LabBook(mock_config_with_repo[0])
-        labbook_dir = lb.new(name="unittest-lb-for-export-import-test", description="Testing import-export.",
-                             owner={"username": 'unittester'})
+        im = InventoryManager(mock_config_with_repo[0])
+        lb = im.create_labbook('unittester', 'unittester', 'unittest-lb-for-export-import-test',
+                               'Testing import-export.')
         cm = ComponentManager(lb)
         cm.add_base(gtmcore.fixtures.ENV_UNIT_TEST_REPO, gtmcore.fixtures.ENV_UNIT_TEST_BASE,
                     gtmcore.fixtures.ENV_UNIT_TEST_REV)
@@ -51,7 +52,7 @@ class TestJobs(object):
         ib.assemble_dockerfile()
 
         # Make sure the destination user exists locally
-        working_dir = lb.labmanager_config.config['git']['working_directory']
+        working_dir = lb.client_config.config['git']['working_directory']
         os.makedirs(os.path.join(working_dir, 'unittester2', 'unittester2', 'labbooks'), exist_ok=True)
 
         lb_root = lb.root_dir
@@ -76,8 +77,7 @@ class TestJobs(object):
 
             # New path should reflect username of new owner and user.
             assert imported_lb_path == lb_root.replace('/unittester/unittester/', '/unittester2/unittester2/')
-            import_lb = LabBook(mock_config_with_repo[0])
-            import_lb.from_directory(imported_lb_path)
+            import_lb = InventoryManager(mock_config_with_repo[0]).load_labbook_from_directory(imported_lb_path)
 
             ib = ImageBuilder(import_lb)
             ib.assemble_dockerfile(write=True)
@@ -97,8 +97,7 @@ class TestJobs(object):
 
             # New path should reflect username of new owner and user.
             assert user_import_lb
-            import_lb2 = LabBook(mock_config_with_repo[0])
-            import_lb2.from_directory(user_import_lb)
+            import_lb2 = InventoryManager(mock_config_with_repo[0]).load_labbook_from_directory(user_import_lb)
             assert import_lb2.data['owner']['username'] == 'unittester'
             # After importing, the new user (in this case "cat") should be the current, active workspace.
             # And be created, if necessary.
@@ -106,7 +105,7 @@ class TestJobs(object):
             assert not import_lb2.has_remote
 
             build_kwargs = {
-                'path': labbook_dir,
+                'path': lb.root_dir,
                 'username': 'unittester',
                 'nocache': True
             }
@@ -121,9 +120,9 @@ class TestJobs(object):
     def test_success_import_export_lbk(self, mock_config_with_repo):
         """Test legacy .lbk extension still works"""
         # Create new LabBook to be exported
-        lb = LabBook(mock_config_with_repo[0])
-        labbook_dir = lb.new(name="unittest-lb-for-export-import-test-lbk", description="Testing import-export.",
-                             owner={"username": 'unittester'})
+        lb = InventoryManager(mock_config_with_repo[0]).create_labbook('unittester', 'unittester',
+                                                                       "unittest-lb-for-export-import-test-lbk",
+                                                                       description="Testing import-export.")
         cm = ComponentManager(lb)
         cm.add_base(gtmcore.fixtures.ENV_UNIT_TEST_REPO, gtmcore.fixtures.ENV_UNIT_TEST_BASE,
                     gtmcore.fixtures.ENV_UNIT_TEST_REV)
@@ -132,7 +131,7 @@ class TestJobs(object):
         ib.assemble_dockerfile()
 
         # Make sure the destination user exists locally
-        working_dir = lb.labmanager_config.config['git']['working_directory']
+        working_dir = lb.client_config.config['git']['working_directory']
         os.makedirs(os.path.join(working_dir, 'unittester2', 'unittester2', 'labbooks'), exist_ok=True)
 
         lb_root = lb.root_dir
@@ -161,8 +160,7 @@ class TestJobs(object):
 
             # New path should reflect username of new owner and user.
             assert imported_lb_path == lb_root.replace('/unittester/unittester/', '/unittester2/unittester2/')
-            import_lb = LabBook(mock_config_with_repo[0])
-            import_lb.from_directory(imported_lb_path)
+            import_lb = InventoryManager(mock_config_with_repo[0]).load_labbook_from_directory(imported_lb_path)
 
             ib = ImageBuilder(import_lb)
             ib.assemble_dockerfile(write=True)
@@ -178,9 +176,9 @@ class TestJobs(object):
     def test_fail_import_export_zip(self, mock_config_with_repo):
 
         # Create new LabBook to be exported
-        lb = LabBook(mock_config_with_repo[0])
-        labbook_dir = lb.new(name="lb-fail-export-import-test", description="Failing import-export.",
-                             owner={"username": "test"})
+        lb = InventoryManager(mock_config_with_repo[0]).create_labbook('test', 'test',
+                                                                       "lb-fail-export-import-test",
+                                                                       description="Failing import-export.")
         cm = ComponentManager(lb)
         cm.add_base(gtmcore.fixtures.ENV_UNIT_TEST_REPO, gtmcore.fixtures.ENV_UNIT_TEST_BASE,
                     gtmcore.fixtures.ENV_UNIT_TEST_REV)

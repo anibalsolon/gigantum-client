@@ -25,7 +25,7 @@ import redis
 from gtmcore.activity import ActivityRecord, ActivityStore, ActivityType
 from gtmcore.activity.processors.processor import ActivityProcessor, ExecutionData
 from gtmcore.configuration import get_docker_client
-from gtmcore.labbook import LabBook
+from gtmcore.inventory.inventory  import InventoryManager
 from gtmcore.gitlib.git import GitAuthor
 from gtmcore.container.utils import infer_docker_image_name
 
@@ -60,8 +60,8 @@ class ActivityMonitor(metaclass=abc.ABCMeta):
             author = None
 
         # Load Lab Book instance
-        self.labbook = LabBook(config_file=config_file, author=author)
-        self.labbook.from_name(user, owner, labbook_name)
+        im = InventoryManager(config_file)
+        self.labbook = im.load_labbook(user, owner, labbook_name, author=author)
         self.user = user
         self.owner = owner
         self.labbook_name = labbook_name

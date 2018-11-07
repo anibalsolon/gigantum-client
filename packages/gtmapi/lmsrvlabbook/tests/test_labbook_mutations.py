@@ -43,7 +43,8 @@ from gtmcore.configuration import Configuration
 from gtmcore.dispatcher.jobs import export_labbook_as_zip
 from gtmcore.files import FileOperations
 from gtmcore.fixtures import remote_labbook_repo, mock_config_file
-from gtmcore.labbook import LabBook
+
+from gtmcore.inventory.inventory import InventoryManager
 
 from lmsrvcore.middleware import error_middleware, LabBookLoaderMiddleware
 
@@ -51,8 +52,9 @@ from lmsrvcore.middleware import error_middleware, LabBookLoaderMiddleware
 @pytest.fixture()
 def mock_create_labbooks(fixture_working_dir):
     # Create a labbook in the temporary directory
-    lb = LabBook(fixture_working_dir[0])
-    lb.new(owner={"username": "default"}, name="labbook1", description="Cats labbook 1")
+    # Create a temporary labbook
+    lb = InventoryManager(fixture_working_dir[0]).create_labbook("default", "default", "labbook1",
+                                                                 description="Cats labbook 1")
 
     # Create a file in the dir
     with open(os.path.join(fixture_working_dir[1], 'sillyfile'), 'w') as sf:
@@ -417,9 +419,8 @@ class TestLabBookServiceMutations(object):
         assert os.path.exists(filepath) is False
 
     def test_delete_dir(self, mock_create_labbooks):
-
-        lb = LabBook(mock_create_labbooks[0])
-        lb.from_name('default', 'default', 'labbook1')
+        im = InventoryManager(mock_create_labbooks[0])
+        lb = im.load_labbook('default', 'default', 'labbook1')
         FileOperations.makedir(lb, 'code/subdir')
         lb.git.add_all('code/')
         lb.git.commit("blah")
@@ -817,8 +818,8 @@ class TestLabBookServiceMutations(object):
         client = Client(fixture_working_dir[3], middleware=[LabBookLoaderMiddleware()])
 
         # Create a temporary labbook
-        lb = LabBook(fixture_working_dir[0])
-        lb.new(owner={"username": "default"}, name="test-export", description="Tester")
+        lb = InventoryManager(fixture_working_dir[0]).create_labbook("default", "default", "test-export",
+                                                                     description="Tester")
 
         # Create a largeish file in the dir
         with open(os.path.join(fixture_working_dir[1], 'testfile.bin'), 'wb') as testfile:

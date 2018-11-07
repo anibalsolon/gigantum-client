@@ -34,7 +34,8 @@ from graphene.test import Client
 from gtmcore.environment import RepositoryManager
 from gtmcore.configuration import Configuration, get_docker_client
 from gtmcore.auth.identity import get_identity_manager
-from gtmcore.labbook import LabBook
+
+from gtmcore.inventory.inventory import InventoryManager
 from lmsrvcore.middleware import LabBookLoaderMiddleware, error_middleware
 from lmsrvcore.tests.fixtures import insert_cached_identity
 
@@ -180,7 +181,8 @@ def fixture_working_dir_env_repo_scoped():
             # Create a test client
             client = Client(schema, middleware=[LabBookLoaderMiddleware(), error_middleware], context_value=ContextMock())
 
-            yield config_file, temp_dir, client, schema  # name of the config file, temporary working directory, the schema
+            # name of the config file, temporary working directory, the schema
+            yield config_file, temp_dir, client, schema
 
     # Remove the temp_dir
     shutil.rmtree(temp_dir)
@@ -202,27 +204,36 @@ def fixture_working_dir_populated_scoped():
     schema = graphene.Schema(query=LabbookQuery, mutation=LabbookMutations)
 
     # Create a bunch of lab books
-    lb = LabBook(config_file)
+    im = InventoryManager(config_file)
 
-    lb.new(owner={"username": "default"}, name="labbook1", description="Cats labbook 1")
+    im.create_labbook('default', 'default', "labbook1", description="Cats labbook 1")
     time.sleep(1.1)
-    lb.new(owner={"username": "default"}, name="labbook2", description="Dogs labbook 2")
+
+    im.create_labbook('default', 'default', "labbook2", description="Dogs labbook 2")
     time.sleep(1.1)
-    lb.new(owner={"username": "default"}, name="labbook3", description="Mice labbook 3")
+
+    im.create_labbook('default', 'default', "labbook3", description="Mice labbook 3")
     time.sleep(1.1)
-    lb.new(owner={"username": "default"}, name="labbook4", description="Horses labbook 4")
+
+    im.create_labbook('default', 'default', "labbook4", description="Horses labbook 4")
     time.sleep(1.1)
-    lb.new(owner={"username": "default"}, name="labbook5", description="Cheese labbook 5")
+
+    im.create_labbook('default', 'default', "labbook5", description="Cheese labbook 5")
     time.sleep(1.1)
-    lb.new(owner={"username": "default"}, name="labbook6", description="Goat labbook 6")
+
+    im.create_labbook('default', 'default', "labbook6", description="Goat labbook 6")
     time.sleep(1.1)
-    lb.new(owner={"username": "default"}, name="labbook7", description="Turtle labbook 7")
+
+    im.create_labbook('default', 'default', "labbook7", description="Turtle labbook 7")
     time.sleep(1.1)
-    lb.new(owner={"username": "default"}, name="labbook8", description="Lamb labbook 8")
+
+    im.create_labbook('default', 'default', "labbook8", description="Lamb labbook 8")
     time.sleep(1.1)
-    lb.new(owner={"username": "default"}, name="labbook9", description="Taco labbook 9")
+
+    im.create_labbook('default', 'default', "labbook9", description="Taco labbook 9")
     time.sleep(1.1)
-    lb.new(owner={"username": "test3"}, name="labbook-0", description="This should not show up.")
+
+    im.create_labbook('test3', 'test3', "labbook-0", description="This should not show up.")
 
     with patch.object(Configuration, 'find_default_config', lambda self: config_file):
         # Load User identity into app context
@@ -273,13 +284,10 @@ def build_image_for_jupyterlab():
             client = Client(schema, middleware=[LabBookLoaderMiddleware(), error_middleware], context_value=ContextMock())
 
             # Create a labook
-            lb = LabBook(config_file)
-            lb.new(name="containerunittestbook", description="Testing docker building.",
-                   owner={"username": "unittester"}, username="default")
-
-            # Create Component Manager
+            im = InventoryManager(config_file)
+            lb = im.create_labbook('default', 'unittester', "containerunittestbook",
+                                   description="Testing docker building.")
             cm = ComponentManager(lb)
-            # Add a component
             cm.add_base(ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV)
             cm.add_packages("pip3", [{"manager": "pip3", "package": "requests", "version": "2.18.4"}])
 
@@ -290,7 +298,7 @@ def build_image_for_jupyterlab():
             try:
                 lb, docker_image_id = ContainerOperations.build_image(labbook=lb, username="default")
 
-                yield lb, ib, docker_client, docker_image_id, client, "unittester"
+                yield lb, ib, docker_client, docker_image_id, client, "default"
 
             finally:
                 try:

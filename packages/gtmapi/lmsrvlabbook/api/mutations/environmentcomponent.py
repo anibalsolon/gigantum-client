@@ -23,7 +23,8 @@ import os
 import base64
 
 from gtmcore.logging import LMLogger
-from gtmcore.labbook import LabBook
+
+from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.environment import ComponentManager
 from gtmcore.labbook.schemas import CURRENT_SCHEMA
 from lmsrvcore.auth.user import get_logged_in_username, get_logged_in_author
@@ -75,12 +76,10 @@ class AddPackageComponents(graphene.relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, owner, labbook_name, packages, client_mutation_id=None):
         username = get_logged_in_username()
+        lb = InventoryManager().load_labbook(username, owner, labbook_name,
+                                             author=get_logged_in_author())
 
-        # Load LabBook instance
-        lb = LabBook(author=get_logged_in_author())
-        lb.from_name(username, owner, labbook_name)
-
-        with lb.lock_labbook():
+        with lb.lock():
             new_edges = cls._add_package_components(lb, packages)
 
         return AddPackageComponents(new_package_component_edges=new_edges)
@@ -101,10 +100,10 @@ class RemovePackageComponents(graphene.relay.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, owner, labbook_name, manager, packages,
                                client_mutation_id=None):
         username = get_logged_in_username()
-        lb = LabBook(author=get_logged_in_author())
-        lb.from_name(username, owner, labbook_name)
+        lb = InventoryManager().load_labbook(username, owner, labbook_name,
+                                             author=get_logged_in_author())
 
-        with lb.lock_labbook():
+        with lb.lock():
             cm = ComponentManager(lb)
             cm.remove_packages(package_manager=manager, package_names=packages)
 
@@ -122,10 +121,10 @@ class AddCustomDocker(graphene.relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, owner, labbook_name, docker_content, client_mutation_id=None):
         username = get_logged_in_username()
-        lb = LabBook(author=get_logged_in_author())
-        lb.from_name(username, owner, labbook_name)
+        lb = InventoryManager().load_labbook(username, owner, labbook_name,
+                                             author=get_logged_in_author())
 
-        with lb.lock_labbook():
+        with lb.lock():
             docker_lines = [n for n in docker_content.strip().split('\n') if n]
             cm = ComponentManager(lb)
             cm.add_docker_snippet(cm.DEFAULT_CUSTOM_DOCKER_NAME, docker_lines)
@@ -142,10 +141,10 @@ class RemoveCustomDocker(graphene.relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, owner, labbook_name, client_mutation_id=None):
         username = get_logged_in_username()
-        lb = LabBook(author=get_logged_in_author())
-        lb.from_name(username, owner, labbook_name)
+        lb = InventoryManager().load_labbook(username, owner, labbook_name,
+                                             author=get_logged_in_author())
         # TODO - Should we cehck if a custom docker component already exists?
-        with lb.lock_labbook():
+        with lb.lock():
             cm = ComponentManager(lb)
             cm.remove_docker_snippet(cm.DEFAULT_CUSTOM_DOCKER_NAME)
         return RemoveCustomDocker(updated_environment=Environment(owner=owner, name=labbook_name))

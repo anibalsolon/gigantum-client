@@ -21,7 +21,7 @@ import graphene
 
 from gtmcore.configuration import Configuration
 from gtmcore.gitlib.gitlab import GitLabManager
-from gtmcore.labbook import LabBook
+from gtmcore.inventory.inventory import InventoryManager, InventoryException
 
 from lmsrvcore.api.interfaces import GitRepository
 from lmsrvcore.auth.user import get_logged_in_username
@@ -135,8 +135,8 @@ class RemoteLabbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRep
 
         """
         try:
-            lb = LabBook()
-            lb.from_name(get_logged_in_username(), self.owner, self.name)
+            username = get_logged_in_username()
+            lb = InventoryManager().load_labbook(username, self.owner, self.name)
             return True
-        except ValueError:
+        except InventoryException:
             return False

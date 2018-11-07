@@ -21,21 +21,27 @@ import pytest
 import os
 import yaml
 import pprint
-
+import uuid
 from gtmcore.environment import ComponentManager, RepositoryManager
-from gtmcore.fixtures import mock_config_file, mock_config_with_repo
+from gtmcore.fixtures import mock_config_file, mock_labbook, mock_config_with_repo
 from gtmcore.labbook import LabBook
+from gtmcore.inventory.inventory  import InventoryManager
 import gtmcore.fixtures
+
+
+def create_tmp_labbook(cfg_file):
+    im = InventoryManager(cfg_file)
+    lb = im.create_labbook('unittest', 'unittest',
+                           f'unittest-labbook-{str(uuid.uuid4())[:4]}')
+    return lb
 
 
 class TestComponentManager(object):
     def test_initalize_labbook(self, mock_config_with_repo):
         """Test preparing an empty labbook"""
 
-        lb = LabBook(mock_config_with_repo[0])
-
-        labbook_dir = lb.new(name="labbook-test-init", description="my first labbook",
-                             owner={"username": "test"})
+        lb = create_tmp_labbook(mock_config_with_repo[0])
+        labbook_dir = lb.root_dir
 
         pprint.pprint([n[0] for n in os.walk(labbook_dir)])
         # Verify missing dir structure
@@ -55,9 +61,8 @@ class TestComponentManager(object):
     def test_add_package(self, mock_config_with_repo):
         """Test adding a package such as one from apt-get or pip3. """
         # Create a labook
-        lb = LabBook(mock_config_with_repo[0])
-        labbook_dir = lb.new(name="labbook1-test-add-pkg", description="my first labbook",
-                             owner={"username": "test"})
+        lb = create_tmp_labbook(mock_config_with_repo[0])
+        labbook_dir = lb.root_dir
 
         # Create Component Manager
         cm = ComponentManager(lb)
@@ -98,13 +103,9 @@ class TestComponentManager(object):
 
     def test_add_duplicate_package(self, mock_config_with_repo):
         """Test adding a duplicate package to a labbook"""
-        # Create a labook
-        lb = LabBook(mock_config_with_repo[0])
 
-        labbook_dir = lb.new(name="labbook-add-package-dup", description="my first labbook",
-                             owner={"username": "test"})
-
-        # Create Component Manager
+        lb = create_tmp_labbook(mock_config_with_repo[0])
+        labbook_dir = lb.root_dir
         cm = ComponentManager(lb)
 
         # Add a component;
@@ -134,10 +135,8 @@ class TestComponentManager(object):
     def test_add_base(self, mock_config_with_repo):
         """Test adding a base to a labbook"""
         # Create a labook
-        lb = LabBook(mock_config_with_repo[0])
-
-        labbook_dir = lb.new(name="labbook-test-add-component", description="my first labbook",
-                             owner={"username": "test"})
+        lb = create_tmp_labbook(mock_config_with_repo[0])
+        labbook_dir = lb.root_dir
 
         # Create Component Manager
         cm = ComponentManager(lb)
@@ -180,10 +179,8 @@ class TestComponentManager(object):
     def test_add_duplicate_base(self, mock_config_with_repo):
         """Test adding a duplicate base to a labbook"""
         # Create a labook
-        lb = LabBook(mock_config_with_repo[0])
-
-        labbook_dir = lb.new(name="labbook-add-dup", description="my first labbook",
-                             owner={"username": "test"})
+        lb = create_tmp_labbook(mock_config_with_repo[0])
+        labbook_dir = lb.root_dir
 
         # Create Component Manager
         cm = ComponentManager(lb)
@@ -208,9 +205,8 @@ class TestComponentManager(object):
 
     def test_get_component_list_base(self, mock_config_with_repo):
         """Test listing base images added a to labbook"""
-        lb = LabBook(mock_config_with_repo[0])
-        lb.new(name="labbook2a", description="my first labbook",
-               owner={"username": "test"})
+        lb = create_tmp_labbook(mock_config_with_repo[0])
+        labbook_dir = lb.root_dir
         cm = ComponentManager(lb)
 
         # mock_config_with_repo is a ComponentManager Instance
@@ -225,9 +221,8 @@ class TestComponentManager(object):
 
     def test_get_component_list_packages(self, mock_config_with_repo):
         """Test listing packages added a to labbook"""
-        lb = LabBook(mock_config_with_repo[0])
-        lb.new(name="labbook2b", description="my first labbook",
-               owner={"username": "test"})
+        lb = create_tmp_labbook(mock_config_with_repo[0])
+        labbook_dir = lb.root_dir
         cm = ComponentManager(lb)
 
         # mock_config_with_repo is a ComponentManager Instance
@@ -247,13 +242,7 @@ class TestComponentManager(object):
 
     def test_remove_package_errors(self, mock_config_with_repo):
         """Test removing a package with expected errors"""
-
-        # Create a labook
-        lb = LabBook(mock_config_with_repo[0])
-        labbook_dir = lb.new(name="labbook-remove-pkg-errors", description="testing package removal errors",
-                             owner={"username": "test"})
-
-        # Create Component Manager
+        lb = create_tmp_labbook(mock_config_with_repo[0])
         cm = ComponentManager(lb)
 
         # Try removing package that doesn't exist
@@ -270,12 +259,8 @@ class TestComponentManager(object):
 
     def test_remove_package(self, mock_config_with_repo):
         """Test removing a package such as one from apt-get or pip3. """
-        # Create a labook
-        lb = LabBook(mock_config_with_repo[0])
-        labbook_dir = lb.new(name="test-remove-pkg", description="test removing packages",
-                             owner={"username": "test"})
-
-        # Create Component Manager
+        lb = create_tmp_labbook(mock_config_with_repo[0])
+        labbook_dir = lb.root_dir
         cm = ComponentManager(lb)
 
         # Add some sample components
@@ -326,19 +311,14 @@ class TestComponentManager(object):
         assert 'Removed 2 pip3 managed package(s)' in log[0]["message"]
 
     def test_misconfigured_base_no_base(self, mock_config_with_repo):
-        lb = LabBook(mock_config_with_repo[0])
-        lb.new(owner={"username": "test"}, name="test-base-1", description="validate tests.")
+        lb = create_tmp_labbook(mock_config_with_repo[0])
         cm = ComponentManager(lb)
-
         with pytest.raises(ValueError):
             a = cm.base_fields
 
     def test_misconfigured_base_two_bases(self, mock_config_with_repo):
-        lb = LabBook(mock_config_with_repo[0])
-        lb.new(owner={"username": "test"}, name="test-base-2", description="validate tests.")
-
+        lb = create_tmp_labbook(mock_config_with_repo[0])
         cm = ComponentManager(lb)
-
         # mock_config_with_repo is a ComponentManager Instance
         cm.add_base(gtmcore.fixtures.ENV_UNIT_TEST_REPO, "ut-jupyterlab-1", 0)
         cm.add_base(gtmcore.fixtures.ENV_UNIT_TEST_REPO, "ut-jupyterlab-2", 0)
@@ -347,9 +327,7 @@ class TestComponentManager(object):
             a = cm.base_fields
 
     def test_get_base(self, mock_config_with_repo):
-        lb = LabBook(mock_config_with_repo[0])
-        lb.new(owner={"username": "test"}, name="test-base-3", description="validate tests.")
-
+        lb = create_tmp_labbook(mock_config_with_repo[0])
         cm = ComponentManager(lb)
 
         # mock_config_with_repo is a ComponentManager Instance
@@ -363,8 +341,7 @@ class TestComponentManager(object):
         assert base_data['schema'] == 1
 
     def test_add_then_remove_custom_docker_snipper_with_valid_docker(self, mock_config_with_repo):
-        lb = LabBook(mock_config_with_repo[0])
-        lb.new(owner={"username": "test"}, name="test-custom-docker-snippet", description="validate tests.")
+        lb = create_tmp_labbook(mock_config_with_repo[0])
         snippet = ["RUN true", "RUN touch /tmp/testfile", "RUN rm /tmp/testfile", "RUN echo 'done'"]
         c1 = lb.git.commit_hash
         cm = ComponentManager(lb)

@@ -24,17 +24,17 @@ import graphql
 from snapshottest import snapshot
 
 from lmsrvlabbook.tests.fixtures import fixture_working_dir_env_repo_scoped
-from gtmcore.labbook import LabBook
+
+from gtmcore.inventory.inventory import InventoryManager
 
 
 class TestAddComponentMutations(object):
 
     def test_add_package(self, fixture_working_dir_env_repo_scoped, snapshot):
         """Test listing labbooks"""
-        lb = LabBook(fixture_working_dir_env_repo_scoped[0])
-
-        labbook_dir = lb.new(name="catbook-package-tester", description="LB to test package mutation",
-                             owner={"username": "default"})
+        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        lb = im.create_labbook('default', 'default', 'catbook-package-tester',
+                               description="LB to test package mutation")
 
         # Add a base image
         pkg_query = """
@@ -64,10 +64,10 @@ class TestAddComponentMutations(object):
 
     def test_add_multiple_packages(self, fixture_working_dir_env_repo_scoped, snapshot):
         """Test listing labbooks"""
-        lb = LabBook(fixture_working_dir_env_repo_scoped[0])
-
-        labbook_dir = lb.new(name="catbook-package-tester-multi", description="LB to test package mutation",
-                             owner={"username": "default"})
+        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        lb = im.create_labbook('default', 'default', 'catbook-package-tester-multi',
+                               description="LB to test package mutation")
+        labbook_dir = lb.root_dir
 
         # Add a base image
         pkg_query = """
@@ -120,10 +120,9 @@ class TestAddComponentMutations(object):
 
     def test_add_packages_multiple_mgr_error(self, fixture_working_dir_env_repo_scoped, snapshot):
         """Test listing labbooks"""
-        lb = LabBook(fixture_working_dir_env_repo_scoped[0])
-
-        lb.new(name="catbook-package-tester-mgr-errors", description="LB to test package mutation",
-               owner={"username": "default"})
+        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        lb = im.create_labbook('default', 'default', 'catbook-package-tester-mgr-errors',
+                               description="LB to test package mutation")
 
         # Test with version missing
         pkg_query = """
@@ -156,10 +155,9 @@ class TestAddComponentMutations(object):
 
     def test_add_package_no_version(self, fixture_working_dir_env_repo_scoped, snapshot):
         """Test adding a package but omitting the version"""
-        lb = LabBook(fixture_working_dir_env_repo_scoped[0])
-
-        labbook_dir = lb.new(name="catbook-package-no-version", description="LB to test package mutation",
-                             owner={"username": "default"})
+        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        lb = im.create_labbook('default', 'default', 'catbook-package-no-version',
+                               description="LB to test package mutation")
 
         # Add a base image
         pkg_query = """
@@ -191,10 +189,10 @@ class TestAddComponentMutations(object):
 
     def test_remove_package(self, fixture_working_dir_env_repo_scoped, snapshot):
         """Test removing a package from a labbook"""
-        lb = LabBook(fixture_working_dir_env_repo_scoped[0])
-
-        labbook_dir = lb.new(name="catbook-package-tester-remove", description="LB to test package mutation",
-                             owner={"username": "default"})
+        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        lb = im.create_labbook('default', 'default', 'catbook-package-tester-remove',
+                               description="LB to test package mutation")
+        labbook_dir = lb.root_dir
 
         # Add a pip package
         pkg_query = """
@@ -244,9 +242,9 @@ class TestAddComponentMutations(object):
 
     def test_custom_docker_snippet_success(self, fixture_working_dir_env_repo_scoped):
         """Test adding a custom dependency"""
-        lb = LabBook(fixture_working_dir_env_repo_scoped[0])
-        labbook_dir = lb.new(name="custom-docker-lb-unittest", description="Testing custom docker and stuff",
-                             owner={"username": "default"})
+        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        lb = im.create_labbook('default', 'default', 'custom-docker-lb-unittest',
+                               description="Testing custom docker and stuff")
         client = fixture_working_dir_env_repo_scoped[2]
         query = """
         mutation addCustomDocker($labbook_name: String!, $owner: String!, $custom_docker: String!) {

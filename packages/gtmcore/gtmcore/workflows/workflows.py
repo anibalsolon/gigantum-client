@@ -17,19 +17,14 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-import datetime
-import subprocess
-import shutil
 import time
 import os
 
 from tempfile import TemporaryDirectory
 from typing import Optional, Callable
 
-
-from gtmcore.configuration import Configuration
 from gtmcore.configuration.utils import call_subprocess
-from gtmcore.labbook.inventory import InventoryManager, InventoryException
+from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.labbook import LabBook
 from gtmcore.logging import LMLogger
 from gtmcore.workflows import core
@@ -119,8 +114,7 @@ class ZipExporter(object):
         if not os.path.isdir(lb_export_directory):
             os.makedirs(lb_export_directory, exist_ok=True)
 
-        labbook: LabBook = LabBook(config_file)
-        labbook.from_directory(labbook_path)
+        labbook = InventoryManager(config_file).load_labbook_from_directory(labbook_path)
         core.sync_locally(labbook)
 
         labbook_dir, _ = labbook.root_dir.rsplit(os.path.sep, 1)
@@ -176,9 +170,7 @@ class ZipExporter(object):
                 raise ValueError("Expected only one directory unzipped")
             unzipped_path = os.path.join(tdir, 'project', pdirs[0])
 
-            lb = LabBook(config_file)
-            lb.from_directory(unzipped_path)
-
+            lb = InventoryManager(config_file).load_labbook_from_directory(unzipped_path)
             statusmsg = f'{statusmsg}\nCreating workspace branch...'
             update_meta(statusmsg)
 
@@ -186,7 +178,7 @@ class ZipExporter(object):
             core.sync_locally(lb, username=username)
 
             lb._data['owner']['username'] = owner
-            lb._save_labbook_data()
+            lb._save_gigantum_data()
             if not lb.is_repo_clean:
                 lb.git.add('.gigantum/labbook.yaml')
                 lb.git.commit(message="Updated owner in labbook.yaml")

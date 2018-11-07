@@ -22,7 +22,8 @@ import time
 import os
 from multiprocessing import Process
 
-from gtmcore.labbook import LabBook, LabbookLockedException
+from gtmcore.labbook import LabBook
+from gtmcore.exceptions import GigantumException
 from gtmcore.fixtures import mock_labbook
 
 
@@ -31,7 +32,7 @@ def write_function(filename: str, delay: int, value: str, labbook: LabBook) -> N
     A test function that appends to a file after a delay
     """
     time.sleep(delay)
-    with labbook.lock_labbook():
+    with labbook.lock():
         with open(filename, 'at') as f:
             f.write(value)
             time.sleep(2)
@@ -61,12 +62,12 @@ class TestLabBookLock(object):
 
         time.sleep(0.5)
 
-        with pytest.raises(LabbookLockedException):
-            with mock_labbook[2].lock_labbook(failfast=True):
+        with pytest.raises(GigantumException):
+            with mock_labbook[2].lock(failfast=True):
                 assert False, "Should not be able to acquire lock"
 
         time.sleep(1.8)
-        with mock_labbook[2].lock_labbook(failfast=True):
+        with mock_labbook[2].lock(failfast=True):
             assert True
 
     def test_multiple_acquires(self, mock_labbook):

@@ -43,14 +43,14 @@ from werkzeug.datastructures import FileStorage
 from gtmcore.configuration import Configuration
 from gtmcore.dispatcher.jobs import export_labbook_as_zip
 from gtmcore.fixtures import remote_labbook_repo, mock_config_file
-from gtmcore.labbook import LabBook
+from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.files import FileOperations
 
 @pytest.fixture()
 def mock_create_labbooks(fixture_working_dir):
     # Create a labbook in the temporary directory
-    lb = LabBook(fixture_working_dir[0])
-    lb.new(owner={"username": "default"}, name="sample-repo-lb", description="Cats labbook 1")
+    lb = InventoryManager(fixture_working_dir[0]).create_labbook("default", "default", "sample-repo-lb",
+                                                                 description="Cats labbook 1")
 
     # Create a file in the dir
     with open(os.path.join(fixture_working_dir[1], 'codefile.c'), 'w') as sf:
@@ -152,9 +152,10 @@ class TestLabbookSharing(object):
         # Create a labbook by the "default" user
         # TODO: enable LFS when integration tests support it
         conf_file, working_dir = _create_temp_work_dir(lfs_enabled=False)
-        lb = LabBook(conf_file)
-        labbook_dir = lb.new(username="default", name="default-owned-repo-lb", description="my first labbook",
-                             owner={"username": "default"})
+        lb = InventoryManager(conf_file).create_labbook("default", "default", "default-owned-repo-lb",
+                                                        description="my first labbook")
+        labbook_dir = lb.root_dir
+
         lb.checkout_branch("gm.workspace")
 
         # Mock the request context so a fake authorization header is present

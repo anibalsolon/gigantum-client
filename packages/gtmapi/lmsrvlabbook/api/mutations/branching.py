@@ -21,7 +21,8 @@ import os
 import graphene
 
 from gtmcore.logging import LMLogger
-from gtmcore.labbook import LabBook
+
+from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.workflows import BranchManager
 from gtmcore.activity import ActivityStore, ActivityDetailRecord, ActivityDetailType, ActivityRecord, ActivityType
 
@@ -47,8 +48,8 @@ class CreateExperimentalBranch(graphene.relay.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, owner, labbook_name, branch_name, revision=None,
                                description=None, client_mutation_id=None):
         username = get_logged_in_username()
-        lb = LabBook(author=get_logged_in_author())
-        lb.from_name(username, owner, labbook_name)
+        lb = InventoryManager().load_labbook(username, owner, labbook_name,
+                                             author=get_logged_in_author())
         bm = BranchManager(labbook=lb, username=username)
         full_branch_title = bm.create_branch(title=branch_name, revision=revision)
         logger.info(f"In {str(lb)} created new experimental feature branch {full_branch_title}")
@@ -58,7 +59,7 @@ class CreateExperimentalBranch(graphene.relay.ClientIDMutation):
             # Update the description on branch creation
             lb.description = description
 
-            with lb.lock_labbook():
+            with lb.lock():
                 lb.git.add(os.path.join(lb.root_dir, '.gigantum/labbook.yaml'))
                 commit = lb.git.commit('Updating description')
 
@@ -96,9 +97,9 @@ class DeleteExperimentalBranch(graphene.relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, owner, labbook_name, branch_name, client_mutation_id=None):
         username = get_logged_in_username()
-        lb = LabBook(author=get_logged_in_author())
-        lb.from_name(username, owner, labbook_name)
-        with lb.lock_labbook():
+        lb = InventoryManager().load_labbook(username, owner, labbook_name,
+                                             author=get_logged_in_author())
+        with lb.lock():
             bm = BranchManager(labbook=lb, username=username)
             bm.remove_branch(target_branch=branch_name)
         logger.info(f'Removed experimental branch {branch_name} from {str(lb)}')
@@ -119,10 +120,10 @@ class WorkonBranch(graphene.relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, owner, labbook_name, branch_name, client_mutation_id=None):
         username = get_logged_in_username()
-        lb = LabBook(author=get_logged_in_author())
-        lb.from_name(username, owner, labbook_name)
+        lb = InventoryManager().load_labbook(username, owner, labbook_name,
+                                             author=get_logged_in_author())
         # TODO - fail fast if already locked.
-        with lb.lock_labbook():
+        with lb.lock():
             bm = BranchManager(labbook=lb, username=username)
             bm.workon_branch(branch_name=branch_name)
         return WorkonBranch(labbook=Labbook(id="{}&{}".format(owner, labbook_name),
@@ -144,9 +145,9 @@ class MergeFromBranch(graphene.relay.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, owner, labbook_name, other_branch_name, force=False,
                                client_mutation_id=None):
         username = get_logged_in_username()
-        lb = LabBook(author=get_logged_in_author())
-        lb.from_name(username, owner, labbook_name)
-        with lb.lock_labbook():
+        lb = InventoryManager().load_labbook(username, owner, labbook_name,
+                                             author=get_logged_in_author())
+        with lb.lock():
             bm = BranchManager(labbook=lb, username=username)
             bm.merge_from(other_branch=other_branch_name, force=force)
 

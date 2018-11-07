@@ -26,7 +26,7 @@ from graphene.test import Client
 import graphene
 from mock import patch
 
-from gtmcore.labbook import LabBook
+from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.files import FileOperations
 from gtmcore.configuration import Configuration
 
@@ -36,8 +36,8 @@ from ..api import LabbookMutations, LabbookQuery
 class TestNodeQueries(object):
 
     def test_node_labbook_from_object(self, fixture_working_dir, snapshot):
-        lb = LabBook(fixture_working_dir[0])
-        lb.new(owner={"username": "default"}, name="cat-lab-book1", description="Test cat labbook from obj")
+        im = InventoryManager(fixture_working_dir[0])
+        lb = im.create_labbook("default", "default", "cat-lab-book1", description="Test cat labbook from obj")
 
         query = """
                 {
@@ -57,8 +57,8 @@ class TestNodeQueries(object):
         snapshot.assert_match(fixture_working_dir[2].execute(query))
 
     def test_node_package(self, fixture_working_dir, snapshot):
-        lb = LabBook(fixture_working_dir[0])
-        lb.new(owner={"username": "default"}, name="node-env-test-lb", description="Example labbook by mutation.")
+        im = InventoryManager(fixture_working_dir[0])
+        lb = im.create_labbook("default", "default", "node-env-test-lb", description="Example labbook by mutation.")
 
         env_query = """
         {
@@ -81,8 +81,9 @@ class TestNodeQueries(object):
         #results['data']['node']['latestVersion'] == '1.14.2'
 
     def test_node_environment(self, fixture_working_dir, snapshot):
-        lb = LabBook(fixture_working_dir[0])
-        lb.new(owner={"username": "default"}, name="node-env-test-lb", description="Example labbook by mutation.")
+        im = InventoryManager(fixture_working_dir[0])
+        lb = im.create_labbook("default", "default", "node-env-test-lb",
+                               description="Example labbook by mutation.")
 
         env_query = """
         {
@@ -121,8 +122,9 @@ class TestNodeQueries(object):
     def test_favorites_node(self, fixture_working_dir, snapshot):
         """Test listing labbook favorites"""
 
-        lb = LabBook(fixture_working_dir[0])
-        lb.new(owner={"username": "default"}, name="labbook1", description="my first labbook1")
+        im = InventoryManager(fixture_working_dir[0])
+        lb = im.create_labbook("default", "default", "labbook1",
+                               description="my first labbook1")
 
         # Setup some favorites in code
         with open(os.path.join(lb.root_dir, 'code', 'test1.txt'), 'wt') as test_file:
@@ -165,9 +167,9 @@ class TestNodeQueries(object):
 
     def test_file_node(self, fixture_working_dir, snapshot):
         """Test listing labbook favorites"""
-
-        lb = LabBook(fixture_working_dir[0])
-        lb.new(owner={"username": "default"}, name="labbook1", description="my first labbook1")
+        im = InventoryManager(fixture_working_dir[0])
+        lb = im.create_labbook("default", "default", "labbook1",
+                               description="my first labbook1")
 
         # Setup some favorites in code
         with open(os.path.join(lb.root_dir, 'code', 'test1.txt'), 'wt') as test_file:
@@ -192,8 +194,9 @@ class TestNodeQueries(object):
 
     def test_activity_record_node(self, fixture_working_dir, snapshot, fixture_test_file):
         """Test getting an activity record by node ID"""
-        lb = LabBook(fixture_working_dir[0])
-        lb.new(owner={"username": "default"}, name="labbook1", description="my test description")
+        im = InventoryManager(fixture_working_dir[0])
+        lb = im.create_labbook("default", "default", "labbook1",
+                               description="my test description")
         FileOperations.insert_file(lb, "code", fixture_test_file)
 
         # Get activity record to
@@ -258,8 +261,9 @@ class TestNodeQueries(object):
 
     def test_detail_record_node(self, fixture_working_dir, snapshot, fixture_test_file):
         """Test getting an detail record by node ID"""
-        lb = LabBook(fixture_working_dir[0])
-        lb.new(owner={"username": "default"}, name="labbook1", description="my test description")
+        im = InventoryManager(fixture_working_dir[0])
+        lb = im.create_labbook("default", "default", "labbook1",
+                               description="my test description")
         FileOperations.insert_file(lb, "code", fixture_test_file)
 
         # Get activity record to

@@ -41,6 +41,7 @@ from gtmcore.fixtures import mock_config_file
 import gtmcore.fixtures
 from gtmcore.dispatcher import Dispatcher
 from gtmcore.labbook import LabBook
+from gtmcore.inventory.inventory import InventoryManager
 
 import gtmcore.dispatcher.jobs as bg_jobs
 
@@ -173,17 +174,16 @@ class TestDispatcher(object):
         erm = RepositoryManager(mock_config_file[0])
         erm.update_repositories()
         erm.index_repositories()
-        lb = LabBook(mock_config_file[0])
-        labbook_dir = lb.new(name="unittest-dispatcher-build-image", description="Testing docker building.",
-                             owner={"username": "unittester"})
-
+        im = InventoryManager(mock_config_file[0])
+        lb = im.create_labbook('unittester', 'unittester', 'unittest-dispatcher-build-image',
+                               description="Testing docker building.")
         cm = ComponentManager(lb)
         cm.add_base(gtmcore.fixtures.ENV_UNIT_TEST_REPO, 'ut-busybox', 0)
         ib = ImageBuilder(lb)
         ib.assemble_dockerfile(write=True)
-        assert os.path.exists(os.path.join(labbook_dir, '.gigantum', 'env', 'Dockerfile'))
+        assert os.path.exists(os.path.join(lb.root_dir, '.gigantum', 'env', 'Dockerfile'))
         docker_kwargs = {
-            'path': labbook_dir,
+            'path': lb.root_dir,
             'nocache': True
         }
 
@@ -220,10 +220,9 @@ class TestDispatcher(object):
         erm.index_repositories()
 
         # Create a labook
-        lb = LabBook(mock_config_file[0])
-        labbook_dir = lb.new(name="unittest-start-stop-job", description="Testing docker building.",
-                             owner={"username": "unittester"})
-
+        lb = InventoryManager(mock_config_file[0]).create_labbook('unittester', 'unittester',
+                                                                  'unittest-start-stop-job',
+                                                                  description="Testing docker building.")
         cm = ComponentManager(lb)
         cm.add_base(gtmcore.fixtures.ENV_UNIT_TEST_REPO, 'quickstart-jupyterlab', 2)
 
@@ -231,7 +230,7 @@ class TestDispatcher(object):
         ib.assemble_dockerfile(write=True)
 
         docker_kwargs = {
-            'path': labbook_dir,
+            'path': lb.root_dir,
             'nocache': True,
             'username': 'unittester'
         }
@@ -278,7 +277,7 @@ class TestDispatcher(object):
 
         startc_kwargs = {
             'root': lb.root_dir,
-            'config_path': lb.labmanager_config.config_file,
+            'config_path': lb.client_config.config_file,
             'username': 'unittester'
         }
         # Start the docker container, and then wait till it's done.
