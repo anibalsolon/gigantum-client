@@ -87,7 +87,8 @@ class Configuration(object):
             return {}
         elif os.path.exists(self.USER_LOCATION):
             with open(self.USER_LOCATION) as user_conf_file:
-                user_conf_data = yaml.load(user_conf_file)
+                # If the config file is empty or only comments, we create an empty dict to allow `update()` to work
+                user_conf_data = yaml.load(user_conf_file) or {}
             return user_conf_data
         else:
             return {}
