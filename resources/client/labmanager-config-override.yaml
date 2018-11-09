@@ -6,3 +6,6 @@ git:
 flask:
   DEBUG: false
   TESTING: false
+environment:
+  repo_url:
+  - https://github.com/gigantum/base-images.git@cuda

@@ -22,10 +22,6 @@ container:
   # To set enter a float for the CPU allocation desired. e.g. 4 CPUs available, 1.5 limits container to 1.5 CPUs
   cpu: null
 
-  # If null, no CUDA/cuDNN support
-  # To set, replace null to a version (either 9.0 or 9.2)
-  cuda_version: null
-
 # Authentication Configuration
 auth:
   client_id: 0Ajo8Ov6Qriafo0xVpSyejWy1pwNWdhk
