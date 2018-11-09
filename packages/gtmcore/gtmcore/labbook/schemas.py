@@ -28,6 +28,7 @@ logger = LMLogger.get_logger()
 # The current LabBook schema version
 CURRENT_SCHEMA = 1
 
+# TODO next time we version schema remove cuda_version.  It is no longer used.  Ask RB
 LABBOOK_SCHEMA_VERSIONS = {
     # Note: Each time a new schema version is needed, add it into this dictionary
     # with its version number as its key.
