@@ -249,11 +249,8 @@ def start_labbook_container(labbook_root: str, config_path: str,
 
     # run with nvidia if we have GPU support in the client compatible with project
 
-    # TODO RB get the driver from nvidia-smi driver        
-    cuda_driver = '174.5'
 
     # project wants CUDA and is compatible with driver
-    logger.info(f"Host nvidia driver version {cuda_driver}, LabBook CUDA ver {lb.cuda_version}")
     if lb.cuda_version and CudaDriverCompatible.check_version(lb.cuda_version):     
         logger.info(f"Launching container with GPU support CUDA version {lb.cuda_version}")
         container_id = docker_client.containers.run(tag, detach=True, init=True, name=tag,
