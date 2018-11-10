@@ -18,7 +18,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import os
+import re
 import platform
+import subprocess
 
 import docker
 
@@ -89,6 +91,16 @@ class ClientRunner(object):
             environment_mapping = {'HOST_WORK_DIR': working_dir}
             environment_mapping['LOCAL_USER_ID'] = os.getuid()
             volume_mapping[working_dir] = {'bind': '/mnt/gigantum', 'mode': 'cached'}
+
+        # get the nvidia driver as available 
+        if platform.system() == 'Linux':
+            bash_command = "nvidia-smi --query-gpu=driver_version --format=csv,noheader --id=0"
+            process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE) 
+            output, error = process.communicate()
+
+            if not error:
+                m = re.match(r"([\d\.]+)", output.decode())
+                environment_mapping['NVIDIA_DRIVER_VERSION'] = m.group(1)
 
         self.docker_client.containers.run(image=self.docker_image,
                                           detach=True,
