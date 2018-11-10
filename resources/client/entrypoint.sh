@@ -6,7 +6,7 @@ export LANG=C.UTF-8
 
 # TODO: Generalize Dev Env Vars
 export JUPYTER_RUNTIME_DIR=/mnt/share/jupyter/runtime
-
+	
 # Open up the docker socket for now
 chmod 777 /var/run/docker.sock
 
