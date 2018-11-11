@@ -29,12 +29,12 @@ class CudaDriverCompatible(object):
     # this table is a simplified version of https://github.com/NVIDIA/nvidia-docker/wiki/CUDA
     #  it should cover most reasonable configurations. 
     #  To interpret this data, cuda version 10.0 requires driver > 410.58
-    cuda_driver_lookup= { 10: {0: (410, 58)},\
-                     9: {0: (384, 81),\
-                         1: (387, 26),\
-                         2: (396, 26)},
-                     8: {0: (375, 51)}} 
-                                    
+    cuda_driver_lookup= { 10: {0: (410, 58)},
+                           9: {0: (384, 81),
+                               1: (387, 26),
+                               2: (396, 26)},
+                           8: {0: (375, 51)}} 
+                                            
     @classmethod
     def check_version (cls, cuda_version: str ) -> bool : 
         """Method to test wheter the CUDA version and the driver
@@ -47,13 +47,11 @@ class CudaDriverCompatible(object):
                 True -> yes run CUDA 
                 False -> no CUDA not supported
         """
-        import pdb; pdb.set_trace()
         # get cuda verison major/minor
         m = re.match("^([0-9]+)\.([0-9]+)$", str(cuda_version))
         if m:
             cuda_major = int(m.group(1))
             cuda_minor = int(m.group(2))
-            logger.info(f"Found CUDA major {cuda_major} minor {cuda_minor}")
         else:
             return False
 
@@ -63,7 +61,6 @@ class CudaDriverCompatible(object):
         if m:
             driver_major = int(m.group(1))
             driver_minor = int(m.group(2))
-            logger.info(f"Found NVIDIA DRIVER major {driver_major} minor {driver_minor}")
 
             # lookup table to check compatibility.
             # if driver exceeds major and minor versions for this cuda, launch with cuda.
