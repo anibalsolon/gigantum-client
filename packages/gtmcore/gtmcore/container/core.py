@@ -31,7 +31,6 @@ from gtmcore.labbook import LabBook
 from gtmcore.inventory.inventory  import InventoryManager
 from gtmcore.container.utils import infer_docker_image_name
 from gtmcore.container.exceptions import ContainerBuildException
-
 from gtmcore.container.cudasupport import CudaDriverCompatible
 
 logger = LMLogger.get_logger()
@@ -248,8 +247,6 @@ def start_labbook_container(labbook_root: str, config_path: str,
     docker_client = get_docker_client()
 
     # run with nvidia if we have GPU support in the client compatible with project
-
-
     # project wants CUDA and is compatible with driver
     if lb.cuda_version and CudaDriverCompatible.check_version(lb.cuda_version):     
         logger.info(f"Launching container with GPU support CUDA version {lb.cuda_version}")
