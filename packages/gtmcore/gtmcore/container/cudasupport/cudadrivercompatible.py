@@ -47,6 +47,7 @@ class CudaDriverCompatible(object):
                 True -> yes run CUDA 
                 False -> no CUDA not supported
         """
+<<<<<<< HEAD
         try:
             # get driver version major/minor
             driver=os.environ['NVIDIA_DRIVER_VERSION']
@@ -72,3 +73,32 @@ class CudaDriverCompatible(object):
 
         return False
 
+=======
+        # get cuda verison major/minor
+        m = re.match("^([0-9]+)\.([0-9]+)$", str(cuda_version))
+        if m:
+            cuda_major = int(m.group(1))
+            cuda_minor = int(m.group(2))
+        else:
+            return False
+
+        # get driver version major/minor
+        driver=os.environ['NVIDIA_DRIVER_VERSION']
+        m = re.match("^([0-9]+)\.([0-9]+)$", str(driver))
+        if m:
+            driver_major = int(m.group(1))
+            driver_minor = int(m.group(2))
+
+            # lookup table to check compatibility.
+            # if driver exceeds major and minor versions for this cuda, launch with cuda.
+            try:
+                mindriver = CudaDriverCompatible.cuda_driver_lookup[cuda_major][cuda_minor]
+                if driver_major > mindriver[0] or \
+                    (driver_major == mindriver[0] and driver_minor >= mindriver[1]):
+                    return True
+            except:
+                return False
+
+        return False                
+       
+>>>>>>> 4ffa1291d819583fc94dd8afd3a742eda4e0905f
