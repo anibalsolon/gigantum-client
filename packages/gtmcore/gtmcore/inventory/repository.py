@@ -438,8 +438,13 @@ class Repository(object):
             ar.message = f"{extra_msg or ''}" \
                          f"{'Uploaded ' if upload else ''}" \
                          f"{nmsg}{mmsg}"
-            ars = ActivityStore(self)
-            ars.create_activity_record(ar)
+            # TODO BVB/DK RB is seeing labbook.yaml changed, which is in .gitignore.
+            #  this check prevents an empty string in AR
+            if ar.message == "" and newcnt == 0 and modcnt == 0:
+                logger.info(f"{str(self)} no changes to sweep.")
+            else: 
+                ars = ActivityStore(self)
+                ars.create_activity_record(ar)
         else:
             logger.info(f"{str(self)} no changes to sweep.")
 
