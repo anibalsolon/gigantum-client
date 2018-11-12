@@ -29,7 +29,10 @@ import requests
 from gtmcore.configuration import Configuration
 from gtmcore.container.container import ContainerOperations
 from gtmcore.dispatcher import (Dispatcher, jobs)
-from gtmcore.labbook import LabBook, loaders, InventoryManager, LabbookException
+from gtmcore.labbook import LabBook, loaders
+
+from gtmcore.inventory.inventory import InventoryManager
+from gtmcore.exceptions import GigantumException
 from gtmcore.logging import LMLogger
 from gtmcore.files import FileOperations
 from gtmcore.activity import ActivityStore, ActivityDetailRecord, ActivityDetailType, ActivityRecord, ActivityType
@@ -217,7 +220,7 @@ class DeleteRemoteLabbook(graphene.ClientIDMutation):
                                                      author=get_logged_in_author())
                 lb.remove_remote()
                 lb.remove_lfs_remotes()
-            except LabbookException as e:
+            except GigantumException as e:
                 logger.warning(e)
 
             return DeleteLabbook(success=True)
@@ -296,11 +299,11 @@ class ImportRemoteLabbook(graphene.relay.ClientIDMutation):
         username = get_logged_in_username()
         logger.info(f"Importing remote labbook from {remote_url}")
         lb = LabBook(author=get_logged_in_author())
-        default_remote = lb.labmanager_config.config['git']['default_remote']
+        default_remote = lb.client_config.config['git']['default_remote']
         admin_service = None
-        for remote in lb.labmanager_config.config['git']['remotes']:
+        for remote in lb.client_config.config['git']['remotes']:
             if default_remote == remote:
-                admin_service = lb.labmanager_config.config['git']['remotes'][remote]['admin_service']
+                admin_service = lb.client_config.config['git']['remotes'][remote]['admin_service']
                 break
 
         # Extract valid Bearer token
@@ -349,7 +352,7 @@ class AddLabbookRemote(graphene.relay.ClientIDMutation):
         username = get_logged_in_username()
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
-        with lb.lock_labbook():
+        with lb.lock():
             lb.add_remote(remote_name, remote_url)
         return AddLabbookRemote(success=True)
 
@@ -369,8 +372,8 @@ class SetLabbookDescription(graphene.relay.ClientIDMutation):
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
         lb.description = description_content
-
-        with lb.lock_labbook():
+        
+        with lb.lock():
             lb.git.add(os.path.join(lb.root_dir, '.gigantum/labbook.yaml'))
             commit = lb.git.commit('Updating description')
 
@@ -410,7 +413,7 @@ class CompleteBatchUploadTransaction(graphene.relay.ClientIDMutation):
         username = get_logged_in_username()
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
-        with lb.lock_labbook():
+        with lb.lock():
             FileOperations.complete_batch(lb, transaction_id, cancel=cancel,
                                           rollback=rollback)
         return CompleteBatchUploadTransaction(success=True)
@@ -448,7 +451,7 @@ class AddLabbookFile(graphene.relay.ClientIDMutation, ChunkUploadMutation):
             lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                                  author=get_logged_in_author())
             dstpath = os.path.join(os.path.dirname(file_path), cls.filename)
-            with lb.lock_labbook():
+            with lb.lock():
                 fops = FileOperations.put_file(labbook=lb,
                                                section=section,
                                                src_file=cls.upload_file_path,
@@ -493,7 +496,7 @@ class DeleteLabbookFile(graphene.ClientIDMutation):
         username = get_logged_in_username()
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
-        with lb.lock_labbook():
+        with lb.lock():
             FileOperations.delete_file(lb, section=section, relative_path=file_path)
 
         return DeleteLabbookFile(success=True)
@@ -518,7 +521,7 @@ class MoveLabbookFile(graphene.ClientIDMutation):
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
 
-        with lb.lock_labbook():
+        with lb.lock():
             file_info = FileOperations.move_file(lb, section, src_path, dst_path)
 
         # Prime dataloader with labbook you already loaded
@@ -554,7 +557,7 @@ class MakeLabbookDirectory(graphene.ClientIDMutation):
         username = get_logged_in_username()
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
-        with lb.lock_labbook():
+        with lb.lock():
             FileOperations.makedir(lb, os.path.join(section, directory), create_activity_record=True)
 
         # Prime dataloader with labbook you already loaded
@@ -604,7 +607,7 @@ class AddLabbookFavorite(graphene.relay.ClientIDMutation):
             if key[-1] != "/":
                 key = f"{key}/"
 
-        with lb.lock_labbook():
+        with lb.lock():
             new_favorite = lb.create_favorite(section, key, description=description, is_dir=is_dir)
 
         # Create data to populate edge
@@ -641,7 +644,7 @@ class UpdateLabbookFavorite(graphene.relay.ClientIDMutation):
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
 
-        with lb.lock_labbook():
+        with lb.lock():
             new_favorite = lb.update_favorite(section, key,
                                               new_description=updated_description,
                                               new_index=updated_index)
@@ -681,7 +684,7 @@ class RemoveLabbookFavorite(graphene.ClientIDMutation):
         favorite_node_id = f"LabbookFavorite:{owner}&{labbook_name}&{section}&{key}"
         favorite_node_id = base64.b64encode(favorite_node_id.encode()).decode()
 
-        with lb.lock_labbook():
+        with lb.lock():
             lb.remove_favorite(section, key)
 
         return RemoveLabbookFavorite(success=True, removed_node_id=favorite_node_id)
@@ -703,11 +706,11 @@ class AddLabbookCollaborator(graphene.relay.ClientIDMutation):
                                              author=get_logged_in_author())
 
         # TODO: Future work will look up remote in LabBook data, allowing user to select remote.
-        default_remote = lb.labmanager_config.config['git']['default_remote']
+        default_remote = lb.client_config.config['git']['default_remote']
         admin_service = None
-        for remote in lb.labmanager_config.config['git']['remotes']:
+        for remote in lb.client_config.config['git']['remotes']:
             if default_remote == remote:
-                admin_service = lb.labmanager_config.config['git']['remotes'][remote]['admin_service']
+                admin_service = lb.client_config.config['git']['remotes'][remote]['admin_service']
                 break
 
         # Extract valid Bearer token
@@ -746,11 +749,11 @@ class DeleteLabbookCollaborator(graphene.relay.ClientIDMutation):
                                              author=get_logged_in_author())
 
         # TODO: Future work will look up remote in LabBook data, allowing user to select remote.
-        default_remote = lb.labmanager_config.config['git']['default_remote']
+        default_remote = lb.client_config.config['git']['default_remote']
         admin_service = None
-        for remote in lb.labmanager_config.config['git']['remotes']:
+        for remote in lb.client_config.config['git']['remotes']:
             if default_remote == remote:
-                admin_service = lb.labmanager_config.config['git']['remotes'][remote]['admin_service']
+                admin_service = lb.client_config.config['git']['remotes'][remote]['admin_service']
                 break
 
         # Extract valid Bearer token
@@ -784,7 +787,7 @@ class WriteReadme(graphene.relay.ClientIDMutation):
                                              author=get_logged_in_author())
 
         # Write data
-        with lb.lock_labbook():
+        with lb.lock():
             lb.write_readme(content)
 
         return WriteReadme(updated_labbook=Labbook(owner=owner, name=labbook_name))
