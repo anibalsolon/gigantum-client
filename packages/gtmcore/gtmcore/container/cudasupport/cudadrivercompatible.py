@@ -71,4 +71,3 @@ class CudaDriverCompatible(object):
             pass
 
         return False
-
