@@ -154,9 +154,10 @@ class LabbookOverview(graphene.ObjectType, interfaces=(graphene.relay.Node, GitR
 
             for item in items:
                 if item.show is True and len(item.detail_objects) > 0:
-                    ar = ActivityRecordObject(id=f"{self.owner}&{self.name}&{item.commit}",
+                    ar = ActivityRecordObject(id=f"labbook&{self.owner}&{self.name}&{item.commit}",
                                               owner=self.owner,
                                               name=self.name,
+                                              _repository_type='labbook',
                                               commit=item.commit,
                                               _activity_record=item)
                     records.append(ar)

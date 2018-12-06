@@ -362,9 +362,10 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         edge_objs = []
         for edge, cursor in zip(edges, cursors):
             edge_objs.append(
-                ActivityConnection.Edge(node=ActivityRecordObject(id=f"{self.owner}&{self.name}&{edge.commit}",
+                ActivityConnection.Edge(node=ActivityRecordObject(id=f"labbook&{self.owner}&{self.name}&{edge.commit}",
                                                                   owner=self.owner,
                                                                   name=self.name,
+                                                                  _repository_type='labbook',
                                                                   commit=edge.commit,
                                                                   _activity_record=edge),
                                         cursor=cursor))
@@ -412,9 +413,10 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         Returns:
 
         """
-        return ActivityDetailObject(id=f"{self.owner}&{self.name}&{key}",
+        return ActivityDetailObject(id=f"labbook&{self.owner}&{self.name}&{key}",
                                     owner=self.owner,
                                     name=self.name,
+                                    _repository_type='labbook',
                                     key=key)
 
     def resolve_detail_records(self, info, keys):
@@ -427,9 +429,10 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         Returns:
 
         """
-        return [ActivityDetailObject(id=f"{self.owner}&{self.name}&{key}",
+        return [ActivityDetailObject(id=f"labbook&{self.owner}&{self.name}&{key}",
                                      owner=self.owner,
                                      name=self.name,
+                                     _repository_type='labbook',
                                      key=key) for key in keys]
 
     def _fetch_collaborators(self, labbook, info):

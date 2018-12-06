@@ -100,6 +100,9 @@ export default class FileBrowserWrapper extends Component {
     this.handleDeleteFile = this.handleDeleteFile.bind(this);
     this.openDetailPanel = this.openDetailPanel.bind(this);
     this.handleFileFavoriting = this.handleFileFavoriting.bind(this);
+    this._chunkLoader = this._chunkLoader.bind(this);
+    this._startFolderUpload = this._startFolderUpload.bind(this);
+    this._continueUpload = this._continueUpload.bind(this);
   }
 
   componentDidMount() {
@@ -150,7 +153,7 @@ export default class FileBrowserWrapper extends Component {
   *  creates a file using AddLabbookFileMutation by passing a blob
   */
   _chunkLoader(data, callback, chunkIndex) {
-    ChunkUploader.chunkFile(data, callback, chunkIndex);
+    ChunkUploader.chunkFile(data, callback, chunkIndex, this.props.type);
   }
 
   /**
@@ -224,6 +227,7 @@ export default class FileBrowserWrapper extends Component {
       this._chunkLoader,
       totalFiles,
       count,
+      this.props.type,
     );
   }
 
@@ -822,6 +826,7 @@ export default class FileBrowserWrapper extends Component {
       this._chunkLoader,
       totalFiles,
       count,
+      this.props.type,
     );
 
     if (store.getState().fileBrowser.chunkUploadData.data) {

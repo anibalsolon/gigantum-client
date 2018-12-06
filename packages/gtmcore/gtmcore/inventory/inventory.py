@@ -17,6 +17,9 @@ from gtmcore.configuration.utils import call_subprocess
 from gtmcore.labbook.labbook import LabBook
 from gtmcore.inventory.branching import BranchManager
 from gtmcore.dataset.dataset import Dataset
+from gtmcore.dataset.storage import SUPPORTED_STORAGE_BACKENDS
+from gtmcore.activity import ActivityStore, ActivityDetailRecord, ActivityDetailType, ActivityRecord, ActivityType
+
 
 logger = LMLogger.get_logger()
 
@@ -157,13 +160,15 @@ class InventoryManager(object):
                              if os.path.isdir(os.path.join(user_root, d))])
         repository_paths = []
         for owner_dir in owner_dirs:
-            repository_dirs = sorted([os.path.join(owner_dir, f'{repository_type}s', l)
-                                      for l in os.listdir(os.path.join(owner_dir, f'{repository_type}s'))
-                                      if os.path.isdir(os.path.join(owner_dir, f'{repository_type}s', l))])
-            for repository_dir in repository_dirs:
-                repository_paths.append((username,
-                                         os.path.basename(owner_dir),
-                                         os.path.basename(repository_dir)))
+            if os.path.exists(os.path.join(owner_dir, f'{repository_type}s')):
+                repository_dirs = sorted([os.path.join(owner_dir, f'{repository_type}s', l)
+                                          for l in os.listdir(os.path.join(owner_dir, f'{repository_type}s'))
+                                          if os.path.isdir(os.path.join(owner_dir, f'{repository_type}s', l))])
+
+                for repository_dir in repository_dirs:
+                    repository_paths.append((username,
+                                             os.path.basename(owner_dir),
+                                             os.path.basename(repository_dir)))
         return repository_paths
 
     def list_labbooks(self, username: str, sort_mode: str = "name") -> List[LabBook]:
@@ -383,7 +388,10 @@ class InventoryManager(object):
             Newly created LabBook instance
 
         """
-        dataset = Dataset(config_file=self.config_file, author=author)
+        dataset = Dataset(config_file=self.config_file, author=author, namespace=owner)
+
+        if storage_type not in SUPPORTED_STORAGE_BACKENDS:
+            raise ValueError(f"Unsupported Dataset storage type: {storage_type}")
 
         try:
             build_info = Configuration(self.config_file).config['build_info']
@@ -471,6 +479,18 @@ class InventoryManager(object):
             # TODO: Move to branch manager class
             dataset.git.create_branch(name="workspace")
 
+            # Create Activity Record
+            adr = ActivityDetailRecord(ActivityDetailType.DATASET, show=False, importance=0)
+            adr.add_value('text/plain', f"Created new Dataset: {username}/{dataset_name}")
+            ar = ActivityRecord(ActivityType.DATASET,
+                                message=f"Created new Dataset: {username}/{dataset_name}",
+                                show=True,
+                                importance=255,
+                                linked_commit=dataset.git.commit_hash)
+            ar.add_detail_object(adr)
+            store = ActivityStore(dataset)
+            store.create_activity_record(ar)
+
             return dataset
 
     def delete_dataset(self, username: str, owner: str, dataset_name: str) -> None:
@@ -502,7 +522,7 @@ class InventoryManager(object):
             Dataset
         """
         try:
-            ds = Dataset(self.config_file, author=author)
+            ds = Dataset(self.config_file, author=author, namespace=owner)
 
             ds_root = os.path.join(self.inventory_root, username,
                                    owner, 'datasets', dataset_name)

@@ -40,9 +40,6 @@ class LabbookList(graphene.ObjectType, interfaces=(graphene.relay.Node,)):
 
     NOTE: RemoteLabbooks require all fields to be explicitly set as there is no current way to asynchronously retrieve
           the data
-
-    NOTE: Currently all RemoteLabbook description fields will return empty strings
-
     """
     # List of specific local labbooks based on Node ID
     local_by_id = graphene.List(Labbook, ids=graphene.List(graphene.String))

@@ -32,7 +32,8 @@ from lmsrvlabbook.api.mutations import (CreateLabbook, BuildImage, StartContaine
                                         DeleteExperimentalBranch,
                                         MergeFromBranch, WorkonBranch, WriteReadme, AddCustomDocker, RemoveCustomDocker,
                                         DeleteRemoteLabbook,
-                                        CompleteBatchUploadTransaction, SetVisibility, FetchLabbookEdge)
+                                        CompleteBatchUploadTransaction, SetVisibility, FetchLabbookEdge,
+                                        CreateDataset, AddDatasetFile, CompleteDatasetUploadTransaction)
 
 
 class LabbookMutations(graphene.ObjectType):
@@ -149,3 +150,12 @@ class LabbookMutations(graphene.ObjectType):
 
     # Kludge-query to return a labbook edge when querying for job status
     fetch_labbook_edge = FetchLabbookEdge.Field()
+
+    # Create a new dataset on the file system.
+    create_dataset = CreateDataset.Field()
+
+    # Add a file to a dataset
+    add_dataset_file = AddDatasetFile.Field()
+
+    # Close an upload transaction to a dataset
+    complete_dataset_upload_transaction = CompleteDatasetUploadTransaction.Field()

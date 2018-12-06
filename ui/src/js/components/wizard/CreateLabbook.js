@@ -4,7 +4,7 @@ import uuidv4 from 'uuid/v4';
 // utilities
 import validation from 'JS/utils/Validation';
 // components
-import LoginPrompt from 'Components/labbook/labbookHeader/branchMenu/modals/LoginPrompt';
+import LoginPrompt from 'Components/header/branchMenu/modals/LoginPrompt';
 // mutations
 import ImportRemoteLabbookMutation from 'Mutations/ImportRemoteLabbookMutation';
 import BuildImageMutation from 'Mutations/BuildImageMutation';
@@ -209,7 +209,7 @@ export default class CreateLabbook extends React.Component {
               type="text"
               onChange={evt => this._updateTextState(evt, 'description')}
 
-              placeholder="Briefly describe this Project, its purpose and any other key details. "
+              placeholder={`Briefly describe this ${this.props.datasets ? 'Dataset' : 'Project'}, its purpose and any other key details.`}
             />
             <p className={`CreateLabbook__warning ${this.state.textWarning}`}>{`${this.state.textLength} characters remaining`}</p>
           </div>

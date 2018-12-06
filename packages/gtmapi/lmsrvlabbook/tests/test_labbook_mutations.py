@@ -46,7 +46,7 @@ from gtmcore.fixtures import remote_labbook_repo, mock_config_file
 
 from gtmcore.inventory.inventory import InventoryManager
 
-from lmsrvcore.middleware import error_middleware, LabBookLoaderMiddleware
+from lmsrvcore.middleware import error_middleware, DataloaderMiddleware
 
 
 @pytest.fixture()
@@ -815,7 +815,7 @@ class TestLabBookServiceMutations(object):
                 self.labbook_loader = None
                 self.files = {'uploadChunk': file_handle}
 
-        client = Client(fixture_working_dir[3], middleware=[LabBookLoaderMiddleware()])
+        client = Client(fixture_working_dir[3], middleware=[DataloaderMiddleware()])
 
         # Create a temporary labbook
         lb = InventoryManager(fixture_working_dir[0]).create_labbook("default", "default", "test-export",

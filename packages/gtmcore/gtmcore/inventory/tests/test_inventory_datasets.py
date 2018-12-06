@@ -9,16 +9,16 @@ from gtmcore.dataset.dataset import Dataset
 from gtmcore.inventory.inventory import InventoryManager, InventoryException
 from gtmcore.gitlib.git import GitAuthor
 
-from gtmcore.fixtures import mock_config_file
+from gtmcore.fixtures import mock_config_file, mock_labbook
 
 
 @pytest.fixture()
 def create_datasets_to_list(mock_config_file):
     inv_manager = InventoryManager(mock_config_file[0])
-    inv_manager.create_dataset("user1", "user1", "dataset2", "gigantum_object", description="my dataset")
-    inv_manager.create_dataset("user1", "user2", "a-dataset3", "gigantum_object", description="my dataset")
-    inv_manager.create_dataset("user1", "user1", "dataset12", "gigantum_object", description="my dataset")
-    inv_manager.create_dataset("user2", "user1", "dataset1", "gigantum_object", description="my dataset")
+    inv_manager.create_dataset("user1", "user1", "dataset2", "gigantum_object_v1", description="my dataset")
+    inv_manager.create_dataset("user1", "user2", "a-dataset3", "gigantum_object_v1", description="my dataset")
+    inv_manager.create_dataset("user1", "user1", "dataset12", "gigantum_object_v1", description="my dataset")
+    inv_manager.create_dataset("user2", "user1", "dataset1", "gigantum_object_v1", description="my dataset")
     yield mock_config_file
 
 
@@ -27,7 +27,7 @@ class TestInventoryDatasets(object):
         """Test creating an empty labbook with the author set"""
         inv_manager = InventoryManager(mock_config_file[0])
         auth = GitAuthor(name="username", email="user1@test.com")
-        ds = inv_manager.create_dataset("test", "test", "dataset1", "gigantum_object",
+        ds = inv_manager.create_dataset("test", "test", "dataset1", "gigantum_object_v1",
                                         description="my first dataset",
                                         author=auth)
         dataset_dir = ds.root_dir
@@ -49,7 +49,7 @@ class TestInventoryDatasets(object):
 
         assert data["name"] == "dataset1"
         assert data["description"] == "my first dataset"
-        assert data["storage_type"] == "gigantum_object"
+        assert data["storage_type"] == "gigantum_object_v1"
         assert "id" in data
         assert ds.build_details is not None
 
@@ -64,7 +64,7 @@ class TestInventoryDatasets(object):
     def test_dataset_attributes(self, mock_config_file):
         inv_manager = InventoryManager(mock_config_file[0])
         auth = GitAuthor(name="username", email="user1@test.com")
-        ds = inv_manager.create_dataset("test", "test", "dataset1", "gigantum_object",
+        ds = inv_manager.create_dataset("test", "test", "dataset1", "gigantum_object_v1",
                                         description="my first dataset",
                                         author=auth)
         root_dir = ds.root_dir
@@ -72,11 +72,12 @@ class TestInventoryDatasets(object):
         assert "datasets" in root_dir
 
         assert ds.name == 'dataset1'
+        assert ds.namespace == 'test'
         assert ds.description == 'my first dataset'
         assert isinstance(ds.creation_date, datetime.datetime)
         assert ds.build_details is not None
 
-        assert ds.storage_type == "gigantum_object"
+        assert ds.storage_type == "gigantum_object_v1"
 
         assert ds.storage_config == {}
         ds.storage_config = {"my_config": 123}
@@ -85,7 +86,7 @@ class TestInventoryDatasets(object):
     def test_delete_dataset(self, mock_config_file):
         inv_manager = InventoryManager(mock_config_file[0])
         auth = GitAuthor(name="username", email="user1@test.com")
-        ds = inv_manager.create_dataset("test", "test", "dataset1", "gigantum_object",
+        ds = inv_manager.create_dataset("test", "test", "dataset1", "gigantum_object_v1",
                                         description="my first dataset",
                                         author=auth)
         root_dir = ds.root_dir
@@ -97,7 +98,7 @@ class TestInventoryDatasets(object):
     def test_change_dataset_name(self, mock_config_file):
         inv_manager = InventoryManager(mock_config_file[0])
         auth = GitAuthor(name="username", email="user1@test.com")
-        ds = inv_manager.create_dataset("test", "test", "dataset1", "gigantum_object",
+        ds = inv_manager.create_dataset("test", "test", "dataset1", "gigantum_object_v1",
                                         description="my first dataset",
                                         author=auth)
         root_dir1 = ds.root_dir
@@ -121,7 +122,7 @@ class TestInventoryDatasets(object):
     def test_change_dataset_name_errors(self, mock_config_file):
         inv_manager = InventoryManager(mock_config_file[0])
         auth = GitAuthor(name="username", email="user1@test.com")
-        ds = inv_manager.create_dataset("test", "test", "dataset1", "gigantum_object",
+        ds = inv_manager.create_dataset("test", "test", "dataset1", "gigantum_object_v1",
                                         description="my first dataset",
                                         author=auth)
 
@@ -136,13 +137,19 @@ class TestInventoryDatasets(object):
         """Test trying to create a labbook with a name that already exists locally"""
         inv_manager = InventoryManager(mock_config_file[0])
         auth = GitAuthor(name="username", email="user1@test.com")
-        ds = inv_manager.create_dataset("test", "test", "dataset1", "gigantum_object",
+        ds = inv_manager.create_dataset("test", "test", "dataset1", "gigantum_object_v1",
                                         description="my first dataset",
                                         author=auth)
         with pytest.raises(ValueError):
-            inv_manager.create_dataset("test", "test", "dataset1", "gigantum_object",
+            inv_manager.create_dataset("test", "test", "dataset1", "gigantum_object_v1",
                                        description="my first dataset",
                                        author=auth)
+
+    def test_list_datasets_empty(self, mock_labbook):
+        """Test list datasets when no dataset directory exists for the user"""
+        inv_manager = InventoryManager(mock_labbook[0])
+        datasets = inv_manager.list_datasets(username="test")
+        assert len(datasets) == 0
 
     def test_list_datasets_az(self, create_datasets_to_list):
         """Test list az datasets"""
@@ -170,13 +177,13 @@ class TestInventoryDatasets(object):
     def test_list_datasets_modified_on(self, mock_config_file):
         """Test list az datasets"""
         inv_manager = InventoryManager(mock_config_file[0])
-        inv_manager.create_dataset("user1", "user1", "dataset2", "gigantum_object", description="my dataset")
+        inv_manager.create_dataset("user1", "user1", "dataset2", "gigantum_object_v1", description="my dataset")
         time.sleep(1)
-        inv_manager.create_dataset("user1", "user2", "a-dataset3", "gigantum_object", description="my dataset")
+        inv_manager.create_dataset("user1", "user2", "a-dataset3", "gigantum_object_v1", description="my dataset")
         time.sleep(1)
-        inv_manager.create_dataset("user1", "user1", "dataset12", "gigantum_object", description="my dataset")
+        inv_manager.create_dataset("user1", "user1", "dataset12", "gigantum_object_v1", description="my dataset")
         time.sleep(1)
-        inv_manager.create_dataset("user2", "user1", "dataset1", "gigantum_object", description="my dataset")
+        inv_manager.create_dataset("user2", "user1", "dataset1", "gigantum_object_v1", description="my dataset")
 
         datasets = inv_manager.list_datasets(username="user1", sort_mode="modified_on")
         assert len(datasets) == 3
@@ -204,4 +211,12 @@ class TestInventoryDatasets(object):
 
         with pytest.raises(InventoryException):
             _ = inv_manager.list_datasets(username="user1", sort_mode="created_atasdf")
+
+    def test_create_dataset_invalid_storage_type(self, mock_config_file):
+        inv_manager = InventoryManager(mock_config_file[0])
+        auth = GitAuthor(name="username", email="user1@test.com")
+        with pytest.raises(ValueError):
+            inv_manager.create_dataset("test", "test", "dataset1", "asdfdfgh",
+                                       description="my first dataset",
+                                       author=auth)
 

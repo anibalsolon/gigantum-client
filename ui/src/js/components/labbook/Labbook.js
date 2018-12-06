@@ -17,7 +17,7 @@ import { setMergeMode, setBuildingState, setStickyDate } from 'JS/redux/reducers
 import { setCallbackRoute } from 'JS/redux/reducers/routes';
 import { setLatestPackages } from 'JS/redux/reducers/labbook/environment/packageDependencies';
 // components
-import LabbookHeader from './labbookHeader/LabbookHeader';
+import LabbookHeader from '../header/Header';
 import Login from 'Components/login/Login';
 import Loader from 'Components/shared/Loader';
 import ErrorBoundary from 'Components/shared/ErrorBoundary';
@@ -36,7 +36,7 @@ const Overview = Loadable({
   delay: 500,
 });
 const Activity = Loadable({
-  loader: () => import('./activity/Activity'),
+  loader: () => import('../activity/labbookContainers/LabbookActivityContainer'),
   loading: Loading,
   delay: 500,
 });
@@ -218,6 +218,7 @@ class Labbook extends Component {
               setBuildingState={this._setBuildingState}
               toggleBranchesView={this._toggleBranchesView}
               branchName={branchName}
+              sectionType={'labbook'}
               {...this.props}
             />
 
@@ -290,6 +291,7 @@ class Labbook extends Component {
                                activeBranch={labbook.activeBranch}
                                isMainWorkspace={branchName === 'workspace'}
                                setBuildingState={this._setBuildingState}
+                               sectionType={'labbook'}
                                {...this.props}
                              />
 
@@ -439,7 +441,7 @@ const LabbookFragmentContainer = createFragmentContainer(
 
           ...Environment_labbook
           ...Overview_labbook
-          ...Activity_labbook
+          ...LabbookActivityContainer_labbook
           ...Code_labbook
           ...InputData_labbook
           ...OutputData_labbook
