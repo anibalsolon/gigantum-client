@@ -103,6 +103,17 @@ def ping():
     return jsonify(config.config['build_info'])
 
 
+@app.route(f"{api_prefix}/version/")
+@cross_origin(headers=["Content-Type", "Authorization"], max_age=7200)
+def version():
+    """Unauthorized endpoint for validating the API is up.
+
+    Note: /api/version endpoint added due to popup blockers starting to block /api/ping/
+
+    """
+    return jsonify(config.config['build_info'])
+
+
 @app.route(f'{api_prefix}/savehook/<username>/<owner>/<labbook_name>')
 def savehook(username, owner, labbook_name):
     try:
