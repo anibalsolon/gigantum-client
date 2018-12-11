@@ -26,7 +26,8 @@ from typing import Optional, Callable, List
 from gtmcore.exceptions import GigantumException
 from gtmcore.configuration.utils import call_subprocess
 from gtmcore.inventory.inventory import InventoryManager
-from gtmcore.labbook import LabBook
+# from gtmcore.repository import LabBook
+from gtmcore.inventory import Repository
 from gtmcore.logging import LMLogger
 from gtmcore.workflows import core
 from gtmcore.inventory.branching import BranchManager
@@ -39,17 +40,17 @@ class GitWorkflow(object):
 
     """
 
-    def __init__(self, labbook: LabBook) -> None:
-        self.labbook = labbook
+    def __init__(self, repository: Repository) -> None:
+        self.repository = repository
 
     def garbagecollect(self):
-        """ Run a `git gc` on the labbook. """
-        core.git_garbage_collect(self.labbook)
+        """ Run a `git gc` on the repository. """
+        core.git_garbage_collect(self.repository)
 
 
     def publish(self, username: str, access_token: Optional[str] = None, remote: str = "origin",
                 public: bool = False, feedback_callback: Callable = lambda _ : None) -> None:
-        """ Publish this labbook to the remote GitLab instance.
+        """ Publish this repository to the remote GitLab instance.
 
         Args:
             username: Subject username
@@ -62,29 +63,29 @@ class GitWorkflow(object):
             None
         """
 
-        logger.info(f"Publishing {str(self.labbook)} for user {username} to remote {remote}")
-        if self.labbook.has_remote:
+        logger.info(f"Publishing {str(self.repository)} for user {username} to remote {remote}")
+        if self.repository.has_remote:
             raise ValueError("Cannot publish Labbook when remote already set.")
 
-        branch_mgr = BranchManager(self.labbook, username=username)
+        branch_mgr = BranchManager(self.repository, username=username)
         if branch_mgr.active_branch != f'gm.workspace-{username}':
             raise ValueError(f"Must be on user workspace (gm.workspace-{username}) to sync")
 
         try:
-            self.labbook.sweep_uncommitted_changes()
+            self.repository.sweep_uncommitted_changes()
             vis = "public" if public is True else "private"
             t0 = time.time()
-            core.create_remote_gitlab_repo(labbook=self.labbook, username=username,
+            core.create_remote_gitlab_repo(repository=self.repository, username=username,
                                            access_token=access_token, visibility=vis)
-            logger.info(f"Created remote repo for {str(self.labbook)} in {time.time()-t0:.1f}sec")
+            logger.info(f"Created remote repo for {str(self.repository)} in {time.time()-t0:.1f}sec")
             t0 = time.time()
-            core.publish_to_remote(labbook=self.labbook, username=username,
+            core.publish_to_remote(repository=self.repository, username=username,
                                    remote=remote, feedback_callback=feedback_callback)
-            logger.info(f"Published {str(self.labbook)} in {time.time()-t0:.1f}sec")
+            logger.info(f"Published {str(self.repository)} in {time.time()-t0:.1f}sec")
         except Exception as e:
             # Unsure what specific exception add_remote creates, so make a catchall.
-            logger.error(f"Publish failed {e}: {str(self.labbook)} may be in corrupted Git state!")
-            call_subprocess(['git', 'reset', '--hard'], cwd=self.labbook.root_dir)
+            logger.error(f"Publish failed {e}: {str(self.repository)} may be in corrupted Git state!")
+            call_subprocess(['git', 'reset', '--hard'], cwd=self.repository.root_dir)
 
             branch_mgr.workon_branch(f"gm.workspace-{username}")
             raise e
@@ -103,8 +104,8 @@ class GitWorkflow(object):
         Returns:
             Integer number of commits pulled down from remote.
         """
-        return core.sync_with_remote(labbook=self.labbook, username=username, remote=remote,
+        return core.sync_with_remote(repository=self.repository, username=username, remote=remote,
                                      force=force, feedback_callback=feedback_callback)
 
     def _add_remote(self, remote_name: str, url: str):
-        self.labbook.add_remote(remote_name=remote_name, url=url)
+        self.repository.add_remote(remote_name=remote_name, url=url)

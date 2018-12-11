@@ -594,7 +594,7 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         # Get collaborators from remote service
         mgr = GitLabManager(default_remote, admin_service, token)
         try:
-            owner = InventoryManager().query_labbook_owner(labbook)
+            owner = InventoryManager().query_owner(labbook)
             d = mgr.repo_details(namespace=owner, labbook_name=labbook.name)
             return d.get('visibility')
         except ValueError:

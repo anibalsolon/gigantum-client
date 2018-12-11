@@ -17,6 +17,7 @@ from gtmcore.configuration.utils import call_subprocess
 from gtmcore.labbook.labbook import LabBook
 from gtmcore.inventory.branching import BranchManager
 from gtmcore.dataset.dataset import Dataset
+from gtmcore.inventory import Repository
 from gtmcore.dataset.storage import SUPPORTED_STORAGE_BACKENDS
 from gtmcore.activity import ActivityStore, ActivityDetailRecord, ActivityDetailType, ActivityRecord, ActivityType
 
@@ -48,11 +49,12 @@ class InventoryManager(object):
         return isinstance(other, InventoryManager) \
                and self.inventory_root == other.inventory_root
 
-    def query_labbook_owner(self, labbook: LabBook) -> str:
-        """Returns the LabBook's owner in the Inventory. """
-        tokens = labbook.root_dir.rsplit('/', 3)
-        if tokens[-2] != 'labbooks':
-            raise InventoryException(f'Unexpected root in {str(labbook)}')
+    def query_owner(self, repository: Repository) -> str:
+        """Returns the Repository's owner in the Inventory. """
+        tokens = repository.root_dir.rsplit('/', 3)
+        # expected pattern: gigantum/<username>/<owner>/<labbooks or datasets>/<project or dataset>
+        if tokens[-2] not in ['labbooks', 'datasets']:
+            raise InventoryException(f'Unexpected root in {str(repository)}')
         return tokens[-3]
 
     def _put_labbook(self, path: str, username: str, owner: str) -> LabBook:
