@@ -3,6 +3,7 @@ import React from 'react';
 import { QueryRenderer, graphql } from 'react-relay';
 import Slider from 'react-slick';
 import classNames from 'classnames';
+import ReactMarkdown from 'react-markdown';
 // components
 import Loader from 'Components/shared/Loader';
 import AdvancedSearch from 'Components/shared/AdvancedSearch';
@@ -300,7 +301,6 @@ export default class SelectBase extends React.Component {
                 } else if (props && this.props.datasets) {
                   const filterCategories = this._createFilters(props.availableDatasets);
                   const filteredDatasets = this._filterDatasets(props.availableDatasets);
-                  console.log(filteredDatasets);
                   return <div className={innerContainer}>
                     <AdvancedSearch
                       tags={this.state.tags}
@@ -309,24 +309,20 @@ export default class SelectBase extends React.Component {
                     />
                     <div className="SelectBase__select-container">
                       <div className="SelectBase__images">
-                        <Slider {...sliderSettings}>
-
-                          {
-                            filteredDatasets.map(node => (
-                              <div
-                                key={node.id}
-                                className="BaseSlide__wrapper"
-                              >
-                                <DatasetSlide
-                                  key={`${node.id}_slide`}
-                                  node={node}
-                                  self={this}
-                                />
-                              </div>
-                                ))
-                          }
-                        </Slider>
-
+                        {
+                          filteredDatasets.map(node => (
+                            <div
+                              key={node.id}
+                              className="BaseSlide__wrapper"
+                            >
+                              <DatasetSlide
+                                key={`${node.id}_slide`}
+                                node={node}
+                                self={this}
+                              />
+                            </div>
+                              ))
+                        }
                       </div>
                     </div>
                     <div className="SelectBase__viewer-container">
@@ -431,10 +427,15 @@ const DatasetSlide = ({ node, self }) => {
   const selectedBaseImage = classNames({
     SelectBase__image: true,
     'SelectBase__image--selected': (self.state.selectedBaseId === node.id),
+    Card: true,
+  });
+  const actionCSS = classNames({
+    'SelectBase__image-actions': true,
+    'SelectBase__image-actions--expanded': self.state.expandedNode === node.name,
   });
   return (<div
-    onClick={() => self._selectBase(node)}
-    className="SelectBase__image-wrapper slick-slide"
+    onClick={evt => evt && evt.target.className.indexOf('button--flat') === -1 && self._selectBase(node)}
+    className="SelectBase__image-wrapper"
   >
     <div
       className={selectedBaseImage}
@@ -447,15 +448,19 @@ const DatasetSlide = ({ node, self }) => {
           width="50"
         />
       </div>
+      <div className="SelectBase__details">
+        <h6 className="SelectBase__name">{node.name}</h6>
+        <h6 className="SelectBase__type">{node.isManaged ? 'Managed' : 'Unmanaged'}</h6>
+      </div>
       <div className="SelectBase__image-text">
-        <h6 className="SelectBase__image-header">{node.name}</h6>
         <p className="SelectBase__image-description">{node.description}</p>
-
-        <div className="SelectBase__image-info">
-        </div>
-        <div className="SelectBase__image-actions">
-          <button onClick={() => self._viewBase(node)} className="button--flat">View Details</button>
-        </div>
+        {
+          self.state.expandedNode === node.name &&
+          <ReactMarkdown source={node.readme} />
+        }
+      </div>
+      <div className={actionCSS}>
+        <button onClick={() => self.setState({ expandedNode: self.state.expandedNode === node.name ? null : node.name })} className="button--flat"></button>
       </div>
     </div>
   </div>);

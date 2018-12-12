@@ -276,8 +276,9 @@ class LabbookHeader extends Component {
 
             </ErrorBoundary>
           }
-
-          <div className="LabbookHeader__navContainer flex-0-0-auto">
+          {
+            !branchesOpen &&
+            <div className="LabbookHeader__navContainer flex-0-0-auto">
 
             <ul className="LabbookHeader__nav flex flex--row">
               {
@@ -295,6 +296,7 @@ class LabbookHeader extends Component {
             </ul>
 
           </div>
+          }
 
         </div>
       </div>

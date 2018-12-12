@@ -90,9 +90,8 @@
   text-align: center;
 }
 .SelectBase__images {
-  padding: 10px;
   background: $white;
-  height: 300px;
+  max-height: 210px;
 }
 .SelectBase__images--hidden {
   overflow: hidden;
@@ -100,7 +99,7 @@
 
 
 .SelectBase__image-wrapper {
-  height: 240px;
+  max-height: 210px;
   width: 100%;
 }
 
@@ -114,13 +113,10 @@
   justify-content: center;
 
   min-width: calc(50% - 10px);
-  margin: 5px;
-  height: 265px;
+  margin: 10px 0;
+  height: 100px;
 
   cursor: pointer;
-
-  background-color: $lightGrey;
-  border: 2px solid $lightGrey;
 }
 
 .SelectBase__image--selected {
@@ -131,9 +127,11 @@
 .SelectBase__image-icon {
   width: 70px;
   padding: 10px;
+  align-self: center;
 }
 
 .SelectBase__image-text {
+  @include flex(center, column);
   padding: 5px;
   flex: 1;
   h6 {
@@ -156,20 +154,29 @@
 }
 
 .SelectBase__image-actions {
+  position:absolute;
+  right: 10px;
+  bottom: 10px;
   @include flex(center, row);
-  margin: 10px;
-  width: 200px;
+  width: 25px;
+  height:25px;
+  background: url('~Images/icons/down-arrow-silver.svg') no-repeat right center;
+  background-size: 25px;
   .button--flat{
     padding: 0px 20px 0 0px;
+  }
+  &--expanded{
+    background: url('~Images/icons/up-arrow-silver.svg') no-repeat right center;
+    background-size: 25px;
   }
 }
 
 .SelectBase__image:hover {
-  background-color: $grey;
+  background-color: $lightGrey;
 }
 
 .SelectBase__image-description {
-  height: 70px;
+  align-self: center;
 }
 
 .SelectBase__image-info {
@@ -213,4 +220,15 @@
   .SelectBase__progress-button {
     visibility: hidden;
   }
+}
+.SelectBase__details{
+  padding: 20px 10px;
+  color: $slateBlue;
+  @include flex(space-around, column);
+
+}
+.SelectBase__type{
+  color: $jet;
+  font-weight: 1000;
+  font-size: 14px;
 }
