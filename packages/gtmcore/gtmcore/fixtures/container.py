@@ -33,7 +33,7 @@ from gtmcore.imagebuilder import ImageBuilder
 from gtmcore.fixtures.fixtures import mock_config_with_repo, ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV
 
 # TODO: This should be update to the latest version of requests, and probably automated in the future
-REQUESTS_LATEST_VERSION = "2.20.1"
+REQUESTS_LATEST_VERSION = "2.21.0"
 
 
 @pytest.fixture(scope='function')
