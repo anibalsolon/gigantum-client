@@ -167,11 +167,16 @@ class LabbookHeader extends Component {
 
   render() {
     const {
-      labbookName, labbook, branchesOpen, branchName,
+      labbookName, labbook, branchesOpen, branchName, dataset,
     } = this.props;
-    const { visibility } = labbook;
-
+    const { visibility } = labbook || dataset;
     const selectedIndex = this._getSelectedIndex();
+    const {
+      description,
+      collaborators,
+      defaultRemote,
+      id,
+    } = labbook || dataset;
 
     const labbookHeaderCSS = classNames({
       LabbookHeader: true,
@@ -215,25 +220,23 @@ class LabbookHeader extends Component {
             </div>
 
             <div className="LabbookHeader__columnContainer">
-              {
-                this.props.sectionType === 'labbook' &&
-                <BranchMenu
-                  visibility={visibility}
-                  description={labbook.description}
-                  history={this.props.history}
-                  collaborators={labbook.collaborators}
-                  defaultRemote={labbook.defaultRemote}
-                  labbookId={labbook.id}
-                  remoteUrl={labbook.overview.remoteUrl}
-                  setSyncingState={this._setSyncingState}
-                  setPublishingState={this._setPublishingState}
-                  setExportingState={this._setExportingState}
-                  isExporting={this.props.isExporting}
-                  toggleBranchesView={this.props.toggleBranchesView}
-                  isMainWorkspace={branchName === 'workspace' || branchName === `gm.workspace-${localStorage.getItem('username')}`}
-                  auth={this.props.auth}
-                />
-              }
+              <BranchMenu
+                sectionType={this.props.sectionType}
+                visibility={visibility}
+                description={description}
+                history={this.props.history}
+                collaborators={collaborators}
+                defaultRemote={defaultRemote}
+                labbookId={id}
+                remoteUrl={labbook && labbook.overview.remoteUrl}
+                setSyncingState={this._setSyncingState}
+                setPublishingState={this._setPublishingState}
+                setExportingState={this._setExportingState}
+                isExporting={this.props.isExporting}
+                toggleBranchesView={this.props.toggleBranchesView}
+                isMainWorkspace={branchName === 'workspace' || branchName === `gm.workspace-${localStorage.getItem('username')}`}
+                auth={this.props.auth}
+              />
               {
                 this.props.sectionType === 'labbook' &&
                 <ErrorBoundary type="containerStatusError" key="containerStatus">

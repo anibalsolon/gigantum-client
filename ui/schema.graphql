@@ -1,5 +1,5 @@
 # source: http://localhost:10000/api/labbook/
-# timestamp: Wed Dec 05 2018 11:56:04 GMT-0500 (Eastern Standard Time)
+# timestamp: Wed Dec 12 2018 15:32:18 GMT-0500 (Eastern Standard Time)
 
 schema {
   query: LabbookQuery
@@ -800,6 +800,7 @@ type LabbookMutations {
   deleteRemoteLabbook(input: DeleteRemoteLabbookInput!): DeleteRemoteLabbookPayload
   setLabbookDescription(input: SetLabbookDescriptionInput!): SetLabbookDescriptionPayload
   publishLabbook(input: PublishLabbookInput!): PublishLabbookPayload
+  publishDataset(input: PublishDatasetInput!): PublishDatasetPayload
   syncLabbook(input: SyncLabbookInput!): SyncLabbookPayload
   addLabbookRemote(input: AddLabbookRemoteInput!): AddLabbookRemotePayload
   buildImage(input: BuildImageInput!): BuildImagePayload
@@ -1012,6 +1013,18 @@ type PageInfo {
 
   """When paginating forwards, the cursor to continue."""
   endCursor: String
+}
+
+input PublishDatasetInput {
+  owner: String!
+  datasetName: String!
+  setPublic: Boolean
+  clientMutationId: String
+}
+
+type PublishDatasetPayload {
+  jobKey: String
+  clientMutationId: String
 }
 
 input PublishLabbookInput {

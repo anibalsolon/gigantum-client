@@ -185,7 +185,7 @@ class Dataset extends Component {
               description={dataset.description}
               toggleBranchesView={() => {}}
               branchName={''}
-              labbook={{ visibility: '' }}
+              dataset={dataset}
               sectionType={'dataset'}
               {...this.props}
             />

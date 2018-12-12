@@ -4,6 +4,7 @@ import uuidv4 from 'uuid/v4';
 // mutations
 import SetVisibilityMutation from 'Mutations/SetVisibilityMutation';
 import PublishLabbookMutation from 'Mutations/branches/PublishLabbookMutation';
+import PublishDatasetMutation from 'Mutations/branches/PublishDatasetMutation';
 // component
 import Modal from 'Components/shared/Modal';
 // store
@@ -131,20 +132,42 @@ export default class PublishModal extends Component {
 
                   self.props.setRemoteSession();
                 };
-
-                PublishLabbookMutation(
+                console.log(
                   owner,
                   labbookName,
                   labbookId,
                   this.state.isPublic,
                   successCall,
                   failureCall,
-                  (response, error) => {
-                    if (error) {
-                      failureCall();
-                    }
-                  },
                 );
+                this.props.sectionType === 'labbook' ?
+                  PublishLabbookMutation(
+                    owner,
+                    labbookName,
+                    labbookId,
+                    this.state.isPublic,
+                    successCall,
+                    failureCall,
+                    (response, error) => {
+                      if (error) {
+                        failureCall();
+                      }
+                    },
+                  )
+                  :
+                  PublishDatasetMutation(
+                    owner,
+                    labbookName,
+                    labbookId,
+                    this.state.isPublic,
+                    successCall,
+                    failureCall,
+                    (response, error) => {
+                      if (error) {
+                        failureCall();
+                      }
+                    },
+                  );
               }
             } else {
               self.props.showContainerMenuMessage('publishing', true);

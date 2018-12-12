@@ -172,7 +172,7 @@ class BranchMenu extends Component {
   *  @return {string}
   */
   _togglePublishModal() {
-    if (!this.props.isMainWorkspace) {
+    if (!this.props.isMainWorkspace && this.props.sectionType === 'labbook') {
       setWarningMessage('Publishing is currently only available on the main workspace branch.');
     } else if (this.props.isExporting) {
       this.setState({ publishWarningVisible: true });
@@ -548,6 +548,7 @@ class BranchMenu extends Component {
       BranchMenu__toggle: true,
       hidden: !this.state.menuOpen,
     });
+    const deleteText = this.props.sectionType === 'labbook' ? 'Delete Project' : 'Delete Dataset';
 
     return (
       <div className="BranchMenu flex flex--column'">
@@ -573,7 +574,6 @@ class BranchMenu extends Component {
 
           <ForceSync toggleSyncModal={this._toggleSyncModal} />
         }
-
         {
           this.state.publishModalVisible &&
 
@@ -602,6 +602,7 @@ class BranchMenu extends Component {
           this.state.visibilityModalVisible &&
 
           <VisibilityModal
+            sectionType={this.props.sectionType}
             owner={this.state.owner}
             labbookName={this.state.labbookName}
             auth={this.props.auth}
@@ -645,39 +646,43 @@ class BranchMenu extends Component {
             />
 
             <hr />
+            {
+              this.props.sectionType === 'labbook' &&
+              <Fragment>
+                <li className="BranchMenu__item BranchMenu__item--new-branch">
 
-            <li className="BranchMenu__item BranchMenu__item--new-branch">
+                <button
+                  onClick={() => { this._handleToggleModal('createBranchVisible'); }}
+                  className="BranchMenu__btn--flat"
+                >
+                  New Branch
+                </button>
 
-              <button
-                onClick={() => { this._handleToggleModal('createBranchVisible'); }}
-                className="BranchMenu__btn--flat"
-              >
-                New Branch
-              </button>
+                </li>
 
-            </li>
+                <li className="BranchMenu__item BranchMenu__item--switch">
 
-            <li className="BranchMenu__item BranchMenu__item--switch">
+                <button
+                  onClick={() => this._switchBranch()}
+                  className="BranchMenu__btn--flat"
+                >
+                  Switch Branch
+                </button>
 
-              <button
-                onClick={() => this._switchBranch()}
-                className="BranchMenu__btn--flat"
-              >
-                Switch Branch
-              </button>
+                </li>
 
-            </li>
+                <li className="BranchMenu__item BranchMenu__item--merge">
 
-            <li className="BranchMenu__item BranchMenu__item--merge">
+                <button
+                  onClick={() => this._mergeFilter()}
+                  className="BranchMenu__btn--flat"
+                >
+                  Merge Branch
+                </button>
 
-              <button
-                onClick={() => this._mergeFilter()}
-                className="BranchMenu__btn--flat"
-              >
-                Merge Branch
-              </button>
-
-            </li>
+                </li>
+              </Fragment>
+            }
 
             <li className="BranchMenu__item BranchMenu__item--export">
 
@@ -712,7 +717,7 @@ class BranchMenu extends Component {
                 onClick={() => this._toggleDeleteModal()}
                 className="BranchMenu__btn--flat"
               >
-                Delete Project
+                {deleteText}
               </button>
 
             </li>
