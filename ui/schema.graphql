@@ -1,5 +1,5 @@
 # source: http://localhost:10000/api/labbook/
-# timestamp: Wed Dec 05 2018 15:38:24 GMT-0500 (Eastern Standard Time)
+# timestamp: Wed Dec 12 2018 11:30:33 GMT-0500 (Eastern Standard Time)
 
 schema {
   query: LabbookQuery
@@ -351,15 +351,16 @@ type DeleteLabbookCollaboratorPayload {
   clientMutationId: String
 }
 
-input DeleteLabbookFilesInput {
+input DeleteLabbookFileInput {
   owner: String!
   labbookName: String!
   section: String!
-  filePaths: [String]!
+  filePath: String!
+  isDirectory: Boolean
   clientMutationId: String
 }
 
-type DeleteLabbookFilesPayload {
+type DeleteLabbookFilePayload {
   success: Boolean
   clientMutationId: String
 }
@@ -675,7 +676,7 @@ type LabbookMutations {
   addLabbookFile(input: AddLabbookFileInput!): AddLabbookFilePayload
   completeBatchUploadTransaction(input: CompleteBatchUploadTransactionInput!): CompleteBatchUploadTransactionPayload
   moveLabbookFile(input: MoveLabbookFileInput!): MoveLabbookFilePayload
-  deleteLabbookFiles(input: DeleteLabbookFilesInput!): DeleteLabbookFilesPayload
+  deleteLabbookFile(input: DeleteLabbookFileInput!): DeleteLabbookFilePayload
   makeLabbookDirectory(input: MakeLabbookDirectoryInput!): MakeLabbookDirectoryPayload
   removeUserIdentity(input: RemoveUserIdentityInput!): RemoveUserIdentityPayload
   addFavorite(input: AddLabbookFavoriteInput!): AddLabbookFavoritePayload
@@ -813,7 +814,7 @@ Method to move/rename a file or directory. If file, both src_path and dst_path s
 If a directory, be sure to include the trailing slash
 """
 type MoveLabbookFilePayload {
-  updatedEdges(before: String, after: String, first: Int, last: Int): LabbookFileConnection
+  newLabbookFileEdge: LabbookFileEdge
   clientMutationId: String
 }
 
