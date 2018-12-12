@@ -189,7 +189,7 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         """Return the size of the labbook on disk (in bytes).
         NOTE! This must be a string, as graphene can't quite handle big integers. """
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
-            lambda labbook: str(FileOperations.content_size(labbook=labbook)))
+            lambda labbook: str(FileOperations.content_size(labbook)))
 
     def resolve_updates_available_count(self, info):
         """Get number of commits the active_branch is behind its remote counterpart.
@@ -203,15 +203,15 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
 
     def resolve_active_branch_name(self, info):
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
-            lambda labbook: BranchManager(labbook=labbook, username=get_logged_in_username()).active_branch)
+            lambda labbook: BranchManager(labbook, username=get_logged_in_username()).active_branch)
 
     def resolve_workspace_branch_name(self, info):
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
-            lambda labbook: BranchManager(labbook=labbook, username=get_logged_in_username()).workspace_branch)
+            lambda labbook: BranchManager(labbook, username=get_logged_in_username()).workspace_branch)
 
     def resolve_available_branch_names(self, info):
         fltr = lambda labbook: \
-            BranchManager(labbook=labbook, username=get_logged_in_username()).available_branches
+            BranchManager(labbook, username=get_logged_in_username()).available_branches
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
             fltr)
 
@@ -228,7 +228,7 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
             _mergeable)
 
     def helper_resolve_active_branch(self, labbook):
-        active_branch_name = BranchManager(labbook=labbook, username=get_logged_in_username()).active_branch
+        active_branch_name = BranchManager(labbook, username=get_logged_in_username()).active_branch
         return LabbookRef(id=f"{self.owner}&{self.name}&None&{active_branch_name}",
                           owner=self.owner, name=self.name, prefix=None,
                           ref_name=active_branch_name)

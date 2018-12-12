@@ -60,7 +60,7 @@ class PublishLabbook(graphene.relay.ClientIDMutation):
 
         job_metadata = {'method': 'publish_labbook',
                         'labbook': lb.key}
-        job_kwargs = {'labbook_path': lb.root_dir,
+        job_kwargs = {'repository': lb,
                       'username': username,
                       'access_token': token,
                       'public': set_public}
