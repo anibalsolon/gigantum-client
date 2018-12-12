@@ -52,7 +52,7 @@ class InventoryManager(object):
     def query_owner(self, repository: Repository) -> str:
         """Returns the Repository's owner in the Inventory. """
         tokens = repository.root_dir.rsplit('/', 3)
-        # expected pattern: gigantum/<username>/<owner>/<labbooks or datasets>/<project or dataset>
+        # expected pattern: gigantum/<username>/<owner>/<labbook or dataset>/<project or dataset name>
         if len(tokens) < 3 or tokens[-2] not in ['labbooks', 'datasets']:
             raise InventoryException(f'Unexpected root in {str(repository)}')
         return tokens[-3]
