@@ -247,12 +247,12 @@ class TestInventory(object):
         lb = inv_manager.create_labbook("test", "test", "labbook1", description="my first labbook")
         assert "test" == inv_manager.query_owner(lb)
 
-    # def test_query_owner_fail(self, mock_config_file):
-    #     inv_manager = InventoryManager(mock_config_file[0])
-    #     lb = inv_manager.create_labbook("test", "test", "labbook1", description="my first labbook")
-    #     shutil.move(lb.root_dir, '/tmp')
-    #     with pytest.raises(InventoryException):
-    #         inv_manager.query_owner(lb)
+    def test_query_owner_fail(self, mock_config_file):
+        inv_manager = InventoryManager(mock_config_file[0])
+        lb = inv_manager.create_labbook("test", "test", "labbook1", description="my first labbook")
+        shutil.move(lb.root_dir, '/tmp')
+        with pytest.raises(InventoryException):
+            inv_manager.query_owner(lb)
 
 
 class TestCreateLabbooks(object):
