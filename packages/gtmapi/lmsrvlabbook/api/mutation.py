@@ -26,7 +26,7 @@ from lmsrvlabbook.api.mutations import (CreateLabbook, BuildImage, StartContaine
                                         MakeLabbookDirectory, RemoveUserIdentity,
                                         AddLabbookFavorite, RemoveLabbookFavorite, UpdateLabbookFavorite,
                                         AddLabbookCollaborator,
-                                        DeleteLabbookCollaborator, SyncLabbook, PublishLabbook,
+                                        DeleteLabbookCollaborator, SyncLabbook, PublishLabbook, PublishDataset,
                                         RemovePackageComponents,
                                         StartDevTool, SetLabbookDescription, CreateExperimentalBranch,
                                         DeleteExperimentalBranch,
@@ -62,6 +62,9 @@ class LabbookMutations(graphene.ObjectType):
 
     # Publish a labbook to a remote (for the first time
     publish_labbook = PublishLabbook.Field()
+
+    # Publish a dataset to a remote (for the first time
+    publish_dataset = PublishDataset.Field()
 
     # Sync a Labbook with remote (for collaboration)
     sync_labbook = SyncLabbook.Field()

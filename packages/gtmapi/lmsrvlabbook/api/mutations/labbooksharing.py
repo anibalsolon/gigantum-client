@@ -65,10 +65,47 @@ class PublishLabbook(graphene.relay.ClientIDMutation):
                       'access_token': token,
                       'public': set_public}
         dispatcher = Dispatcher()
-        job_key = dispatcher.dispatch_task(jobs.publish_labbook, kwargs=job_kwargs, metadata=job_metadata)
+        job_key = dispatcher.dispatch_task(jobs.publish_repository, kwargs=job_kwargs, metadata=job_metadata)
         logger.info(f"Publishing LabBook {lb.root_dir} in background job with key {job_key.key_str}")
 
         return PublishLabbook(job_key=job_key.key_str)
+
+
+class PublishDataset(graphene.relay.ClientIDMutation):
+
+    class Input:
+        owner = graphene.String(required=True)
+        dataset_name = graphene.String(required=True)
+        set_public = graphene.Boolean(required=False)
+
+    job_key = graphene.String()
+
+    @classmethod
+    @logged_mutation
+    def mutate_and_get_payload(cls, root, info, owner, dataset_name, set_public=False,
+                               client_mutation_id=None):
+        # Load LabBook
+        username = get_logged_in_username()
+        ds = InventoryManager().load_dataset(username, owner, dataset_name,
+                                             author=get_logged_in_author())
+        # Extract valid Bearer token
+        if "HTTP_AUTHORIZATION" in info.context.headers.environ:
+            token = parse_token(info.context.headers.environ["HTTP_AUTHORIZATION"])
+        else:
+            raise ValueError(
+                "Authorization header not provided. Must have a valid session to query for collaborators")
+
+        job_metadata = {'method': 'publish_dataset',
+                        'dataset': ds.key}
+        job_kwargs = {'repository': ds,
+                      'username': username,
+                      'access_token': token,
+                      'public': set_public}
+        dispatcher = Dispatcher()
+        job_key = dispatcher.dispatch_task(jobs.publish_repository, kwargs=job_kwargs, metadata=job_metadata)
+        logger.info(f"Publishing Dataset {ds.root_dir} in background job with key {job_key.key_str}")
+
+        return PublishDataset(job_key=job_key.key_str)
 
 
 class SyncLabbook(graphene.relay.ClientIDMutation):

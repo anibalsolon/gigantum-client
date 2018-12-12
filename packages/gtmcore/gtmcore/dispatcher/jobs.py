@@ -33,6 +33,7 @@ from gtmcore.configuration import Configuration
 from gtmcore.configuration.utils import call_subprocess
 from gtmcore.labbook import LabBook
 from gtmcore.inventory.inventory  import InventoryManager
+from gtmcore.inventory  import Repository
 from gtmcore.logging import LMLogger
 from gtmcore.workflows import sync_locally, GitWorkflow, ZipExporter
 from gtmcore.container.core import (build_docker_image as build_image,
@@ -46,11 +47,13 @@ from gtmcore.container.core import (build_docker_image as build_image,
 # ANY use of globals will cause the following methods to fail.
 
 
-def publish_labbook(labbook_path: str, username: str, access_token: str,
+
+
+def publish_repository(repository: Repository, username: str, access_token: str,
                     remote: Optional[str] = None, public: bool = False) -> None:
     p = os.getpid()
     logger = LMLogger.get_logger()
-    logger.info(f"(Job {p}) Starting publish_labbook({labbook_path})")
+    logger.info(f"(Job {p}) Starting publish_repository({str(repository)})")
 
     def update_meta(msg):
         job = get_current_job()
@@ -63,14 +66,12 @@ def publish_labbook(labbook_path: str, username: str, access_token: str,
         job.save_meta()
 
     try:
-        labbook = InventoryManager().load_labbook_from_directory(labbook_path)
-
-        with labbook.lock():
-            wf = GitWorkflow(labbook)
+        with repository.lock():
+            wf = GitWorkflow(repository)
             wf.publish(username=username, access_token=access_token, remote=remote or "origin",
                        public=public, feedback_callback=update_meta)
     except Exception as e:
-        logger.exception(f"(Job {p}) Error on publish_labbook: {e}")
+        logger.exception(f"(Job {p}) Error on publish_repository: {e}")
         raise
 
 
