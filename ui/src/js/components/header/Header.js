@@ -228,7 +228,7 @@ class LabbookHeader extends Component {
                 collaborators={collaborators}
                 defaultRemote={defaultRemote}
                 labbookId={id}
-                remoteUrl={labbook && labbook.overview.remoteUrl}
+                remoteUrl={defaultRemote}
                 setSyncingState={this._setSyncingState}
                 setPublishingState={this._setPublishingState}
                 setExportingState={this._setExportingState}

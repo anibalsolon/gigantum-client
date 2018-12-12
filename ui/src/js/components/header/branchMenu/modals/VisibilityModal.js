@@ -132,14 +132,7 @@ export default class PublishModal extends Component {
 
                   self.props.setRemoteSession();
                 };
-                console.log(
-                  owner,
-                  labbookName,
-                  labbookId,
-                  this.state.isPublic,
-                  successCall,
-                  failureCall,
-                );
+
                 this.props.sectionType === 'labbook' ?
                   PublishLabbookMutation(
                     owner,
@@ -158,7 +151,6 @@ export default class PublishModal extends Component {
                   PublishDatasetMutation(
                     owner,
                     labbookName,
-                    labbookId,
                     this.state.isPublic,
                     successCall,
                     failureCall,

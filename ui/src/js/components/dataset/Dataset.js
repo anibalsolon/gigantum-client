@@ -297,6 +297,8 @@ const DatasetFragmentContainer = createFragmentContainer(
           owner
           #createdOnUtc
           modifiedOnUtc
+          defaultRemote
+          visibility
           datasetType {
               name
               storageType

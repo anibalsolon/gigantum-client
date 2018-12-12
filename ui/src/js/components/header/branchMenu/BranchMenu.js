@@ -196,7 +196,7 @@ class BranchMenu extends Component {
   *  @return {string}
   */
   _sync() {
-    if (!this.props.isMainWorkspace) {
+    if (!this.props.isMainWorkspace && this.props.sectionType === 'labbook') {
       setWarningMessage('Syncing is currently only available on the main workspace branch.');
     } else if (this.props.isExporting) {
       this.setState({ syncWarningVisible: true });
@@ -207,7 +207,7 @@ class BranchMenu extends Component {
         this.setState({ menuOpen: false });
       }
 
-      if ((status === 'Stopped') || (status === 'Rebuild')) {
+      if ((status === 'Stopped') || (status === 'Rebuild') || this.props.sectionType !== 'labbook') {
         const id = uuidv4();
         const self = this;
 

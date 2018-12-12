@@ -1,5 +1,5 @@
 # source: http://localhost:10000/api/labbook/
-# timestamp: Wed Dec 12 2018 15:32:18 GMT-0500 (Eastern Standard Time)
+# timestamp: Wed Dec 12 2018 16:54:30 GMT-0500 (Eastern Standard Time)
 
 schema {
   query: LabbookQuery
@@ -385,6 +385,8 @@ type Dataset implements Node & GitRepository {
   allFiles(before: String, after: String, first: Int, last: Int): DatasetFileConnection
   detailRecord(key: String): ActivityDetailObject
   detailRecords(keys: [String]): [ActivityDetailObject]
+  visibility: String
+  defaultRemote: String
 }
 
 """A Connection for paging through datasets that exist locally. """
