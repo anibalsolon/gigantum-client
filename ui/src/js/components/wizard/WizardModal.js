@@ -309,6 +309,7 @@ export default class WizardModal extends React.Component {
           this.state.modal_visible &&
           <Modal
             size="large"
+            icon="add"
             handleClose={() => this._hideModal()}
             header={currentComponent.header}
             preHeader={currentComponent.preHeader}

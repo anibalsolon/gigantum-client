@@ -5,6 +5,7 @@ import Slider from 'react-slick';
 import classNames from 'classnames';
 // components
 import Loader from 'Components/shared/Loader';
+import AdvancedSearch from 'Components/shared/AdvancedSearch';
 import BaseDetails from './BaseDetails';
 // utilites
 import environment from 'JS/createRelayEnvironment';
@@ -54,6 +55,7 @@ const DatasetQuery = graphql`query SelectBase_DatasetQuery{
     name
     storageType
     description
+    isManaged
     readme
     tags
     icon
@@ -70,11 +72,13 @@ export default class SelectBase extends React.Component {
       selectedTab: 'python3',
       viewedBase: null,
       viewingBase: false,
+      tags: [],
     };
 
     this._backToBaseSelect = this._backToBaseSelect.bind(this);
     this._viewBase = this._viewBase.bind(this);
     this._selectBase = this._selectBase.bind(this);
+    this._setTags = this._setTags.bind(this);
   }
   /**
     @param {object} edge
@@ -152,6 +156,63 @@ export default class SelectBase extends React.Component {
 
     return sortedBases;
   }
+  /**
+    @param {object} datasetBases
+    determines filter criteria for dataset types
+    @return {object} filters
+  */
+  _createFilters(datasetBases) {
+    const filters = {
+      'Dataset Type': ['Managed', 'Unmanaged'],
+      Tags: [],
+    };
+    const tags = new Set();
+    datasetBases.forEach((datasetBase) => {
+      datasetBase.tags.forEach((tag) => {
+        if (!tags.has(tag)) {
+          tags.add(tag);
+        }
+      });
+    });
+    filters.Tags = Array.from(tags);
+    return filters;
+  }
+  /**
+    @param {Array} tags
+    sets component tags from child
+  */
+  _setTags(tags) {
+    this.setState({ tags });
+  }
+  /**
+    @param {Array} datasets
+    filters datasets based on selected filters
+  */
+  _filterDatasets(datasets) {
+    const tags = this.state.tags.map(tagObject => tagObject.text.toLowerCase());
+    return datasets.filter((dataset) => {
+      const lowercaseReadme = dataset.readme.toLowerCase();
+      const lowercaseDescription = dataset.description.toLowerCase();
+      const lowercaseName = dataset.name.toLowerCase();
+      let isReturned = true;
+      if (tags.indexOf('Managed') > -1 && !dataset.isManaged ||
+          tags.indexOf('Unmanaged') > -1 && dataset.isManaged) {
+        isReturned = false;
+      }
+
+      tags.forEach((tag) => {
+        if (tag !== 'Managed' && tag !== 'Unmanaged' &&
+            dataset.tags.indexOf(tag) === -1 &&
+            lowercaseReadme.indexOf(tag) === -1 &&
+            lowercaseDescription.indexOf(tag) === -1 &&
+            lowercaseName.indexOf(tag) === -1) {
+          isReturned = false;
+        }
+      });
+      return isReturned;
+    });
+  }
+
 
   render() {
     const sliderSettings = {
@@ -168,6 +229,7 @@ export default class SelectBase extends React.Component {
 
     const innerContainer = classNames({
       'SelectBase__inner-container': true,
+      'SelectBase__inner-container--datasets': true,
       'SelectBase__inner-container--viewer': this.state.viewingBase,
     });
 
@@ -236,13 +298,21 @@ export default class SelectBase extends React.Component {
                     </div>
                   );
                 } else if (props && this.props.datasets) {
+                  const filterCategories = this._createFilters(props.availableDatasets);
+                  const filteredDatasets = this._filterDatasets(props.availableDatasets);
+                  console.log(filteredDatasets);
                   return <div className={innerContainer}>
+                    <AdvancedSearch
+                      tags={this.state.tags}
+                      setTags={this._setTags}
+                      filterCategories={filterCategories}
+                    />
                     <div className="SelectBase__select-container">
                       <div className="SelectBase__images">
                         <Slider {...sliderSettings}>
 
                           {
-                            props.availableDatasets.map(node => (
+                            filteredDatasets.map(node => (
                               <div
                                 key={node.id}
                                 className="BaseSlide__wrapper"

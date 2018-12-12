@@ -39,6 +39,9 @@
   flex-wrap: nowrap;
   transition: right 0.5s;
   right: 0%;
+  &--datasets {
+    @include flex(flex-start, column);
+  }
 }
 
 .SelectBase__inner-container--viewer {

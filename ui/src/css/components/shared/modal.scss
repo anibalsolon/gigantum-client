@@ -33,6 +33,13 @@
   }
 }
 
+.Modal__content.add .Modal__container{
+  .Modal__header{
+    background: url('./../images/icons/add.svg') no-repeat 160px 34px;
+    background-size: 50px;
+  }
+}
+
 .Modal__sub-container{
   padding: 0 20px;
   height: calc(100% - 60px);
