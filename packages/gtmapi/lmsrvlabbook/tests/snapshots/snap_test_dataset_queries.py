@@ -747,22 +747,6 @@ snapshots['TestDatasetQueries.test_pagination 4'] = {
     }
 }
 
-snapshots['TestDatasetQueries.test_get_dataset 1'] = {
-    'data': {
-        'dataset': {
-            'datasetType': {
-                'description': 'Scalable Dataset storage provided by your Gigantum account',
-                'id': 'RGF0YXNldFR5cGU6Z2lnYW50dW1fb2JqZWN0X3Yx',
-                'name': 'Gigantum Cloud'
-            },
-            'description': 'Cats 8',
-            'id': 'RGF0YXNldDpkZWZhdWx0JmRhdGFzZXQ4',
-            'name': 'dataset8',
-            'schemaVersion': 1
-        }
-    }
-}
-
 snapshots['TestDatasetQueries.test_get_dataset_all_fields 1'] = {
     'data': {
         'dataset': {
