@@ -18,18 +18,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import time
-import os
 
-from tempfile import TemporaryDirectory
-from typing import Optional, Callable, List
+from typing import Optional, Callable
 
-from gtmcore.exceptions import GigantumException
 from gtmcore.configuration.utils import call_subprocess
-from gtmcore.inventory.inventory import InventoryManager
-# from gtmcore.repository import LabBook
-from gtmcore.inventory import Repository
 from gtmcore.logging import LMLogger
 from gtmcore.workflows import core
+from gtmcore.inventory import Repository
 from gtmcore.inventory.branching import BranchManager
 
 logger = LMLogger.get_logger()

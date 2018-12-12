@@ -38,7 +38,7 @@ from gtmcore.inventory.branching import BranchManager
 class TestLabbookShareProtocol(object):
 
     @mock.patch('gtmcore.workflows.core.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
-    def  test_simple_publish_new_one_user(self, remote_bare_repo, mock_labbook_lfs_disabled):
+    def test_simple_publish_new_one_user(self, remote_bare_repo, mock_labbook_lfs_disabled):
         # Make sure you cannot clobber a remote branch with your local branch of the same name.
 
         ## 1 - Make initial set of contributions to Labbook.
