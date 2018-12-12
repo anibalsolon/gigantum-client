@@ -477,14 +477,15 @@ class InventoryManager(object):
 
             # Commit
             dataset.git.add_all()
+            dataset.git.create_branch(name="gm.workspace")
+            bm = BranchManager(dataset, username=username)
 
             # NOTE: this string is used to indicate there are no more activity records to get. Changing the string will
             # break activity paging.
             # TODO: Improve method for detecting the first activity record
             dataset.git.commit(f"Creating new empty Dataset: {dataset_name}")
-
-            # TODO: Move to branch manager class
-            dataset.git.create_branch(name="workspace")
+            user_workspace_branch = f"gm.workspace-{username}"
+            bm.create_branch(user_workspace_branch)
 
             # Create Activity Record
             adr = ActivityDetailRecord(ActivityDetailType.DATASET, show=False, importance=0)

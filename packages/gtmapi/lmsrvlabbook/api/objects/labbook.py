@@ -595,7 +595,7 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         mgr = GitLabManager(default_remote, admin_service, token)
         try:
             owner = InventoryManager().query_owner(labbook)
-            d = mgr.repo_details(namespace=owner, labbook_name=labbook.name)
+            d = mgr.repo_details(namespace=owner, repo_name=labbook.name)
             return d.get('visibility')
         except ValueError:
             return "local"

@@ -222,7 +222,7 @@ class GitLabManager(object):
         if details.get('visibility') != visibility:
             raise ValueError(f"Visibility could not be set for {namespace}/{labbook_name} to {visibility}")
 
-    def repo_details(self, namespace: str, labbook_name: str) -> Dict[str, Any]:
+    def repo_details(self, namespace: str, repo_name: str) -> Dict[str, Any]:
         """ Get all properties of a given Gitlab Repository, see API documentation
             at https://docs.gitlab.com/ee/api/projects.html#get-single-project.
 
@@ -230,20 +230,20 @@ class GitLabManager(object):
 
             Args:
                 namespace: Owner or organization
-                labbook_name: Name of labbook
+                repo_name: Name of repository
 
             Returns:
-                Dict of labbook properties, for keys see above link.
+                Dict of repository properties, for keys see above link.
             """
-        repo_id = self.get_repository_id(namespace, labbook_name)
+        repo_id = self.get_repository_id(namespace, repo_name)
         response = requests.get(f"https://{self.remote_host}/api/v4/projects/{repo_id}",
                                 headers={"PRIVATE-TOKEN": self.user_token}, timeout=10)
         if response.status_code == 200:
             return response.json()
         elif response.status_code == 404:
-            raise ValueError(f"Remote GitLab repo {namespace}/{labbook_name} not found")
+            raise ValueError(f"Remote GitLab repo {namespace}/{repo_name} not found")
         else:
-            msg = f"Failed to check if {namespace}/{labbook_name} exists. Status Code: {response.status_code}"
+            msg = f"Failed to check if {namespace}/{repo_name} exists. Status Code: {response.status_code}"
             logger.error(msg)
             logger.error(response.json())
             raise ValueError(msg)
