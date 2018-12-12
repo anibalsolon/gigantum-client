@@ -33,6 +33,7 @@
 }
 
 .SelectBase__inner-container {
+  min-height: 320px;
   position: relative;
   padding: 0 40px;
   @include flex(flex-start, row);
@@ -50,6 +51,7 @@
 
 .SelectBase__select-container {
   min-width: 100%;
+  overflow: auto;
   flex-wrap: nowrap;
 }
 
@@ -117,6 +119,9 @@
   height: 100px;
 
   cursor: pointer;
+  &--expanded {
+    height: auto !important;
+  }
 }
 
 .SelectBase__image--selected {
@@ -224,6 +229,7 @@
 .SelectBase__details{
   padding: 20px 10px;
   color: $slateBlue;
+  font-size: 14px;
   @include flex(space-around, column);
 
 }

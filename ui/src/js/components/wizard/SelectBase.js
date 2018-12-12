@@ -70,7 +70,6 @@ export default class SelectBase extends React.Component {
       description: '',
       selectedBase: null,
       selectedBaseId: false,
-      selectedTab: 'python3',
       viewedBase: null,
       viewingBase: false,
       tags: [],
@@ -128,34 +127,6 @@ export default class SelectBase extends React.Component {
   */
   _environmentView() {
     return this.props.environmentView;
-  }
-  /**
-    @param {}
-    @return {}
-  */
-  _setSelectedTab(tab) {
-    this.setState({ selectedTab: tab });
-  }
-  /**
-    @param {array} availableBases
-    sort bases into a object for easier consumption
-    @return {object} sortedBases
-  */
-  _getTabStructure(availableBases) {
-    const sortedBases = { tabs: [], bases: {} };
-    availableBases.edges.forEach((edge) => {
-      const languages = edge.node.languages;
-      languages.forEach((language) => {
-        if (sortedBases.tabs.indexOf(language) < 0) {
-          sortedBases.tabs.push(language);
-          sortedBases.bases[language] = [edge.node];
-        } else {
-          sortedBases.bases[language].push(edge.node);
-        }
-      });
-    });
-
-    return sortedBases;
   }
   /**
     @param {object} datasetBases
@@ -216,14 +187,6 @@ export default class SelectBase extends React.Component {
 
 
   render() {
-    const sliderSettings = {
-      dots: false,
-      infinite: false,
-      speed: 500,
-      slidesToShow: 2,
-      slidesToScroll: 1,
-      arrows: false,
-    };
     const variables = {
       first: 20,
     };
@@ -246,47 +209,36 @@ export default class SelectBase extends React.Component {
               }
 
                 if (props && !this.props.datasets) {
-                  const sortedBaseItems = this._getTabStructure(props.availableBases);
                   const selecBaseImage = classNames({
                     SelectBase__images: true,
                     'SelectBase__images--hidden': (this.state.selectedTab === 'none'),
                   });
 
-                  if (sortedBaseItems.bases[this.state.selectedTab].length > 2) sliderSettings.arrows = true;
+                  console.log(props.availableBases);
+                  const filterCategories = {};
                   return (
                     <div className={innerContainer}>
                       <div className="SelectBase__select-container">
-                        <div className="SelectBase__tabs-container">
-                          <ul className="SelectBase__tabs-list">
-                            {
-                              sortedBaseItems.tabs.map(tab => (
-                                <LanguageTab
-                                  key={tab}
-                                  tab={tab}
-                                  self={this}
-                                  length={sortedBaseItems.bases[tab].length}
-                                />))
-                            }
-                          </ul>
-                        </div>
+                      <AdvancedSearch
+                        tags={this.state.tags}
+                        setTags={this._setTags}
+                        filterCategories={filterCategories}
+                      />
                         <div className={selecBaseImage}>
-                          <Slider {...sliderSettings}>
-                            {
-                              (this.state.selectedTab !== 'none') && sortedBaseItems.bases[this.state.selectedTab].map(node => (
-                                <div
-                                  key={node.id}
-                                  className="BaseSlide__wrapper"
-                                >
-                                  <BaseSlide
-                                    key={`${node.id}_slide`}
-                                    node={node}
-                                    self={this}
-                                  />
-                                </div>
-                                  ))
-                            }
-                          </Slider>
-
+                          {
+                            props.availableBases.edges.map(({ node }) => (
+                              <div
+                                key={node.id}
+                                className="BaseSlide__wrapper"
+                              >
+                                <BaseSlide
+                                  key={`${node.id}_slide`}
+                                  node={node}
+                                  self={this}
+                                />
+                              </div>
+                                ))
+                          }
                         </div>
                       </div>
                       <div className="SelectBase__viewer-container">
@@ -346,24 +298,6 @@ export default class SelectBase extends React.Component {
 
 /**
 * @param {string, this}
-* returns tab jsx for
-* return {jsx}
-*/
-const LanguageTab = ({ tab, self, length }) => {
-  const tabClass = classNames({
-    SelectBase__tab: true,
-    'SelectBase__tab--selected': (tab === self.state.selectedTab),
-  });
-  return (<li
-    className={tabClass}
-    onClick={() => self._setSelectedTab(tab)}
-  >
-    {`${tab} (${length})`}
-          </li>);
-};
-
-/**
-* @param {string, this}
 * returns base slide
 * return {jsx}
 */
@@ -371,10 +305,18 @@ const BaseSlide = ({ node, self }) => {
   const selectedBaseImage = classNames({
     SelectBase__image: true,
     'SelectBase__image--selected': (self.state.selectedBaseId === node.id),
+    'SelectBase__image--expanded': self.state.expandedNode === node.name,
+    Card: true,
   });
+  const actionCSS = classNames({
+    'SelectBase__image-actions': true,
+    'SelectBase__image-actions--expanded': self.state.expandedNode === node.name,
+  });
+  let languages = node.languages.length > 1 ? 'Languages:' : 'Language:';
+  node.languages.forEach((language, index) => languages += ` ${language}${index === node.languages.length - 1 ? '' : ','}`);
   return (<div
     onClick={() => self._selectBase(node)}
-    className="SelectBase__image-wrapper slick-slide"
+    className="SelectBase__image-wrapper"
   >
     <div
       className={selectedBaseImage}
@@ -387,12 +329,15 @@ const BaseSlide = ({ node, self }) => {
           width="50"
         />
       </div>
+      <div className="SelectBase__details">
+        <h6 className="SelectBase__name">{node.name}</h6>
+        <h6 className="SelectBase__type">{`${node.osClass} ${node.osRelease}`}</h6>
+        <h6 className="SelectBase__languages">{languages}</h6>
+      </div>
       <div className="SelectBase__image-text">
-        <h6 className="SelectBase__image-header">{node.name}</h6>
-        <p>{`${node.osClass} ${node.osRelease}`}</p>
         <p className="SelectBase__image-description">{node.description}</p>
-
-        <div className="SelectBase__image-info">
+      </div>
+        {/* <div className="SelectBase__image-info">
           <div className="SelectBase__image-languages">
             <h6>Languages</h6>
             <ul>
@@ -409,11 +354,10 @@ const BaseSlide = ({ node, self }) => {
             }
             </ul>
           </div>
+        </div> */}
+        <div className={actionCSS}>
+          <button onClick={() => self.setState({ expandedNode: self.state.expandedNode === node.name ? null : node.name })} className="button--flat"></button>
         </div>
-        <div className="SelectBase__image-actions">
-          <button onClick={() => self._viewBase(node)} className="button--flat">View Details</button>
-        </div>
-      </div>
     </div>
   </div>);
 };
@@ -427,6 +371,7 @@ const DatasetSlide = ({ node, self }) => {
   const selectedBaseImage = classNames({
     SelectBase__image: true,
     'SelectBase__image--selected': (self.state.selectedBaseId === node.id),
+    'SelectBase__image--expanded': self.state.expandedNode === node.name,
     Card: true,
   });
   const actionCSS = classNames({
