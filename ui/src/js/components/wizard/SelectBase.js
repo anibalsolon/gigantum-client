@@ -1,5 +1,5 @@
 // vendor
-import React from 'react';
+import React, { Fragment } from 'react';
 import { QueryRenderer, graphql } from 'react-relay';
 import Slider from 'react-slick';
 import classNames from 'classnames';
@@ -133,7 +133,7 @@ export default class SelectBase extends React.Component {
     determines filter criteria for dataset types
     @return {object} filters
   */
-  _createFilters(datasetBases) {
+  _createDatasetFilters(datasetBases) {
     const filters = {
       'Dataset Type': ['Managed', 'Unmanaged'],
       Tags: [],
@@ -147,6 +147,45 @@ export default class SelectBase extends React.Component {
       });
     });
     filters.Tags = Array.from(tags);
+    return filters;
+  }
+  /**
+    @param {object} projectBases
+    determines filter criteria for project types
+    @return {object} filters
+  */
+  _createProjectFilters(projectBases) {
+    const filters = {
+      Languages: [],
+      'Development Environments': [],
+      Tags: [],
+    };
+    const tags = new Set();
+    const languages = new Set();
+    const devTools = new Set();
+
+    projectBases.forEach(({ node }) => {
+      console.log(node);
+      node.tags.forEach((tag) => {
+        if (!tags.has(tag)) {
+          tags.add(tag);
+        }
+        node.languages.forEach((language) => {
+          if (!languages.has(language)) {
+            languages.add(language);
+          }
+        });
+        node.developmentTools.forEach((devTool) => {
+          if (!devTools.has(devTool)) {
+            devTools.add(devTool);
+          }
+        });
+      });
+    });
+    filters.Tags = Array.from(tags);
+    filters.Languages = Array.from(languages);
+    filters['Development Environments'] = Array.from(devTools);
+
     return filters;
   }
   /**
@@ -184,6 +223,29 @@ export default class SelectBase extends React.Component {
       return isReturned;
     });
   }
+  /**
+    @param {Array} projects
+    filters projects based on selected filters
+  */
+  _filterProjects(projects, existingFilters) {
+    const tags = this.state.tags.map(tagObject => tagObject.text);
+    const defaultLanguages = existingFilters.Languages;
+    const defaultDevtools = existingFilters['Development Environments'];
+    const defaultTags = existingFilters.Tags;
+    return projects.filter(({ node }) => {
+      const lowercaseJSON = JSON.stringify(node);
+      let isReturned = true;
+      tags.forEach((tag) => {
+        if (((defaultLanguages.indexOf(tag) > -1) && node.languages.indexOf(tag) === -1) ||
+          ((defaultDevtools.indexOf(tag) > -1) && node.developmentTools.indexOf(tag) === -1) ||
+          ((defaultTags.indexOf(tag) > -1) && node.tags.indexOf(tag) === -1) ||
+          (lowercaseJSON.indexOf(tag.toLowerCase()) === -1)) {
+          isReturned = false;
+        }
+      });
+      return isReturned;
+    });
+  }
 
 
   render() {
@@ -215,7 +277,8 @@ export default class SelectBase extends React.Component {
                   });
 
                   console.log(props.availableBases);
-                  const filterCategories = {};
+                  const filterCategories = this._createProjectFilters(props.availableBases.edges);
+                  const filteredProjects = this._filterProjects(props.availableBases.edges, filterCategories);
                   return (
                     <div className={innerContainer}>
                       <div className="SelectBase__select-container">
@@ -226,7 +289,7 @@ export default class SelectBase extends React.Component {
                       />
                         <div className={selecBaseImage}>
                           {
-                            props.availableBases.edges.map(({ node }) => (
+                            filteredProjects.map(({ node }) => (
                               <div
                                 key={node.id}
                                 className="BaseSlide__wrapper"
@@ -251,7 +314,7 @@ export default class SelectBase extends React.Component {
                     </div>
                   );
                 } else if (props && this.props.datasets) {
-                  const filterCategories = this._createFilters(props.availableDatasets);
+                  const filterCategories = this._createDatasetFilters(props.availableDatasets);
                   const filteredDatasets = this._filterDatasets(props.availableDatasets);
                   return <div className={innerContainer}>
                     <AdvancedSearch
@@ -401,7 +464,10 @@ const DatasetSlide = ({ node, self }) => {
         <p className="SelectBase__image-description">{node.description}</p>
         {
           self.state.expandedNode === node.name &&
-          <ReactMarkdown source={node.readme} />
+          <Fragment>
+            <hr/>
+            <ReactMarkdown source={node.readme} />
+          </Fragment>
         }
       </div>
       <div className={actionCSS}>

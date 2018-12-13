@@ -35,7 +35,6 @@
 .SelectBase__inner-container {
   min-height: 320px;
   position: relative;
-  padding: 0 40px;
   @include flex(flex-start, row);
   flex-wrap: nowrap;
   transition: right 0.5s;
@@ -51,7 +50,8 @@
 
 .SelectBase__select-container {
   min-width: 100%;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
   flex-wrap: nowrap;
 }
 
@@ -137,6 +137,7 @@
 
 .SelectBase__image-text {
   @include flex(center, column);
+  word-break: beak-word;
   padding: 5px;
   flex: 1;
   h6 {
@@ -145,6 +146,7 @@
     font-size: 14px;
   }
   p {
+    align-self: flex-start;
     padding: 5px 0;
   }
   ul {
@@ -229,8 +231,10 @@
 .SelectBase__details{
   padding: 20px 10px;
   color: $slateBlue;
-  font-size: 14px;
   @include flex(space-around, column);
+  h6 {
+    font-size: 16px;
+  }
 
 }
 .SelectBase__type{
