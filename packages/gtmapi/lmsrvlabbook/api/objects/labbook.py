@@ -596,6 +596,7 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         try:
             owner = InventoryManager().query_owner(labbook)
             d = mgr.repo_details(namespace=owner, repository_name=labbook.name)
+            assert 'visibility' in d.keys(), 'Visibility is not in repo details response keys'
             return d.get('visibility')
         except ValueError:
             return "local"
