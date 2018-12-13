@@ -30,7 +30,9 @@ from lmsrvcore.api import logged_mutation
 from lmsrvcore.auth.identity import parse_token
 from lmsrvcore.auth.user import get_logged_in_username, get_logged_in_author
 from lmsrvlabbook.api.connections.labbook import LabbookConnection
+from lmsrvlabbook.api.connections.dataset import DatasetConnection
 from lmsrvlabbook.api.objects.labbook import Labbook as LabbookObject
+from lmsrvlabbook.api.objects.dataset import Dataset as DatasetObject
 
 logger = LMLogger.get_logger()
 
@@ -209,3 +211,54 @@ class SetVisibility(graphene.relay.ClientIDMutation):
         lbedge = LabbookConnection.Edge(node=LabbookObject(owner, name=labbook_name),
                                         cursor=cursor)
         return SetVisibility(new_labbook_edge=lbedge)
+
+
+class SetDatasetVisibility(graphene.relay.ClientIDMutation):
+    class Input:
+        owner = graphene.String(required=True)
+        dataset_name = graphene.String(required=True)
+        visibility = graphene.String(required=True)
+
+    new_dataset_edge = graphene.Field(DatasetConnection.Edge)
+
+    @classmethod
+    @logged_mutation
+    def mutate_and_get_payload(cls, root, info, owner, dataset_name, visibility,
+                               client_mutation_id=None):
+        # Load LabBook
+        username = get_logged_in_username()
+        ds = InventoryManager().load_dataset(username, owner, dataset_name,
+                                             author=get_logged_in_author())
+        # Extract valid Bearer token
+        token = None
+        if hasattr(info.context.headers, 'environ'):
+            if "HTTP_AUTHORIZATION" in info.context.headers.environ:
+                token = parse_token(info.context.headers.environ["HTTP_AUTHORIZATION"])
+
+        if not token:
+            raise ValueError("Authorization header not provided. Must have a valid session to query for collaborators")
+
+        default_remote = ds.client_config.config['git']['default_remote']
+        admin_service = None
+        for remote in ds.client_config.config['git']['remotes']:
+            if default_remote == remote:
+                admin_service = ds.client_config.config['git']['remotes'][remote]['admin_service']
+                break
+
+        if not admin_service:
+            raise ValueError('admin_service could not be found')
+
+        # Configure git creds
+        mgr = GitLabManager(default_remote, admin_service, access_token=token)
+        mgr.configure_git_credentials(default_remote, username)
+
+        if visibility not in ['public', 'private']:
+            raise ValueError(f'Visibility must be either "public" or "private";'
+                             f'("{visibility}" invalid)')
+        with ds.lock():
+            mgr.set_visibility(namespace=owner, repository_name=dataset_name, visibility=visibility)
+
+        cursor = base64.b64encode(f"{0}".encode('utf-8'))
+        dsedge = LabbookConnection.Edge(node=DatasetObject(owner, name=dataset_name),
+                                        cursor=cursor)
+        return SetVisibility(new_dataset_edge=dsedge)

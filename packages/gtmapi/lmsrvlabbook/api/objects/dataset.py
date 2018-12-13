@@ -271,7 +271,7 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         mgr = GitLabManager(default_remote, admin_service, token)
         try:
             owner = InventoryManager().query_owner(dataset)
-            d = mgr.repo_details(namespace=owner, repo_name=dataset.name)
+            d = mgr.repo_details(namespace=owner, repository_name=dataset.name)
             return d.get('visibility')
         except ValueError:
             return "local"

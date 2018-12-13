@@ -94,17 +94,17 @@ class GitLabManager(object):
         self._gitlab_token: Optional[str] = None
 
     @staticmethod
-    def get_repository_id(namespace: str, labbook_name: str) -> str:
+    def get_repository_id(namespace: str, repository_name: str) -> str:
         """Method to transform a namespace and labbook name to a project ID
 
         Args:
             namespace(str): Namespace in gitlab, currently the "owner"
-            labbook_name(str): LabBook name (i.e. project name in gitlab)
+            repository_name(str): Repository name (i.e. project name in gitlab)
 
         Returns:
             str
         """
-        return quote_plus(f"{namespace}/{labbook_name}")
+        return quote_plus(f"{namespace}/{repository_name}")
 
     @property
     def user_token(self) -> Optional[str]:
@@ -196,33 +196,33 @@ class GitLabManager(object):
             logger.error(response.json())
             raise ValueError(msg)
 
-    def set_visibility(self, namespace: str, labbook_name: str, visibility: str) -> None:
+    def set_visibility(self, namespace: str, repository_name: str, visibility: str) -> None:
         """ Change public/private visibility for a given project
 
         Args:
             namespace: Owner or organization
-            labbook_name: Name of labbook
+            repository_name: Name of repository
             visibility: One of "public" or "private"
 
         Returns:
             None (Exception on failure)
 
         """
-        repo_id = self.get_repository_id(namespace, labbook_name)
+        repo_id = self.get_repository_id(namespace, repository_name)
         update_data = {'visibility': visibility}
         response = requests.put(f"https://{self.remote_host}/api/v4/projects/{repo_id}",
                                 data=update_data, headers={"PRIVATE-TOKEN": self.user_token},
                                 timeout=10)
         if response.status_code != 200:
-            msg = f"Could not set visibility for remote project {namespace}/{labbook_name} " \
+            msg = f"Could not set visibility for remote repository {namespace}/{repository_name} " \
                   f"to {visibility}: Status code {response.status_code}"
             raise ValueError(msg)
 
-        details = self.repo_details(namespace, labbook_name)
+        details = self.repo_details(namespace, repository_name)
         if details.get('visibility') != visibility:
-            raise ValueError(f"Visibility could not be set for {namespace}/{labbook_name} to {visibility}")
+            raise ValueError(f"Visibility could not be set for {namespace}/{repository_name} to {visibility}")
 
-    def repo_details(self, namespace: str, repo_name: str) -> Dict[str, Any]:
+    def repo_details(self, namespace: str, repository_name: str) -> Dict[str, Any]:
         """ Get all properties of a given Gitlab Repository, see API documentation
             at https://docs.gitlab.com/ee/api/projects.html#get-single-project.
 
@@ -230,20 +230,20 @@ class GitLabManager(object):
 
             Args:
                 namespace: Owner or organization
-                repo_name: Name of repository
+                repository_name: Name of repository
 
             Returns:
                 Dict of repository properties, for keys see above link.
             """
-        repo_id = self.get_repository_id(namespace, repo_name)
+        repo_id = self.get_repository_id(namespace, repository_name)
         response = requests.get(f"https://{self.remote_host}/api/v4/projects/{repo_id}",
                                 headers={"PRIVATE-TOKEN": self.user_token}, timeout=10)
         if response.status_code == 200:
             return response.json()
         elif response.status_code == 404:
-            raise ValueError(f"Remote GitLab repo {namespace}/{repo_name} not found")
+            raise ValueError(f"Remote GitLab repo {namespace}/{repository_name} not found")
         else:
-            msg = f"Failed to check if {namespace}/{repo_name} exists. Status Code: {response.status_code}"
+            msg = f"Failed to check if {namespace}/{repository_name} exists. Status Code: {response.status_code}"
             logger.error(msg)
             logger.error(response.json())
             raise ValueError(msg)
