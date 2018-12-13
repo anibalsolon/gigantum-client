@@ -3,6 +3,7 @@ import React, { Component, Fragment } from 'react';
 import classNames from 'classnames';
 // components
 import ToolTip from 'Components/shared/ToolTip';
+import Modal from 'Components/shared/Modal';
 // store
 import store from 'JS/redux/store';
 // assets
@@ -67,6 +68,25 @@ const ImportMain = ({ self }) => {
   });
 
   return (<div className="Import__dataset-main">
+    {
+      self.state.showImportModal &&
+      <Modal
+        header="Import Dataset"
+        handleClose={() => self.setState({ showImportModal: false })}
+        size="medium"
+        renderContent={() =>
+          (<Fragment>
+            <div>
+              <p>Import instructions here</p>
+            </div>
+            <div className="ForceSync__buttonContainer">
+              <button onClick={() => { self.importDataset(); }}>Import</button>
+              <button onClick={() => self.setState({ showImportModal: false })}>Cancel</button>
+            </div>
+            </Fragment>)
+        }
+      />
+    }
 
     <div className="Import__dataset-header">
       <div className="Import__dataset-icon">
@@ -85,6 +105,15 @@ const ImportMain = ({ self }) => {
       }}
     >
       Create New
+    </div>
+
+    <div
+      className="btn--import"
+      onClick={(evt) => {
+        self.setState({ showImportModal: true });
+      }}
+    >
+      Import Existing
     </div>
 
     <ToolTip section="createLabbook" />
