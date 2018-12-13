@@ -29,13 +29,17 @@ class JupyterLabCellVisibilityProcessor(ActivityProcessor):
         old_details = result_obj.detail_objects
         result_obj.detail_objects = []
 
+        # XXX DC Putting this on pause while doing a small refactor of the ActivityRecord code.
+        # Remaining, first pass, just for CODE_EXECUTED, find and set directive, and also store a dict of directives
+        # Second pass, for everything else (or just everything), check dict for tag and set directive if found.
+        # After refactor, unpacking below should not be necessary.
+
         # At this point, all detail records will be generated. So, we enumerate over and modify them as indicated
         # by code comments.
-        for _, _, _, detail in result_obj.detail_objects:
-            logger.info(f'JLCellVisibilityP.process: {detail}')
+        for _, _, _, detail in old_details:
             if detail.type is ActivityDetailType.CODE_EXECUTED:
                 code = detail.data['text/markdown']
-                res = self.comment_re.match(code)
+                res = self.comment_re.search(code)
                 if res:
                     directive = res[1]
                     if directive == 'auto':
@@ -54,11 +58,13 @@ class JupyterLabCellVisibilityProcessor(ActivityProcessor):
                         # We discard this one
                         continue
                     else:
-                        # Currently we don't have a mechanism to highlight anything to users. We need to think through
-                        # this UX.
+                        # Currently we don't have a mechanism to highlight any problem to users.
+                        # We need to think through this UX.
                         pass
 
                     result_obj.add_detail_object(detail)
+            else:
+                result_obj.add_detail_object(detail)
 
         return result_obj
 

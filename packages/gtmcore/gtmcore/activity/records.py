@@ -438,6 +438,5 @@ class ActivityRecord(object):
         if index < 0 or index >= len(self.detail_objects):
             raise ValueError("Index out of range when updating detail object")
 
-        self.detail_objects.insert(index, (obj.show, obj.type.value, obj.importance, obj))
-        del self.detail_objects[index + 1]
+        self.detail_objects[index] = (obj.show, obj.type.value, obj.importance, obj)
         self._sort_detail_objects()

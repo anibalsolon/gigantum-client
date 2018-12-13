@@ -104,10 +104,10 @@ class JupyterLabMonitor(DevEnvMonitor):
         for am in activity_monitors:
             kernel_id = redis_conn.hget(am, "kernel_id").decode()
             if kernel_id not in sessions:
-                if redis_conn.hget(am, 'run'):
+                if redis_conn.hget(am, 'run').decode() != 'False':
                     logger.info("Detected exited JupyterLab kernel. Stopping monitoring for kernel id {}".format(kernel_id))
                     # Kernel isn't running anymore. Clean up by setting run flag to `False` so worker exits
-                    redis_conn.hset(am, 'run', False)
+                    redis_conn.hset(am, 'run', 'False')
 
                     # TODO DC This runs again and again, persisting across dev API restarts
                     # At a minimum, propose checking for 'run' before issuing a message (Trying this above, but that
