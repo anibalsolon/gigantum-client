@@ -75,11 +75,11 @@ def publish_repository(repository: Repository, username: str, access_token: str,
         raise
 
 
-def sync_labbook(labbook_path: str, username: str, remote: str = "origin",
+def sync_repository(repository: Repository, username: str, remote: str = "origin",
                  force: bool = False) -> int:
     p = os.getpid()
     logger = LMLogger.get_logger()
-    logger.info(f"(Job {p}) Starting sync_labbook({labbook_path})")
+    logger.info(f"(Job {p}) Starting sync_repository({str(repository)})")
 
     def update_meta(msg):
         job = get_current_job()
@@ -92,16 +92,14 @@ def sync_labbook(labbook_path: str, username: str, remote: str = "origin",
         job.save_meta()
 
     try:
-        labbook = InventoryManager().load_labbook_from_directory(labbook_path)
-
-        with labbook.lock():
-            wf = GitWorkflow(labbook)
+        with repository.lock():
+            wf = GitWorkflow(repository)
             cnt = wf.sync(username=username, remote=remote, force=force,
                           feedback_callback=update_meta)
-        logger.info(f"(Job {p} Completed sync_labbook with cnt={cnt}")
+        logger.info(f"(Job {p} Completed sync_repository with cnt={cnt}")
         return cnt
     except Exception as e:
-        logger.exception(f"(Job {p}) Error on sync_labbook: {e}")
+        logger.exception(f"(Job {p}) Error on sync_repository: {e}")
         raise
 
 
