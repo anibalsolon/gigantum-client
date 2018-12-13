@@ -6,28 +6,24 @@ import uuidv4 from 'uuid/v4';
 // components
 import ActionsMenu from './DatasetActionsMenu';
 import File from './DatasetFile';
-import Folder from './DatasetFolder';
 // assets
-import './Dataset.scss';
+import './DatasetFolder.scss';
 
 
-class Dataset extends Component {
+class Folder extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            isDragging: props.isDragging,
             expanded: this.props.childrenState[this.props.data.edge.node.key].isExpanded || false,
             isSelected: (props.isSelected || this.props.childrenState[this.props.data.edge.node.key].isSelected) || false,
             isIncomplete: this.props.childrenState[this.props.data.edge.node.key].isIncomplete || false,
-            hoverId: '',
-            isOver: false,
-            prevIsOverState: false,
             addFolderVisible: this.props.childrenState[this.props.data.edge.node.key].isAddingFolder || false,
         };
 
         this._setSelected = this._setSelected.bind(this);
         this._setIncomplete = this._setIncomplete.bind(this);
         this._checkParent = this._checkParent.bind(this);
+        this._checkRefs = this._checkRefs.bind(this);
         this._setState = this._setState.bind(this);
         this._addFolderVisible = this._addFolderVisible.bind(this);
     }
@@ -42,8 +38,6 @@ class Dataset extends Component {
         let isIncomplete = (nextProps.multiSelect === 'none') ? false : state.isIncomplete;
       return {
         ...state,
-        isOver: nextProps.isOver,
-        prevIsOverState: state.isOver,
         isSelected,
         isIncomplete,
       };
@@ -95,10 +89,10 @@ class Dataset extends Component {
     *  @return {}
     */
     _setIncomplete() {
-        this.setState({
-          isIncomplete: true,
-          isSelected: false,
-        });
+      this.setState({
+        isIncomplete: true,
+        isSelected: false,
+      });
     }
 
     /**
@@ -196,44 +190,27 @@ class Dataset extends Component {
         this.setState({ addFolderVisible: false });
       }
     }
-
     /**
     *  @param {}
-    *  sets state on a boolean value
-    *  @return {}
+    *  checks if folder refs has props.isOver === true
+    *  @return {boolean}
     */
-    _triggerMutation() {
-      let fileKeyArray = this.props.data.edge.node.key.split('/');
-      fileKeyArray.pop();
-      fileKeyArray.pop();
-      let folderKeyArray = fileKeyArray;
-      let folderKey = folderKeyArray.join('/');
+    _checkRefs() {
+      let isOver = this.props.isOverCurrent || this.props.isOver, // this.state.isOverChildFile,
+          { refs } = this;
 
-      let removeIds = [this.props.data.edge.node.id];
-      let currentHead = this.props.data;
-
-      const searchChildren = (parent) => {
-        if (parent.children) {
-          Object.keys(parent.children).forEach((childKey) => {
-            if (parent.children[childKey].edge) {
-              removeIds.push(parent.children[childKey].edge.node.id);
-              searchChildren(parent.children[childKey]);
+      Object.keys(refs).forEach((childname) => {
+        if (refs[childname].getDecoratedComponentInstance && refs[childname].getDecoratedComponentInstance() && refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance && refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance()) {
+          const child = refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance();
+          if (child.props.data && !child.props.data.edge.node.isDir) {
+            if (child.props.isOverCurrent) {
+              isOver = true;
             }
-          });
+          }
         }
-      };
-
-      searchChildren(currentHead);
-
-      const data = {
-        newKey: folderKey === '' ? `${this.state.newFolderName}/` : `${folderKey}/${this.state.newFolderName}/`,
-        edge: this.props.data.edge,
-        removeIds,
-      };
-
-      this.props.mutations.moveLabbookFile(data, (response) => {
-         this._clearState();
       });
+
+      return (isOver);
     }
     /**
     *  @param {Array} array
@@ -274,11 +251,11 @@ class Dataset extends Component {
               { children, index } = this.props.data,
               { isOver } = this.props,
               splitKey = node.key.split('/'),
-              datasetName = this.props.filename,
-              datasetRowCSS = classNames({
-                Dataset__row: true,
-                'Dataset__row--expanded': this.state.expanded,
-                'Dataset__row--hover': this.state.hover,
+              folderName = this.props.filename,
+              folderRowCSS = classNames({
+                Folder__row: true,
+                'Folder__row--expanded': this.state.expanded,
+                'Folder__row--hover': this.state.hover,
               }),
               buttonCSS = classNames({
                 'Btn Btn--round': true,
@@ -286,19 +263,26 @@ class Dataset extends Component {
                 'Btn--check': this.state.isSelected && !this.state.isIncomplete,
                 'Btn--partial': this.state.isIncomplete,
               }),
-              datasetChildCSS = classNames({
+
+              folderChildCSS = classNames({
                 Folder__child: true,
                 hidden: !this.state.expanded,
               }),
-              datasetNameCSS = classNames({
-                'Dataset__cell Dataset__cell--name': true,
-                'Dataset__cell--open': this.state.expanded,
+
+              folderNameCSS = classNames({
+                'Folder__cell Folder__cell--name': true,
+                'Folder__cell--open': this.state.expanded,
                 hidden: this.state.renameEditMode,
               }),
-              datasetCSS = classNames({
-                Dataset: true,
-                'Dataset--highlight': isOver,
-                'Dataset--background': this.props.isDragging,
+
+              folderCSS = classNames({
+                Folder: true,
+                'Folder--highlight': isOver,
+                'Folder--background': this.props.isDragging,
+              }),
+              renameCSS = classNames({
+                'File__cell File__cell--edit': true,
+                hidden: !this.state.renameEditMode,
               }),
               paddingLeft = 40 * index,
               rowStyle = { paddingLeft: `${paddingLeft}px` },
@@ -312,31 +296,53 @@ class Dataset extends Component {
         fileKeys = this._childSort(fileKeys, this.props.sort, this.props.reverse, children, 'files');
         let childrenKeys = folderKeys.concat(fileKeys);
 
-        return (<div
+        return (
+          <div
           style={this.props.style}
-          className={ datasetCSS }>
+          className={ folderCSS }>
                 <div
-                    className={datasetRowCSS}
+                    className={folderRowCSS}
                     style={rowStyle}
                     onClick={evt => this._expandSection(evt)}>
                     <button
                         className={buttonCSS}
                         onClick={() => this._setSelected(!this.state.isSelected)}>
                     </button>
-                    <div className={datasetNameCSS}>
-                      <div className="Dataset__icon">
+                    <div className={folderNameCSS}>
+                      <div className="Folder__icon">
                       </div>
-                      <div className="Dataset__name">
-                          {datasetName}
+                      <div className="Folder__name">
+                          {folderName}
                       </div>
                     </div>
-                    <div className="Dataset__cell Dataset__cell--size">
+                    <div className={renameCSS}>
+
+                      <div className="File__container">
+                        <input
+                          ref={(input) => { this.reanmeInput = input; }}
+                          placeholder="Rename File"
+                          type="text"
+                          className="File__input"
+                          onKeyUp={(evt) => { this._updateFileName(evt); }}
+                        />
+                      </div>
+                      <div className="flex justify-space-around">
+                        <button
+                          className="File__btn--round File__btn--cancel"
+                          onClick={() => { this._clearState(); }} />
+                        <button
+                          className="File__btn--round File__btn--add"
+                          onClick={() => { this._triggerMutation(); }}
+                        />
+                      </div>
+                    </div>
+                    <div className="Folder__cell Folder__cell--size">
 
                     </div>
-                    <div className="Dataset__cell Dataset__cell--date">
+                    <div className="Folder__cell Folder__cell--date">
                         {Moment((node.modifiedAt * 1000), 'x').fromNow()}
                     </div>
-                    <div className="Dataset__cell Dataset__cell--menu">
+                    <div className="Folder__cell Folder__cell--menu">
                       <ActionsMenu
                         edge={this.props.data.edge}
                         mutationData={this.props.mutationData}
@@ -347,7 +353,7 @@ class Dataset extends Component {
                       />
                     </div>
                 </div>
-                <div className={datasetChildCSS}>
+                <div className={folderChildCSS}>
                   {
                     this.state.expanded &&
                       childrenKeys.map((file, index) => {
@@ -415,10 +421,10 @@ class Dataset extends Component {
                             );
                       })
                   }
-                </div>
-            </div>);
+         </div>
+      </div>)
     }
 }
 
 
-export default Dataset;
+export default Folder;

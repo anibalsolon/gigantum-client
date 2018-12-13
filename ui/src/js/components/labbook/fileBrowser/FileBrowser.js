@@ -10,12 +10,14 @@ import './FileBrowser.scss';
 // components
 import File from './fileRow/File';
 import Folder from './fileRow/Folder';
+import Dataset from './fileRow/dataset/Dataset';
 import AddSubfolder from './fileRow/AddSubfolder';
 import FileBrowserMutations from './utilities/FileBrowserMutations';
 import Connectors from './utilities/Connectors';
 import Modal from 'Components/shared/Modal';
 // util
 import FileFormatter, { fileHandler } from './utilities/FileFormatter';
+import datasetJSON from './datasets_mock.json';
 
 
 class FileBrowser extends Component {
@@ -54,7 +56,10 @@ class FileBrowser extends Component {
         let previousCount = state.count;
         let count = props.files.edges.length;
         let childrenState = {};
-        props.files.edges.forEach((edge) => {
+
+
+        let files = props.files.edges.concat(datasetJSON.edges)
+        files.forEach((edge) => {
           if (edge.node && edge.node.key) {
             let key = edge.node.key;
             let splitKey = key.split('/').filter(n => n);
@@ -97,7 +102,8 @@ class FileBrowser extends Component {
     */
     componentDidMount() {
       this.fileHandler = new FileFormatter(fileHandler);
-      this.fileHandler.postMessage({ files: this.props.files.edges, search: this.state.search });
+      const files = this.props.files.edges.concat(datasetJSON.edges);
+      this.fileHandler.postMessage({ files, search: this.state.search });
       this.fileHandler.addEventListener('message', (evt) => {
         if (this.state.fileHash !== evt.data.hash) {
           this.setState({ fileHash: evt.data.hash, files: evt.data.files });
@@ -117,7 +123,8 @@ class FileBrowser extends Component {
       if (this.state.search === '' && element.value !== '') {
         element.value = '';
       }
-      this.fileHandler.postMessage({ files: this.props.files.edges, search: this.state.search });
+      const files = this.props.files.edges.concat(datasetJSON.edges)
+      this.fileHandler.postMessage({ files, search: this.state.search });
     }
     /**
     *  @param {string} key - key of file to be updated
@@ -520,7 +527,6 @@ class FileBrowser extends Component {
           { isOver } = this.props;
     let folderKeys = files && Object.keys(files).filter(child => files[child].edge && files[child].edge.node.isDir) || [];
     folderKeys = this._childSort(folderKeys, this.state.sort, this.state.reverse, files, 'folder');
-
     let fileKeys = files && Object.keys(files).filter(child => files[child].edge && !files[child].edge.node.isDir) || [];
     fileKeys = this._childSort(fileKeys, this.state.sort, this.state.reverse, files, 'files');
 
@@ -667,8 +673,26 @@ class FileBrowser extends Component {
             childrenKeys.map((file) => {
               const isDir = files[file] && files[file].edge && files[file].edge.node.isDir;
               const isFile = files[file] && files[file].edge && !files[file].edge.node.isDir;
-
-                if (isDir) {
+              const isDataset = files[file] && files[file].edge && files[file].edge.node.isDataset;
+                if (isDataset) {
+                  return (
+                    <Dataset
+                      ref={file}
+                      filename={file}
+                      key={files[file].edge.node.key}
+                      multiSelect={this.state.multiSelect}
+                      mutationData={mutationData}
+                      data={files[file]}
+                      mutations={this.state.mutations}
+                      setState={this._setState}
+                      sort={this.state.sort}
+                      reverse={this.state.reverse}
+                      childrenState={this.state.childrenState}
+                      updateChildState={this._updateChildState}
+                      codeDirUpload={this._codeDirUpload}
+                    />
+                  )
+                } else if (isDir) {
                   return (<Folder
                     ref={file}
                     filename={file}

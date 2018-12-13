@@ -78,7 +78,7 @@ export const fileHandler = () => {
               });
            }
         });
-        const hash = JSON.stringify(fileObject) + search;
+        const hash = btoa(JSON.stringify(fileObject) + search);
         postMessage({ files: fileObject, hash });
     });
 };

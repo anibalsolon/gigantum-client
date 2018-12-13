@@ -3,15 +3,11 @@
 .ActionsMenu{
     right: 20px;
 
-    padding: 2px;
+    padding: 2px 20px 2px 2px;
 
-    //border: 1px solid $romanSilver;
-    //border-radius: 10px;
-    //background: $background-color;
+    width: 180px;
 
-    min-width: 100px;
-
-    @include flex(space-around, row);
+    @include flex(flex-end, row);
 
 }
 
@@ -20,6 +16,8 @@
 
     width: 20px;
     height: 20px;
+
+    margin: 0 5px;
 
     cursor: pointer;
 
