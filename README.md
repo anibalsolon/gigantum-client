@@ -15,6 +15,98 @@ and services, including:
 - [Gigantum Desktop](https://github.com/gigantum/gigantum-desktop) - A desktop app to install and launch the Client 
 - [Gigantum CLI](https://github.com/gigantum/gigantum-cli) - A simple command line tool to install and launch the Client
 
+## Quickstart Guide (Setup and Build)
+
+### 1) Install Docker 
+
+Developing the Gigantum Client requires that you have Docker installed locally. Visit the Gigantum 
+[user docs](https://docs.gigantum.com/docs/configuring-docker) for instructions if needed.
+
+Note, Docker must be running to build/run/test the Client.
+
+
+### 2) Clone gigantum-client
+
+```
+git clone git@github.com:gigantum/gigantum-client.git
+cd gigantum-client
+git submodule update --init --recursive
+```
+
+To get started, clone the `gigantum-client` repository locally. If you plan to contribute, be sure to create a fork
+first so you can easily create a PR. 
+
+The `integration` branch is the current "working" branch with the latest functional changes that have yet to be 
+released as stable.
+The `master` branch is the last version released as stable (i.e. what you get when you install the Gigantum Desktop
+app)
+
+
+### 3) Create virtual environment
+
+```
+python -m venv gtm-env
+source gtm-env/bin/activate
+cd gtm && pip install -e . && cd ..
+```
+
+`gtm` is a command line tool to help build and configure the Client. This is a Python 3 application, so you must have
+Python 3 installed. For detailed instruction see [gtm/README.md](gtm/README.md).
+
+The command `gtm` is now available. Run `gtm -h` to see available commands.
+
+### 4) Configure your development environment
+
+```
+gtm dev setup
+```
+
+`gtm` must be configured before use. This will ask a few questions and write configuration data to disk for future use.
+
+"Backend" development mode is a configuration primarily used when working on the API. It configures the development
+ container so that when started, the UI is served but the API does not start automatically. 
+
+"Frontend" development mode is a configuration primarily used when working on the Javascript UI. It configures the
+development container so that the API starts automatically, but the UI bundle is not served. This lets you run the Node
+ server locally (on your host) so hot-loading and other dev features work well.
+
+### 5) Build application client container and start working
+
+```
+gtm dev -v build
+```
+
+Once complete, you'll have a container available for use either via your terminal or from PyCharm.
+
+
+### 6) Starting and stopping the gigantum client from terminal
+
+```
+gtm dev start
+```
+
+In a new console session, enter the container and kick off the application:
+
+```
+gtm dev attach
+/opt/setup.sh
+python3 service.py
+```
+
+Open your web browser to http://localhost:10000 to access the application.
+
+When finished, run:
+
+```
+gtm dev stop
+```
+ 
+
+### 7) Starting and stopping the gigantum client from PyCharm
+
+See [Pycharm dev notes](docs/pycharm-dev.md) for more details on how to set up Pycharm to use the development
+container
+
 
 
 ## Users
@@ -82,71 +174,6 @@ If you want to contribute to the Gigantum Client, the best place to start is the
 
 This project follows the [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected 
 to follow this code. Please report unacceptable behavior to conduct@gigantum.com.
-
-
-### Getting Started
-
-#### 1) Install Docker 
-
-Developing the Gigantum Client requires that you have Docker installed locally. Visit the Gigantum 
-[user docs](https://docs.gigantum.com/docs/configuring-docker) for instructions if needed.
-
-Note, Docker must be running to build/run/test the Client.
-
-
-#### 2) Clone gigantum-client
-
-To get started, clone the `gigantum-client` repository locally. If you plan to contribute, be sure to create a fork
-first so you can easily create a PR. 
-
-The `integration` branch is the current "working" branch with the latest functional changes that have yet to be 
-released as stable.
-
-The `master` branch is the last version released as stable (i.e. what you get when you install the Gigantum Desktop
-app)
-
-#### 2a) Initialize submodules (temporary)
-
-   The file browser widget is still a submodule, but will soon be refactored out.
-   For now, initialize all submodules in the repo:
-
-   ```
-   git submodule update --init --recursive
-   ```
-
-#### 3) Install gtm 
-
-`gtm` is a command line tool to help build and configure the Client. This is a Python 3 application, so you must have
-Python 3 installed. For detailed instruction see [gtm/README.md](gtm/README.md). If you already have Python 3 and a 
-virtualenv set up, from the repository root simply run:
-
-```
-cd gtm
-pip install .
-```
-
-The command `gtm` is now available. Run `gtm -h` to see available commands.
-
-#### 4) Configure your development environment
-
-`gtm` must be configured before use. Run `gtm dev setup` from your terminal to configure (from the virtualenv in which
- gtm was installed). This will ask a few questions and write configuration data to disk for future use.
-
-"Backend" development mode is a configuration primarily used when working on the API. It configures the development
- container so that when started, the UI is served but the API does not start automatically. 
-
-"Frontend" development mode is a configuration primarily used when working on the Javascript UI. It configures the
-development container so that the API starts automatically, but the UI bundle is not served. This lets you run the Node
- server locally (on your host) so hot-loading and other dev features work well.
-
-#### 4) Build development container and start working
-
-Once configured, you must build the development container by running `gtm dev -v build`. Once complete, you'll have a
-container available for use either via your terminal or from PyCharm (see [Pycharm dev notes](docs/pycharm-dev.md) for
-more details on how to configure Pycharm to use the development container).
-
-If using the terminal for backend dev or working on the UI, run `gtm dev start` to fire up the container and mount
-the `gigantum-client` repo into it. While running, `gtm dev attach` will drop you into the container if needed. 
 
 
 ### License
