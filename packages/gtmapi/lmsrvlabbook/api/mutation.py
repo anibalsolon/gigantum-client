@@ -33,7 +33,8 @@ from lmsrvlabbook.api.mutations import (CreateLabbook, BuildImage, StartContaine
                                         MergeFromBranch, WorkonBranch, WriteReadme, AddCustomDocker, RemoveCustomDocker,
                                         DeleteRemoteLabbook,
                                         CompleteBatchUploadTransaction, SetVisibility, FetchLabbookEdge,
-                                        CreateDataset, AddDatasetFile, CompleteDatasetUploadTransaction)
+                                        CreateDataset, AddDatasetFile, CompleteDatasetUploadTransaction,
+                                        FetchDatasetEdge, SetDatasetVisibility)
 
 
 class LabbookMutations(graphene.ObjectType):
@@ -148,7 +149,7 @@ class LabbookMutations(graphene.ObjectType):
     # Work on a given feature branch (perform a git checkout).
     workon_experimental_branch = WorkonBranch.Field()
 
-    # Set a remote project visibiltiy
+    # Set a remote project visibility
     set_visibility = SetVisibility.Field()
 
     # Kludge-query to return a labbook edge when querying for job status
@@ -162,3 +163,9 @@ class LabbookMutations(graphene.ObjectType):
 
     # Close an upload transaction to a dataset
     complete_dataset_upload_transaction = CompleteDatasetUploadTransaction.Field()
+
+    # Kludge-query to return a dataset edge when querying for job status
+    fetch_dataset_edge = FetchDatasetEdge.Field()
+
+    # Set a remote dataset visibility
+    set_dataset_visibility = SetDatasetVisibility.Field()

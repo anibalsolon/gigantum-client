@@ -261,4 +261,4 @@ class SetDatasetVisibility(graphene.relay.ClientIDMutation):
         cursor = base64.b64encode(f"{0}".encode('utf-8'))
         dsedge = LabbookConnection.Edge(node=DatasetObject(owner, name=dataset_name),
                                         cursor=cursor)
-        return SetVisibility(new_dataset_edge=dsedge)
+        return SetDatasetVisibility(new_dataset_edge=dsedge)

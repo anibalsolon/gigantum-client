@@ -7,7 +7,8 @@ from lmsrvlabbook.api.mutations.labbook import (CreateLabbook, DeleteLabbook, De
                                                 AddLabbookFavorite, RemoveLabbookFavorite, UpdateLabbookFavorite,
                                                 AddLabbookCollaborator, DeleteLabbookCollaborator,
                                                 WriteReadme, CompleteBatchUploadTransaction, FetchLabbookEdge)
-from lmsrvlabbook.api.mutations.dataset import CreateDataset, AddDatasetFile, CompleteDatasetUploadTransaction
+from lmsrvlabbook.api.mutations.dataset import (CreateDataset, AddDatasetFile, CompleteDatasetUploadTransaction,
+                                                FetchDatasetEdge)
 from lmsrvlabbook.api.mutations.environment import (BuildImage, StartContainer, StopContainer)
 from lmsrvlabbook.api.mutations.container import StartDevTool
 from lmsrvlabbook.api.mutations.note import CreateUserNote
@@ -17,4 +18,5 @@ from lmsrvlabbook.api.mutations.environmentcomponent import (AddPackageComponent
                                                              RemovePackageComponents,
                                                              AddCustomDocker, RemoveCustomDocker)
 from lmsrvlabbook.api.mutations.user import RemoveUserIdentity
-from lmsrvlabbook.api.mutations.labbooksharing import SyncLabbook, PublishLabbook, PublishDataset, SetVisibility
+from lmsrvlabbook.api.mutations.labbooksharing import (SyncLabbook, PublishLabbook, PublishDataset, SetVisibility,
+                                                       SetDatasetVisibility)
