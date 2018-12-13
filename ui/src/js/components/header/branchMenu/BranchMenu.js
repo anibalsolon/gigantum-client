@@ -8,6 +8,7 @@ import JobStatus from 'JS/utils/JobStatus';
 // mutations
 import ExportLabbookMutation from 'Mutations/ExportLabbookMutation';
 import SyncLabbookMutation from 'Mutations/branches/SyncLabbookMutation';
+import SyncDatasetMutation from 'Mutations/branches/SyncDatasetMutation';
 import BuildImageMutation from 'Mutations/BuildImageMutation';
 // queries
 import UserIdentity from 'JS/Auth/UserIdentity';
@@ -228,34 +229,49 @@ class BranchMenu extends Component {
 
                 const successCall = () => {
                   this.props.setSyncingState(false);
-                  BuildImageMutation(
-                    this.state.labbookName,
-                    this.state.owner,
-                    false,
-                    (response, error) => {
-                      if (error) {
-                        console.error(error);
+                  if (this.props.sectionType === 'labbook') {
+                    BuildImageMutation(
+                      this.state.labbookName,
+                      this.state.owner,
+                      false,
+                      (response, error) => {
+                        if (error) {
+                          console.error(error);
 
-                        setMultiInfoMessage(id, `ERROR: Failed to build ${this.state.labookName}`, null, true, error);
-                      }
-                    },
-                  );
+                          setMultiInfoMessage(id, `ERROR: Failed to build ${this.state.labookName}`, null, true, error);
+                        }
+                      },
+                    );
+                  }
 
                   setContainerMenuVisibility(false);
                 };
-
-                SyncLabbookMutation(
-                  this.state.owner,
-                  this.state.labbookName,
-                  false,
-                  successCall,
-                  failureCall,
-                  (error) => {
-                    if (error) {
-                      failureCall();
-                    }
-                  },
-                );
+                this.props.sectionType === 'labbook' ?
+                  SyncLabbookMutation(
+                    this.state.owner,
+                    this.state.labbookName,
+                    false,
+                    successCall,
+                    failureCall,
+                    (error) => {
+                      if (error) {
+                        failureCall();
+                      }
+                    },
+                  )
+                  :
+                  SyncDatasetMutation(
+                    this.state.owner,
+                    this.state.labbookName,
+                    false,
+                    successCall,
+                    failureCall,
+                    (error) => {
+                      if (error) {
+                        failureCall();
+                      }
+                    },
+                  );
               } else {
                 this.props.auth.renewToken(true, () => {
                   self.setState({ showLoginPrompt: true });
@@ -572,7 +588,10 @@ class BranchMenu extends Component {
         {
           this.state.forceSyncModalVisible &&
 
-          <ForceSync toggleSyncModal={this._toggleSyncModal} />
+          <ForceSync
+            toggleSyncModal={this._toggleSyncModal}
+            sectionType={this.props.sectionType}
+          />
         }
         {
           this.state.publishModalVisible &&

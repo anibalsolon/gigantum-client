@@ -1,5 +1,5 @@
 # source: http://localhost:10000/api/labbook/
-# timestamp: Thu Dec 13 2018 12:45:26 GMT-0500 (Eastern Standard Time)
+# timestamp: Thu Dec 13 2018 13:45:06 GMT-0500 (Eastern Standard Time)
 
 schema {
   query: LabbookQuery
@@ -848,6 +848,7 @@ type LabbookMutations {
   completeDatasetUploadTransaction(input: CompleteDatasetUploadTransactionInput!): CompleteDatasetUploadTransactionPayload
   fetchDatasetEdge(input: FetchDatasetEdgeInput!): FetchDatasetEdgePayload
   setDatasetVisibility(input: SetDatasetVisibilityInput!): SetDatasetVisibilityPayload
+  syncDataset(input: SyncDatasetInput!): SyncDatasetPayload
 }
 
 """
@@ -1224,6 +1225,18 @@ input StopContainerInput {
 """Mutation to stop a Docker container. """
 type StopContainerPayload {
   environment: Environment
+  clientMutationId: String
+}
+
+input SyncDatasetInput {
+  owner: String!
+  datasetName: String!
+  force: Boolean
+  clientMutationId: String
+}
+
+type SyncDatasetPayload {
+  jobKey: String
   clientMutationId: String
 }
 
