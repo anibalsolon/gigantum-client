@@ -1,5 +1,5 @@
 # source: http://localhost:10000/api/labbook/
-# timestamp: Wed Dec 12 2018 16:54:30 GMT-0500 (Eastern Standard Time)
+# timestamp: Thu Dec 13 2018 12:45:26 GMT-0500 (Eastern Standard Time)
 
 schema {
   query: LabbookQuery
@@ -557,6 +557,17 @@ type ExportLabbookPayload {
   clientMutationId: String
 }
 
+input FetchDatasetEdgeInput {
+  owner: String!
+  datasetName: String!
+  clientMutationId: String
+}
+
+type FetchDatasetEdgePayload {
+  newDatasetEdge: DatasetEdge
+  clientMutationId: String
+}
+
 input FetchLabbookEdgeInput {
   owner: String!
   labbookName: String!
@@ -835,6 +846,8 @@ type LabbookMutations {
   createDataset(input: CreateDatasetInput!): CreateDatasetPayload
   addDatasetFile(input: AddDatasetFileInput!): AddDatasetFilePayload
   completeDatasetUploadTransaction(input: CompleteDatasetUploadTransactionInput!): CompleteDatasetUploadTransactionPayload
+  fetchDatasetEdge(input: FetchDatasetEdgeInput!): FetchDatasetEdgePayload
+  setDatasetVisibility(input: SetDatasetVisibilityInput!): SetDatasetVisibilityPayload
 }
 
 """
@@ -1138,6 +1151,18 @@ Mutation to remove a locally stored user identity (no-op if not running in local
 """
 type RemoveUserIdentityPayload {
   userIdentityEdge: UserIdentity
+  clientMutationId: String
+}
+
+input SetDatasetVisibilityInput {
+  owner: String!
+  datasetName: String!
+  visibility: String!
+  clientMutationId: String
+}
+
+type SetDatasetVisibilityPayload {
+  newDatasetEdge: DatasetEdge
   clientMutationId: String
 }
 

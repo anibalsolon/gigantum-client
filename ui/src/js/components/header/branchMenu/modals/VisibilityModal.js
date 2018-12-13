@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import uuidv4 from 'uuid/v4';
 // mutations
 import SetVisibilityMutation from 'Mutations/SetVisibilityMutation';
+import SetDatasetVisibilityMutation from 'Mutations/SetDatasetVisibilityMutation';
 import PublishLabbookMutation from 'Mutations/branches/PublishLabbookMutation';
 import PublishDatasetMutation from 'Mutations/branches/PublishDatasetMutation';
 // component
@@ -59,19 +60,34 @@ export default class PublishModal extends Component {
         if (response.data) {
           if (response.data.userIdentity.isSessionValid) {
             if (this.props.visibility !== visibility) {
-              SetVisibilityMutation(
-                owner,
-                labbookName,
-                visibility,
-                (response, error) => {
-                  if (error) {
-                    console.log(error);
-                    setErrorMessage('Visibility change failed', error);
-                  } else {
-                    setInfoMessage(`Visibility changed to ${visibility}`);
-                  }
-                },
-              );
+              this.props.sectionType === 'labbook' ?
+                SetVisibilityMutation(
+                  owner,
+                  labbookName,
+                  visibility,
+                  (response, error) => {
+                    if (error) {
+                      console.log(error);
+                      setErrorMessage('Visibility change failed', error);
+                    } else {
+                      setInfoMessage(`Visibility changed to ${visibility}`);
+                    }
+                  },
+                )
+                :
+                SetDatasetVisibilityMutation(
+                  owner,
+                  labbookName,
+                  visibility,
+                  (response, error) => {
+                    if (error) {
+                      console.log(error);
+                      setErrorMessage('Visibility change failed', error);
+                    } else {
+                      setInfoMessage(`Visibility changed to ${visibility}`);
+                    }
+                  },
+                );
             }
           } else {
             self.props.auth.renewToken(true, () => {
