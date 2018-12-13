@@ -226,10 +226,13 @@ class SetVisibility(graphene.relay.ClientIDMutation):
     @logged_mutation
     def mutate_and_get_payload(cls, root, info, owner, labbook_name, visibility,
                                client_mutation_id=None):
+        print(('Starting SetVisibility', owner, labbook_name, visibility))
         # Load LabBook
         username = get_logged_in_username()
-        lb = InventoryManager().load_labbook(username, owner, labbook_name,
-                                             author=get_logged_in_author())
+        inv = InventoryManager()
+        lb = inv.load_labbook(username, owner, labbook_name, author=get_logged_in_author())
+        # lb = InventoryManager().load_labbook(username, owner, labbook_name,
+        #                                      author=get_logged_in_author())
         # Extract valid Bearer token
         token = None
         if hasattr(info.context.headers, 'environ'):
@@ -257,11 +260,12 @@ class SetVisibility(graphene.relay.ClientIDMutation):
             raise ValueError(f'Visibility must be either "public" or "private";'
                              f'("{visibility}" invalid)')
         with lb.lock():
-            mgr.set_visibility(namespace=owner, labbook_name=labbook_name, visibility=visibility)
+            mgr.set_visibility(namespace=owner, repository_name=labbook_name, visibility=visibility)
 
         cursor = base64.b64encode(f"{0}".encode('utf-8'))
         lbedge = LabbookConnection.Edge(node=LabbookObject(owner, name=labbook_name),
                                         cursor=cursor)
+        print(('Ending SetVisibility', lbedge))
         return SetVisibility(new_labbook_edge=lbedge)
 
 
