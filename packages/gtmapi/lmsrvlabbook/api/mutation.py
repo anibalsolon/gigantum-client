@@ -34,7 +34,7 @@ from lmsrvlabbook.api.mutations import (CreateLabbook, BuildImage, StartContaine
                                         DeleteRemoteLabbook,
                                         CompleteBatchUploadTransaction, SetVisibility, FetchLabbookEdge,
                                         CreateDataset, AddDatasetFile, CompleteDatasetUploadTransaction,
-                                        FetchDatasetEdge, SetDatasetVisibility)
+                                        FetchDatasetEdge, SetDatasetVisibility, SyncDataset)
 
 
 class LabbookMutations(graphene.ObjectType):
@@ -169,3 +169,6 @@ class LabbookMutations(graphene.ObjectType):
 
     # Set a remote dataset visibility
     set_dataset_visibility = SetDatasetVisibility.Field()
+
+    # Sync a Dataset with remote (for collaboration)
+    sync_dataset = SyncDataset.Field()

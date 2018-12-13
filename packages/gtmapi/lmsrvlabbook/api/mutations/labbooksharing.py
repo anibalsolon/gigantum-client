@@ -152,14 +152,66 @@ class SyncLabbook(graphene.relay.ClientIDMutation):
 
         job_metadata = {'method': 'sync_labbook',
                         'labbook': lb.key}
-        job_kwargs = {'labbook_path': lb.root_dir,
+        job_kwargs = {'repository': lb,
                       'username': username,
                       'force': force}
         dispatcher = Dispatcher()
-        job_key = dispatcher.dispatch_task(jobs.sync_labbook, kwargs=job_kwargs, metadata=job_metadata)
+        job_key = dispatcher.dispatch_task(jobs.sync_repository, kwargs=job_kwargs, metadata=job_metadata)
         logger.info(f"Syncing LabBook {lb.root_dir} in background job with key {job_key.key_str}")
 
         return SyncLabbook(job_key=job_key.key_str)
+
+
+class SyncDataset(graphene.relay.ClientIDMutation):
+
+    class Input:
+        owner = graphene.String(required=True)
+        dataset_name = graphene.String(required=True)
+        force = graphene.Boolean(required=False)
+
+    job_key = graphene.String()
+
+    @classmethod
+    @logged_mutation
+    def mutate_and_get_payload(cls, root, info, owner, dataset_name, force=False, client_mutation_id=None):
+        # Load LabBook
+        username = get_logged_in_username()
+        ds = InventoryManager().load_dataset(username, owner, dataset_name,
+                                             author=get_logged_in_author())
+
+        # Extract valid Bearer token
+        token = None
+        if hasattr(info.context.headers, 'environ'):
+            if "HTTP_AUTHORIZATION" in info.context.headers.environ:
+                token = parse_token(info.context.headers.environ["HTTP_AUTHORIZATION"])
+
+        if not token:
+            raise ValueError("Authorization header not provided. Must have a valid session to query for collaborators")
+
+        default_remote = ds.client_config.config['git']['default_remote']
+        admin_service = None
+        for remote in ds.client_config.config['git']['remotes']:
+            if default_remote == remote:
+                admin_service = ds.client_config.config['git']['remotes'][remote]['admin_service']
+                break
+
+        if not admin_service:
+            raise ValueError('admin_service could not be found')
+
+        # Configure git creds
+        mgr = GitLabManager(default_remote, admin_service, access_token=token)
+        mgr.configure_git_credentials(default_remote, username)
+
+        job_metadata = {'method': 'sync_dataset',
+                        'dataset': ds.key}
+        job_kwargs = {'repository': ds,
+                      'username': username,
+                      'force': force}
+        dispatcher = Dispatcher()
+        job_key = dispatcher.dispatch_task(jobs.sync_repository, kwargs=job_kwargs, metadata=job_metadata)
+        logger.info(f"Syncing Dataset {ds.root_dir} in background job with key {job_key.key_str}")
+
+        return SyncDataset(job_key=job_key.key_str)
 
 
 class SetVisibility(graphene.relay.ClientIDMutation):
