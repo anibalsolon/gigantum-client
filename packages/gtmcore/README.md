@@ -1,27 +1,9 @@
-# LabManager Common
+# Gigantum Client core libraries
 
-[![CircleCI](https://circleci.com/gh/gigantum/labmanager-common.svg?style=svg&circle-token=3cb82b88ad0817673298c4c16b57fa7ace78cd45)](https://circleci.com/gh/gigantum/labmanager-common)
-[![Coverage Status](https://coveralls.io/repos/github/gigantum/labmanager-common/badge.svg?branch=integration&t=X8AMcV)](https://coveralls.io/github/gigantum/labmanager-common?branch=master)
+The packages here contain core functionality of the Gigantum Client. For example,
+this includes activity monitoring, environment management, and project/dataset
+definitions.
 
-This repository contains common tools used across Gigantum LabManager
-components.  During development, this repository will generally be checked out
-as a submodule of [gtm](https://github.com/gigantum/gtm). High-level
-instructions are available in that repository.
-
-## Installation
-
-LabManager Common has two system dependencies that should be installed prior to
-installation and use.
-
-### libyaml
-
-configuration files are yaml based. Libyaml provides a C-accelerated interface.
-
-OSX:
-
-```
-$ brew install libyaml
-```
 
 ## Packages
 
