@@ -6,7 +6,7 @@ import datetime
 from natsort import natsorted
 from pkg_resources import resource_filename
 
-from typing import Any, Optional, Generator, List, Tuple, Dict, Callable
+from typing import Optional, Generator, List, Tuple, Dict
 
 from gtmcore.labbook.schemas import CURRENT_SCHEMA as LABBOOK_CURRENT_SCHEMA
 from gtmcore.dataset.schemas import CURRENT_SCHEMA as DATASET_CURRENT_SCHEMA
@@ -161,15 +161,9 @@ class InventoryManager(object):
                                       for l in os.listdir(os.path.join(owner_dir, f'{repository_type}s'))
                                       if os.path.isdir(os.path.join(owner_dir, f'{repository_type}s', l))])
             for repository_dir in repository_dirs:
-                git_dir = os.path.join(repository_dir, '.git')
-                gtm_dir = os.path.join(repository_dir, '.gigantum')
-                if os.path.isdir(git_dir) and os.path.isdir(gtm_dir):
-                    repository_paths.append((username,
-                                             os.path.basename(owner_dir),
-                                             os.path.basename(repository_dir)))
-                else:
-                    logger.warning(f'Unknown artifact in inventory: {repository_dir}')
-
+                repository_paths.append((username,
+                                         os.path.basename(owner_dir),
+                                         os.path.basename(repository_dir)))
         return repository_paths
 
     def list_labbooks(self, username: str, sort_mode: str = "name") -> List[LabBook]:
@@ -185,8 +179,6 @@ class InventoryManager(object):
         local_labbooks = []
         for username, owner, lbname in self.list_repository_ids(username, 'labbook'):
             try:
-                # We can be reasonably confident that anything loaded here
-                # will not be totally invalid (e.g., no git or gigantum dir)
                 labbook = self.load_labbook(username, owner, lbname)
                 local_labbooks.append(labbook)
             except Exception as e:
@@ -195,9 +187,9 @@ class InventoryManager(object):
         if sort_mode == "name":
             return natsorted(local_labbooks, key=lambda lb: lb.name)
         elif sort_mode == 'modified_on':
-            return sorted(local_labbooks, key=lambda l: l.modified_on)
+            return sorted(local_labbooks, key=lambda lb: lb.modified_on)
         elif sort_mode == 'created_on':
-            return sorted(local_labbooks, key=lambda l: l.creation_date)
+            return sorted(local_labbooks, key=lambda lb: lb.creation_date)
         else:
             raise InventoryException(f"Invalid sort mode {sort_mode}")
 

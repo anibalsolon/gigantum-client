@@ -209,7 +209,7 @@ class FileBrowserMutations {
       } = this.state;
 
     edges.forEach((edge) => {
-      if (edge.node.isFavorite) {
+      if (edge && edge.node && edge.node.isFavorite) {
         let data = {
           key: edge.node.key,
           edge,

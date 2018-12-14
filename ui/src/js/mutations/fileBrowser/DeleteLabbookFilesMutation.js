@@ -57,6 +57,10 @@ export default function DeleteLabbookFilesMutation(
         deletedID,
       );
     }
+
+    if (store.get(deletedID)) {
+      store.delete(deletedID);
+    }
   }
 
   commitMutation(
@@ -87,6 +91,8 @@ export default function DeleteLabbookFilesMutation(
             if (edge) {
               sharedUpdater(store, labbookId, edge.node.id, connectionKey);
               sharedUpdater(store, labbookId, edge.node.id, recentConnectionKey);
+
+              store.delete(edge.node.id);
             }
           });
       },
@@ -95,6 +101,7 @@ export default function DeleteLabbookFilesMutation(
           if (edge) {
             sharedUpdater(store, labbookId, edge.node.id, connectionKey);
             sharedUpdater(store, labbookId, edge.node.id, recentConnectionKey);
+            store.delete(edge.node.id);
           }
         });
       },

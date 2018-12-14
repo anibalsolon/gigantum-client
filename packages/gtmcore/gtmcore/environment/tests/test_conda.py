@@ -241,7 +241,7 @@ class TestConda2PackageManager(object):
         result = mrg.latest_versions(pkgs, lb, username)
 
         assert result[0] == '1.15.4'  # Numpy
-        assert result[1] == '2.21.0'  # Requests
+        assert result[1] == REQUESTS_LATEST_VERSION
 
     def test_is_valid_errors(self, build_lb_image_for_env):
         """Test list_versions command"""

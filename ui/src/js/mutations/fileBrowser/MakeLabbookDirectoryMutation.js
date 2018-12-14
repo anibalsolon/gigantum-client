@@ -118,29 +118,30 @@ export default function MakeLabbookDirectoryMutation(
         const node = store.create(optimisticId, 'CodeFile');
 
         node.setValue(optimisticId, 'id');
-        node.setValue(false, 'isDir');
+        node.setValue(true, 'isDir');
         node.setValue(directory, 'key');
         node.setValue(0, 'modifiedAt');
         node.setValue(100, 'size');
 
         sharedUpdater(store, labbookId, connectionKey, node);
 
-        deleteOptimisticEdge(store, labbookId, optimisticId, connectionKey);
+
       },
       updater: (store, response) => {
-        const id = `client:newCodeFile:${tempID++}`;
-        const node = store.create(id, 'CodeFile');
-
-
-        if (response.makeLabbookDirectory && response.makeLabbookDirectory.newLabbookFileEdge) {
-          node.setValue(response.makeLabbookDirectory.newLabbookFileEdge.node.id, 'id');
-          node.setValue(false, 'isDir');
-          node.setValue(response.makeLabbookDirectory.newLabbookFileEdge.node.key, 'key');
-          node.setValue(response.makeLabbookDirectory.newLabbookFileEdge.node.modifiedAt, 'modifiedAt');
-          node.setValue(response.makeLabbookDirectory.newLabbookFileEdge.node.size, 'size');
-
-          sharedUpdater(store, labbookId, connectionKey, node)
-        }
+        // const id = `client:newCodeFile:${tempID++}`;
+        //
+        // deleteOptimisticEdge(store, labbookId, optimisticId, connectionKey);
+        // store.delete(optimisticId)
+        // if (response.makeLabbookDirectory && response.makeLabbookDirectory.newLabbookFileEdge) {
+        //   const node = store.create(id, 'CodeFile');
+        //   node.setValue(id, 'id');
+        //   node.setValue(true, 'isDir');
+        //   node.setValue(response.makeLabbookDirectory.newLabbookFileEdge.node.key, 'key');
+        //   node.setValue(response.makeLabbookDirectory.newLabbookFileEdge.node.modifiedAt, 'modifiedAt');
+        //   node.setValue(response.makeLabbookDirectory.newLabbookFileEdge.node.size, 'size');
+        //
+        //   sharedUpdater(store, labbookId, connectionKey, node)
+        // }
       },
     },
   );

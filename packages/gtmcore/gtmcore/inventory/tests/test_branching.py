@@ -203,7 +203,7 @@ class TestBranching(object):
 
         # Do some stuff to make commits locally
         FileOperations.makedir(lb, 'code/rand_dir', create_activity_record=True)
-        FileOperations.delete_file(lb, 'code', 'rand_dir')
+        FileOperations.delete_files(lb, 'code', ['rand_dir'])
 
         # Assert local branch is AHEAD of remote
         r = bm.get_commits_behind_remote("origin")

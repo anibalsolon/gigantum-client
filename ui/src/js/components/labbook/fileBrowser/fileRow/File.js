@@ -258,12 +258,13 @@ class File extends Component {
 
                   <div className="File__container">
                     <input
+                      draggable
                       ref={(input) => { this.reanmeInput = input; }}
                       value={this.state.newFileName}
                       type="text"
                       className="File__input"
-                      onClick={(evt) => { evt.stopPropagation(); }}
-                      onDrag={(evt) => { evt.stopPropagation(); }}
+                      onClick={(evt) => { evt.preventDefault(); evt.stopPropagation(); }}
+                      onDragStart={(evt) => { evt.preventDefault(); evt.stopPropagation(); }}
                       onChange={(evt) => { this._updateFileName(evt); }}
                       onKeyDown={(evt) => { this._submitRename(evt); }}
                     />

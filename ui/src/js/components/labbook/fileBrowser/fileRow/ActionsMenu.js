@@ -71,16 +71,38 @@ export default class ActionsMenu extends Component {
     }
     this.setState({ popupVisible });
   }
-
+  /**
+  *  @param {Object} data - event from clicking delete button
+  *  triggers DeleteLabbookFileMutation
+  *  @return {}
+  */
+  _getEdges(data) {
+    let edges = [data.edge];
+    console.log(data)
+    function getEdges(data) {
+      Object.keys(data).forEach((name) => {
+        edges.push(data[name].edge);
+        if (data[name].children) {
+          getEdges(data[name].children);
+        }
+      });
+      return edges;
+    }
+    if (data.children) {
+      getEdges(data.children);
+    }
+    return edges;
+  }
   /**
   *  @param {event} evt - event from clicking delete button
   *  triggers DeleteLabbookFileMutation
   *  @return {}
   */
   _triggerDeleteMutation(evt) {
+    const edges = this.props.data ? this._getEdges(this.props.data) : [this.props.edge];
     const deleteFileData = {
       filePaths: [this.props.edge.node.key],
-      edges: [this.props.edge],
+      edges,
     };
 
     this.props.mutations.deleteLabbookFiles(deleteFileData, (reponse) => {});

@@ -29,6 +29,7 @@ class Folder extends Component {
             addFolderVisible: this.props.childrenState[this.props.data.edge.node.key].isAddingFolder || false,
             renameEditMode: false,
             isOverChildFile: false,
+            renameValue: props.filename,
         };
 
         this._setSelected = this._setSelected.bind(this);
@@ -58,7 +59,14 @@ class Folder extends Component {
         prevIsOverState: state.isOver,
         isSelected,
         isIncomplete,
+
       };
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+      if (this.state.renameEditMode) {
+             this.reanmeInput.focus();
+        }
     }
 
     /**
@@ -303,9 +311,15 @@ class Folder extends Component {
     */
     _updateFileName(evt) {
       this.setState({
-        newFolderName: evt.target.value,
+        renameValue: evt.target.value,
       });
-
+    }
+    /**
+    *  @param {event}
+    *  sumbit or clear
+    *  @return {}
+    */
+    _submitCancel(evt) {
       if (evt.key === 'Enter') {
         this._triggerMutation();
       }
@@ -314,7 +328,6 @@ class Folder extends Component {
         this._clearState();
       }
     }
-
     /**
     *  @param {}
     *  sets state on a boolean value
@@ -322,13 +335,9 @@ class Folder extends Component {
     */
     _clearState() {
       this.setState({
-        newFolderName: '',
+        renameValue: this.props.filename,
         renameEditMode: false,
       });
-
-      if (this.renameInput) {
-        this.renameInput.value = '';
-      }
     }
 
     /**
@@ -360,7 +369,7 @@ class Folder extends Component {
       searchChildren(currentHead);
 
       const data = {
-        newKey: folderKey === '' ? `${this.state.newFolderName}/` : `${folderKey}/${this.state.newFolderName}/`,
+        newKey: folderKey === '' ? `${this.state.renameValue}/` : `${folderKey}/${this.state.renameValue}/`,
         edge: this.props.data.edge,
         removeIds,
       };
@@ -497,11 +506,15 @@ class Folder extends Component {
 
                       <div className="File__container">
                         <input
+                          draggable
                           ref={(input) => { this.reanmeInput = input; }}
                           placeholder="Rename File"
                           type="text"
                           className="File__input"
-                          onKeyUp={(evt) => { this._updateFileName(evt); }}
+                          value={this.state.renameValue}
+                          onDragStart={(evt) => { evt.preventDefault(); evt.stopPropagation(); }}
+                          onChange={(evt) => { this._updateFileName(evt); }}
+                          onKeyDown={(evt) => { this._submitCancel(evt); }}
                         />
                       </div>
                       <div className="flex justify-space-around">
@@ -526,6 +539,7 @@ class Folder extends Component {
                         mutationData={this.props.mutationData}
                         mutations={this.props.mutations}
                         addFolderVisible={this._addFolderVisible}
+                        data={this.props.data}
                         folder
                         renameEditMode={ this._renameEditMode}
                       />

@@ -71,7 +71,6 @@ class TestLabbookFileOperations(object):
         lb = mock_labbook[2]
         git_hash_1 = lb.git.commit_hash
         lines = [l.strip() for l in open(os.path.join(lb.root_dir, '.gitignore')).readlines()]
-        pprint.pprint(lines)
         assert any(['.DS_Store' in l for l in lines])
 
         # Note: .DS_Store is in the gitignore directory.
@@ -94,7 +93,7 @@ class TestLabbookFileOperations(object):
         new_file_data = FO.insert_file(lb, "code", sample_src_file)
         base_name = os.path.basename(new_file_data['key'])
         assert os.path.exists(os.path.join(lb.root_dir, 'code', base_name))
-        FO.delete_file(lb, 'code', base_name)
+        FO.delete_files(lb, 'code', [base_name])
         assert not os.path.exists(os.path.join(lb.root_dir, 'code', base_name))
 
     def test_remove_file_fail(self, mock_labbook, sample_src_file):
@@ -102,7 +101,17 @@ class TestLabbookFileOperations(object):
         FO.insert_file(lb, "code", sample_src_file)
         new_file_path = os.path.join('blah', 'invalid.txt')
         with pytest.raises(ValueError):
-            FO.delete_file(lb, 'code', new_file_path)
+            FO.delete_files(lb, 'code', [new_file_path])
+
+    def test_remove_file_fail_old_prototype(self, mock_labbook, sample_src_file):
+        lb = mock_labbook[2]
+        new_file_data = FO.insert_file(lb, "code", sample_src_file)
+        base_name = os.path.basename(new_file_data['key'])
+
+        assert os.path.exists(os.path.join(lb.root_dir, 'code', base_name))
+
+        with pytest.raises(ValueError):
+            FO.delete_files(lb, 'code', base_name)
 
     def test_remove_dir(self, mock_labbook, sample_src_file):
         lb = mock_labbook[2]
@@ -113,9 +122,39 @@ class TestLabbookFileOperations(object):
         assert os.path.exists(os.path.join(lb.root_dir, 'output', 'testdir', base_name))
         # Note! Now that remove() uses force=True, no special action is needed for directories.
         # Delete the directory
-        FO.delete_file(lb, "output", "testdir")
+        FO.delete_files(lb, "output", ["testdir"])
         assert not os.path.exists(os.path.join(lb.root_dir, 'output', 'testdir', base_name))
         assert not os.path.exists(os.path.join(lb.root_dir, 'output', 'testdir'))
+
+    def test_remove_empty_dir(self, mock_labbook, sample_src_file):
+        lb = mock_labbook[2]
+        FO.makedir(lb, "output/testdir")
+        new_file_path = FO.insert_file(lb, "output", sample_src_file, "testdir")
+        base_name = os.path.basename(new_file_path['key'])
+
+        assert os.path.exists(os.path.join(lb.root_dir, 'output', 'testdir', base_name))
+
+        # Delete the directory
+        FO.delete_files(lb, "output", ["testdir"])
+        assert not os.path.exists(os.path.join(lb.root_dir, 'output', 'testdir', base_name))
+        assert not os.path.exists(os.path.join(lb.root_dir, 'output', 'testdir'))
+
+    def test_remove_many_files(self, mock_labbook, sample_src_file):
+        lb = mock_labbook[2]
+
+        test_files = [f"testfile{x}.txt" for x in range(15)]
+        for test_file in test_files:
+            with open(os.path.join(lb.root_dir, 'code', test_file), 'wt') as sample_f:
+                sample_f.write("blah")
+
+            assert os.path.exists(os.path.join(lb.root_dir, 'code', test_file))
+        lb.git.add_all()
+        lb.git.commit("making test data")
+
+        FO.delete_files(lb, "code", test_files)
+
+        for test_file in test_files:
+            assert not os.path.exists(os.path.join(lb.root_dir, 'code', test_file))
 
     def test_move_file_as_rename_in_same_dir(self, mock_labbook, sample_src_file):
         lb = mock_labbook[2]
@@ -127,12 +166,47 @@ class TestLabbookFileOperations(object):
 
         # move to rename
         moved_rel_path = os.path.join(f'{base_name}.MOVED')
-        FO.move_file(lb, 'code', new_file_data['key'], moved_rel_path)
+        r = FO.move_file(lb, 'code', new_file_data['key'], moved_rel_path)
+        assert len(r) == 1
         assert not os.path.exists(os.path.join(lb.root_dir, 'code', base_name))
         assert os.path.exists(os.path.join(lb.root_dir, 'code', f'{base_name}.MOVED'))
         assert os.path.isfile(os.path.join(lb.root_dir, 'code', f'{base_name}.MOVED'))
 
-    def test_move_file_subdirectory(self, mock_labbook, sample_src_file):
+    def test_move_single_file(self, mock_labbook, mock_config_file, sample_src_file):
+        lb = mock_labbook[2]
+        f = FO.insert_file(lb, 'code', sample_src_file)['key']
+        FO.makedir(lb, 'code/target_dir')
+        results = FO.move_file(lb, 'code', f, 'target_dir')
+        assert len(results) == 1
+        pprint.pprint(results)
+        assert results[0]['is_dir'] == False
+        assert results[0]['key'] == 'target_dir/' + os.path.basename(sample_src_file)
+
+    def test_move_single_file_to_section_top(self, mock_labbook, mock_config_file, sample_src_file):
+        lb = mock_labbook[2]
+        FO.makedir(lb, 'code/inner_dir')
+        f = FO.insert_file(lb, 'code', sample_src_file, 'inner_dir')['key']
+        # Move file to top of code section
+        results = FO.move_file(lb, 'code', f, dst_rel_path='')
+
+        # Results should be returned for "code" -- the file just moved there and the
+        assert len(results) == 1
+        assert results[0]['is_dir'] == False
+        assert results[0]['key'] == os.path.basename(f)
+
+    def test_move_empty_directory(self, mock_labbook, mock_config_file, sample_src_file):
+        lb = mock_labbook[2]
+
+        FO.makedir(lb, 'code/stable_dir')
+        FO.makedir(lb, 'code/empty_dir')
+
+        # We'll move "empty_dir" into "stable_dir" - there should only be one element in returned list
+        res = FO.move_file(lb, 'code', 'empty_dir', 'stable_dir')
+        assert len(res) == 1
+        assert res[0]['is_dir'] is True
+        assert res[0]['key'] == 'stable_dir/empty_dir/'
+
+    def test_move_loaded_directory_with_one_file(self, mock_labbook, mock_config_file, sample_src_file):
         lb = mock_labbook[2]
         new_file_data = FO.insert_file(lb, "code", sample_src_file)
         base_name = os.path.basename(new_file_data['key'])
@@ -140,38 +214,37 @@ class TestLabbookFileOperations(object):
 
         # make new subdir
         os.makedirs(os.path.join(lb.root_dir, 'code', 'subdir'))
+        # .. and then put a file in it
+        mv_file_res = FO.move_file(lb, "code", base_name, os.path.join('subdir', base_name))
+        # Should be 2, because it returns the info of the directory it was moved into
+        assert len(mv_file_res) == 1
+        assert mv_file_res[0]['key'] == f'subdir/{base_name}'
+        assert mv_file_res[0]['is_dir'] == False
 
-        moved_abs_data = FO.move_file(lb, 'code',
-                                      base_name,
-                                      os.path.join('subdir', base_name))
-
-        assert moved_abs_data['key'] == os.path.join('subdir', base_name)
-        assert moved_abs_data['is_dir'] is False
-
-        assert os.path.exists(os.path.join(lb.root_dir, 'code', 'subdir'))
-        assert os.path.isdir(os.path.join(lb.root_dir, 'code', 'subdir'))
-        assert os.path.exists(os.path.join(lb.root_dir, 'code', 'subdir', base_name))
-        assert os.path.isfile(os.path.join(lb.root_dir, 'code', 'subdir', base_name))
-        assert not os.path.exists(os.path.join(lb.root_dir, 'code', base_name))
-
-    def test_move_loaded_directory(self, mock_labbook, sample_src_file):
-        lb = mock_labbook[2]
-        new_file_data = FO.insert_file(lb, "code", sample_src_file)
-        base_name = os.path.basename(new_file_data['key'])
-        assert os.path.exists(os.path.join(lb.root_dir, 'code', base_name))
-
-        # make new subdir with a file in it
-        os.makedirs(os.path.join(lb.root_dir, 'code', 'subdir'))
-        FO.move_file(lb, "code", base_name, os.path.join('subdir', base_name))
-
-        # Move entire directory
-        FO.move_file(lb, "code", 'subdir', 'subdir_moved')
+        # Move "subdir" into "target_dir", there should be two activity records
+        FO.makedir(lb, "code/target_dir", create_activity_record=True)
+        mv_dir_res = FO.move_file(lb, "code", 'subdir', 'target_dir')
+        assert len(mv_dir_res) == 2
+        assert mv_dir_res[0]['key'] == 'target_dir/subdir/'
+        assert mv_dir_res[0]['is_dir'] is True
+        assert mv_dir_res[1]['key'] == f'target_dir/subdir/{base_name}'
+        assert mv_dir_res[1]['is_dir'] is False
 
         assert not os.path.exists(os.path.join(lb.root_dir, 'code', 'subdir'))
-        assert os.path.exists(os.path.join(lb.root_dir, 'code', 'subdir_moved'))
-        assert os.path.isdir(os.path.join(lb.root_dir, 'code', 'subdir_moved'))
-        assert os.path.exists(os.path.join(lb.root_dir, 'code', 'subdir_moved', base_name))
-        assert os.path.isfile(os.path.join(lb.root_dir, 'code', 'subdir_moved', base_name))
+        assert os.path.exists(os.path.join(lb.root_dir, 'code', 'target_dir/subdir'))
+
+    def test_move_loaded_directory_with_full_tree(self, mock_labbook, mock_config_file, sample_src_file):
+        lb = mock_labbook[2]
+        FO.makedir(lb, 'code/level_1/level_2A', create_activity_record=True)
+        FO.makedir(lb, 'code/level_1/level_2B', create_activity_record=True)
+        FO.makedir(lb, 'code/target_dir', create_activity_record=True)
+        FO.makedir(lb, 'code/target_dir/existing_dir_counted_anyway', create_activity_record=True)
+        FO.makedir(lb, 'code/this-dir-must-be-ignored', create_activity_record=True)
+        FO.insert_file(lb, 'code', sample_src_file, dst_path='level_1/level_2B')
+
+        # Move "level_1" into target_dir
+        results = FO.move_file(lb, 'code', 'level_1', 'target_dir')
+        assert len(results) == 4
 
     def test_makedir_simple(self, mock_labbook):
         # Note that "score" refers to the count of .gitkeep files.

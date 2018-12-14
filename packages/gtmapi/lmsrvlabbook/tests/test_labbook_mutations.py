@@ -162,7 +162,6 @@ class TestLabBookServiceMutations(object):
         """
         variables = {'content': desc_md}
         r = fixture_working_dir_env_repo_scoped[2].execute(description_query, variable_values=variables)
-        pprint.pprint(r)
         assert 'errors' not in r
         assert r['data']['setLabbookDescription']['success'] is True
 
@@ -176,7 +175,6 @@ class TestLabBookServiceMutations(object):
         }
         """
         r = fixture_working_dir_env_repo_scoped[2].execute(query)
-        pprint.pprint(r['data']['labbook']['description'])
         assert 'errors' not in r
         # There's a lot of weird characters getting filtered out, make sure the bulk of the text remains
         assert abs(1.0 * len(r['data']['labbook']['description']) / len(desc_md)) > 0.75
@@ -275,135 +273,179 @@ class TestLabBookServiceMutations(object):
         # Second should fail with an error message
         snapshot.assert_match(fixture_working_dir_env_repo_scoped[2].execute(query, variable_values=variables))
 
-    def test_move_file(self, mock_create_labbooks, snapshot):
+    def test_move_file(self, mock_create_labbooks):
         """Test moving a file"""
         labbook_dir = os.path.join(mock_create_labbooks[1], 'default', 'default', 'labbooks', 'labbook1')
         os.makedirs(os.path.join(labbook_dir, 'code', 'subdir'))
 
         query = """
         mutation MoveLabbookFile {
-          moveLabbookFile(
-            input: {
-              owner: "default",
-              labbookName: "labbook1",
-              section: "code",
-              srcPath: "sillyfile",
-              dstPath: "subdir/sillyfile"
-            }) {
-              newLabbookFileEdge {
-                node{
-                  key
-                  isDir
-                  size
+            moveLabbookFile(
+                input: {
+                    owner: "default",
+                    labbookName: "labbook1",
+                    section: "code",
+                    srcPath: "sillyfile",
+                    dstPath: "subdir/sillyfile"
+                }) {
+                updatedEdges {
+                    edges {
+                        node {
+                            id
+                            key
+                            isDir
+                            size
+                            section
+                        }
+                    }
                 }
-              }
             }
         }
         """
-        snapshot.assert_match(mock_create_labbooks[2].execute(query))
+        result_1 = mock_create_labbooks[2].execute(query)
+        assert 'errors' not in result_1
+        nodes = result_1['data']['moveLabbookFile']['updatedEdges']['edges']
+        assert len(nodes) == 1
+        assert nodes[0]['node']['key'] == 'subdir/sillyfile'
+        assert nodes[0]['node']['isDir'] is False
+        assert nodes[0]['node']['size'] == '7'
+        assert nodes[0]['node']['section'] == 'code'
 
+        os.makedirs(os.path.join(labbook_dir, 'code', 'subdir2'))
         query = """
         mutation MoveLabbookFile {
-          moveLabbookFile(
-            input: {
-              owner: "default",
-              labbookName: "labbook1",
-              section: "code",
-              srcPath: "subdir/",
-              dstPath: "subdir2/"
+            moveLabbookFile(
+                input: {
+                owner: "default",
+                labbookName: "labbook1",
+                section: "code",
+                srcPath: "subdir",
+                dstPath: "subdir2"
             }) {
-              newLabbookFileEdge {
-                node{
-                  key
-                  isDir
-                  size
+                updatedEdges {
+                    edges {
+                        node {
+                            id
+                            section
+                            key
+                            isDir
+                            size
+                        }
+                    }
                 }
-              }
             }
         }
         """
-        snapshot.assert_match(mock_create_labbooks[2].execute(query))
+        result_2 = mock_create_labbooks[2].execute(query)
+        assert 'errors' not in result_2
+        nodes = result_2['data']['moveLabbookFile']['updatedEdges']['edges']
+        assert len(nodes) == 2
+        assert nodes[0]['node']['key'] == 'subdir2/subdir/'
+        assert nodes[0]['node']['isDir'] is True
+        assert nodes[0]['node']['section'] == 'code'
+        assert nodes[1]['node']['key'] == 'subdir2/subdir/sillyfile'
+        assert nodes[1]['node']['isDir'] is False
+        assert nodes[1]['node']['section'] == 'code'
 
-        assert os.path.exists(os.path.join(labbook_dir, 'code', 'subdir2', 'sillyfile')) is True
+        assert os.path.exists(os.path.join(labbook_dir, 'code', 'subdir2', 'subdir', 'sillyfile')) is True
 
-    def test_move_file_many(self, mock_create_labbooks, snapshot):
+    def test_move_file_many_times(self, mock_create_labbooks):
         """Test moving a file around a bunch"""
         labbook_dir = os.path.join(mock_create_labbooks[1], 'default', 'default', 'labbooks', 'labbook1', 'code')
         os.makedirs(os.path.join(labbook_dir, 'subdir'))
 
         query1 = """
         mutation MoveLabbookFile {
-          moveLabbookFile(
-            input: {
-              owner: "default",
-              labbookName: "labbook1",
-              section: "code",
-              srcPath: "sillyfile",
-              dstPath: "subdir/sillyfile"
+            moveLabbookFile(input: {
+                owner: "default",
+                labbookName: "labbook1",
+                section: "code",
+                srcPath: "sillyfile",
+                dstPath: "subdir/sillyfile"
             }) {
-              newLabbookFileEdge {
-                node{
-                  key
-                  isDir
-                  size
+                updatedEdges {
+                    edges {
+                        node {
+                            section
+                            key
+                            isDir
+                            size
+                        }
+                    }
                 }
-              }
             }
         }
         """
+
         query2 = """
         mutation MoveLabbookFile {
-          moveLabbookFile(
-            input: {
-              owner: "default",
-              labbookName: "labbook1",
-              section: "code",
-              srcPath: "subdir/sillyfile",
-              dstPath: "sillyfile"
+            moveLabbookFile(input: {
+                owner: "default",
+                labbookName: "labbook1",
+                section: "code",
+                srcPath: "subdir/sillyfile",
+                dstPath: "sillyfile"
             }) {
-              newLabbookFileEdge {
-                node{
-                  key
-                  isDir
-                  size
+                updatedEdges {
+                    edges {
+                        node {
+                            section
+                            key
+                            isDir
+                            size
+                        }
+                    }
                 }
-              }
             }
         }
         """
-        snapshot.assert_match(mock_create_labbooks[2].execute(query1))
+        result1 = mock_create_labbooks[2].execute(query1)
+        assert 'errors' not in result1
+        assert len(result1['data']['moveLabbookFile']['updatedEdges']['edges']) == 1
+        assert result1['data']['moveLabbookFile']['updatedEdges']['edges'][0]['node']['key'] == 'subdir/sillyfile'
+        assert result1['data']['moveLabbookFile']['updatedEdges']['edges'][0]['node']['isDir'] == False
         assert os.path.exists(os.path.join(labbook_dir, 'subdir', 'sillyfile'))
         assert os.path.isfile(os.path.join(labbook_dir, 'subdir', 'sillyfile'))
 
-        snapshot.assert_match(mock_create_labbooks[2].execute(query2))
+        result2 = mock_create_labbooks[2].execute(query2)
+        assert 'errors' not in result2
+        assert len(result2['data']['moveLabbookFile']['updatedEdges']['edges']) == 1
+        assert result2['data']['moveLabbookFile']['updatedEdges']['edges'][0]['node']['key'] == 'sillyfile'
+        assert result2['data']['moveLabbookFile']['updatedEdges']['edges'][0]['node']['isDir'] == False
         assert os.path.exists(os.path.join(labbook_dir, 'sillyfile'))
         assert os.path.isfile(os.path.join(labbook_dir, 'sillyfile'))
 
-        snapshot.assert_match(mock_create_labbooks[2].execute(query1))
+        result3 = mock_create_labbooks[2].execute(query1)
+        assert 'errors' not in result3
+        assert len(result3['data']['moveLabbookFile']['updatedEdges']['edges']) == 1
+        assert result3['data']['moveLabbookFile']['updatedEdges']['edges'][0]['node']['key'] == 'subdir/sillyfile'
+        assert result3['data']['moveLabbookFile']['updatedEdges']['edges'][0]['node']['isDir'] == False
         assert os.path.exists(os.path.join(labbook_dir, 'subdir', 'sillyfile'))
         assert os.path.isfile(os.path.join(labbook_dir, 'subdir', 'sillyfile'))
 
-        snapshot.assert_match(mock_create_labbooks[2].execute(query2))
+        result4 = mock_create_labbooks[2].execute(query2)
+        assert len(result4['data']['moveLabbookFile']['updatedEdges']['edges']) == 1
+        assert result4['data']['moveLabbookFile']['updatedEdges']['edges'][0]['node']['key'] == 'sillyfile'
+        assert result4['data']['moveLabbookFile']['updatedEdges']['edges'][0]['node']['isDir'] == False
         assert os.path.exists(os.path.join(labbook_dir, 'sillyfile'))
         assert os.path.isfile(os.path.join(labbook_dir, 'sillyfile'))
 
-        snapshot.assert_match(mock_create_labbooks[2].execute(query1))
+        result5 = mock_create_labbooks[2].execute(query1)
+        assert len(result5['data']['moveLabbookFile']['updatedEdges']['edges']) == 1
+        assert result5['data']['moveLabbookFile']['updatedEdges']['edges'][0]['node']['key'] == 'subdir/sillyfile'
+        assert result5['data']['moveLabbookFile']['updatedEdges']['edges'][0]['node']['isDir'] == False
         assert os.path.exists(os.path.join(labbook_dir, 'subdir', 'sillyfile'))
         assert os.path.isfile(os.path.join(labbook_dir, 'subdir', 'sillyfile'))
-
-        snapshot.assert_match(mock_create_labbooks[2].execute(query2))
-        assert os.path.exists(os.path.join(labbook_dir, 'sillyfile'))
-        assert os.path.isfile(os.path.join(labbook_dir, 'sillyfile'))
 
     def test_delete_file(self, mock_create_labbooks):
         query = """
-        mutation deleteLabbookFile {
-          deleteLabbookFile(
+        mutation deleteLabbookFiless {
+          deleteLabbookFiles(
             input: {
               owner: "default",
               labbookName: "labbook1",
               section: "code",
-              filePath: "sillyfile"
+              filePaths: ["sillyfile"]
             }) {
               success
             }
@@ -414,7 +456,7 @@ class TestLabBookServiceMutations(object):
         assert os.path.exists(filepath) is True
 
         res = mock_create_labbooks[2].execute(query)
-        assert res['data']['deleteLabbookFile']['success'] is True
+        assert res['data']['deleteLabbookFiles']['success'] is True
 
         assert os.path.exists(filepath) is False
 
@@ -422,31 +464,38 @@ class TestLabBookServiceMutations(object):
         im = InventoryManager(mock_create_labbooks[0])
         lb = im.load_labbook('default', 'default', 'labbook1')
         FileOperations.makedir(lb, 'code/subdir')
+
+        test_file = os.path.join(lb.root_dir, 'code', 'subdir', 'test.txt')
+        with open(test_file, 'wt') as tf:
+            tf.write("puppers")
+
         lb.git.add_all('code/')
         lb.git.commit("blah")
 
         dir_path = os.path.join(lb.root_dir, 'code', 'subdir')
         assert os.path.exists(dir_path) is True
+        assert os.path.exists(test_file) is True
 
         # Note, deleting a file should work with and without a trailing / at the end.
         query = """
-        mutation deleteLabbookFile {
-          deleteLabbookFile(
+        mutation deleteLabbookFiles {
+          deleteLabbookFiles(
             input: {
               owner: "default",
               labbookName: "labbook1",
               section: "code",
-              filePath: "subdir/",
-              isDirectory: true
+              filePaths: ["subdir/"]
             }) {
               success
             }
         }
         """
         res = mock_create_labbooks[2].execute(query)
-        assert res['data']['deleteLabbookFile']['success'] is True
+        print(res)
+        assert res['data']['deleteLabbookFiles']['success'] is True
 
         assert os.path.exists(dir_path) is False
+        assert os.path.exists(test_file) is False
         assert os.path.exists(os.path.join(lb.root_dir, 'code')) is True
 
     def test_makedir(self, mock_create_labbooks, snapshot):

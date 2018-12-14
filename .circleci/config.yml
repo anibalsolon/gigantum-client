@@ -84,7 +84,7 @@ jobs:
 
   test-long-running-env:
     docker:
-      - image: gigantum/circleci-client:f652c96aba-2018-12-07
+      - image: gigantum/circleci-client:d1f2e268a3-2018-12-05
     working_directory: ~/repo
     steps:
       - checkout
