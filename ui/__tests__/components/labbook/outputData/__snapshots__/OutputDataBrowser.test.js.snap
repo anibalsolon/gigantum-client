@@ -2,98 +2,107 @@
 
 exports[`Test CodeBrowser snapshot renders 1`] = `
 <div
-  className="Code flex flex-row justify-center"
-  id="code"
+  className="FileBrowser FileBrowser--dropzone"
 >
   <div
-    className="rendered-react-keyed-file-browser"
+    className="FileBrowser__tools flex justify--space-between"
   >
     <div
-      className="rendered-file-browser"
+      className="FileBrowser__multiselect flex justify--start"
     >
-      <div
-        className="action-bar"
-      >
-        <input
-          onChange={[Function]}
-          placeholder="Filter files"
-          type="search"
-          value=""
-        />
-        <ul
-          className="item-actions"
-        >
-          <li>
-            <a
-              className="btn btn-primary btn-sm"
-              href="#"
-              onClick={[Function]}
-              role="button"
-            >
-              <i
-                aria-hidden="true"
-                className="fa fa-folder-o"
-              />
-               Add Folder
-            </a>
-          </li>
-        </ul>
-      </div>
-      <div
-        className="files"
-        id="OutputDataBrowser_allFiles"
-      >
-        <table
-          cellPadding="0"
-          cellSpacing="0"
-        >
-          <thead>
-            <tr
-              className="folder"
-            >
-              <th>
-                File
-              </th>
-              <th />
-              <th
-                className="size"
-              >
-                Size
-              </th>
-              <th
-                className="modified"
-              >
-                Last Modified
-              </th>
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              className="file FileBrowser__large-dropzone modified grey"
-            >
-              <td
-                colSpan="5"
-              >
-                Drag and Drop files here
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <button
+        className="Btn Btn--round Btn--uncheck"
+        onClick={[Function]}
+      />
+      <button
+        className="Btn Btn--round Btn--delete hidden"
+        onClick={[Function]}
+      />
+    </div>
+    <div
+      className="FileBrowser__search flex-1"
+    >
+      <input
+        className="FileBrowser__input full--border"
+        onChange={[Function]}
+        onKeyUp={[Function]}
+        placeholder="Search Files Here"
+        type="text"
+      />
     </div>
   </div>
   <div
-    className="DetailPanel hidden"
+    className="FileBrowser__header"
   >
     <div
-      className="DetailPanel--close"
+      className="FileBrowser__header--name flex justify--start"
+    >
+      <div
+        className="FileBrowser__name-text"
+      >
+        File
+      </div>
+    </div>
+    <div
+      className="FileBrowser__header--size"
+    >
+      Size
+    </div>
+    <div
+      className="FileBrowser__header--date"
+    >
+      Modified
+    </div>
+    <div
+      className="FileBrowser__header--menu"
+    />
+  </div>
+  <div
+    className="FileBrowser__body"
+  >
+    <div
+      className="AddSubfolder"
       onClick={[Function]}
     >
-      X
+      <div
+        className="AddSubfolder__text"
+      >
+        Add Folder
+      </div>
+      <div
+        className="AddSubfolder__edit hidden"
+      >
+        <div
+          className="AddSubfolder__container"
+        >
+          <input
+            className="AddSubfolder__input"
+            onKeyUp={[Function]}
+            placeholder="Enter Folder Name"
+            type="text"
+          />
+        </div>
+        <div
+          className="flex justify--space-around"
+        >
+          <button
+            className="File__btn--round File__btn--cancel"
+            onClick={[Function]}
+          />
+          <button
+            className="File__btn--round File__btn--add"
+            onClick={[Function]}
+          />
+        </div>
+      </div>
     </div>
-    <p />
-    <p />
+    <div
+      className="FileBrowser__empty"
+    >
+      <h5>
+        Upload Files by Dragging & Dropping Here
+      </h5>
+    </div>
   </div>
 </div>
 `;

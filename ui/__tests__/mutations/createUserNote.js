@@ -1,20 +1,19 @@
-//vendor
-import fs from 'fs'
-import os from 'os'
-//mutations
+// vendor
+import fs from 'fs';
+import os from 'os';
+// mutations
 import CreateUserNoteMutation from 'Mutations/CreateUserNoteMutation';
-//config
-import testConfig from './config'
+// config
+import testConfig from './config';
 
-let owner = JSON.parse(fs.readFileSync(os.homedir() + testConfig.ownerLocation, 'utf8')).username
+let owner = JSON.parse(fs.readFileSync(os.homedir() + testConfig.ownerLocation, 'utf8')).username;
 
 const CreateUserNote = {
   createUserNote: (labbbookName, callback) => {
-
     const {
       title,
       body,
-    } = testConfig
+    } = testConfig;
 
       CreateUserNoteMutation(
       labbbookName,
@@ -24,9 +23,9 @@ const CreateUserNote = {
       [],
       [],
       'id',
-      callback
-    )
-  }
-}
+      callback,
+    );
+  },
+};
 
 export default CreateUserNote;

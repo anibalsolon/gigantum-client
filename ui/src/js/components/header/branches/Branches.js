@@ -75,7 +75,7 @@ export default class Branches extends Component {
   /**
   * @param {}
   * determines how many branches are visible based on window width
-  * @return {int} branchCount
+  * @return {number} branchCount
   */
   _determineVisibleBranchCount() {
     let branchCount = 5;

@@ -394,7 +394,12 @@ export default class Activity extends Component {
     activityRecords.edges.forEach((edge, index) => {
       if (edge && edge.node) {
         const date = (edge.node && edge.node.timestamp) ? new Date(edge.node.timestamp) : new Date();
-        const timeHash = `${date.getFullYear()}_${date.getMonth()}_${date.getDate()}`;
+
+        const year = date.getFullYear(),
+          month = date.getMonth(),
+          day = date.getDate();
+
+        const timeHash = `${year}_${month}_${day}`;
         count = edge.node.show || (previousTimeHash && timeHash !== previousTimeHash) ? 0 : count + 1;
         previousTimeHash = timeHash;
 
@@ -569,6 +574,7 @@ export default class Activity extends Component {
     const isLastPage = !this.sectionType.activityRecords.pageInfo.hasNextPage;
     const rollbackableDetails = obj.edge.node.detailObjects.filter(detailObjs => detailObjs.type !== 'RESULT' && detailObjs.type !== 'CODE_EXECUTED');
     const isCompressed = this.state.compressedElements.has(obj.flatIndex);
+    const activtyBarHeight = obj.attachedCluster ? ((obj.attachedCluster.length - 1) * 7.5) + 30 : 0;
     return (
       <Fragment key={obj.edge.node.id}>
         <div className="ActivityCard__wrapper">
@@ -611,11 +617,11 @@ export default class Activity extends Component {
           }
           {
             obj.isExpandedHead && isCompressed &&
-              <div className="Activity__compressed-bar--top" style={{ height: `${((obj.attachedCluster.length - 1) * 7.5) + 30}px` }} />
+              <div className="Activity__compressed-bar--top" style={{ height: `${activtyBarHeight}px` }} />
           }
           {
             obj.isExpandedEnd && isCompressed &&
-              <div className="Activity__compressed-bar--bottom" style={{ height: `${((obj.attachedCluster.length - 1) * 7.5) + 30}px` }} />
+              <div className="Activity__compressed-bar--bottom" style={{ height: `${activtyBarHeight}px` }} />
           }
           <ErrorBoundary type="activityCardError" key={`activityCard${obj.edge.node.id}`}>
             <ActivityCard

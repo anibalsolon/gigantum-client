@@ -54,6 +54,9 @@ class LabbookSection(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRe
     # True if this directory is gitignored (to temporarily handle multigig files)
     is_untracked = graphene.Boolean()
 
+    has_files = graphene.Boolean()
+    has_favorites = graphene.Boolean()
+
     @classmethod
     def get_node(cls, info, id):
         """Method to resolve the object based on it's Node ID"""
@@ -105,6 +108,19 @@ class LabbookSection(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRe
         """Resolver for getting file listing in a single directory"""
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
             lambda labbook: self.helper_resolve_files(labbook, kwargs))
+
+    def resolve_has_files(self, info, **kwargs):
+        def _hf(lb):
+            p = os.path.join(lb.root_dir, self.section)
+            for rootd, dirs, files in os.walk(p):
+                for f in files:
+                    if f != '.gitkeep':
+                        return True
+            return False
+
+        return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
+            _hf
+        )
 
     def helper_resolve_all_files(self, labbook, kwargs):
         """Helper method to populate the LabbookFileConnection"""
@@ -171,6 +187,14 @@ class LabbookSection(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRe
         """Resolve all favorites for the given section"""
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
             lambda labbook: self.helper_resolve_favorites(labbook, kwargs))
+
+    def resolve_has_favorites(self, info, **kwargs):
+        def _hf(lb):
+            return len(lb.get_favorites(self.section).items()) > 0
+
+        return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
+            _hf
+        )
 
     def resolve_is_untracked(self, info):
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(

@@ -1,51 +1,48 @@
-//vendor
-import fs from 'fs'
-import os from 'os'
-import uuidv4 from 'uuid/v4'
-//mutations
-import DeleteLabbook from './../deleteLabbook';
-import CreateLabbook from './../createLabbook';
-import MakeLabbookDirectoryMutation from 'Mutations/fileBrowser/MakeLabbookDirectoryMutation'
-import MoveLabbookFileMutation from 'Mutations/fileBrowser/MoveLabbookFileMutation'
-//config
-import testConfig from './../config'
+// vendor
+import fs from 'fs';
+import os from 'os';
+import uuidv4 from 'uuid/v4';
+// mutations
+import MakeLabbookDirectoryMutation from 'Mutations/fileBrowser/MakeLabbookDirectoryMutation';
+import MoveLabbookFileMutation from 'Mutations/fileBrowser/MoveLabbookFileMutation';
+import DeleteLabbook from '../deleteLabbook';
+import CreateLabbook from '../createLabbook';
+// config
+import testConfig from '../config';
 
 
-const directory = 'test_directory'
-const moveDirectory = 'test_directory_move'
-const labbookName = uuidv4()
-const owner = JSON.parse(fs.readFileSync(os.homedir() + testConfig.ownerLocation, 'utf8')).username
-const section = 'code'
-const connectionKey = 'Code_allFiles'
+const directory = 'test_directory';
+const moveDirectory = 'test_directory_move';
+const labbookName = uuidv4();
+const owner = JSON.parse(fs.readFileSync(os.homedir() + testConfig.ownerLocation, 'utf8')).username;
+const section = 'code';
+const connectionKey = 'Code_allFiles';
 
-let edge
-let labbookId
+let edge;
+let labbookId;
 
 describe('Test Suite: Move Labbook File', () => {
-  test('Test: CreateLabbookMutation - Create Labbook Mutation untracked', done => {
+  test('Test: CreateLabbookMutation - Create Labbook Mutation untracked', (done) => {
     const isUntracked = true;
 
     CreateLabbook.createLabbook(
         labbookName,
         isUntracked,
         (response, error) => {
-
-          if(response && response.createLabbook){
-            labbookId = response.createLabbook.labbook.id
+          if (response && response.createLabbook) {
+            labbookId = response.createLabbook.labbook.id;
             expect(response.createLabbook.labbook.name).toEqual(labbookName);
-            done()
-          }else{
-            console.log(error)
-            done.fail(new Error(error))
+            done();
+          } else {
+            console.log(error);
+            done.fail(new Error(error));
           }
-        }
-    )
+        },
+    );
+  });
 
-  })
 
-
-  test('Test: MakeLabbookDirectoryMutation - Make Directory', done => {
-
+  test('Test: MakeLabbookDirectoryMutation - Make Directory', (done) => {
     MakeLabbookDirectoryMutation(
       connectionKey,
       owner,
@@ -54,22 +51,19 @@ describe('Test Suite: Move Labbook File', () => {
       directory,
       section,
         (response, error) => {
-
-          if(response){
-
-            expect(response.makeLabbookDirectory.newLabbookFileEdge.node.key).toEqual(directory + '/');
-            done()
-          }else{
-            console.log(error)
-            done.fail(new Error(error))
+          if (response) {
+            expect(response.makeLabbookDirectory.newLabbookFileEdge.node.key).toEqual(`${directory}/`);
+            done();
+          } else {
+            console.log(error);
+            done.fail(new Error(error));
           }
-        }
-    )
-  })
+        },
+    );
+  });
 
 
-  test('Test: MakeLabbookDirectoryMutation - Make Directory to move', done => {
-
+  test('Test: MakeLabbookDirectoryMutation - Make Directory to move', (done) => {
     MakeLabbookDirectoryMutation(
       connectionKey,
       owner,
@@ -78,24 +72,21 @@ describe('Test Suite: Move Labbook File', () => {
       moveDirectory,
       section,
       (response, error) => {
-
-        if(response){
-          edge = response.makeLabbookDirectory.newLabbookFileEdge
-          expect(response.makeLabbookDirectory.newLabbookFileEdge.node.key).toEqual(moveDirectory + '/');
-          done()
-        }else{
-          console.log(error)
-          done.fail(new Error(error))
+        if (response) {
+          edge = response.makeLabbookDirectory.newLabbookFileEdge;
+          expect(response.makeLabbookDirectory.newLabbookFileEdge.node.key).toEqual(`${moveDirectory}/`);
+          done();
+        } else {
+          console.log(error);
+          done.fail(new Error(error));
         }
-      }
-    )
+      },
+    );
+  });
 
-  })
 
-
-  test('Test: MoveLabbookFileMutation - Move Directory', done => {
-
-    const  newPath = `${directory}/${moveDirectory}`
+  test('Test: MoveLabbookFileMutation - Move Directory', (done) => {
+    const newPath = `${directory}/${moveDirectory}`;
 
     MoveLabbookFileMutation(
       connectionKey,
@@ -107,22 +98,20 @@ describe('Test Suite: Move Labbook File', () => {
       newPath,
       section,
       (response, error) => {
-    
-        if(response && response.moveLabbookFile){
-
-          expect(response.moveLabbookFile.newLabbookFileEdge.node.key).toEqual(newPath + '/');
-          done()
-        }else{
-          console.log(error)
-          done.fail(new Error(error))
+        if (response && response.moveLabbookFile) {
+          expect(response.moveLabbookFile.newLabbookFileEdge.node.key).toEqual(`${newPath}/`);
+          done();
+        } else {
+          console.log(error);
+          done.fail(new Error(error));
         }
-      }
-    )
-  })
+      },
+    );
+  });
 
-  test('Test: MoveLabbookFileMutation - Rename', done => {
-    const oldPath = `${directory}/${moveDirectory}`
-    const newPath = `${directory}/renamed_folder`
+  test('Test: MoveLabbookFileMutation - Rename', (done) => {
+    const oldPath = `${directory}/${moveDirectory}`;
+    const newPath = `${directory}/renamed_folder`;
 
     MoveLabbookFileMutation(
       connectionKey,
@@ -134,22 +123,20 @@ describe('Test Suite: Move Labbook File', () => {
       newPath,
       section,
       (response, error) => {
-
-        if(response && response.moveLabbookFile){
-
-          expect(response.moveLabbookFile.newLabbookFileEdge.node.key).toEqual(newPath + '/');
-          done()
-        }else{
-          console.log(error)
-          done.fail(new Error(error))
+        if (response && response.moveLabbookFile) {
+          expect(response.moveLabbookFile.newLabbookFileEdge.node.key).toEqual(`${newPath}/`);
+          done();
+        } else {
+          console.log(error);
+          done.fail(new Error(error));
         }
-      }
-    )
-  })
+      },
+    );
+  });
 
-  test('Test: MoveLabbookFileMutation - Move Directory: Fail folder does not exist', done => {
-    const fakeFolder = 'doesn_not_exist'
-    const newPath = `${fakeFolder}/${moveDirectory}`
+  test('Test: MoveLabbookFileMutation - Move Directory: Fail folder does not exist', (done) => {
+    const fakeFolder = 'doesn_not_exist';
+    const newPath = `${fakeFolder}/${moveDirectory}`;
 
     MoveLabbookFileMutation(
       connectionKey,
@@ -161,37 +148,33 @@ describe('Test Suite: Move Labbook File', () => {
       newPath,
       section,
       (response, error) => {
-
-        if(response && response.moveLabbookFile){
-
+        if (response && response.moveLabbookFile) {
           expect(response.moveLabbookFile).toEqual(undefined);
-          done.fail(new Error('Mutation Should Fail'))
-        }else{
-          console.log(error)
+          done.fail(new Error('Mutation Should Fail'));
+        } else {
+          console.log(error);
           expect(error[0].message).toMatch(/No src file exists at/);
-          done()
+          done();
         }
-      }
-    )
-  })
+      },
+    );
+  });
 
-  test('Test: DeleteLabbookMutation - Delete Labbook Mutation confirm', done => {
-
-    const confirm = true
+  test('Test: DeleteLabbookMutation - Delete Labbook Mutation confirm', (done) => {
+    const confirm = true;
 
     DeleteLabbook.deleteLabbook(
       labbookName,
       confirm,
       (response, error) => {
-        if(response){
-
+        if (response) {
           expect(response.deleteLabbook.success).toEqual(true);
-          done()
-        }else{
-          console.log(error)
-          done.fail(new Error(error))
+          done();
+        } else {
+          console.log(error);
+          done.fail(new Error(error));
         }
-      }
-    )
-  })
-})
+      },
+    );
+  });
+});

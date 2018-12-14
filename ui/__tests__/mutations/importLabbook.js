@@ -1,10 +1,10 @@
-//vendor
-import fs from 'fs'
-import os from 'os'
-//mutations
+// vendor
+import fs from 'fs';
+import os from 'os';
+// mutations
 import ImportLabbookMutation from 'Mutations/ImportLabbookMutation';
-//config
-import testConfig from './config'
+// config
+import testConfig from './config';
 
 const ImportLabbook = {
   importLabbook: (callback) => {
@@ -12,9 +12,9 @@ const ImportLabbook = {
       blob,
       chunk,
       accessToken,
-      callback
-    )
-  }
-}
+      callback,
+    );
+  },
+};
 
 export default ImportLabbook;

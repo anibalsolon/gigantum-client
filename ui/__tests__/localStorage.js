@@ -1,59 +1,54 @@
 
-var localStorageMock = (function() {
+var localStorageMock = (function () {
   var store = {};
   var jwt = require('jsonwebtoken');
   var token = jwt.sign({ foo: 'bar', exp: Math.floor(Date.now() / 1000) + 3000 }, 'shhhhh');
 
   var date = new Date();
-  var d = new Date(date.getMilliseconds() + 100)
+  var d = new Date(date.getMilliseconds() + 100);
 
   store = {
-    'id_token':  token,
-    'expires_at': d.getTime(),
-    'username': 'cbutler'
+    id_token: token,
+    expires_at: d.getTime(),
+    username: 'cbutler',
   };
 
   return {
-    getItem: function(key) {
+    getItem(key) {
       return store[key];
     },
-    setItem: function(key, value) {
+    setItem(key, value) {
       store[key] = value.toString();
     },
-    clear: function() {
+    clear() {
       store = {};
     },
-    removeItem: function(key) {
+    removeItem(key) {
       delete store[key];
-    }
+    },
   };
-})();
+}());
 
 Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 
 
-var sessionStorageMock = (function() {
+var sessionStorageMock = (function () {
   var store = {};
 
   return {
-    getItem: function(key) {
+    getItem(key) {
       return store[key];
     },
-    setItem: function(key, value) {
+    setItem(key, value) {
       store[key] = value.toString();
     },
-    clear: function() {
+    clear() {
       store = {};
     },
-    removeItem: function(key) {
+    removeItem(key) {
       delete store[key];
-    }
+    },
   };
-})();
+}());
 
 Object.defineProperty(window, 'sessionStorage', { value: sessionStorageMock });
-
-
-const oneHundredSeconds = 1 * 1000 * 100
-//set timout to one hundred seconds
-jasmine.DEFAULT_TIMEOUT_INTERVAL = oneHundredSeconds

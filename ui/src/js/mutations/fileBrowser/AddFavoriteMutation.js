@@ -38,7 +38,6 @@ function sharedUpdater(store, parentId, connectionKey, node, tempId) {
       labbookProxy,
       connectionKey,
     );
-
     if (conn) {
       if (tempId) {
         RelayRuntime.ConnectionHandler.deleteNode(

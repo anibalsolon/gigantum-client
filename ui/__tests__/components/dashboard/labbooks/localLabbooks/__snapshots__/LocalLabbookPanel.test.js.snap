@@ -2,7 +2,7 @@
 
 exports[`Test LocalLabbooks rendering 1`] = `
 <a
-  className="Card Card--text column-4-span-3 flex flex--column justify--space-between"
+  className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
   href="/projects/cbutler/zab"
   onClick={[Function]}
 >
@@ -30,12 +30,9 @@ exports[`Test LocalLabbooks rendering 1`] = `
         className="LocalLabbooks__panel-title"
         onClick={[Function]}
       >
-        <span
-          className={undefined}
-        >
+        <span>
           <span
             className=""
-            style={undefined}
           >
             zab
           </span>
@@ -45,14 +42,17 @@ exports[`Test LocalLabbooks rendering 1`] = `
     <p
       className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner "
     >
-      Created by cbutler
+      cbutler
+    </p>
+    <p
+      className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner"
+    >
+      Created on 12/07/18
     </p>
     <p
       className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
     >
-      <span
-        className={undefined}
-      />
+      <span />
     </p>
   </div>
   <div

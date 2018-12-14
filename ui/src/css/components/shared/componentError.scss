@@ -4,7 +4,7 @@
   }
 
 .packageDependenciesError{
-    @extend .card;
+    @extend .Card;
     background: $white url(../images/icons/warning-triangle.svg) no-repeat center 40px;
     background-size: 80px;
     margin: 8px 0 16px 0;
@@ -13,7 +13,7 @@
 }
 
 .baseError{
-    @extend .card;
+    @extend .Card;
     background: $white url(../images/icons/warning-triangle.svg) no-repeat center 30px;
     background-size: 60px;
     margin: 8px 0 16px 0;

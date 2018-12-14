@@ -1,21 +1,19 @@
 
-      import React from 'react'
+      import React from 'react';
       import renderer from 'react-test-renderer';
-      import {mount} from 'enzyme'
+      import { mount } from 'enzyme';
       import CollaboratorButton from 'Components/labbook/branchMenu/CollaboratorButton';
 
-      import relayTestingUtils from 'relay-testing-utils'
+      import relayTestingUtils from '@gigantum/relay-testing-utils';
 
       test('Test CollaboratorButton', () => {
-
         const wrapper = renderer.create(
 
-           <CollaboratorButton />
+           <CollaboratorButton />,
 
         );
 
-        const tree = wrapper.toJSON()
+        const tree = wrapper.toJSON();
 
-        expect(tree).toMatchSnapshot()
-
-      })
+        expect(tree).toMatchSnapshot();
+      });

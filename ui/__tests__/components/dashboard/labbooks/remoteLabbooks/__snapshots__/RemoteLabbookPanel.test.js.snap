@@ -2,7 +2,7 @@
 
 exports[`Test RemoteLabbooks rendering 1`] = `
 <div
-  className="Card column-4-span-3 flex flex--column justify--space-between"
+  className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
 >
   <div
     className="RemoteLabbooks__row RemoteLabbooks__row--icon"
@@ -11,12 +11,17 @@ exports[`Test RemoteLabbooks rendering 1`] = `
       className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud-download"
       disabled={false}
       onClick={[Function]}
-    />
+    >
+      Import
+    </button>
     <button
       className="RemoteLabbooks__icon RemoteLabbooks__icon--delete-disabled"
-      disabled={false}
+      data-tooltip="Can only delete remote projects created by you"
+      disabled={true}
       onClick={[Function]}
-    />
+    >
+      Delete
+    </button>
   </div>
   <div
     className="RemoteLabbooks__row RemoteLabbooks__row--text"
@@ -27,12 +32,9 @@ exports[`Test RemoteLabbooks rendering 1`] = `
       <h6
         className="RemoteLabbooks__panel-title"
       >
-        <span
-          className={undefined}
-        >
+        <span>
           <span
             className=""
-            style={undefined}
           >
             update-test
           </span>
@@ -42,14 +44,22 @@ exports[`Test RemoteLabbooks rendering 1`] = `
     <p
       className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
     >
-      Created by dmk
+      dmk
+    </p>
+    <p
+      className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
+    >
+      Created on 12/07/18
+    </p>
+    <p
+      className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
+    >
+      Modified a few seconds ago
     </p>
     <p
       className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
     >
-      <span
-        className={undefined}
-      />
+      <span />
     </p>
   </div>
   <div

@@ -12,7 +12,7 @@ const ansi_up = new AnsiUp();
 
 const FooterUtils = {
   /**
-   *  @param {Int}
+   *  @param {number}
    *  iterate value of index within the bounds of the array size
    *  @return {}
    */
@@ -114,7 +114,6 @@ const FooterUtils = {
                 errorMessage = 'Project failed to build: Check for and remove invalid dependencies and try again.';
               }
               if ((type === 'syncLabbook') || (type === 'publishLabbook')) {
-                console.log(response.data);
                 failureCall(response.data.jobStatus.failureMessage);
               }
               html += `\n<span style="color:rgb(255,85,85)">${response.data.jobStatus.failureMessage}</span>`;

@@ -141,7 +141,7 @@ export default class CustomDockerfile extends Component {
 
         </div>
 
-        <div className="CustomDockerfile__content Card Card--auto Card--no-hover grid column-1-span-12">
+        <div className="CustomDockerfile__content Card Card--auto Card--no-hover column-1-span-12">
           {
             this.state.editingDockerfile ?
 

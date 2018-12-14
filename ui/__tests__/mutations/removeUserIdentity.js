@@ -1,15 +1,15 @@
-//mutations
+// mutations
 import RemoveUserIdentityMutation from 'Mutations/RemoveUserIdentityMutation';
-//config
-import testConfig from './config'
+// config
+import testConfig from './config';
 
 
 const RemoveUserIdentity = {
   removeUserIdentity: (callback) => {
     RemoveUserIdentityMutation(
-      callback
-    )
-  }
-}
+      callback,
+    );
+  },
+};
 
 export default RemoveUserIdentity;

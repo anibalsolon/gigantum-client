@@ -20,6 +20,8 @@ import './CreateBranch.scss';
 export default class CreateBranchModal extends Component {
   constructor(props) {
     super(props);
+    const formatedCurrentTimestamp = Moment().format('M/DD/YY h:mm:ss A');
+    const formatedTimestamp = props.selected ? Moment(Date.parse(props.selected.timestamp)).format('M/DD/YY h:mm:ss A') : '';
     this.state = {
       modalVisible: props.modalVisible,
       showLoginPrompt: false,
@@ -27,7 +29,7 @@ export default class CreateBranchModal extends Component {
       textLength: 0,
       showError: false,
       branchName: '',
-      branchDescription: this.props.selected ? `Branch created on ${Moment().format('M/DD/YY h:mm:ss A')} to rollback workspace to ${Moment(Date.parse(this.props.selected.timestamp)).format('M/DD/YY h:mm:ss A')}.` : this.props.description ? this.props.description : '',
+      branchDescription: props.selected ? `Branch created on ${formatedCurrentTimestamp} to rollback workspace to ${formatedTimestamp}.` : props.description ? props.description : '',
       createButtonClicked: false,
       buttonLoaderCreateBranch: '',
     };
@@ -45,7 +47,8 @@ export default class CreateBranchModal extends Component {
     }
 
     if (nextProps.selected) {
-      const branchName = `rollback-to-${Moment(Date.parse(nextProps.selected.timestamp)).format('YYYYMMDD-HHmmss')}`;
+      const formattedTimestamp = Moment(Date.parse(nextProps.selected.timestamp)).format('YYYYMMDD-HHmmss');
+      const branchName = `rollback-to-${formattedTimestamp}`;
       this.setState({ branchName });
     } else {
       this.setState({ branchName: '' });
@@ -204,6 +207,9 @@ export default class CreateBranchModal extends Component {
         hidden: !this.state.showError,
       });
 
+    const formatedCurrentTimestamp = Moment().format('M/DD/YY h:mm:ss A'),
+      formatedTimestamp = this.props.selected ? Moment(Date.parse(this.props.selected.timestamp)).format('M/DD/YY h:mm:ss A') : '';
+
     return (
       <div>
         {this.state.modalVisible &&
@@ -240,7 +246,7 @@ export default class CreateBranchModal extends Component {
 
                       maxLength="240"
                       placeholder="Briefly describe this branch, its purpose and any other key details. "
-                      defaultValue={this.props.selected ? `Branch created on ${Moment().format('M/DD/YY h:mm:ss A')} to rollback workspace to ${Moment(Date.parse(this.props.selected.timestamp)).format('M/DD/YY h:mm:ss A')}.` : this.props.description ? this.props.description : ''}
+                      defaultValue={this.props.selected ? `Branch created on ${formatedCurrentTimestamp} to rollback workspace to ${formatedTimestamp}.` : this.props.description ? this.props.description : ''}
                     />
                     <p className={`CreateBranch__warning ${this.state.textWarning}`}>{`${this.state.textLength} characters remaining`}</p>
                   </div>

@@ -351,7 +351,9 @@ class Labbooks extends Component {
   */
   _changeSearchParam(newValues) {
     const searchObj = Object.assign({}, queryString.parse(this.props.history.location.search.slice(1)), newValues);
-    this.props.history.replace(`..${this.props.history.location.pathname}?${queryString.stringify(searchObj)}`);
+    const urlParameters = queryString.stringify(searchObj);
+
+    this.props.history.replace(`..${this.props.history.location.pathname}?${urlParameters}`);
   }
 
   render() {

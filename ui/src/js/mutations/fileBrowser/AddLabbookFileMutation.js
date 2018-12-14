@@ -26,22 +26,20 @@ const mutation = graphql`
 `;
 
 
-function sharedUpdater(store, labbookId, connectionKey, node) {
-  const labbookProxy = store.get(labbookId);
-  if (labbookProxy) {
+function sharedUpdater(store, sectionId, connectionKey, node) {
+  const sectionProxy = store.get(sectionId);
+  if (sectionProxy) {
     const conn = RelayRuntime.ConnectionHandler.getConnection(
-      labbookProxy,
+      sectionProxy,
       connectionKey,
     );
-
     if (conn) {
       const newEdge = RelayRuntime.ConnectionHandler.createEdge(
         store,
         conn,
         node,
-        'newLabbookFileEdge',
+        'LabbookFileEdge',
       );
-
       RelayRuntime.ConnectionHandler.insertEdgeAfter(
         conn,
         newEdge,
@@ -52,10 +50,10 @@ function sharedUpdater(store, labbookId, connectionKey, node) {
 
 
 function deleteEdge(store, labbookID, deletedID, connectionKey) {
-  const labbookProxy = store.get(labbookID);
-  if (labbookProxy) {
+  const sectionProxy = store.get(labbookID);
+  if (sectionProxy) {
     const conn = RelayRuntime.ConnectionHandler.getConnection(
-      labbookProxy,
+      sectionProxy,
       connectionKey,
     );
 
@@ -72,18 +70,35 @@ export default function AddLabbookFileMutation(
   connectionKey,
   owner,
   labbookName,
-  labbookId,
+  sectionId,
   filePath,
   chunk,
   accessToken,
   section,
   transactionId,
+  deleteId,
   callback,
 ) {
+  const date = new Date();
+  const size = chunk.fileSizeKb * 1000;
+  const modifiedAt = (date.getTime() / 1000)
+  const optimisticResponse = {
+    addLabbookFile: {
+      newLabbookFileEdge: {
+        node: {
+          id: optimisticId,
+          isDir: false,
+          key: filePath,
+          modifiedAt,
+          size,
+        },
+      },
+    },
+  };
   const uploadables = [chunk.blob, accessToken];
 
   const id = uuidv4();
-  const optimisticId = uuidv4();
+  const optimisticId = window.btoa((transactionId + filePath));
 
   const variables = {
     input: {
@@ -113,23 +128,8 @@ export default function AddLabbookFileMutation(
       mutation,
       variables,
       uploadables,
-      configs: [{ // commented out until nodes are returned
-        type: 'RANGE_ADD',
-        parentID: labbookId,
-        connectionInfo: [{
-          key: connectionKey,
-          rangeBehavior: 'append',
-        }],
-        edgeName: 'newLabbookFileEdge',
-      }, {
-        type: 'RANGE_ADD',
-        parentID: labbookId,
-        connectionInfo: [{
-          key: recentConnectionKey,
-          rangeBehavior: 'append',
-        }],
-        edgeName: 'newLabbookFileEdge',
-      }],
+      optimisticResponse,
+      configs: [],
       onCompleted: (response, error) => {
         if (error) {
           console.log(error);
@@ -138,61 +138,44 @@ export default function AddLabbookFileMutation(
       },
       onError: err => console.error(err),
       optimisticUpdater: (store) => {
-        const node = store.create(optimisticId, 'LabbookFile');
 
-        node.setValue(optimisticId, 'id');
-        node.setValue(false, 'isDir');
-        node.setValue(filePath, 'key');
-        node.setValue(0, 'modifiedAt');
-        node.setValue(chunk.chunkSize, 'size');
-
-        sharedUpdater(store, labbookId, connectionKey, node);
-        sharedUpdater(store, labbookId, recentConnectionKey, node);
+        if (deleteId && store.get(deleteId)) {
+          let node = store.get(deleteId)
+          node.setValue(modifiedAt, 'modifiedAt');
+          node.setValue(size, 'size');
+        } else {
+          if (store.get(optimisticId)) {
+            deleteEdge(store, sectionId, optimisticId, connectionKey);
+          }
+          let nodeExists = store.get(optimisticId);
+          const node = store.create(optimisticId, 'LabbookFile');
+          node.setValue(optimisticId, 'id');
+          node.setValue(false, 'isDir');
+          node.setValue(filePath, 'key');
+          node.setValue(modifiedAt, 'modifiedAt');
+          node.setValue(size, 'size');
+          sharedUpdater(store, sectionId, connectionKey, node);
+        }
       },
       updater: (store, response) => {
-        deleteEdge(store, labbookId, optimisticId, connectionKey);
-        deleteEdge(store, labbookId, optimisticId, recentConnectionKey);
 
         if (response.addLabbookFile && response.addLabbookFile.newLabbookFileEdge && response.addLabbookFile.newLabbookFileEdge.node) {
+          deleteEdge(store, sectionId, optimisticId, connectionKey);
+          deleteEdge(store, sectionId, optimisticId, recentConnectionKey);
           const { id } = response.addLabbookFile.newLabbookFileEdge.node;
-
           const nodeExists = store.get(id);
 
-          const responseKey = response.addLabbookFile.newLabbookFileEdge.node.key;
-          const responseKeyArr = responseKey.split('/');
-          let temp = '';
+          const node = nodeExists ? store.get(id) : store.create(id, 'LabbookFile');
 
-          responseKeyArr.forEach((key, index) => {
-            if (!nodeExists || index !== responseKeyArr.length - 1) {
-              let node;
+          node.setValue(response.addLabbookFile.newLabbookFileEdge.node.size, 'size');
+          node.setValue(false, 'isDir');
+          node.setValue(response.addLabbookFile.newLabbookFileEdge.node.id, 'id');
+          node.setValue(response.addLabbookFile.newLabbookFileEdge.node.key, 'key');
+          node.setValue(response.addLabbookFile.newLabbookFileEdge.node.modifiedAt, 'modifiedAt');
 
-              if (index === responseKeyArr.length - 1) {
-                temp += key;
-              } else {
-                temp = `${temp + key}/`;
-              }
+          sharedUpdater(store, sectionId, connectionKey, node);
+          sharedUpdater(store, sectionId, recentConnectionKey, node);
 
-              if (index === responseKeyArr.length - 1) {
-                node = store.create(id, 'LabbookFile');
-                node.setValue(response.addLabbookFile.newLabbookFileEdge.node.size, 'size');
-                node.setValue(false, 'isDir');
-                node.setValue(response.addLabbookFile.newLabbookFileEdge.node.id, 'id');
-                node.setValue(response.addLabbookFile.newLabbookFileEdge.node.key, 'key');
-                node.setValue(response.addLabbookFile.newLabbookFileEdge.node.modifiedAt, 'modifiedAt');
-                sharedUpdater(store, labbookId, connectionKey, node);
-                sharedUpdater(store, labbookId, recentConnectionKey, node);
-              } else if (!store.get(temp)) {
-                node = store.create(temp, 'LabbookFile');
-                node.setValue(temp, 'id');
-                node.setValue(true, 'isDir');
-                node.setValue(temp, 'key');
-                node.setValue(0, 'size');
-                node.setValue(response.addLabbookFile.newLabbookFileEdge.node.modifiedAt, 'modifiedAt');
-                sharedUpdater(store, labbookId, connectionKey, node);
-                sharedUpdater(store, labbookId, recentConnectionKey, node);
-              }
-            }
-          });
         }
       },
     },

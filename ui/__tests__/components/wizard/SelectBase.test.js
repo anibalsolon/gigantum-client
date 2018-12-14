@@ -1,43 +1,39 @@
 
-      import React from 'react'
+      import React from 'react';
       import renderer from 'react-test-renderer';
       import sinon from 'sinon';
-      import {mount} from 'enzyme'
+      import { mount } from 'enzyme';
       import SelectBase from 'Components/wizard/SelectBase';
 
-      import json from './__relaydata__/SelectBase.json'
-      import relayTestingUtils from 'relay-testing-utils'
+      import relayTestingUtils from '@gigantum/relay-testing-utils';
+      import json from './__relaydata__/SelectBase.json';
 
       const fixtures = {
-        'name': '',
-        'description': '',
-        'selectedBase': null,
-        'selectedBaseId': false,
-        'selectedTab': 'python3',
-        'viewedBase': null,
-        'viewingBase': false,
-      }
+        name: '',
+        description: '',
+        selectedBase: null,
+        selectedBaseId: false,
+        selectedTab: 'python3',
+        viewedBase: null,
+        viewingBase: false,
+      };
 
       describe('SelectBase', () => {
-
         it('SelectBase snapshot', () => {
-
           const selectBaseSnap = renderer.create(
                <SelectBase
                 {...fixtures}
-                />
-          )
+                />,
+          );
 
-          const tree = selectBaseSnap.toJSON()
+          const tree = selectBaseSnap.toJSON();
 
-          expect(tree).toMatchSnapshot()
-
-        })
+          expect(tree).toMatchSnapshot();
+        });
       });
 
 
       describe('Test SelectBase', () => {
-
         const selectBaseCallbackTest = sinon.spy();
         const toggleDisabledContinueTest = sinon.spy();
         const createLabbookMutationTest = sinon.spy();
@@ -52,13 +48,12 @@
               toggleDisabledContinue={toggleDisabledContinueTest}
               createLabbookMutation={createLabbookMutationTest}
               toggleMenuVisibility={toggleMenuVisibilityTest}
-            />, {}, json.data.availableBases
-          )
+            />, {}, json.data.availableBases,
+          ),
         );
-        it('renders loader', ()=>{
+        it('renders loader', () => {
           expect(selectBaseMount.find('.Loader').length).toEqual(1);
-
-        })
+        });
         // it('Simulates selecting a base', () => {
         //   console.log(selectBaseMount)
         //   console.log(selectBaseMount.find('.SelectBase__image-wrapper'))
@@ -74,4 +69,4 @@
         //   console.log(selectBaseCallbackTest.find('.button--flat'))
         //   expect(toggleMenuVisibilityTest).toHaveProperty('callCount', 1);
         // });
-      })
+      });

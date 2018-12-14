@@ -27,7 +27,6 @@ export default function RemoveFavoriteMutation(
   key,
   removeFavoriteId,
   fileItem,
-  favorites,
   callback,
 ) {
   const clientMutationId = uuidv4();

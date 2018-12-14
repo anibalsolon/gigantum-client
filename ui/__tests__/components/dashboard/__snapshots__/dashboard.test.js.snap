@@ -199,7 +199,7 @@ exports[`Test Dashboard Labbooks 1`] = `
           className="grid"
         >
           <div
-            className="ImportModule Card Card--add Card--import column-4-span-3"
+            className="ImportModule Card Card-300 Card--line-50 Card--text-center Card--add Card--import column-4-span-3"
             id="dropZone"
             onDragEnd={[Function]}
             onDragOver={[Function]}
@@ -293,8 +293,8 @@ exports[`Test Dashboard Labbooks 1`] = `
                   className="hidden importLabbook"
                 >
                   Clicking on the Import Existing' button transition the card to Import mode. 
-                   You can import by using a URL of a published Project or by uploading an exported Project's .zip file. 
-                   You can also directly import Projects that have been shared with you in the Cloud view.
+ You can import by using a URL of a published Project or by uploading an exported Project's .zip file. 
+ You can also directly import Projects that have been shared with you in the Cloud view.
                 </div>
               </div>
             </div>
@@ -303,27 +303,27 @@ exports[`Test Dashboard Labbooks 1`] = `
             />
           </div>
           <div
-            className="Card column-4-span-3 flex flex--column justify--space-between LabbookPaginationLoader LabbookPaginationLoader--0"
+            className="Card Card--300 column-4-span-3 flex flex--column justify--space-between LabbookPaginationLoader LabbookPaginationLoader--0"
           >
             <div />
           </div>
           <div
-            className="Card column-4-span-3 flex flex--column justify--space-between LabbookPaginationLoader LabbookPaginationLoader--1"
+            className="Card Card--300 column-4-span-3 flex flex--column justify--space-between LabbookPaginationLoader LabbookPaginationLoader--1"
           >
             <div />
           </div>
           <div
-            className="Card column-4-span-3 flex flex--column justify--space-between LabbookPaginationLoader LabbookPaginationLoader--2"
+            className="Card Card--300 column-4-span-3 flex flex--column justify--space-between LabbookPaginationLoader LabbookPaginationLoader--2"
           >
             <div />
           </div>
           <div
-            className="Card column-4-span-3 flex flex--column justify--space-between LabbookPaginationLoader LabbookPaginationLoader--3"
+            className="Card Card--300 column-4-span-3 flex flex--column justify--space-between LabbookPaginationLoader LabbookPaginationLoader--3"
           >
             <div />
           </div>
           <div
-            className="Card column-4-span-3 flex flex--column justify--space-between LabbookPaginationLoader LabbookPaginationLoader--4"
+            className="Card Card--300 column-4-span-3 flex flex--column justify--space-between LabbookPaginationLoader LabbookPaginationLoader--4"
           >
             <div />
           </div>

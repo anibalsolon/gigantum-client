@@ -47,11 +47,11 @@
 }
 
 .justify--left {
-    justify-content: left;
+    justify-content: flex-start;
 }
 
 .justify--right {
-    justify-content: left;
+    justify-content: flex-end;
 }
 
 .justify--space-around {
@@ -61,6 +61,7 @@
 .justify--space-between {
     justify-content: space-between;
 }
+
 
 /*
   flex: 0 0 auto, 1 0 auto, 0 1 auto, 1 1 auto
@@ -124,6 +125,10 @@
 
 .flex--column-reverse {
     flex-wrap: column-reverse;
+}
+
+.align-items--center {
+  align-items: center;
 }
 
 /*
