@@ -162,6 +162,8 @@ class InventoryManager(object):
                              if os.path.isdir(os.path.join(user_root, d))])
         repository_paths = []
         for owner_dir in owner_dirs:
+            if not os.path.isdir(os.path.join(owner_dir, f'{repository_type}s')):
+                continue
             repository_dirs = sorted([os.path.join(owner_dir, f'{repository_type}s', l)
                                       for l in os.listdir(os.path.join(owner_dir, f'{repository_type}s'))
                                       if os.path.isdir(os.path.join(owner_dir, f'{repository_type}s', l))])
