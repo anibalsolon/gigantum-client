@@ -493,16 +493,16 @@ type DeleteLabbookCollaboratorPayload {
   clientMutationId: String
 }
 
-input DeleteLabbookFileInput {
+input DeleteLabbookFilesInput {
   owner: String!
   labbookName: String!
   section: String!
-  filePath: String!
+  filePath: [String]!
   isDirectory: Boolean
   clientMutationId: String
 }
 
-type DeleteLabbookFilePayload {
+type DeleteLabbookFilesPayload {
   success: Boolean
   clientMutationId: String
 }
@@ -828,7 +828,7 @@ type LabbookMutations {
   addLabbookFile(input: AddLabbookFileInput!): AddLabbookFilePayload
   completeBatchUploadTransaction(input: CompleteBatchUploadTransactionInput!): CompleteBatchUploadTransactionPayload
   moveLabbookFile(input: MoveLabbookFileInput!): MoveLabbookFilePayload
-  deleteLabbookFile(input: DeleteLabbookFileInput!): DeleteLabbookFilePayload
+  deleteLabbookFiles(input: DeleteLabbookFilesInput!): DeleteLabbookFilesPayload
   makeLabbookDirectory(input: MakeLabbookDirectoryInput!): MakeLabbookDirectoryPayload
   removeUserIdentity(input: RemoveUserIdentityInput!): RemoveUserIdentityPayload
   addFavorite(input: AddLabbookFavoriteInput!): AddLabbookFavoritePayload
@@ -975,7 +975,7 @@ Method to move/rename a file or directory. If file, both src_path and dst_path s
 If a directory, be sure to include the trailing slash
 """
 type MoveLabbookFilePayload {
-  newLabbookFileEdge: LabbookFileEdge
+  updateEdges: [LabbookFileEdge]!
   clientMutationId: String
 }
 
