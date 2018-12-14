@@ -277,8 +277,8 @@ class Dataset extends Component {
               datasetName = this.props.filename,
               datasetRowCSS = classNames({
                 Dataset__row: true,
-                'Dataset__row--expanded': this.state.expanded,
-                'Dataset__row--hover': this.state.hover,
+                'DatasetBrowser__row--expanded': this.state.expanded,
+                'DatasetBrowser__row--hover': this.state.hover,
               }),
               buttonCSS = classNames({
                 'Btn Btn--round': true,
@@ -291,14 +291,14 @@ class Dataset extends Component {
                 hidden: !this.state.expanded,
               }),
               datasetNameCSS = classNames({
-                'Dataset__cell Dataset__cell--name': true,
-                'Dataset__cell--open': this.state.expanded,
+                'DatasetBrowser__cell Dataset__cell--name': true,
+                'DatasetBrowser__cell--open': this.state.expanded,
                 hidden: this.state.renameEditMode,
               }),
               datasetCSS = classNames({
                 Dataset: true,
-                'Dataset--highlight': isOver,
-                'Dataset--background': this.props.isDragging,
+                'DatasetBrowser--highlight': isOver,
+                'DatasetBrowser--background': this.props.isDragging,
               }),
               paddingLeft = 40 * index,
               rowStyle = { paddingLeft: `${paddingLeft}px` },
@@ -330,13 +330,13 @@ class Dataset extends Component {
                           {datasetName}
                       </div>
                     </div>
-                    <div className="Dataset__cell Dataset__cell--size">
+                    <div className="Dataset__cell DatasetBrowser__cell--size">
 
                     </div>
-                    <div className="Dataset__cell Dataset__cell--date">
+                    <div className="Dataset__cell DatasetBrowser__cell--date">
                         {Moment((node.modifiedAt * 1000), 'x').fromNow()}
                     </div>
-                    <div className="Dataset__cell Dataset__cell--menu">
+                    <div className="Dataset__cell DatasetBrowser__cell--menu">
                       <ActionsMenu
                         edge={this.props.data.edge}
                         mutationData={this.props.mutationData}

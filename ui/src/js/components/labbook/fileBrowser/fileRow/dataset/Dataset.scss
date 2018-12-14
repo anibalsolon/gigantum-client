@@ -1,6 +1,6 @@
 @import '~Styles/_imports.scss';
 
-.Dataset {
+.DatasetBrowser {
   color: $white;
   background: rgb(74,84,101);
   &--highlight {
@@ -16,7 +16,7 @@
   }
 }
 
-.Dataset__row{
+.DatasetBrowser__row{
 
     height: 50px;
     padding-top: 12px;
@@ -64,7 +64,7 @@
 }
 
 
-.Dataset__cell{
+.DatasetBrowser__cell{
 
   @include flex(flex-start, row);
 
@@ -99,7 +99,7 @@
 }
 
 
-.Dataset__btn{
+.DatasetBrowser__btn{
 
     width: 20px;
     height: 20px;
@@ -159,7 +159,7 @@
     }
 }
 
-.Dataset__child {
+.DatasetBrowser__child {
 
     .AddSubfolder {
       height: 40px;
@@ -172,7 +172,7 @@
     }
 
     // .File__row,
-    // .Dataset__row {
+    // .DatasetBrowser__row {
     //   padding-left: 30px;
     // }
 }
