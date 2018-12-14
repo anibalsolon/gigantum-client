@@ -8,6 +8,7 @@ from gtmcore.labbook import LabBook
 
 logger = LMLogger.get_logger()
 
+
 class JupyterLabCellVisibilityProcessor(ActivityProcessor):
     """Class to set visibility in activity record based on cell metadata
 
@@ -24,47 +25,26 @@ class JupyterLabCellVisibilityProcessor(ActivityProcessor):
 
     def process(self, result_obj: ActivityRecord, data: List[ExecutionData],
                 status: Dict[str, Any], metadata: Dict[str, Any]) -> ActivityRecord:
-
-        # We are going to re-create these details
-        old_details = result_obj.detail_objects
-        result_obj.detail_objects = []
-
-        # XXX DC Putting this on pause while doing a small refactor of the ActivityRecord code.
-        # Remaining, first pass, just for CODE_EXECUTED, find and set directive, and also store a dict of directives
-        # Second pass, for everything else (or just everything), check dict for tag and set directive if found.
-        # After refactor, unpacking below should not be necessary.
-
-        # At this point, all detail records will be generated. So, we enumerate over and modify them as indicated
-        # by code comments.
-        for _, _, _, detail in old_details:
-            if detail.type is ActivityDetailType.CODE_EXECUTED:
-                code = detail.data['text/markdown']
-                res = self.comment_re.search(code)
-                if res:
-                    directive = res[1]
-                    if directive == 'auto':
-                        # This is the default behavior
-                        pass
-                    elif directive == 'show':
-                        detail.show = True
-                        # Once we identify a needed modification, we need to find linked records
-                    elif directive == 'hide':
-                        detail.show = False
-                        # Once we identify a needed modification, we need to find linked records
-                    elif directive == 'ignore':
-                        # Search and destroy all associated records.
-                        # This means we're being a little wasteful, but we can always tighten this up later.
-
-                        # We discard this one
-                        continue
-                    else:
-                        # Currently we don't have a mechanism to highlight any problem to users.
-                        # We need to think through this UX.
-                        pass
-
-                    result_obj.add_detail_object(detail)
-            else:
-                result_obj.add_detail_object(detail)
+        with result_obj.inspect_detail_objects() as old_details:
+            for idx, detail in enumerate(old_details):
+                if detail.type is ActivityDetailType.CODE_EXECUTED:
+                    code = detail.data['text/markdown']
+                    res = self.comment_re.search(code)
+                    if res:
+                        directive = res[1]
+                        if directive == 'auto':
+                            # This is the default behavior
+                            pass
+                        elif directive in ['show', 'hide', 'ignore']:
+                            for tag in detail.tags:
+                                # currently, the 'ex1' type tags are the only ones...
+                                if tag.startswith('ex'):
+                                    result_obj.modify_tag_visibility(tag, directive)
+                        else:
+                            # TODO DC Currently we don't have a mechanism to highlight any problem to users.
+                            # But this is where we could signal an unknown comment directive. Another place
+                            # would be in the jupyterlab extension. We need to think through this UX!
+                            pass
 
         return result_obj
 

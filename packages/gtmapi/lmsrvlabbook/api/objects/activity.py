@@ -286,14 +286,15 @@ class ActivityRecordObject(graphene.ObjectType, interfaces=(graphene.relay.Node,
                 self._load_activity_record(info.context.labbook_loader)
 
             # Load detail objects from database
-            self.detail_objects = [ActivityDetailObject(id=f"{self.owner}&{self.name}&{r[3].key}",
-                                                        owner=self.owner,
-                                                        name=self.name,
-                                                        key=r[3].key,
-                                                        show=r[3].show,
-                                                        tags=r[3].tags,
-                                                        importance=r[3].importance,
-                                                        action=ActivityActionTypeEnum.get(r[3].action.value).value,
-                                                        type=ActivityDetailTypeEnum.get(r[3].type.value).value) for r in self._activity_record.detail_objects]
+            with self._activity_record.inspect_detail_objects() as details:
+                self.detail_objects = [ActivityDetailObject(id=f"{self.owner}&{self.name}&{d.key}",
+                                                            owner=self.owner,
+                                                            name=self.name,
+                                                            key=d.key,
+                                                            show=d.show,
+                                                            tags=d.tags,
+                                                            importance=d.importance,
+                                                            action=ActivityActionTypeEnum.get(d.action.value).value,
+                                                            type=ActivityDetailTypeEnum.get(d.type.value).value) for d in details]
 
         return self.detail_objects

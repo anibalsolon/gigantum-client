@@ -21,9 +21,10 @@ class ActivityShowBasicProcessor(ActivityProcessor):
             ActivityNote
         """
         result_obj.show = False
-        for detail in result_obj.detail_objects:
-            if detail[0]:
-                result_obj.show = True
-                break
+        with result_obj.inspect_detail_objects() as details:
+            for detail in details:
+                if detail.show:
+                    result_obj.show = True
+                    break
 
         return result_obj
