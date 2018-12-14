@@ -44,7 +44,7 @@ class TestDataloaderPackage(object):
         assert isinstance(promise1, Promise)
 
         pkg = promise1.get()
-        assert pkg == '2.20.1'
+        assert pkg == '2.21.0'
 
     def test_load_many_pip(self, build_image_for_jupyterlab):
         """Test loading many labbooks"""

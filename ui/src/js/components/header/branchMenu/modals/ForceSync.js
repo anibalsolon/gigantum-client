@@ -3,6 +3,7 @@ import React, { Component, Fragment } from 'react';
 import uuidv4 from 'uuid/v4';
 // mutations
 import SyncLabbookMutation from 'Mutations/branches/SyncLabbookMutation';
+import SyncDatasetMutation from 'Mutations/branches/SyncLabbookMutation';
 // component
 import Modal from 'Components/shared/Modal';
 // store
@@ -15,20 +16,37 @@ export default class ForceSync extends Component {
   _forceSync() {
     const id = uuidv4;
     const { owner, labbookName } = store.getState().routes;
-    setMultiInfoMessage(id, 'Syncing Project with Gigantum cloud ...', false, false);
+    if (this.props.sectionType === 'labbook') {
+      setMultiInfoMessage(id, 'Syncing Project with Gigantum cloud ...', false, false);
 
-    SyncLabbookMutation(
-      owner,
-      labbookName,
-      true,
-      () => {},
-      () => {},
-      (error) => {
-        if (error) {
-          setMultiInfoMessage(id, `Could not 'force' sync ${labbookName}`, true, true, error);
-        }
-      },
-    );
+      SyncLabbookMutation(
+        owner,
+        labbookName,
+        true,
+        () => {},
+        () => {},
+        (error) => {
+          if (error) {
+            setMultiInfoMessage(id, `Could not 'force' sync ${labbookName}`, true, true, error);
+          }
+        },
+      );
+    } else {
+      setMultiInfoMessage(id, 'Syncing Dataset with Gigantum cloud ...', false, false);
+
+      SyncDatasetMutation(
+        owner,
+        labbookName,
+        true,
+        () => {},
+        () => {},
+        (error) => {
+          if (error) {
+            setMultiInfoMessage(id, `Could not 'force' sync ${labbookName}`, true, true, error);
+          }
+        },
+      );
+    }
     this.props.toggleSyncModal();
   }
   render() {

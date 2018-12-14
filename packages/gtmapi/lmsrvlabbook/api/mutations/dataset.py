@@ -29,6 +29,7 @@ from lmsrvcore.auth.user import get_logged_in_username, get_logged_in_author
 from lmsrvcore.api.mutations import ChunkUploadMutation, ChunkUploadInput
 
 from lmsrvlabbook.api.objects.dataset import Dataset
+from lmsrvlabbook.api.connections.dataset import DatasetConnection
 from lmsrvlabbook.api.connections.datasetfile import DatasetFile, DatasetFileConnection
 
 logger = LMLogger.get_logger()
@@ -140,3 +141,23 @@ class CompleteDatasetUploadTransaction(graphene.relay.ClientIDMutation):
                                                  rollback=rollback)
 
         return CompleteDatasetUploadTransaction(success=True)
+
+
+class FetchDatasetEdge(graphene.relay.ClientIDMutation):
+    class Input:
+        owner = graphene.String(required=True)
+        dataset_name = graphene.String(required=True)
+
+    new_dataset_edge = graphene.Field(DatasetConnection.Edge)
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, owner, dataset_name, client_mutation_id=None):
+        username = get_logged_in_username()
+        ds = InventoryManager().load_dataset(username, owner, dataset_name,
+                                             author=get_logged_in_author())
+
+        cursor = base64.b64encode(f"{0}".encode('utf-8'))
+        dsedge = DatasetConnection.Edge(node=Dataset(owner=owner, name=dataset_name),
+                                        cursor=cursor)
+
+        return FetchDatasetEdge(new_dataset_edge=dsedge)

@@ -69,7 +69,7 @@
   background: $azure;
 }
 
-.LocalLabbookPanel__private{
+.LocalDatasetPanel__private{
   align-self: flex-end;
 
   width: 24px;
@@ -80,7 +80,7 @@
   background-size: 18px;
 }
 
-.LocalLabbookPanel__public{
+.LocalDatasetPanel__public{
   align-self: flex-end;
 
   width: 24px;
@@ -92,7 +92,7 @@
 
 }
 
-.LocalLabbookPanel__loading{
+.LocalDatasetPanel__loading{
   align-self: flex-end;
 
   width: 18px;
