@@ -34,7 +34,7 @@ from gtmcore.inventory.inventory import InventoryManager
 
 from gtmcore.files import FileOperations
 
-from lmsrvcore.middleware import LabBookLoaderMiddleware, error_middleware
+from lmsrvcore.middleware import DataloaderMiddleware, error_middleware
 from lmsrvlabbook.tests.fixtures import ContextMock, fixture_working_dir, _create_temp_work_dir
 from lmsrvlabbook.api.query import LabbookQuery
 from lmsrvlabbook.api.mutation import LabbookMutations
@@ -66,7 +66,7 @@ def mock_create_labbooks(fixture_working_dir):
         app.config["LABMGR_ID_MGR"] = get_identity_manager(Configuration())
         with app.app_context():
             flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
-            client = Client(schema, middleware=[LabBookLoaderMiddleware(), error_middleware],
+            client = Client(schema, middleware=[DataloaderMiddleware(), error_middleware],
                             context_value=ContextMock())
             yield lb, client, schema
     shutil.rmtree(fixture_working_dir, ignore_errors=True)
@@ -545,7 +545,7 @@ class TestWorkflowsBranching(object):
 
         nb = bm.create_branch(f'gm.workspace-{UT_USERNAME}.new-branch')
         assert os.path.exists(os.path.join(lb.root_dir, 'code', 's1.txt'))
-        FileOperations.delete_file(lb, 'code', 's1.txt')
+        FileOperations.delete_files(lb, 'code', ['s1.txt'])
         assert lb.is_repo_clean
         assert not os.path.exists(os.path.join(lb.root_dir, 'code', 's1.txt'))
 

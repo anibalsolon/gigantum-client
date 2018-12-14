@@ -13,7 +13,7 @@ import { setWarningMessage, setMultiInfoMessage } from 'JS/redux/reducers/footer
 // queries
 import UserIdentity from 'JS/Auth/UserIdentity';
 // components
-import LoginPrompt from 'Components/labbook/labbookHeader/branchMenu/modals/LoginPrompt';
+import LoginPrompt from 'Components/header/branchMenu/modals/LoginPrompt';
 import Loader from 'Components/shared/Loader';
 // assets
 import './RemoteLabbookPanel.scss';
@@ -187,7 +187,7 @@ export default class RemoteLabbookPanel extends Component {
    return (
      <div
        key={edge.node.name}
-       className="Card column-4-span-3 flex flex--column justify--space-between"
+       className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
      >
        {
 

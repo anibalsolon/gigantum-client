@@ -5,7 +5,10 @@ import './FileCard.scss';
 
 export default class Overview extends Component {
   _truncate(string, cutoff) {
-    if (string.length > cutoff) { return `${string.substring(0, cutoff)}...`; }
+    if (string.length > cutoff) {
+      const stringCutoff = string.substring(0, cutoff);
+      return `${stringCutoff}...`;
+    }
     return string;
   }
 

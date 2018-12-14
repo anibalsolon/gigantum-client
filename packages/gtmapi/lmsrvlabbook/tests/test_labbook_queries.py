@@ -554,6 +554,19 @@ class TestLabBookServiceQueries(object):
         im = InventoryManager(fixture_working_dir[0])
         lb = im.create_labbook('default', 'default', 'labbook1', description='my first labbook1')
 
+        has_no_files_query = """
+        {
+            labbook(name: "labbook1", owner: "default") {
+                code{
+                    hasFiles
+                }
+            }
+        }
+        """
+        resp = fixture_working_dir[2].execute(has_no_files_query)
+        assert 'errors' not in resp
+        assert resp['data']['labbook']['code']['hasFiles'] is False
+
         # Write data in code
         with open(os.path.join(lb.root_dir, 'code', "test_file1.txt"), 'wt') as tf:
             tf.write("file 1")
@@ -584,11 +597,16 @@ class TestLabBookServiceQueries(object):
                             }
                         }
                     }
+                    hasFiles
                 }
             }
         }
         """
-        snapshot.assert_match(fixture_working_dir[2].execute(query))
+
+        resp = fixture_working_dir[2].execute(query)
+        assert 'errors' not in resp
+        assert resp['data']['labbook']['code']['hasFiles'] is True
+        snapshot.assert_match(resp)
 
         # Just get the files in the sub-directory "js"
         query = """
@@ -766,6 +784,20 @@ class TestLabBookServiceQueries(object):
         im = InventoryManager(fixture_working_dir[0])
         lb = im.create_labbook('default', 'default', 'labbook1', description="my first labbook1")
 
+        has_no_favs_query = """
+        {
+            labbook(name: "labbook1", owner: "default") {
+                name
+                code {
+                    hasFavorites
+                }
+            }
+        }
+        """
+        resp = fixture_working_dir[2].execute(has_no_favs_query)
+        assert 'errors' not in resp
+        assert resp['data']['labbook']['code']['hasFavorites'] is False
+
         # Setup some favorites in code
         with open(os.path.join(lb.root_dir, 'code', 'test1.txt'), 'wt') as test_file:
             test_file.write("blah1")
@@ -802,11 +834,15 @@ class TestLabBookServiceQueries(object):
                                     }
                                 }
                             }
+                            hasFavorites
                         }
                       }
                     }
                     """
-        snapshot.assert_match(fixture_working_dir[2].execute(query))
+        resp = fixture_working_dir[2].execute(query)
+        assert 'errors' not in resp
+        assert resp['data']['labbook']['code']['hasFavorites'] is True
+        snapshot.assert_match(resp)
 
         # Get input favorites
         query = """
@@ -1372,7 +1408,11 @@ class TestLabBookServiceQueries(object):
           }
         }
         """
-        snapshot.assert_match(fixture_working_dir[2].execute(query))
+        # Uses an invalid string
+        r = fixture_working_dir[2].execute(query)
+        pprint.pprint(r)
+        assert 'errors' in r
+        snapshot.assert_match(r)
 
         query = """
         {
@@ -1397,7 +1437,9 @@ class TestLabBookServiceQueries(object):
           }
         }
         """
-        snapshot.assert_match(fixture_working_dir[2].execute(query))
+        r = fixture_working_dir[2].execute(query)
+        assert 'errors' in r
+        snapshot.assert_match(r)
 
         query = """
         {
@@ -1422,7 +1464,9 @@ class TestLabBookServiceQueries(object):
           }
         }
         """
-        snapshot.assert_match(fixture_working_dir[2].execute(query))
+        r = fixture_working_dir[2].execute(query)
+        assert 'errors'  in r
+        snapshot.assert_match(r)
 
     def test_get_activity_records_with_details(self, fixture_working_dir, snapshot, fixture_test_file):
         """Test getting activity records with detail records"""

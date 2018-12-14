@@ -1,21 +1,19 @@
 
-      import React from 'react'
+      import React from 'react';
       import renderer from 'react-test-renderer';
-      import {mount} from 'enzyme'
-      import UserIdentity from '/Auth/UserIdentity';
+      import { mount } from 'enzyme';
+      import UserIdentity from 'Auth/UserIdentity';
 
-      import relayTestingUtils from 'relay-testing-utils'
+      import relayTestingUtils from '@gigantum/relay-testing-utils';
 
       test('Test UserIdentity', () => {
-
         const wrapper = renderer.create(
 
-           <UserIdentity />
+           <UserIdentity />,
 
         );
 
-        const tree = wrapper.toJSON()
+        const tree = wrapper.toJSON();
 
-        expect(tree).toMatchSnapshot()
-
-      })
+        expect(tree).toMatchSnapshot();
+      });

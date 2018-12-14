@@ -107,7 +107,7 @@ class Footer extends Component {
     this.props.setToggleMessageList(!this.props.messageListOpen, true);
   }
   /**
-  @param {Int}
+  @param {number}
   toggles view of message body for a stack item
   updates redux store
   @return {}

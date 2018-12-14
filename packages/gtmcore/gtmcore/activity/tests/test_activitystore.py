@@ -51,7 +51,7 @@ class TestActivityStore:
     def test_create_activitystore(self, mock_config_with_activitystore):
         """Test to verify the ActivityStore is initialized properly"""
         assert type(mock_config_with_activitystore[0]) == ActivityStore
-        assert type(mock_config_with_activitystore[0].labbook) == LabBook
+        assert type(mock_config_with_activitystore[0].repository) == LabBook
 
         assert mock_config_with_activitystore[0].compress_details is True
         assert mock_config_with_activitystore[0].compress_min_bytes == 4000

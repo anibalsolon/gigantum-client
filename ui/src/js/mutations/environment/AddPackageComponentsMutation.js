@@ -151,8 +151,9 @@ export default function AddPackageComponentsMutation(
               node.setValue(fromBase, 'fromBase');
               node.setValue(latestVersion, 'latestVersion');
               node.setValue(id, 'id');
+              tempID++;
               const newEdge = store.create(
-                `client:newEdge:${tempID++}`,
+                `client:newEdge:${tempID}`,
                 'PackageComponentEdge',
               );
 
@@ -165,7 +166,8 @@ export default function AddPackageComponentsMutation(
       },
       optimisticUpdater: (store) => {
         if (clientMutationId) {
-          const id = `client:newPackageManager:${tempID++}`;
+          tempID++;
+          const id = `client:newPackageManager:${tempID}`;
           const node = store.create(id, 'PackageManager');
           packages.forEach((item) => {
             const { manager, version } = item;

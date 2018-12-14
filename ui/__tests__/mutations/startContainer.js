@@ -1,12 +1,12 @@
-//vendor
-import fs from 'fs'
-import os from 'os'
-//mutations
+// vendor
+import fs from 'fs';
+import os from 'os';
+// mutations
 import StartContainerMutation from 'Mutations/StartContainerMutation';
-//config
-import testConfig from './config'
+// config
+import testConfig from './config';
 
-let owner = JSON.parse(fs.readFileSync(os.homedir() + testConfig.ownerLocation, 'utf8')).username
+let owner = JSON.parse(fs.readFileSync(os.homedir() + testConfig.ownerLocation, 'utf8')).username;
 
 const StartContainer = {
   startContainer: (labbbookName, clientMutationId, callback) => {
@@ -14,9 +14,9 @@ const StartContainer = {
       labbbookName,
       owner,
       clientMutationId,
-      callback
-    )
-  }
-}
+      callback,
+    );
+  },
+};
 
 export default StartContainer;

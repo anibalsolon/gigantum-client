@@ -48,6 +48,17 @@ const BaseQuery = graphql`query SelectBaseQuery($first: Int!, $cursor: String){
   }
 }`;
 
+const DatasetQuery = graphql`query SelectBase_DatasetQuery{
+  availableDatasets {
+    id
+    name
+    storageType
+    description
+    readme
+    tags
+    icon
+  }
+}`;
 export default class SelectBase extends React.Component {
   constructor(props) {
   	super(props);
@@ -100,7 +111,11 @@ export default class SelectBase extends React.Component {
   */
   continueSave() {
     this.props.toggleDisabledContinue(true);
-    this.props.createLabbookMutation();
+    if (!this.props.datasets) {
+      this.props.createLabbookMutation();
+    } else {
+      this.props.createDatasetMutation();
+    }
   }
   /**
     @param {}
@@ -147,32 +162,33 @@ export default class SelectBase extends React.Component {
       slidesToScroll: 1,
       arrows: false,
     };
+    const variables = {
+      first: 20,
+    };
 
+    const innerContainer = classNames({
+      'SelectBase__inner-container': true,
+      'SelectBase__inner-container--viewer': this.state.viewingBase,
+    });
 
     return (
       <div className="SelectBase">
         <QueryRenderer
-          variables={{
-            first: 20,
-          }}
-          query={BaseQuery}
+          variables={this.props.datasets ? {} : variables}
+          query={this.props.datasets ? DatasetQuery : BaseQuery}
           environment={environment}
           render={({ error, props }) => {
               if (error) {
                 return (<div>{error.message}</div>);
               }
 
-                if (props) {
+                if (props && !this.props.datasets) {
                   const sortedBaseItems = this._getTabStructure(props.availableBases);
                   const selecBaseImage = classNames({
                     SelectBase__images: true,
                     'SelectBase__images--hidden': (this.state.selectedTab === 'none'),
                   });
 
-                  const innerContainer = classNames({
-                    'SelectBase__inner-container': true,
-                    'SelectBase__inner-container--viewer': this.state.viewingBase,
-                  });
                   if (sortedBaseItems.bases[this.state.selectedTab].length > 2) sliderSettings.arrows = true;
                   return (
                     <div className={innerContainer}>
@@ -219,6 +235,39 @@ export default class SelectBase extends React.Component {
 
                     </div>
                   );
+                } else if (props && this.props.datasets) {
+                  return <div className={innerContainer}>
+                    <div className="SelectBase__select-container">
+                      <div className="SelectBase__images">
+                        <Slider {...sliderSettings}>
+
+                          {
+                            props.availableDatasets.map(node => (
+                              <div
+                                key={node.id}
+                                className="BaseSlide__wrapper"
+                              >
+                                <DatasetSlide
+                                  key={`${node.id}_slide`}
+                                  node={node}
+                                  self={this}
+                                />
+                              </div>
+                                ))
+                          }
+                        </Slider>
+
+                      </div>
+                    </div>
+                    <div className="SelectBase__viewer-container">
+                      <BaseDetails
+                        base={this.state.viewedBase}
+                        backToBaseSelect={this._backToBaseSelect}
+                        datasets={this.props.datasets}
+                      />
+                    </div>
+
+                  </div>;
                 }
                   return (<Loader />);
           }}
@@ -294,6 +343,45 @@ const BaseSlide = ({ node, self }) => {
             }
             </ul>
           </div>
+        </div>
+        <div className="SelectBase__image-actions">
+          <button onClick={() => self._viewBase(node)} className="button--flat">View Details</button>
+        </div>
+      </div>
+    </div>
+  </div>);
+};
+
+/**
+* @param {string, this}
+* returns dataset slide
+* return {jsx}
+*/
+const DatasetSlide = ({ node, self }) => {
+  const selectedBaseImage = classNames({
+    SelectBase__image: true,
+    'SelectBase__image--selected': (self.state.selectedBaseId === node.id),
+  });
+  return (<div
+    onClick={() => self._selectBase(node)}
+    className="SelectBase__image-wrapper slick-slide"
+  >
+    <div
+      className={selectedBaseImage}
+    >
+      <div className="SelectBase__image-icon">
+        <img
+          alt=""
+          src={`data:image/jpeg;base64,${node.icon}`}
+          height="50"
+          width="50"
+        />
+      </div>
+      <div className="SelectBase__image-text">
+        <h6 className="SelectBase__image-header">{node.name}</h6>
+        <p className="SelectBase__image-description">{node.description}</p>
+
+        <div className="SelectBase__image-info">
         </div>
         <div className="SelectBase__image-actions">
           <button onClick={() => self._viewBase(node)} className="button--flat">View Details</button>

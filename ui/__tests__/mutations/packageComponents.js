@@ -1,15 +1,15 @@
-//vendor
-import fs from 'fs'
-import os from 'os'
-//mutations
+// vendor
+import fs from 'fs';
+import os from 'os';
+// mutations
 import AddPackageComponentsMutation from 'Mutations/environment/AddPackageComponentsMutation';
 import RemovePackageComponentsMutation from 'Mutations/environment/RemovePackageComponentsMutation';
 import AddCustomComponentMutation from 'Mutations/environment/AddCustomComponentMutation';
 import RemoveCustomComponentMutation from 'Mutations/environment/RemoveCustomComponentMutation';
-//config
-import testConfig from './config'
+// config
+import testConfig from './config';
 
-let owner = JSON.parse(fs.readFileSync(os.homedir() + testConfig.ownerLocation, 'utf8')).username
+let owner = JSON.parse(fs.readFileSync(os.homedir() + testConfig.ownerLocation, 'utf8')).username;
 
 const {
   manager,
@@ -20,7 +20,7 @@ const {
   repository,
   revision,
   customComponentId,
-  customConnection
+  customConnection,
 
 } = testConfig;
 
@@ -37,8 +37,8 @@ const PackageComponents = {
       environmentId,
       packageConnection,
       skipValidation,
-      callback
-    )
+      callback,
+    );
   },
   removePackageComponent: (labbbookName, nodeId, environmentId, callback) => {
     RemovePackageComponentsMutation(
@@ -50,8 +50,8 @@ const PackageComponents = {
       '',
       environmentId,
       packageConnection,
-      callback
-    )
+      callback,
+    );
   },
   addCustomComponent: (labbbookName, environmentId, callback) => {
     AddCustomComponentMutation(
@@ -63,7 +63,7 @@ const PackageComponents = {
       environmentId,
       '',
       callback,
-    )
+    );
   },
   removeCustomComponent: (labbbookName, nodeId, environmentId, callback) => {
     RemoveCustomComponentMutation(
@@ -76,9 +76,9 @@ const PackageComponents = {
       environmentId,
       customConnection,
       callback,
-    )
-  }
+    );
+  },
 
-}
+};
 
 export default PackageComponents;

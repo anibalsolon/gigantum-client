@@ -1,0 +1,7 @@
+@import '~Styles/_imports.scss';
+
+.DeleteLabbook{
+  @include flex(space-around, column);
+  align-items: center;
+  height: 100%;
+}

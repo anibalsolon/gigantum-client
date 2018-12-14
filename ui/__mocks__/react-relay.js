@@ -1,6 +1,6 @@
 
 import { XMLHttpRequest } from 'xmlhttprequest';
-import relayTestingUtils from 'relay-testing-utils';
+import relayTestingUtils from '@gigantum/relay-testing-utils';
 import {commitMutation, graphql, QueryRenderer} from 'react-relay';
 import React,{Component} from 'react'
 global.XMLHttpRequest = XMLHttpRequest;

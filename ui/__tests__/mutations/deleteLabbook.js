@@ -1,11 +1,11 @@
-//vendor
-import fs from 'fs'
-import os from 'os'
-//mutations
+// vendor
+import fs from 'fs';
+import os from 'os';
+// mutations
 import DeleteLabbookMutation from 'Mutations/DeleteLabbookMutation';
-import testConfig from './config'
+import testConfig from './config';
 
-let owner = JSON.parse(fs.readFileSync(os.homedir() + testConfig.ownerLocation, 'utf8')).username
+let owner = JSON.parse(fs.readFileSync(os.homedir() + testConfig.ownerLocation, 'utf8')).username;
 
 const DeleteLabbook = {
 
@@ -14,9 +14,9 @@ const DeleteLabbook = {
       labbbookName,
       owner,
       confirm,
-      callback
-    )
-  }
-}
+      callback,
+    );
+  },
+};
 
-export default DeleteLabbook
+export default DeleteLabbook;

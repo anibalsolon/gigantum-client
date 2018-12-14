@@ -8,7 +8,7 @@ import WizardModal from 'Components/wizard/WizardModal';
 import Loader from 'Components/shared/Loader';
 import LocalLabbooksContainer, { LocalLabbooks } from 'Components/dashboard/labbooks/localLabbooks/LocalLabbooks';
 import RemoteLabbooks from 'Components/dashboard/labbooks/remoteLabbooks/RemoteLabbooks';
-import LoginPrompt from 'Components/labbook/labbookHeader/branchMenu/modals/LoginPrompt';
+import LoginPrompt from 'Components/header/branchMenu/modals/LoginPrompt';
 import ToolTip from 'Components/shared/ToolTip';
 import LabbookFilterBy from './filters/LabbookFilterBy';
 import LabbookSort from './filters/LabbookSort';
@@ -351,7 +351,9 @@ class Labbooks extends Component {
   */
   _changeSearchParam(newValues) {
     const searchObj = Object.assign({}, queryString.parse(this.props.history.location.search.slice(1)), newValues);
-    this.props.history.replace(`..${this.props.history.location.pathname}?${queryString.stringify(searchObj)}`);
+    const urlParameters = queryString.stringify(searchObj);
+
+    this.props.history.replace(`..${this.props.history.location.pathname}?${urlParameters}`);
   }
 
   render() {

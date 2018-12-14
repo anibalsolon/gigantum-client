@@ -2,9 +2,6 @@
 .Card {
   position: relative;
 
-  height: 300px;
-  padding: 0 1px 1px 1px;
-
   cursor: pointer;
   transition: box-shadow 0.5s;
   text-align: left;
@@ -13,8 +10,6 @@
   color: $jet;
   background: $white;
   background-size: 50px;
-
-  @extend .card;
 
   &:empty {
     height: 0;
@@ -29,6 +24,12 @@
   &--text-center{
     text-align: center;
   }
+
+  @include boxShadow();
+}
+
+.Card--300 {
+  height: 300px;
 }
 
 

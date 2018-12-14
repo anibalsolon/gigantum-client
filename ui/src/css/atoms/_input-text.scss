@@ -2,9 +2,13 @@ input[type="text"] {
 //  height: 20px !important;
   line-height: 20px;
   margin: 5px;
+  border: 0;
+  outline: none;
+  width: 100%;
   border-bottom: 1px solid $romanSilver !important;
   padding: 0 20px !important;
   width: calc(100% - 40px) !important;
+  background: transparent;
 }
 input[type="text"]:focus {
   border-bottom: 1px solid $turquise !important;

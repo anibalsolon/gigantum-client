@@ -3,10 +3,10 @@
 .Labbooks {
   width: auto;
   min-width: 760px;
-  max-width: 1285px;
+  max-width: 1235px;
   height: 100%;
-  margin: auto;
-  padding: 0 25px;
+  margin: 0 auto 0 25px;
+  overflow: visible;
 }
 
 .Labbooks--demo{
@@ -239,10 +239,8 @@ Labbook__nav end
 }
 
 .Labbooks__listing {
-  overflow-x: hidden;
-  overflow-y: auto;
-
+  overflow: visible;
   height: calc(100% - 90px);
 
-  @include flex(center, row);
+  @include flex(flex-start, row);
 }

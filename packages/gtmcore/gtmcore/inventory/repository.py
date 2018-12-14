@@ -433,12 +433,18 @@ class Repository(object):
                                 tags=['save'])
             if upload:
                 ar.tags.append('upload')
-            ar, newcnt, modcnt = self.process_sweep_status(ar, result_status)
+            ar, newcnt, modcnt, delcnt = self.process_sweep_status(ar, result_status)
             nmsg = f"{newcnt} new file(s). " if newcnt > 0 else ""
             mmsg = f"{modcnt} modified file(s). " if modcnt > 0 else ""
-            ar.message = f"{extra_msg or ''}" \
-                         f"{'Uploaded ' if upload else ''}" \
-                         f"{nmsg}{mmsg}"
+            dmsg = f"{delcnt} deleted file(s). " if delcnt > 0 else ""
+
+            message = f"{extra_msg or ''}" \
+                      f"{'Uploaded ' if upload else ''}" \
+                      f"{nmsg}{mmsg}{dmsg}"
+
+            # This is used to handle if you try to delete an empty directory. This shouldn't technically happen, but if
+            # a user manages to create an empty dir outside the client, we should handle it gracefully
+            ar.message = "No detected changes" if not message else message
             ars = ActivityStore(self)
             ars.create_activity_record(ar)
         else:
@@ -496,7 +502,7 @@ class Repository(object):
         return Repository.get_activity_type_from_section(possible_section)
 
     def process_sweep_status(self, result_obj: ActivityRecord,
-                             status: Dict[str, Any]) -> Tuple[ActivityRecord, int, int]:
+                             status: Dict[str, Any]) -> Tuple[ActivityRecord, int, int, int]:
         sections = []
         ncnt = 0
         for filename in status['untracked']:
@@ -527,10 +533,13 @@ class Repository(object):
                 result_obj.type = ActivityType.OUTPUT_DATA
 
         mcnt = 0
+        dcnt = 0
         msections = []
-        for filename, change in status['unstaged']:
+        changes = status['unstaged']
+        changes.extend(status['staged'])
+        for filename, change in changes:
             # skip any file in .git or .gigantum dirs
-            if ".git" in filename or ".gigantum" in filename:
+            if (".git" in filename and ".gitkeep" not in filename) or ".gigantum" in filename:
                 continue
 
             activity_type, activity_detail_type, section = self.infer_section_from_relative_path(filename)
@@ -538,24 +547,32 @@ class Repository(object):
 
             if change == "deleted":
                 action = ActivityAction.DELETE
+                dcnt += 1
             elif change == "added":
                 action = ActivityAction.CREATE
+                mcnt += 1
             elif change == "modified":
                 action = ActivityAction.EDIT
+                mcnt += 1
             elif change == "renamed":
                 action = ActivityAction.EDIT
+                mcnt += 1
             else:
                 action = ActivityAction.NOACTION
+                mcnt += 1
 
             adr = ActivityDetailRecord(activity_detail_type, show=False, importance=max(255 - mcnt, 0), action=action)
-            adr.add_value('text/markdown', f"{change[0].upper() + change[1:]} {section} file `{filename}`")
+            if ".gitkeep" in filename:
+                directory_name, _ = filename.split('.gitkeep')
+                adr.add_value('text/markdown', f"{change[0].upper() + change[1:]} {section} directory `{directory_name}`")
+            else:
+                adr.add_value('text/markdown', f"{change[0].upper() + change[1:]} {section} file `{filename}`")
             result_obj.add_detail_object(adr)
-            mcnt += 1
 
         modified_section_set = set(msections)
         if result_obj.type == self._default_activity_type:
             # If new files are from different sections or no new files, you'll still be LABBOOK or DATASET type
-            if mcnt > 0 and len(modified_section_set) == 1:
+            if (mcnt+dcnt) > 0 and len(modified_section_set) == 1:
                 # If there have been modified files and they are all from the same section
                 if len(new_section_set) == 0 or new_section_set == modified_section_set:
                     # If there have been only modified files from a single section,
@@ -566,13 +583,13 @@ class Repository(object):
                         result_obj.type = ActivityType.INPUT_DATA
                     elif "Output Data" in modified_section_set:
                         result_obj.type = ActivityType.OUTPUT_DATA
-        elif mcnt > 0:
+        elif (mcnt+dcnt) > 0:
             if len(modified_section_set) > 1 or new_section_set != modified_section_set:
                 # Mismatch between new and modify or within modify, just use catchall LABBOOK or DATASET type
                 result_obj.type = self._default_activity_type
 
         # Return additionally new file cnt (ncnt) and modified (mcnt)
-        return result_obj, ncnt, mcnt
+        return result_obj, ncnt, mcnt, dcnt
 
     def checkout_branch(self, branch_name: str, new: bool = False) -> None:
         """
@@ -985,5 +1002,4 @@ class Repository(object):
         if os.path.exists(readme_file):
             with open(readme_file, 'rt') as rf:
                 contents = rf.read()
-        
         return contents

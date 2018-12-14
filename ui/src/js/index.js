@@ -38,7 +38,7 @@ UserIdentity.getUserIdentity().then((response) => {
       }, true, () => {
         routes.setState({ forceLoginScreen: true, loadingRenew: false });
       });
-    } else {
+    } else if (!response.data.userIdentity && !localStorage.getItem('access_token')) {
       localStorage.removeItem('family_name');
       localStorage.removeItem('given_name');
       localStorage.removeItem('email');

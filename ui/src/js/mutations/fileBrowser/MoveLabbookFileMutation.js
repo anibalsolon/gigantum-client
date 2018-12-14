@@ -10,15 +10,17 @@ import { setErrorMessage } from 'JS/redux/reducers/footer';
 const mutation = graphql`
   mutation MoveLabbookFileMutation($input: MoveLabbookFileInput!){
     moveLabbookFile(input: $input){
-      newLabbookFileEdge{
-        node{
-          id
-          isDir
-          modifiedAt
-          key
-          size
+      updatedEdges(first: 1){
+        edges{
+          node{
+              id
+              isDir
+              modifiedAt
+              key
+              size
+            }
+            cursor
         }
-        cursor
       }
       clientMutationId
     }
@@ -27,20 +29,23 @@ const mutation = graphql`
 
 let tempID = 0;
 
-function sharedDeleteUpdater(store, labbookID, deletedID, connectionKey) {
+function sharedDeleteUpdater(store, labbookID, removeIds, connectionKey) {
   const labbookProxy = store.get(labbookID);
   if (labbookProxy) {
-    const conn = RelayRuntime.ConnectionHandler.getConnection(
-      labbookProxy,
-      connectionKey,
-    );
-
-    if (conn) {
-      RelayRuntime.ConnectionHandler.deleteNode(
-        conn,
-        deletedID,
+    removeIds.forEach((deletedID) => {
+      const conn = RelayRuntime.ConnectionHandler.getConnection(
+        labbookProxy,
+        connectionKey,
       );
-    }
+
+      if (conn) {
+        RelayRuntime.ConnectionHandler.deleteNode(
+          conn,
+          deletedID,
+        );
+        store.delete(deletedID);
+      }
+    });
   }
 }
 
@@ -54,6 +59,7 @@ export default function MoveLabbookFileMutation(
   srcPath,
   dstPath,
   section,
+  removeIds,
   callback,
 ) {
   const variables = {
@@ -66,31 +72,45 @@ export default function MoveLabbookFileMutation(
       clientMutationId: `${tempID++}`,
     },
   };
+
+  // TODO: remove this, key should propogate down from each section and get passed to the mutation data class
   const recentConnectionKey = section === 'code' ? 'MostRecentCode_allFiles' :
     section === 'input' ? 'MostRecentInput_allFiles' :
       'MostRecentOutput_allFiles';
+
+  const configs = [{
+    type: 'RANGE_ADD',
+    parentID: labbookId,
+    connectionInfo: [{
+      key: connectionKey,
+      rangeBehavior: 'append',
+    }],
+    edgeName: 'newLabbookFileEdge',
+  }, {
+    type: 'RANGE_ADD',
+    parentID: labbookId,
+    connectionInfo: [{
+      key: recentConnectionKey,
+      rangeBehavior: 'append',
+    }],
+    edgeName: 'newLabbookFileEdge',
+  }];
+
+  if (removeIds && removeIds.length) {
+    removeIds.forEach((id) => {
+      configs.unshift({
+        type: 'NODE_DELETE',
+        deletedIDFieldName: id,
+      });
+    });
+  }
+
+
   commitMutation(
     environment,
     {
       mutation,
       variables,
-      configs: [{
-        type: 'RANGE_ADD',
-        parentID: labbookId,
-        connectionInfo: [{
-          key: connectionKey,
-          rangeBehavior: 'prepend',
-        }],
-        edgeName: 'newLabbookFileEdge',
-      }, {
-        type: 'RANGE_ADD',
-        parentID: labbookId,
-        connectionInfo: [{
-          key: recentConnectionKey,
-          rangeBehavior: 'prepend',
-        }],
-        edgeName: 'newLabbookFileEdge',
-      }],
       onCompleted: (response, error) => {
         if (error) {
           console.log(error);
@@ -100,42 +120,68 @@ export default function MoveLabbookFileMutation(
       },
       onError: err => console.error(err),
       optimisticUpdater: (store) => {
-        const id = `client:newFileMove:${tempID++}`;
+
         const labbookProxy = store.get(labbookId);
 
-        if (labbookProxy) {
+        if (labbookProxy && (edge.node !== null)) {
           const conn = RelayRuntime.ConnectionHandler.getConnection(
             labbookProxy,
             connectionKey,
           );
 
-          const node = store.create(id, 'MoveFile');
-
-          if (conn) {
-            const newEdge = RelayRuntime.ConnectionHandler.createEdge(
-              store,
-              conn,
-              node,
-              'newLabbookFileEdge',
-            );
-
-            node.setValue(id, 'id');
-            node.setValue(false, 'isDir');
-            node.setValue(dstPath, 'key');
-            node.setValue(0, 'modifiedAt');
-            node.setValue(100, 'size');
-
-
-            RelayRuntime.ConnectionHandler.insertEdgeAfter(
-              conn,
-              newEdge,
-            );
-          }
+          const node = store.get(edge.node.id);
+          node.setValue(edge.node.id, 'id');
+          node.setValue(edge.node.isDir, 'isDir');
+          node.setValue(dstPath, 'key');
+          node.setValue(edge.node.modifiedAt, 'modifiedAt');
+          node.setValue(edge.node.size, 'size');
+          const newEdge = RelayRuntime.ConnectionHandler.createEdge(
+            store,
+            conn,
+            node,
+            'newLabbookFileEdge',
+          );
+          RelayRuntime.ConnectionHandler.insertEdgeAfter(
+            conn,
+            newEdge,
+            edge.cursor,
+          );
         }
       },
       updater: (store, response) => {
-        sharedDeleteUpdater(store, labbookId, edge.node.id, connectionKey);
-        sharedDeleteUpdater(store, labbookId, edge.node.id, recentConnectionKey);
+        sharedDeleteUpdater(store, labbookId, removeIds, connectionKey);
+        sharedDeleteUpdater(store, labbookId, removeIds, recentConnectionKey);
+        if (response && response.moveLabbookFile && response.moveLabbookFile.updatedEdges && response.moveLabbookFile.updatedEdges.edges) {
+          response.moveLabbookFile.updatedEdges.edges.forEach((edge) => {
+            const labbookProxy = store.get(labbookId);
+
+            if (labbookProxy && (edge.node !== null)) {
+              const conn = RelayRuntime.ConnectionHandler.getConnection(
+                labbookProxy,
+                connectionKey,
+              );
+
+              const node = store.get(edge.node.id) ? store.get(edge.node.id) : store.create(edge.node.id, 'LabbookFile');
+
+              node.setValue(edge.node.id, 'id');
+              node.setValue(edge.node.isDir, 'isDir');
+              node.setValue(edge.node.key, 'key');
+              node.setValue(edge.node.modifiedAt, 'modifiedAt');
+              node.setValue(edge.node.size, 'size');
+              const newEdge = RelayRuntime.ConnectionHandler.createEdge(
+                store,
+                conn,
+                node,
+                'newLabbookFileEdge',
+              );
+              RelayRuntime.ConnectionHandler.insertEdgeAfter(
+                conn,
+                newEdge,
+                edge.cursor,
+              );
+            }
+          });
+        }
       },
 
     },

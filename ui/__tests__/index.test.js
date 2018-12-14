@@ -4,17 +4,15 @@ import renderer from 'react-test-renderer';
 import Auth from 'JS/Auth/Auth';
 
 
-test('Test  index rendering', () => {
+describe('Test  index rendering', () => {
   let root = document.createElement('div');
-  root.id = 'root'
-  document.body.appendChild(root)
+  root.id = 'root';
+  document.body.appendChild(root);
 
   it('renders without crashing', () => {
   expect(JSON.stringify(
-      Object.assign({}, Index, { _reactInternalInstance: 'censored' })
+      Object.assign({}, Index, { _reactInternalInstance: 'censored' }),
     )).toMatchSnapshot();
   });
-  console.log(document.getElementById('root'))
-
-
+  console.log(document.getElementById('root'));
 });

@@ -1,13 +1,12 @@
-//vendor
-import uuidv4 from 'uuid/v4'
+// vendor
+import uuidv4 from 'uuid/v4';
 // mutations
-import DeleteLabbook from './../deleteLabbook';
-import ImportRemoteLabbook from './../importRemoteLabbook';
+import DeleteLabbook from '../deleteLabbook';
+import ImportRemoteLabbook from '../importRemoteLabbook';
 
-const labbookName = uuidv4()
+const labbookName = uuidv4();
 
 describe('Test Suite: Import Remote Labbook', () => {
-
   // test('Test: ImportRemoteLabbookMutation - Import Remote Labbook', done => {
 
   //   ImportRemoteLabbook.importRemoteLabbook(
@@ -30,20 +29,18 @@ describe('Test Suite: Import Remote Labbook', () => {
 
   // })
 
-  test('Test: ImportRemoteLabbookMutation - Import Remote Labbook (error)', done => {
-
+  test('Test: ImportRemoteLabbookMutation - Import Remote Labbook (error)', (done) => {
     ImportRemoteLabbook.importRemoteLabbook(
       (response, error) => {
         if (error) {
           expect(error).toBeTruthy();
-          done()
+          done();
         } else {
           done.fail();
         }
-      }
-    )
-
-  })
+      },
+    );
+  });
 
   // test('Test: DeleteLabbookMutation - Delete Labbook Mutation confirm', done => {
 
@@ -69,5 +66,4 @@ describe('Test Suite: Import Remote Labbook', () => {
   //   )
 
   // })
-
-})
+});

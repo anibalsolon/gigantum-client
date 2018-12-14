@@ -913,7 +913,8 @@ snapshots['TestLabBookServiceQueries.test_list_files_code 1'] = {
                             }
                         }
                     ]
-                }
+                },
+                'hasFiles': True
             },
             'name': 'labbook1'
         }
@@ -1141,7 +1142,8 @@ snapshots['TestLabBookServiceQueries.test_list_favorites 1'] = {
                             }
                         }
                     ]
-                }
+                },
+                'hasFavorites': True
             },
             'name': 'labbook1'
         }

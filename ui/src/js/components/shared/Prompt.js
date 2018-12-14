@@ -5,8 +5,8 @@ let updateAvailable = false;
 
 const pingServer = () => {
   const apiHost = process.env.NODE_ENV === 'development' ? 'localhost:10000' : window.location.host;
-
-  const url = `${window.location.protocol}//${apiHost}${process.env.PING_API}?v=${uuidv4()}`;
+  const uuid = uuidv4();
+  const url = `${window.location.protocol}//${apiHost}${process.env.PING_API}?v=${uuid}`;
   const currentVersion = localStorage.getItem('currentVersion');
 
   return fetch(url, {

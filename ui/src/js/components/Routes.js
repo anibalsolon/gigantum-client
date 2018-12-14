@@ -27,6 +27,11 @@ const LabbookQueryContainer = Loadable({
   loading: Loading,
 });
 
+const DatasetQueryContainer = Loadable({
+  loader: () => import('Components/dataset/DatasetQueryContainer'),
+  loading: Loading,
+});
+
 class Routes extends Component {
   constructor(props) {
     super(props);
@@ -205,6 +210,23 @@ class Routes extends Component {
                     }
                     />
 
+
+                    <Route
+                      exact
+                      path="/datasets/:labbookSection"
+                      render={props =>
+
+
+                      (<Home
+                        loadingRenew={this.state.loadingRenew}
+                        history={history}
+                        auth={this.props.auth}
+                        {...props}
+                      />)
+                      }
+                    />
+
+
                     <Route
                       exact
                       path="/projects/:labbookSection"
@@ -217,6 +239,28 @@ class Routes extends Component {
                         auth={this.props.auth}
                         {...props}
                       />)
+                      }
+                    />
+
+                    <Route
+                      path="/datasets/:owner/:datasetName"
+                      auth={this.props.auth}
+                      render={(parentProps) => {
+                          if (this.state.forceLoginScreen) {
+                            return <Redirect to="/login" />;
+                          }
+
+                          return (
+                            <DatasetQueryContainer
+                              datasetName={parentProps.match.params.datasetName}
+                              owner={parentProps.match.params.owner}
+                              auth={this.props.auth}
+                              history={history}
+                              {...this.props}
+                              {...parentProps}
+                            />);
+                      }
+
                       }
                     />
 

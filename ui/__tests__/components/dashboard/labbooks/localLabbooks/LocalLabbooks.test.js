@@ -1,75 +1,69 @@
-import React from 'react'
+import React from 'react';
 import renderer from 'react-test-renderer';
-import {configure, shallow, mount} from 'enzyme';
+import { configure, shallow, mount } from 'enzyme';
 import sinon from 'sinon';
-import history from 'JS/history'
-import {StaticRouter, Link} from 'react-router';
-import json from './__relaydata__/LocalLabbooks.json'
-import LocalLabbooks from 'Components/dashboard/labbooks/localLabbooks/LocalLabbooks';
-import relayTestingUtils from 'relay-testing-utils'
-import {MemoryRouter } from 'react-router-dom'
-import environment from 'JS/createRelayEnvironment'
-import {Provider} from 'react-redux'
-import store from 'JS/redux/store'
-import {BrowserRouter as Router} from 'react-router-dom'
+import history from 'JS/history';
+import { StaticRouter, Link } from 'react-router';
+import LocalLabbooksComp from 'Components/dashboard/labbooks/localLabbooks/LocalLabbooks';
+import relayTestingUtils from '@gigantum/relay-testing-utils';
+import { MemoryRouter } from 'react-router-dom';
+import environment from 'JS/createRelayEnvironment';
+import { Provider } from 'react-redux';
+import store from 'JS/redux/store';
+import { BrowserRouter as Router } from 'react-router-dom';
 
 import Adapter from 'enzyme-adapter-react-16';
+import json from './__relaydata__/LocalLabbooks.json';
 
 configure({ adapter: new Adapter() });
 
-const variables = {first:20}
+const variables = { first: 20 };
 
 store.dispatch({
   type: 'SET_FILTER_TEXT',
   payload: {
-    filterText: ''
-  }
-})
+    filterText: '',
+  },
+});
 
-const showModal = () =>{
+const showModal = () => {
 
-}
+};
 
-const goToLabbook = () =>{
+const goToLabbook = () => {
 
-}
+};
 
-const filterLabbooks = (labbooks, filter) =>{
+const filterLabbooks = (labbooks, filter) => {
   let filteredLabbooks = [];
-  let username = localStorage.getItem('username')
-  if(filter === username){
-    filteredLabbooks = labbooks.filter((labbook)=>{
-        return (labbook.node.owner === username)
-    })
-
-  }else if(filter === "others"){
-    filteredLabbooks = labbooks.filter((labbook)=>{
-        return (labbook.node.owner !== username)
-    })
-  }else{
+  let username = localStorage.getItem('username');
+  if (filter === username) {
+    filteredLabbooks = labbooks.filter(labbook => (labbook.node.owner === username));
+  } else if (filter === 'others') {
+    filteredLabbooks = labbooks.filter(labbook => (labbook.node.owner !== username));
+  } else {
     filteredLabbooks = labbooks;
   }
 
-  return filteredLabbooks
-}
+  return filteredLabbooks;
+};
 
-const changeRefetchState = () =>{
+const changeRefetchState = () => {
 
-}
+};
 
 const sortProcessed = () => {
 
-}
+};
 
 const loadMore = (props, value, ha) => {
+  let labbooks = json.data.labbookList.localLabbooks;
+  labbooks.edges = labbooks.edges.slice(0, 5);
+  return labbooks;
+};
 
-  let labbooks = json.data.labbookList.localLabbooks
-  labbooks.edges = labbooks.edges.slice(0, 5)
-  return labbooks
-}
-
-let labbookList = json.data.labbookList
-labbookList.localLabbooks.edges = labbookList.localLabbooks.edges.slice(0, 5)
+let labbookList = json.data.labbookList;
+labbookList.localLabbooks.edges = labbookList.localLabbooks.edges.slice(0, 5);
 
 const fixtures = {
   localLabbooks: labbookList,
@@ -85,67 +79,62 @@ const fixtures = {
   filterLabbooks,
   changeRefetchState,
   sortProcessed,
-  history
-}
+  history,
+};
 
 
 describe('LocalLabbooks', () => {
-
   it('LocalLabbooks snapshot', () => {
-
     const localLabbooksSnap = renderer.create(
 
        relayTestingUtils.relayWrap(
         <Provider store={store}>
           <Router>
-            <LocalLabbooks
+            <LocalLabbooksComp
 
               {...fixtures}
 
             />
           </Router>
-        </Provider>, {}, json.data.labbookList)
+        </Provider>, {}, json.data.labbookList,
+),
 
-    )
+    );
 
-    const tree = localLabbooksSnap.toJSON()
+    const tree = localLabbooksSnap.toJSON();
 
-    expect(tree).toMatchSnapshot()
+    expect(tree).toMatchSnapshot();
+  });
 
-  })
-
-  /****
+  /** **
    *
    * Shallow
    * Run shallow tests here
    *
    *
-   *****/
+   **** */
   const localLabbooksShallow = mount(
     <Provider store={store}>
      <Router>
-      <LocalLabbooks history={history} {...fixtures} feed={json.data}/>
+      <LocalLabbooksComp history={history} {...fixtures} feed={json.data}/>
      </Router>
-    </Provider>
+    </Provider>,
 
   );
 
 
   it('LocalLabbooks panel length', () => {
+    expect(localLabbooksShallow.find('.LocalLabbooks__panel')).toHaveLength(5);
+  });
 
 
-    expect(localLabbooksShallow.find('.LocalLabbooks__panel')).toHaveLength(5)
-  })
-
-
-
-  /****
+  /** **
    *
    * Mount
    * Run shallow tests here
    *
    *
-   *****/
+   **** */
   const showModalTest = sinon.spy();
   const goToLabbookTest = sinon.spy();
   const sortProcessedTest = sinon.spy();
@@ -154,25 +143,23 @@ describe('LocalLabbooks', () => {
     relayTestingUtils.relayWrap(
       <Provider store={store}>
         <Router>
-          <LocalLabbooks
+          <LocalLabbooksComp
             {...fixtures}
             showModal={showModalTest}
             goToLabbook={goToLabbookTest}
             sortProcessed={sortProcessedTest}
-            relay={{loadMore: loadMore}}
+            relay={{ loadMore }}
           />
        </Router>
-      </Provider>, {}, json.data.labbookList
-     )
+      </Provider>, {}, json.data.labbookList,
+     ),
   );
 
   it('Simulates sort processed', () => {
-
     expect(sortProcessedTest).toHaveProperty('callCount', 0);
   });
 
   it('Simulates opening create labbook', () => {
-
     localLabbooksMount.find('.btn--import').at(0).simulate('click');
 
     expect(showModalTest).toHaveProperty('callCount', 1);
@@ -180,7 +167,6 @@ describe('LocalLabbooks', () => {
 
 
   it('Simulates opening a labbook', () => {
-
     localLabbooksMount.find('.Card').at(4).simulate('click');
 
 
@@ -197,7 +183,6 @@ describe('LocalLabbooks', () => {
   //
   //   // expect(window.screenTop).toBe(1800)
   // });
-
 
 
   // describe('LocalLabbooks load more', () => {
@@ -274,8 +259,7 @@ describe('LocalLabbooks', () => {
   //   expect(localLabbooks.find('.LocalLabbooks__panel')).toHaveLength(22)
   //
   // })
-})
+});
 
 
-
-export default variables
+export default variables;

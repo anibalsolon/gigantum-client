@@ -38,8 +38,11 @@ class Dataset(Repository):
     _default_activity_detail_type = ActivityDetailType.DATASET
     _default_activity_section = "Dataset Root"
 
-    def __init__(self, config_file: Optional[str] = None, author: Optional[GitAuthor] = None) -> None:
+    def __init__(self, config_file: Optional[str] = None, namespace: Optional[str] = None,
+                 author: Optional[GitAuthor] = None) -> None:
         super().__init__(config_file, author)
+
+        self.namespace = namespace
 
     def __str__(self):
         if self._root_dir:

@@ -17,9 +17,11 @@ class LabbookSort extends Component {
   */
   _getSelectedSort() {
     if (this.props.orderBy === 'modified_on') {
-      return `Modified Date ${this.props.sort === 'asc' ? '(Oldest)' : '(Newest)'}`;
+      const modifiedDirection = this.props.sort === 'asc' ? '(Oldest)' : '(Newest)';
+      return `Modified Date ${modifiedDirection}`;
     } else if (this.props.orderBy === 'created_on') {
-      return `Creation Date ${this.props.sort === 'asc' ? '(Oldest)' : '(Newest)'}`;
+      const creationDirection = this.props.sort === 'asc' ? '(Oldest)' : '(Newest)';
+      return `Creation Date ${creationDirection}`;
     }
 
     return this.props.sort === 'asc' ? 'A-Z' : 'Z-A';

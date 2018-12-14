@@ -189,7 +189,7 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         """Return the size of the labbook on disk (in bytes).
         NOTE! This must be a string, as graphene can't quite handle big integers. """
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
-            lambda labbook: str(FileOperations.content_size(labbook=labbook)))
+            lambda labbook: str(FileOperations.content_size(labbook)))
 
     def resolve_updates_available_count(self, info):
         """Get number of commits the active_branch is behind its remote counterpart.
@@ -203,15 +203,15 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
 
     def resolve_active_branch_name(self, info):
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
-            lambda labbook: BranchManager(labbook=labbook, username=get_logged_in_username()).active_branch)
+            lambda labbook: BranchManager(labbook, username=get_logged_in_username()).active_branch)
 
     def resolve_workspace_branch_name(self, info):
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
-            lambda labbook: BranchManager(labbook=labbook, username=get_logged_in_username()).workspace_branch)
+            lambda labbook: BranchManager(labbook, username=get_logged_in_username()).workspace_branch)
 
     def resolve_available_branch_names(self, info):
         fltr = lambda labbook: \
-            BranchManager(labbook=labbook, username=get_logged_in_username()).available_branches
+            BranchManager(labbook, username=get_logged_in_username()).available_branches
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
             fltr)
 
@@ -228,7 +228,7 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
             _mergeable)
 
     def helper_resolve_active_branch(self, labbook):
-        active_branch_name = BranchManager(labbook=labbook, username=get_logged_in_username()).active_branch
+        active_branch_name = BranchManager(labbook, username=get_logged_in_username()).active_branch
         return LabbookRef(id=f"{self.owner}&{self.name}&None&{active_branch_name}",
                           owner=self.owner, name=self.name, prefix=None,
                           ref_name=active_branch_name)
@@ -362,9 +362,10 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         edge_objs = []
         for edge, cursor in zip(edges, cursors):
             edge_objs.append(
-                ActivityConnection.Edge(node=ActivityRecordObject(id=f"{self.owner}&{self.name}&{edge.commit}",
+                ActivityConnection.Edge(node=ActivityRecordObject(id=f"labbook&{self.owner}&{self.name}&{edge.commit}",
                                                                   owner=self.owner,
                                                                   name=self.name,
+                                                                  _repository_type='labbook',
                                                                   commit=edge.commit,
                                                                   _activity_record=edge),
                                         cursor=cursor))
@@ -412,9 +413,10 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         Returns:
 
         """
-        return ActivityDetailObject(id=f"{self.owner}&{self.name}&{key}",
+        return ActivityDetailObject(id=f"labbook&{self.owner}&{self.name}&{key}",
                                     owner=self.owner,
                                     name=self.name,
+                                    _repository_type='labbook',
                                     key=key)
 
     def resolve_detail_records(self, info, keys):
@@ -427,9 +429,10 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         Returns:
 
         """
-        return [ActivityDetailObject(id=f"{self.owner}&{self.name}&{key}",
+        return [ActivityDetailObject(id=f"labbook&{self.owner}&{self.name}&{key}",
                                      owner=self.owner,
                                      name=self.name,
+                                     _repository_type='labbook',
                                      key=key) for key in keys]
 
     def _fetch_collaborators(self, labbook, info):
@@ -591,8 +594,9 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         # Get collaborators from remote service
         mgr = GitLabManager(default_remote, admin_service, token)
         try:
-            owner = InventoryManager().query_labbook_owner(labbook)
-            d = mgr.repo_details(namespace=owner, labbook_name=labbook.name)
+            owner = InventoryManager().query_owner(labbook)
+            d = mgr.repo_details(namespace=owner, repository_name=labbook.name)
+            assert 'visibility' in d.keys(), 'Visibility is not in repo details response keys'
             return d.get('visibility')
         except ValueError:
             return "local"

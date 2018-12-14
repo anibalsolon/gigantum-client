@@ -1,5 +1,7 @@
 .grid{
   @include grid();
+  margin: 0 -12.5px;
+  width: auto;
 }
 
 .column-1-span-1{

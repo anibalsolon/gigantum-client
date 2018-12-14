@@ -160,12 +160,12 @@ class ChunkUploadMutation(object):
                             pass
             raise
 
-    @abc.abstractclassmethod
+    @classmethod
     def mutate_and_process_upload(cls, info, **kwargs):
         """Method to implement to process the upload. Must return a Mutation type"""
         raise NotImplemented
 
-    @abc.abstractclassmethod
+    @classmethod
     def mutate_and_wait_for_chunks(cls, info, **kwargs):
         """Method to implement to process set any non-null fields, but essentially just return.
          Must return a Mutation type"""

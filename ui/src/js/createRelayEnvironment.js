@@ -30,7 +30,6 @@ function fetchQuery(operation, variables, cacheConfig, uploadables) {
   const headers = {
     accept: '*/*',
   };
-
   if (process.env.NODE_ENV === 'development') {
     headers['Access-Control-Allow-Origin'] = '*';
   }
@@ -74,7 +73,6 @@ function fetchQuery(operation, variables, cacheConfig, uploadables) {
     ? 'localhost:10000'
     : window.location.host;
   const apiURL = `${window.location.protocol}//${apiHost}${process.env.GIGANTUM_API}`;
-
   return fetch(apiURL, {
     method: 'POST',
     headers,

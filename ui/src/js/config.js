@@ -2,7 +2,7 @@ import tips from './tips';
 
 const CONFIG = {
   api: process.env.NODE_ENV,
-  navigation_items: [
+  labbook_navigation_items: [
     { id: 'overview', name: 'Overview' },
     { id: 'activity', name: 'Activity', fragment: '...Activity_labbook' },
     { id: 'environment', name: 'Environment', fragment: '...Environment_labbook' },
@@ -10,7 +10,12 @@ const CONFIG = {
     { id: 'inputData', name: 'Input Data' },
     { id: 'outputData', name: 'Output Data' },
   ],
-  defaultNavOrder: ['overview', 'activity', 'environment', 'code', 'inputData', 'outputData'],
+  dataset_navigation_items: [
+    { id: 'activity', name: 'Activity', fragment: '...Activity_labbook' },
+    { id: 'data', name: 'Data' },
+  ],
+  labbookDefaultNavOrder: ['overview', 'activity', 'environment', 'code', 'inputData', 'outputData'],
+  datasetDefaultNavOrder: ['activity', 'data'],
   modalNav: [
     { id: 'createLabook', description: 'Title & Description' },
     { id: 'selectBaseImage', description: 'Base Image' },
@@ -60,6 +65,26 @@ const CONFIG = {
   },
   getToolTipText: section => tips[section],
   demoHostName: 'try.gigantum.com',
+  /**
+    @param {number} bytes
+    converts bytes into suitable units
+  */
+  humanFileSize: (bytes) => {
+    let si = true;
+    let thresh = si ? 1000 : 1024;
+    if (Math.abs(bytes) < thresh) {
+        return `${bytes}B`;
+    }
+    var units = si
+        ? ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+        : ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
+    var u = -1;
+    do {
+        bytes /= thresh;
+        ++u;
+    } while (Math.abs(bytes) >= thresh && u < units.length - 1);
+    return `${bytes.toFixed(1)} ${units[u]}`;
+  },
 };
 
 export default CONFIG;

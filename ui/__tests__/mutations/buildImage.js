@@ -1,12 +1,12 @@
-//vendor
-import fs from 'fs'
-import os from 'os'
-//mutations
+// vendor
+import fs from 'fs';
+import os from 'os';
+// mutations
 import BuildImageMutation from 'Mutations/BuildImageMutation';
-//config
-import testConfig from './config'
+// config
+import testConfig from './config';
 
-let owner = JSON.parse(fs.readFileSync(os.homedir() + testConfig.ownerLocation, 'utf8')).username
+let owner = JSON.parse(fs.readFileSync(os.homedir() + testConfig.ownerLocation, 'utf8')).username;
 
 const BuildImage = {
     buildImage: (labbbookName, noCache, callback) => {
@@ -14,9 +14,9 @@ const BuildImage = {
       labbbookName,
       owner,
       noCache,
-      callback
-    )
-  }
-}
+      callback,
+    );
+  },
+};
 
 export default BuildImage;

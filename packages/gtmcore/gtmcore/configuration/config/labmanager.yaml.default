@@ -91,3 +91,7 @@ proxy:
   apparent_proxy_port: 10000
   # All LabManager api traffic has this default prefix.
   labmanager_api_prefix: /api
+
+# Datasets configuration
+datasets:
+  cache_manager: "host"

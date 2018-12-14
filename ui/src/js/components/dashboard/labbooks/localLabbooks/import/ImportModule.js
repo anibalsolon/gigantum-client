@@ -6,7 +6,7 @@ import uuidv4 from 'uuid/v4';
 import JobStatus from 'JS/utils/JobStatus';
 import ChunkUploader from 'JS/utils/ChunkUploader';
 // components
-import LoginPrompt from 'Components/labbook/labbookHeader/branchMenu/modals/LoginPrompt';
+import LoginPrompt from 'Components/header/branchMenu/modals/LoginPrompt';
 import ToolTip from 'Components/shared/ToolTip';
 // store
 import store from 'JS/redux/store';
@@ -16,37 +16,11 @@ import UserIdentity from 'JS/Auth/UserIdentity';
 // mutations
 import ImportRemoteLabbookMutation from 'Mutations/ImportRemoteLabbookMutation';
 import BuildImageMutation from 'Mutations/BuildImageMutation';
+// config
+import config from 'JS/config'
 // assets
 import './ImportModule.scss';
-/**
-  @param {number} bytes
-  converts bytes into suitable units
-*/
-const _humanFileSize = (bytes) => {
-  const thresh = 1000;
 
-  if (Math.abs(bytes) < thresh) {
-    return `${bytes} kB`;
-  }
-
-  const units = [
-    'MB',
-    'GB',
-    'TB',
-    'PB',
-    'EB',
-    'ZB',
-    'YB',
-  ];
-
-  let u = -1;
-  do {
-    bytes /= thresh;
-    ++u;
-  } while (Math.abs(bytes) >= thresh && u < units.length - 1);
-
-  return `${bytes.toFixed(1)} ${units[u]}`;
-};
 /*
  @param {object} workerData
  uses redux to dispatch file upload to the footer
@@ -57,8 +31,8 @@ const dispatchLoadingProgress = (wokerData) => {
   bytesUploaded = bytesUploaded < totalBytes
     ? bytesUploaded
     : totalBytes;
-  const totalBytesString = _humanFileSize(totalBytes);
-  const bytesUploadedString = _humanFileSize(bytesUploaded);
+  const totalBytesString = config.humanFileSize(totalBytes);
+  const bytesUploadedString = config.humanFileSize(bytesUploaded);
 
   store.dispatch({
     type: 'UPLOAD_MESSAGE_UPDATE',
@@ -73,7 +47,8 @@ const dispatchLoadingProgress = (wokerData) => {
   });
 
   if (document.getElementById('footerProgressBar')) {
-    document.getElementById('footerProgressBar').style.width = `${Math.floor((bytesUploaded / totalBytes) * 100)}%`;
+    const width = Math.floor((bytesUploaded / totalBytes) * 100);
+    document.getElementById('footerProgressBar').style.width = `${width}%`;
   }
 };
 
@@ -365,7 +340,6 @@ export default class ImportModule extends Component {
     const self = this;
 
     this._importingState();
-    console.log(this.state.files[0]);
     const filepath = this.state.files[0].filename;
 
     const data = {
@@ -668,7 +642,7 @@ export default class ImportModule extends Component {
 
     return (<Fragment>
 
-      <div id="dropZone" className="ImportModule Card Card--line-50 Card--text-center Card--add Card--import column-4-span-3" key="addLabbook" ref={div => this.dropZone = div} type="file" onDragEnd={evt => this._dragendHandler(evt)} onDrop={evt => this._dropHandler(evt)} onDragOver={evt => this._dragoverHandler(evt)}>
+      <div id="dropZone" className="ImportModule Card Card-300 Card--line-50 Card--text-center Card--add Card--import column-4-span-3" key="addLabbook" ref={div => this.dropZone = div} type="file" onDragEnd={evt => this._dragendHandler(evt)} onDrop={evt => this._dropHandler(evt)} onDragOver={evt => this._dragoverHandler(evt)}>
 
         {
           !this.state.importingScreen
