@@ -119,7 +119,7 @@ const uploadFileBrowserChunk = (data, chunkData, file, chunk, accessToken, usern
       }
     };
 
-    type === 'dataset' ?
+    section === 'data' ?
       AddDatasetFileMutation(
         data.connectionKey,
         username,
@@ -142,6 +142,7 @@ const uploadFileBrowserChunk = (data, chunkData, file, chunk, accessToken, usern
         accessToken,
         section,
         data.transactionId,
+        [],
         cbFunction,
       );
   } else if (chunk.fileSizeKb > (48 * 1000)) {
@@ -220,7 +221,6 @@ const ChunkUploader = {
               section,
               getChunk,
               componentCallback,
-              type,
             );
 
             postMessage(chunkData, false);

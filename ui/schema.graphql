@@ -1,5 +1,5 @@
 # source: http://localhost:10000/api/labbook/
-# timestamp: Thu Dec 13 2018 13:45:06 GMT-0500 (Eastern Standard Time)
+# timestamp: Fri Dec 14 2018 12:42:54 GMT-0500 (Eastern Standard Time)
 
 schema {
   query: LabbookQuery
@@ -497,8 +497,7 @@ input DeleteLabbookFilesInput {
   owner: String!
   labbookName: String!
   section: String!
-  filePath: [String]!
-  isDirectory: Boolean
+  filePaths: [String]!
   clientMutationId: String
 }
 
@@ -648,7 +647,7 @@ type JobStatus implements Node {
 }
 
 """
-A Connection for paging through all background jobs the system is aware of.
+A Connection for paging through all background jobs the system is aware of. 
 """
 type JobStatusConnection {
   pageInfo: PageInfo!
@@ -916,7 +915,7 @@ type LabbookRefEdge {
 
 """
 A type representing a section within a LabBook (i.e., code, input, output)
-
+    
 """
 type LabbookSection implements Node & GitRepository {
   """The ID of the object."""
@@ -954,7 +953,7 @@ input MergeFromBranchInput {
 }
 
 """
-Merge from another branch into the current active branch. Force if necessary.
+Merge from another branch into the current active branch. Force if necessary. 
 """
 type MergeFromBranchPayload {
   labbook: Labbook
@@ -975,7 +974,7 @@ Method to move/rename a file or directory. If file, both src_path and dst_path s
 If a directory, be sure to include the trailing slash
 """
 type MoveLabbookFilePayload {
-  updateEdges: [LabbookFileEdge]!
+  updatedEdges(before: String, after: String, first: Int, last: Int): LabbookFileConnection
   clientMutationId: String
 }
 

@@ -2,7 +2,7 @@
 import React, { Component } from 'react';
 import { createPaginationContainer, graphql } from 'react-relay';
 // mutations
-import FileBrowserWrapper from 'Components/labbook/fileBrowser/FileBrowserWrapper';
+import FileBrowser from 'Components/labbook/fileBrowser/FileBrowser';
 // store
 import store from 'JS/redux/store';
 
@@ -86,7 +86,7 @@ class DataBrowser extends Component {
       }
 
       return (
-        <FileBrowserWrapper
+        <FileBrowser
           ref="dataBrowser"
           section="data"
           selectedFiles={this.props.selectedFiles}
