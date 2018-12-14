@@ -27,7 +27,7 @@ from gtmcore.inventory.inventory import InventoryManager
 
 class TestDatasetQueries(object):
 
-    def test_get_dataset(self, fixture_working_dir_dataset_populated_scoped, snapshot):
+    def test_get_dataset(self, fixture_working_dir_dataset_populated_scoped):
         query = """{
                     dataset(name: "dataset8", owner: "default") {
                       id
@@ -39,10 +39,19 @@ class TestDatasetQueries(object):
                         id
                         description
                       }
+                      visibility
+                      defaultRemote
                     }
                     }
                 """
-        snapshot.assert_match(fixture_working_dir_dataset_populated_scoped[2].execute(query))
+        r = fixture_working_dir_dataset_populated_scoped[2].execute(query)
+        assert r['data']['dataset']['description'] == 'Cats 8'
+        assert r['data']['dataset']['datasetType']['description'] == 'Scalable Dataset storage provided by your Gigantum account'
+        assert r['data']['dataset']['datasetType']['name'] == 'Gigantum Cloud'
+        assert r['data']['dataset']['name'] == 'dataset8'
+        assert r['data']['dataset']['schemaVersion'] == 1
+        assert r['data']['dataset']['visibility'] == "local"
+        assert r['data']['dataset']['defaultRemote'] is None
 
     def test_get_dataset_all_fields(self, fixture_working_dir_dataset_populated_scoped, snapshot):
         query = """{

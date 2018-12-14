@@ -8,6 +8,8 @@ import {
 import LocalDatasetPanel from 'Components/dashboard/datasets/localDatasets/LocalDatasetsPanel';
 import DatasetsPaginationLoader from './datasetsLoaders/datasetsPaginationLoader';
 import ImportModule from './import/ImportModule';
+// helpers
+import DatasetVisibilityLookup from './lookups/DatasetVisibilityLookup';
 // assets
 import './LocalDatasets.scss';
 
@@ -17,11 +19,13 @@ export class LocalDatasets extends Component {
     super(props);
     this.state = {
       isPaginating: false,
+      visibilityList: new Map(),
     };
 
     this._captureScroll = this._captureScroll.bind(this);
     this._loadMore = this._loadMore.bind(this);
     this._fetchDemo = this._fetchDemo.bind(this);
+    this._visibilityLookup = this._visibilityLookup.bind(this);
   }
 
   /** *
@@ -29,7 +33,9 @@ export class LocalDatasets extends Component {
   * adds event listener for pagination and fetches container status
   */
   componentDidMount() {
+    this.mounted = true;
     if (!this.props.loading) {
+      this._visibilityLookup();
       if (this.props.datasetList &&
          this.props.localDatasets.localDatasets &&
          this.props.localDatasets.localDatasets.edges &&
@@ -104,9 +110,50 @@ export class LocalDatasets extends Component {
           this.setState({
             isPaginating: false,
           });
+          this._visibilityLookup();
         },
       );
     }
+  }
+
+  /** *
+    * @param {}
+    * calls VisibilityLookup query and attaches the returned data to the state
+    */
+  _visibilityLookup() {
+    const self = this;
+
+    const idArr = this.props.localDatasets.localDatasets.edges.map(edges => edges.node.id);
+
+    const index = 0;
+
+    function query(ids, index) {
+      const subsetIds = idArr.slice(index, index + 10);
+
+      DatasetVisibilityLookup.query(subsetIds).then((res) => {
+        if (res && res.data &&
+          res.data.datasetList &&
+          res.data.datasetList.localById) {
+          const visibilityListCopy = new Map(self.state.visibilityList);
+
+          res.data.datasetList.localById.forEach((node) => {
+            visibilityListCopy.set(node.id, node);
+          });
+
+
+          if (index < idArr.length) {
+            index += 10;
+
+            query(ids, index);
+          }
+          if (self.mounted) {
+            self.setState({ visibilityList: visibilityListCopy });
+          }
+        }
+      });
+    }
+
+    query(idArr, index);
   }
 
   render() {
@@ -132,17 +179,20 @@ export class LocalDatasets extends Component {
 
             }
             {
-              datasets.length ? datasets.map((edge, index) => (
-                  <LocalDatasetPanel
+              datasets.length ? datasets.map((edge, index) => {
+                const visibility = this.state.visibilityList.has(edge.node.id) ? this.state.visibilityList.get(edge.node.id).visibility : 'loading';
+                return (<LocalDatasetPanel
                     key={`${edge.node.owner}/${edge.node.name}`}
                     ref={`LocalDatasetPanel${edge.node.name}`}
                     className="LocalDatasets__panel"
                     edge={edge}
+                    visibility={visibility}
                     history={this.props.history}
                     filterText={this.props.filterText}
                     goToDataset={this.props.goToDataset}
                   />
-                ))
+                );
+              })
               : !this.props.loading && this.props.filterText &&
 
                 <div className="Datasets__no-results">
@@ -154,7 +204,7 @@ export class LocalDatasets extends Component {
                     onClick={() => this.props.setFilterValue({ target: { value: '' } })}
                   >clear
 
-                                                                                        </span> to try again.
+                  </span> to try again.
                   </p>
 
                 </div>

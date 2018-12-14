@@ -150,7 +150,7 @@ def build_docker_image(root_dir: str, override_image_tag: Optional[str],
     lb = InventoryManager().load_labbook_from_directory(root_dir)
 
     # Build image
-    owner = InventoryManager().query_labbook_owner(lb)
+    owner = InventoryManager().query_owner(lb)
     image_name = override_image_tag or infer_docker_image_name(labbook_name=lb.name,
                                                                owner=owner,
                                                                username=username)
@@ -215,7 +215,7 @@ def start_labbook_container(labbook_root: str, config_path: str,
 
     lb = InventoryManager(config_file=config_path).load_labbook_from_directory(labbook_root)
     if not override_image_id:
-        owner = InventoryManager().query_labbook_owner(lb)
+        owner = InventoryManager().query_owner(lb)
         tag = infer_docker_image_name(lb.name, owner, username)
     else:
         tag = override_image_id

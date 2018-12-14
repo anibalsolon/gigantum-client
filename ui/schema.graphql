@@ -1,5 +1,5 @@
 # source: http://localhost:10000/api/labbook/
-# timestamp: Wed Dec 05 2018 11:56:04 GMT-0500 (Eastern Standard Time)
+# timestamp: Thu Dec 13 2018 13:45:06 GMT-0500 (Eastern Standard Time)
 
 schema {
   query: LabbookQuery
@@ -385,6 +385,8 @@ type Dataset implements Node & GitRepository {
   allFiles(before: String, after: String, first: Int, last: Int): DatasetFileConnection
   detailRecord(key: String): ActivityDetailObject
   detailRecords(keys: [String]): [ActivityDetailObject]
+  visibility: String
+  defaultRemote: String
 }
 
 """A Connection for paging through datasets that exist locally. """
@@ -552,6 +554,17 @@ input ExportLabbookInput {
 
 type ExportLabbookPayload {
   jobKey: String
+  clientMutationId: String
+}
+
+input FetchDatasetEdgeInput {
+  owner: String!
+  datasetName: String!
+  clientMutationId: String
+}
+
+type FetchDatasetEdgePayload {
+  newDatasetEdge: DatasetEdge
   clientMutationId: String
 }
 
@@ -800,6 +813,7 @@ type LabbookMutations {
   deleteRemoteLabbook(input: DeleteRemoteLabbookInput!): DeleteRemoteLabbookPayload
   setLabbookDescription(input: SetLabbookDescriptionInput!): SetLabbookDescriptionPayload
   publishLabbook(input: PublishLabbookInput!): PublishLabbookPayload
+  publishDataset(input: PublishDatasetInput!): PublishDatasetPayload
   syncLabbook(input: SyncLabbookInput!): SyncLabbookPayload
   addLabbookRemote(input: AddLabbookRemoteInput!): AddLabbookRemotePayload
   buildImage(input: BuildImageInput!): BuildImagePayload
@@ -832,6 +846,9 @@ type LabbookMutations {
   createDataset(input: CreateDatasetInput!): CreateDatasetPayload
   addDatasetFile(input: AddDatasetFileInput!): AddDatasetFilePayload
   completeDatasetUploadTransaction(input: CompleteDatasetUploadTransactionInput!): CompleteDatasetUploadTransactionPayload
+  fetchDatasetEdge(input: FetchDatasetEdgeInput!): FetchDatasetEdgePayload
+  setDatasetVisibility(input: SetDatasetVisibilityInput!): SetDatasetVisibilityPayload
+  syncDataset(input: SyncDatasetInput!): SyncDatasetPayload
 }
 
 """
@@ -1014,6 +1031,18 @@ type PageInfo {
   endCursor: String
 }
 
+input PublishDatasetInput {
+  owner: String!
+  datasetName: String!
+  setPublic: Boolean
+  clientMutationId: String
+}
+
+type PublishDatasetPayload {
+  jobKey: String
+  clientMutationId: String
+}
+
 input PublishLabbookInput {
   owner: String!
   labbookName: String!
@@ -1126,6 +1155,18 @@ type RemoveUserIdentityPayload {
   clientMutationId: String
 }
 
+input SetDatasetVisibilityInput {
+  owner: String!
+  datasetName: String!
+  visibility: String!
+  clientMutationId: String
+}
+
+type SetDatasetVisibilityPayload {
+  newDatasetEdge: DatasetEdge
+  clientMutationId: String
+}
+
 input SetLabbookDescriptionInput {
   owner: String!
   labbookName: String!
@@ -1184,6 +1225,18 @@ input StopContainerInput {
 """Mutation to stop a Docker container. """
 type StopContainerPayload {
   environment: Environment
+  clientMutationId: String
+}
+
+input SyncDatasetInput {
+  owner: String!
+  datasetName: String!
+  force: Boolean
+  clientMutationId: String
+}
+
+type SyncDatasetPayload {
+  jobKey: String
   clientMutationId: String
 }
 

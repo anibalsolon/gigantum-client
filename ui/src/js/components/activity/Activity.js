@@ -74,7 +74,7 @@ export default class Activity extends Component {
     const activityRecords = nextProps[nextProps.sectionType].activityRecords;
     if (JSON.stringify(this._transformActivity(activityRecords)) !== JSON.stringify(this.state.activityRecords)) {
       const prevCommit = this.sectionType && this.sectionType.activityRecords.edges && this.sectionType.activityRecords.edges[0].node;
-      const newcommit = nextProps[nextProps.sectionType] && nextProps[nextProps.sectionType].activityRecords.edges && nextProps[nextProps.sectionType].activityRecords.edges[0].node;
+      const newcommit = nextProps[nextProps.sectionType] && nextProps[nextProps.sectionType].activityRecords.edges && nextProps[nextProps.sectionType].activityRecords.edges[0] && nextProps[nextProps.sectionType].activityRecords.edges[0].node;
 
       if (prevCommit && prevCommit !== newcommit) {
         this.setState({ expandedClusterObject: new Map() }, () => this.setState({ activityRecords: this._transformActivity(activityRecords) }));

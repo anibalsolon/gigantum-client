@@ -3,12 +3,15 @@ import base64
 
 from gtmcore.activity import ActivityStore
 
+from lmsrvcore.auth.identity import parse_token
 from lmsrvcore.auth.user import get_logged_in_username
 from lmsrvcore.api.interfaces import GitRepository
 from lmsrvcore.api.connections import ListBasedConnection
 
 from gtmcore.dataset.manifest import Manifest
 from gtmcore.dataset.cache.filesystem import HostFilesystemCache
+from gtmcore.gitlib.gitlab import GitLabManager
+from gtmcore.inventory.inventory import InventoryManager
 
 from lmsrvlabbook.api.objects.datasettype import DatasetType
 from lmsrvlabbook.api.connections.activity import ActivityConnection
@@ -47,6 +50,11 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
     # Access a detail record directly, which is useful when fetching detail items
     detail_record = graphene.Field(ActivityDetailObject, key=graphene.String())
     detail_records = graphene.List(ActivityDetailObject, keys=graphene.List(graphene.String))
+
+    visibility = graphene.String()
+
+    # Get the URL of the remote origin
+    default_remote = graphene.String()
 
     @classmethod
     def get_node(cls, info, id):
@@ -242,3 +250,61 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         """Resolver for getting all files in a Dataset"""
         return info.context.dataset_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
             lambda dataset: self.helper_resolve_all_files(dataset, kwargs))
+
+    @staticmethod
+    def helper_resolve_visibility(dataset, info):
+        # TODO: Future work will look up remote in LabBook data, allowing user to select remote.
+        default_remote = dataset.client_config.config['git']['default_remote']
+        admin_service = None
+        for remote in dataset.client_config.config['git']['remotes']:
+            if default_remote == remote:
+                admin_service = dataset.client_config.config['git']['remotes'][remote]['admin_service']
+                break
+
+        # Extract valid Bearer token
+        if "HTTP_AUTHORIZATION" in info.context.headers.environ:
+            token = parse_token(info.context.headers.environ["HTTP_AUTHORIZATION"])
+        else:
+            raise ValueError("Authorization header not provided. Must have a valid session to query for collaborators")
+
+        # Get collaborators from remote service
+        mgr = GitLabManager(default_remote, admin_service, token)
+        try:
+            owner = InventoryManager().query_owner(dataset)
+            d = mgr.repo_details(namespace=owner, repository_name=dataset.name)
+            return d.get('visibility')
+        except ValueError:
+            return "local"
+
+    def resolve_visibility(self, info):
+        """ Return string indicating visibility of project from GitLab:
+         "public", "private", or "internal". """
+
+        return info.context.dataset_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
+            lambda dataset: self.helper_resolve_visibility(dataset, info))
+
+    @staticmethod
+    def helper_resolve_default_remote(dataset):
+        """Helper to extract the default remote from a labbook"""
+        remotes = dataset.git.list_remotes()
+        if remotes:
+            url = [x['url'] for x in remotes if x['name'] == 'origin']
+            if url:
+                return url[0]
+            else:
+                dataset.warning(f"There exist remotes in {str(lb)}, but no origin found.")
+        return None
+
+    def resolve_default_remote(self, info):
+        """Return True if no untracked files and no uncommitted changes (i.e., Git repo clean)
+
+        Args:
+            args:
+            context:
+            info:
+
+        Returns:
+
+        """
+        return info.context.dataset_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
+            lambda dataset: self.helper_resolve_default_remote(dataset))
