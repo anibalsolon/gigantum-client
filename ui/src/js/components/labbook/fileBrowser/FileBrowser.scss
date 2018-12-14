@@ -81,6 +81,7 @@
 
     &--menu{
         width: 180px;
+        padding: 0 20px 0 0;
     }
 }
 
@@ -172,4 +173,19 @@
 
 .FileBrowser__button-container{
   width: 500px;
+}
+
+.FileBrowser__button {
+  height: 30px;
+  width: 30px;
+
+  &--add-folder {
+    background: url(~Images/icons/folder-add-new.svg) no-repeat center center;
+    background-size: 30px;
+  }
+
+  &--add-dataset {
+    background: url(~Images/icons/database-add.svg) no-repeat center center;
+    background-size: 30px;
+  }
 }

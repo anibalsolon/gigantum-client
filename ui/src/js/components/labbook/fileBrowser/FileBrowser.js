@@ -123,7 +123,7 @@ class FileBrowser extends Component {
       if (this.state.search === '' && element.value !== '') {
         element.value = '';
       }
-      const files = this.props.files.edges.concat(datasetJSON.edges)
+      const files = this.props.files.edges.concat(datasetJSON.edges);
       this.fileHandler.postMessage({ files, search: this.state.search });
     }
     /**
@@ -657,7 +657,9 @@ class FileBrowser extends Component {
                   Modified
               </div>
 
-              <div className="FileBrowser__header--menu">
+              <div className="FileBrowser__header--menu flex flex--row justify--right">
+                <div className="FileBrowser__button FileBrowser__button--add-folder"></div>
+                <div className="FileBrowser__button FileBrowser__button--add-dataset"></div>
               </div>
           </div>
       <div className="FileBrowser__body">
@@ -691,7 +693,7 @@ class FileBrowser extends Component {
                       updateChildState={this._updateChildState}
                       codeDirUpload={this._codeDirUpload}
                     />
-                  )
+                  );
                 } else if (isDir) {
                   return (<Folder
                     ref={file}
