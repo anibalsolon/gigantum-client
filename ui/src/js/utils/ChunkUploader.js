@@ -9,28 +9,7 @@ import CompleteDatasetUploadTransactionMutation from 'Mutations/fileBrowser/Comp
 import store from 'JS/redux/store';
 import { setUploadMessageUpdate, setUploadMessageRemove, setWarningMessage } from 'JS/redux/reducers/footer';
 import { setFinishedUploading, setPauseChunkUpload } from 'JS/redux/reducers/labbook/fileBrowser/fileBrowserWrapper';
-
-/**
-  @param {number} bytes
-  converts bytes into suitable units
-*/
-export const humanFileSize = (bytes) => {
-  const thresh = 1000;
-
-  if (Math.abs(bytes) < thresh) {
-    return `${bytes} kB`;
-  }
-
-  const units = ['MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-
-  let u = -1;
-  do {
-    bytes /= thresh;
-    ++u;
-  } while (Math.abs(bytes) >= thresh && u < units.length - 1);
-  return `${bytes.toFixed(1)} ${units[u]}`;
-};
-
+import config from 'JS/config';
 
 const uploadLabbookChunk = (file, chunk, accessToken, getChunkCallback) => {
   ImportLabbookMutation(chunk.blob, chunk, accessToken, (result, error) => {
@@ -84,8 +63,8 @@ const updateChunkStatus = (file, chunkData, labbookName, owner, transactionId, t
     chunkSize,
   } = chunkData;
   const chunkIndex = chunkData.chunkIndex + 1;
-  const uploadedChunkSize = ((chunkSize / 1000) * chunkIndex) > fileSizeKb ? humanFileSize(fileSizeKb) : humanFileSize((chunkSize / 1000) * chunkIndex);
-  const fileSize = humanFileSize(fileSizeKb);
+  const uploadedChunkSize = ((chunkSize / 1000) * chunkIndex) > fileSizeKb ? config.humanFileSize(fileSizeKb * 1000) : config.humanFileSize((chunkSize) * chunkIndex);
+  const fileSize = config.humanFileSize(fileSizeKb * 1000);
   setUploadMessageUpdate(`${uploadedChunkSize} of ${fileSize} files`, 1, (((chunkSize * chunkIndex) / (fileSizeKb * 1000)) * 100));
 
   if ((chunkSize * chunkIndex) >= (fileSizeKb * 1000)) {
@@ -118,11 +97,10 @@ const updateChunkStatus = (file, chunkData, labbookName, owner, transactionId, t
   }
 };
 
-
 const uploadFileBrowserChunk = (data, chunkData, file, chunk, accessToken, username, filepath, section, getChunkCallback, componentCallback, type) => {
-  if (!store.getState().fileBrowser.pause || (store.getState().footer.totalFiles > 1)) {
+  let { footer, fileBrowser } = store.getState();
+  if (fileBrowser.pause || (footer.totalFiles > 0)) {
     const cbFunction = (result, error) => {
-      setFinishedUploading();
 
       if (result && (error === undefined)) {
         getChunkCallback(file, result);
@@ -141,7 +119,7 @@ const uploadFileBrowserChunk = (data, chunkData, file, chunk, accessToken, usern
       }
     };
 
-    type === 'dataset' ?
+    section === 'data' ?
       AddDatasetFileMutation(
         data.connectionKey,
         username,
@@ -164,6 +142,7 @@ const uploadFileBrowserChunk = (data, chunkData, file, chunk, accessToken, usern
         accessToken,
         section,
         data.transactionId,
+        [],
         cbFunction,
       );
   } else if (chunk.fileSizeKb > (48 * 1000)) {
@@ -175,11 +154,13 @@ const ChunkUploader = {
   /*
     @param {object} data includes file filepath username and accessToken
   */
-  chunkFile: (data, postMessage, passedChunkIndex, type) => {
-    let file = data.file,
-      filepath = data.filepath,
-      username = data.username,
-      section = data.section,
+  chunkFile: (data, postMessage, passedChunkIndex) => {
+    let {
+        file,
+        filepath,
+        username,
+        section,
+      } = data,
       componentCallback = (response) => { // callback to trigger postMessage from initializer
         postMessage(response, false);
       };
@@ -216,7 +197,6 @@ const ChunkUploader = {
           filename: file.name,
           uploadId: id,
         };
-
         if (chunkIndex <= totalChunks) { // if  there is still chunks to process do next chunk
           // select type of mutation
           if (file.name.indexOf('.lbk') > -1 || file.name.indexOf('.zip') > -1) {
@@ -227,11 +207,9 @@ const ChunkUploader = {
                 data.accessToken,
                 getChunk,
               );
-
               postMessage(chunkData, false); // post progress back to worker instantiator file
             }
           } else {
-            // if(store.getState().fileBrowser.pause === false){
             uploadFileBrowserChunk(
               data,
               chunkData,
@@ -243,7 +221,6 @@ const ChunkUploader = {
               section,
               getChunk,
               componentCallback,
-              type,
             );
 
             postMessage(chunkData, false);

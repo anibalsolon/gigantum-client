@@ -22,18 +22,19 @@ from lmsrvlabbook.api.mutations import (CreateLabbook, BuildImage, StartContaine
                                         AddPackageComponents, CreateUserNote, StopContainer,
                                         ImportLabbook, DeleteLabbook,
                                         ImportRemoteLabbook, AddLabbookRemote,
-                                        ExportLabbook, AddLabbookFile, MoveLabbookFile, DeleteLabbookFile,
+                                        ExportLabbook, AddLabbookFile, MoveLabbookFile, DeleteLabbookFiles,
                                         MakeLabbookDirectory, RemoveUserIdentity,
                                         AddLabbookFavorite, RemoveLabbookFavorite, UpdateLabbookFavorite,
                                         AddLabbookCollaborator,
-                                        DeleteLabbookCollaborator, SyncLabbook, PublishLabbook,
+                                        DeleteLabbookCollaborator, SyncLabbook, PublishLabbook, PublishDataset,
                                         RemovePackageComponents,
                                         StartDevTool, SetLabbookDescription, CreateExperimentalBranch,
                                         DeleteExperimentalBranch,
                                         MergeFromBranch, WorkonBranch, WriteReadme, AddCustomDocker, RemoveCustomDocker,
                                         DeleteRemoteLabbook,
                                         CompleteBatchUploadTransaction, SetVisibility, FetchLabbookEdge,
-                                        CreateDataset, AddDatasetFile, CompleteDatasetUploadTransaction)
+                                        CreateDataset, AddDatasetFile, CompleteDatasetUploadTransaction,
+                                        FetchDatasetEdge, SetDatasetVisibility, SyncDataset)
 
 
 class LabbookMutations(graphene.ObjectType):
@@ -62,6 +63,9 @@ class LabbookMutations(graphene.ObjectType):
 
     # Publish a labbook to a remote (for the first time
     publish_labbook = PublishLabbook.Field()
+
+    # Publish a dataset to a remote (for the first time
+    publish_dataset = PublishDataset.Field()
 
     # Sync a Labbook with remote (for collaboration)
     sync_labbook = SyncLabbook.Field()
@@ -107,7 +111,7 @@ class LabbookMutations(graphene.ObjectType):
     move_labbook_file = MoveLabbookFile.Field()
 
     # Delete a file or directory inside of a Labbook.
-    delete_labbook_file = DeleteLabbookFile.Field()
+    delete_labbook_files = DeleteLabbookFiles.Field()
 
     # Make a directory (with auto-included .gitkeep) inside of a Labbook
     make_labbook_directory = MakeLabbookDirectory.Field()
@@ -145,7 +149,7 @@ class LabbookMutations(graphene.ObjectType):
     # Work on a given feature branch (perform a git checkout).
     workon_experimental_branch = WorkonBranch.Field()
 
-    # Set a remote project visibiltiy
+    # Set a remote project visibility
     set_visibility = SetVisibility.Field()
 
     # Kludge-query to return a labbook edge when querying for job status
@@ -159,3 +163,12 @@ class LabbookMutations(graphene.ObjectType):
 
     # Close an upload transaction to a dataset
     complete_dataset_upload_transaction = CompleteDatasetUploadTransaction.Field()
+
+    # Kludge-query to return a dataset edge when querying for job status
+    fetch_dataset_edge = FetchDatasetEdge.Field()
+
+    # Set a remote dataset visibility
+    set_dataset_visibility = SetDatasetVisibility.Field()
+
+    # Sync a Dataset with remote (for collaboration)
+    sync_dataset = SyncDataset.Field()

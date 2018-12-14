@@ -1,6 +1,6 @@
 const config = {
   owner: 'cbutler',
-  labbookName: 'data-shader'
-}
+  labbookName: 'data-shader',
+};
 
-export default config
+export default config;

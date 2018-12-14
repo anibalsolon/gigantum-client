@@ -167,11 +167,16 @@ class LabbookHeader extends Component {
 
   render() {
     const {
-      labbookName, labbook, branchesOpen, branchName,
+      labbookName, labbook, branchesOpen, branchName, dataset,
     } = this.props;
-    const { visibility } = labbook;
-
+    const { visibility } = labbook || dataset;
     const selectedIndex = this._getSelectedIndex();
+    const {
+      description,
+      collaborators,
+      defaultRemote,
+      id,
+    } = labbook || dataset;
 
     const labbookHeaderCSS = classNames({
       LabbookHeader: true,
@@ -218,12 +223,12 @@ class LabbookHeader extends Component {
               <BranchMenu
                 sectionType={this.props.sectionType}
                 visibility={visibility}
-                description={labbook.description}
+                description={description}
                 history={this.props.history}
-                collaborators={labbook.collaborators}
-                defaultRemote={labbook.defaultRemote}
-                labbookId={labbook.id}
-                remoteUrl={labbook.overview && labbook.overview.remoteUrl}
+                collaborators={collaborators}
+                defaultRemote={defaultRemote}
+                labbookId={id}
+                remoteUrl={defaultRemote}
                 setSyncingState={this._setSyncingState}
                 setPublishingState={this._setPublishingState}
                 setExportingState={this._setExportingState}

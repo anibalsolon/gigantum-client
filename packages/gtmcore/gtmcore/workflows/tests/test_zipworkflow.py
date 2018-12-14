@@ -150,7 +150,7 @@ class TestLabbookImportZipping(object):
             newlb = ZipExporter.import_zip(path, "unittester2", "unittester2",
                                            mock_config_file[0])
             assert not os.path.exists(path)
-            assert 'unittester2' == InventoryManager(mock_config_file[0]).query_labbook_owner(newlb)
+            assert 'unittester2' == InventoryManager(mock_config_file[0]).query_owner(newlb)
             assert newlb.is_repo_clean
             assert newlb.active_branch == 'gm.workspace-unittester2'
 
@@ -159,6 +159,6 @@ class TestLabbookImportZipping(object):
             shutil.rmtree(lb.root_dir)
             lb2 = ZipExporter.import_zip(path2, "unittester", "unittester",
                                          mock_config_file[0])
-            assert 'unittester' == InventoryManager(mock_config_file[0]).query_labbook_owner(lb2)
+            assert 'unittester' == InventoryManager(mock_config_file[0]).query_owner(lb2)
             assert lb2.is_repo_clean
             assert lb2.active_branch == 'gm.workspace-unittester'

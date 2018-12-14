@@ -256,79 +256,73 @@ class FileOperations(object):
                                               show=True)
 
     @classmethod
-    def delete_file(cls, labbook: LabBook, section: str, relative_path: str) -> bool:
+    def delete_files(cls, labbook: LabBook, section: str, relative_paths: List[str]) -> None:
         """Delete file (or directory) from inside lb section.
 
+        The list of paths is deleted in series. Only provide "parent" nodes in the file tree. This is because deletes
+        on directories will remove all child objects, so subsequent deletes of individual files will then fail.
 
-        Part of the intention is to mirror the unix "rm" command. Thus, there
-        needs to be some extra arguments in order to delete a directory, especially
-        one with contents inside of it. In this case, `directory` must be true in order
-        to delete a directory at the given path.
 
         Args:
-            labbook: Subject LabBook
-            section: Section name (code, input, output)
-            relative_path: Relative path from labbook root to target
+            labbook(LabBook): Subject LabBook
+            section(str): Section name (code, input, output)
+            relative_paths(list(str)): a list of relative paths from labbook root to target
 
         Returns:
             None
         """
         labbook.validate_section(section)
-        relative_path = LabBook.make_path_relative(relative_path)
-        target_path = os.path.join(labbook.root_dir, section, relative_path)
-        if not os.path.exists(target_path):
-            raise ValueError(f"Attempted to delete non-existent path at `{target_path}`")
-        else:
-            target_type = 'file' if os.path.isfile(target_path) else 'directory'
-            logger.info(f"Removing {target_type} at `{target_path}`")
+        is_untracked = in_untracked(labbook.root_dir, section=section)
 
-            if in_untracked(labbook.root_dir, section=section):
-                logger.info(f"Removing untracked target {target_path}")
-                if os.path.isdir(target_path):
-                    shutil.rmtree(target_path)
-                else:
-                    os.remove(target_path)
-                return True
+        if not isinstance(relative_paths, list):
+            raise ValueError("Must provide list of paths to remove")
 
-            commit_msg = f"Removed {target_type} {relative_path}."
-            labbook.git.remove(target_path, force=True, keep_file=False)
-            assert not os.path.exists(target_path)
-            commit = labbook.git.commit(commit_msg)
-
-            if os.path.isfile(target_path):
-                _, ext = os.path.splitext(target_path)
-            else:
-                ext = 'directory'
-
-            # Get LabBook section
-            activity_type, activity_detail_type, section_str = labbook.get_activity_type_from_section(section)
-
-            # Create detail record
-            adr = ActivityDetailRecord(activity_detail_type, show=False, importance=0,
-                                       action=ActivityAction.DELETE)
-            adr.add_value('text/plain', commit_msg)
-
-            # Create activity record
-            ar = ActivityRecord(activity_type,
-                                message=commit_msg,
-                                linked_commit=commit.hexsha,
-                                show=True,
-                                importance=255,
-                                tags=[ext])
-            ar.add_detail_object(adr)
-
-            # Store
-            ars = ActivityStore(labbook)
-            ars.create_activity_record(ar)
-
+        for file_path in relative_paths:
+            relative_path = LabBook.make_path_relative(file_path)
+            target_path = os.path.join(labbook.root_dir, section, relative_path)
             if not os.path.exists(target_path):
-                return True
+                raise ValueError(f"Attempted to delete non-existent path at `{target_path}`")
             else:
-                logger.error(f"{target_path} should have been deleted, but remains.")
-                return False
+                if is_untracked:
+                    if os.path.isdir(target_path):
+                        shutil.rmtree(target_path)
+                    else:
+                        os.remove(target_path)
+                else:
+                    labbook.git.remove(target_path, force=True, keep_file=False)
+
+                if os.path.exists(target_path):
+                    raise IOError(f"Failed to delete path: {target_path}")
+
+        if not is_untracked:
+            labbook.sweep_uncommitted_changes(show=True)
 
     @classmethod
-    def move_file(cls, labbook: LabBook, section: str, src_rel_path: str, dst_rel_path: str) -> Dict[str, Any]:
+    def _make_move_activity_record(cls, labbook: LabBook, section: str, dst_abs_path: str,
+                                   commit_msg: str) -> None:
+        if os.path.isdir(dst_abs_path):
+            labbook.git.add_all(dst_abs_path)
+        else:
+            labbook.git.add(dst_abs_path)
+
+        commit = labbook.git.commit(commit_msg)
+        activity_type, activity_detail_type, section_str = labbook.get_activity_type_from_section(section)
+        adr = ActivityDetailRecord(activity_detail_type, show=False, importance=0,
+                                   action=ActivityAction.EDIT)
+        adr.add_value('text/markdown', commit_msg)
+        ar = ActivityRecord(activity_type,
+                            message=commit_msg,
+                            linked_commit=commit.hexsha,
+                            show=True,
+                            importance=255,
+                            tags=['file-move'])
+        ar.add_detail_object(adr)
+        ars = ActivityStore(labbook)
+        ars.create_activity_record(ar)
+
+    @classmethod
+    def move_file(cls, labbook: LabBook, section: str, src_rel_path: str, dst_rel_path: str) \
+            -> List[Dict[str, Any]]:
 
         """Move a file or directory within a labbook, but not outside of it. Wraps
         underlying "mv" call.
@@ -345,7 +339,7 @@ class FileOperations(object):
         if not src_rel_path:
             raise ValueError("src_rel_path cannot be None or empty")
 
-        if not dst_rel_path:
+        if dst_rel_path is None:
             raise ValueError("dst_rel_path cannot be None or empty")
 
         is_untracked = in_untracked(labbook.root_dir, section)
@@ -365,40 +359,30 @@ class FileOperations(object):
             if not is_untracked:
                 labbook.git.remove(src_abs_path, keep_file=True)
 
-            shutil.move(src_abs_path, dst_abs_path)
+            final_dest = shutil.move(src_abs_path, dst_abs_path)
 
             if not is_untracked:
                 commit_msg = f"Moved {src_type} `{src_rel_path}` to `{dst_rel_path}`"
+                cls._make_move_activity_record(labbook, section, dst_abs_path, commit_msg)
 
-                if os.path.isdir(dst_abs_path):
-                    labbook.git.add_all(dst_abs_path)
-                else:
-                    labbook.git.add(dst_abs_path)
+            if os.path.isfile(final_dest):
+                t = final_dest.replace(os.path.join(labbook.root_dir, section), '')
+                return [cls.get_file_info(labbook, section, t or "/")]
+            else:
+                moved_files = list()
+                t = final_dest.replace(os.path.join(labbook.root_dir, section), '')
+                moved_files.append(cls.get_file_info(labbook, section, t or "/"))
+                for root, dirs, files in os.walk(final_dest):
+                    rt = root.replace(os.path.join(labbook.root_dir, section), '')
+                    rt = _make_path_relative(rt)
+                    for d in sorted(dirs):
+                        dinfo = cls.get_file_info(labbook, section, os.path.join(rt, d))
+                        moved_files.append(dinfo)
+                    for f in filter(lambda n: n != '.gitkeep', sorted(files)):
+                        finfo = cls.get_file_info(labbook, section, os.path.join(rt, f))
+                        moved_files.append(finfo)
+                return moved_files
 
-                commit = labbook.git.commit(commit_msg)
-
-                # Get LabBook section
-                activity_type, activity_detail_type, section_str = labbook.get_activity_type_from_section(section)
-
-                # Create detail record
-                adr = ActivityDetailRecord(activity_detail_type, show=False, importance=0,
-                                           action=ActivityAction.EDIT)
-                adr.add_value('text/markdown', commit_msg)
-
-                # Create activity record
-                ar = ActivityRecord(activity_type,
-                                    message=commit_msg,
-                                    linked_commit=commit.hexsha,
-                                    show=True,
-                                    importance=255,
-                                    tags=['file-move'])
-                ar.add_detail_object(adr)
-
-                # Store
-                ars = ActivityStore(labbook)
-                ars.create_activity_record(ar)
-
-            return cls.get_file_info(labbook, section, dst_rel_path)
         except Exception as e:
             logger.critical("Failed moving file in labbook. Repository may be in corrupted state.")
             logger.exception(e)
@@ -490,7 +474,7 @@ class FileOperations(object):
 
         # If it's a directory, add a trailing slash so UI renders properly
         if is_dir:
-            if rel_file_path[-1] != os.path.sep:
+            if len(rel_file_path) == 0 or rel_file_path[-1] != os.path.sep:
                 rel_file_path = f"{rel_file_path}{os.path.sep}"
 
         return {

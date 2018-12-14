@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import { DragSource, DropTarget } from 'react-dnd';
 import { findDOMNode } from 'react-dom';
 import classNames from 'classnames';
+import TextTruncate from 'react-text-truncate';
 // Mutations
 import RemoveFavoriteMutation from 'Mutations/fileBrowser/RemoveFavoriteMutation';
 import UpdateFavoriteMutation from 'Mutations/fileBrowser/UpdateFavoriteMutation';
@@ -78,6 +79,7 @@ function collect(connect, monitor) {
 function collectDropTarget(connect, monitor) {
   return {
     connectDropTarget: connect.dropTarget(),
+    isOverCurrent: monitor.isOver({ shallow: true }),
   };
 }
 
@@ -89,6 +91,7 @@ class FavoriteCard extends Component {
 
     this.state = {
       editMode: false,
+      newDescription: '',
       owner,
       labbookName,
     };
@@ -98,7 +101,7 @@ class FavoriteCard extends Component {
   }
 
   /*
-		@param {num}
+		@param {number} newIndex
 		sets editMode to true or false
 		displays textarea if true
 	*/
@@ -138,7 +141,11 @@ class FavoriteCard extends Component {
   _updateDescription(evt, favorite) {
     const filepath = favorite.key.replace(`${this.props.section}/`, '');
 
-    if (evt.keyCode === 13) {
+    if (evt.type === 'keyup') {
+      this.setState({ newDescription: evt.target.value });
+    }
+
+    if (evt.keyCode === 13 || evt.type === 'click') {
       UpdateFavoriteMutation(
         this.props.connection,
         this.props.parentId,
@@ -146,7 +153,7 @@ class FavoriteCard extends Component {
         this.state.labbookName,
         favorite.id,
         filepath,
-        evt.target.value,
+        this.state.newDescription,
         favorite.index,
         favorite,
         this.props.section,
@@ -161,7 +168,7 @@ class FavoriteCard extends Component {
   }
 
   /**
-    @param {object} node
+    @param {Object} node
     triggers remove favorite mutation
   */
   _removeFavorite(node) {
@@ -174,7 +181,6 @@ class FavoriteCard extends Component {
       node.key,
       node.id,
       node,
-      null,
       (response, error) => {
         if (error) {
           console.error(error);
@@ -193,28 +199,37 @@ class FavoriteCard extends Component {
   render() {
     const fileDirectories = this.props.favorite.key.split('/');
     const filename = fileDirectories[fileDirectories.length - 1];
-    const path = this.props.favorite.key.replace(filename, '');
+    const path = `${this.props.section}/${this.props.favorite.key.replace(filename, '')}`;
 
     const {
 	    connectDragSource,
       connectDropTarget,
+      isDragging,
   	} = this.props;
 
     const favoriteCardCSS = classNames({
-      'Favorite__card card': (this.props.favorite.index !== undefined),
-      'Favorite__card--opaque card': !(this.props.favorite.index !== undefined),
+      'Favorite__card Card': (this.props.favorite.index !== undefined),
+      'Favorite__card--opaque Card': !(this.props.favorite.index !== undefined),
       'column-3-span-4': true,
+      'Favorite__card--hidden': this.props.isOverCurrent,
+      'Favorite__card--isDragging': isDragging,
     });
     return (
       connectDragSource(connectDropTarget(<div
-        className={favoriteCardCSS}
-      >
+        className={favoriteCardCSS}>
         <div
           onClick={() => { this._removeFavorite(this.props.favorite); }}
           className="Favorite__star"
         />
         <div className="Favorite__header-section">
-          <h6 className="Favorite__card-header">{filename}</h6>
+          <h6 className="Favorite__card-header">
+            <TextTruncate
+                className="Favorite__card-header"
+                line={1}
+                truncateText="…"
+                text={filename}
+            />
+          </h6>
         </div>
 
         <div className="Favorite__path-section">
@@ -226,9 +241,8 @@ class FavoriteCard extends Component {
           { !this.state.editMode && (this.props.favorite.description.length > 0) &&
 
           <p className="Favorite__description">{this.props.favorite.description} <button
-            onClick={() => this._editDescription(true)}
-            className="Favorite__edit-button"
-          />
+                                                                                   onClick={() => this._editDescription(true)}
+                                                                                   className="Favorite__edit-button" />
           </p>
 	            }
 
@@ -236,30 +250,40 @@ class FavoriteCard extends Component {
 
           <p
             onDoubleClick={() => this._handleClickDescription()}
-            className="Favorite__description-filler"
-          >Enter a short description<button
-            onClick={() => this._editDescription(true)}
-            className="Favorite__edit-button"
-          />
+            className="Favorite__description-filler">
+            Enter a short description <button
+                                        onClick={() => this._editDescription(true)}
+                                        className="Favorite__edit-button" />
           </p>
 	            }
 
           {
 	              this.state.editMode &&
-	              <textarea
-  className="Favorite__description-editor"
-  onKeyDown={evt => this._updateDescription(evt, this.props.favorite)}
-  placeholder={this.props.favorite.description}
-	              >
-  {this.props.favorite.description}
-	              </textarea>
+                <div className="Favorite__edit flex justify--space-between">
+  	              <textarea
+                    maxLength="140"
+                    className="Favorite__description-editor"
+                    onKeyUp={evt => this._updateDescription(evt, this.props.favorite)}
+                    placeholder={this.props.favorite.description}>
+                    {this.props.favorite.description}
+  	              </textarea>
+
+                  <div className="flex justify--space-around align-items--center">
+                    <button
+                      onClick={() => this._editDescription(false)}
+                      className="Btn Btn--round Btn--close" />
+                    <button
+                      onClick={(evt) => { this._updateDescription(evt, this.props.favorite); }}
+                      className="Btn Btn--round Btn--check" />
+                  </div>
+                </div>
 	            }
 
           <div className={(this.props.favorite.index !== undefined) ? 'Favorite__mask hidden' : 'Favorite__mask'} />
 
         </div>
 
-                                          </div>))
+      </div>))
     );
   }
 }

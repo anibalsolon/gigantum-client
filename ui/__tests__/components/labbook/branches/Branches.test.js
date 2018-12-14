@@ -1,23 +1,23 @@
 
-      import React from 'react'
+      import React from 'react';
       import renderer from 'react-test-renderer';
-      import {mount} from 'enzyme'
+      import { mount } from 'enzyme';
 
-      import json from './__relaydata__/Branches.json'
       import Branches from 'Components/labbook/branches/Branches';
 
-      import relayTestingUtils from 'relay-testing-utils'
+      import relayTestingUtils from '@gigantum/relay-testing-utils';
+      import json from './__relaydata__/Branches.json';
 
       const toggleBranchesView = () => {
 
-      }
+      };
 
       const setBuildingState = () => {
 
-      }
+      };
 
 
-      let labbook = json.data.labbook
+      let labbook = json.data.labbook;
       let fixtures = {
         labbook,
         defaultRemote: labbook.defaultRemote,
@@ -27,39 +27,33 @@
         activeBranch: labbook.activeBranchName,
         toggleBranchesView,
         setBuildingState,
-        setBuildingState
-
-      }
+      };
 
       describe('Branches snapshot', () => {
-
-
-        it('branches open render', () =>{
-
+        it('branches open render', () => {
           const wrapper = renderer.create(
 
-             relayTestingUtils.relayWrap(<Branches {...fixtures} />, {}, json.data.labbook)
+             relayTestingUtils.relayWrap(<Branches {...fixtures} />, {}, json.data.labbook),
 
           );
 
-          const tree = wrapper.toJSON()
+          const tree = wrapper.toJSON();
 
-          expect(tree).toMatchSnapshot()
-        })
+          expect(tree).toMatchSnapshot();
+        });
 
 
-        it('branches merge open render', () =>{
-          fixtures.mergeFilter = true
+        it('branches merge open render', () => {
+          fixtures.mergeFilter = true;
 
           const wrapper = renderer.create(
 
-             relayTestingUtils.relayWrap(<Branches {...fixtures} />, {}, json.data.labbook)
+             relayTestingUtils.relayWrap(<Branches {...fixtures} />, {}, json.data.labbook),
 
           );
 
-          const tree = wrapper.toJSON()
+          const tree = wrapper.toJSON();
 
-          expect(tree).toMatchSnapshot()
-        })
-
-      })
+          expect(tree).toMatchSnapshot();
+        });
+      });

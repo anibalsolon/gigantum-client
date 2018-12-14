@@ -6,7 +6,7 @@ import datetime
 from natsort import natsorted
 from pkg_resources import resource_filename
 
-from typing import Any, Optional, Generator, List, Tuple, Dict, Callable
+from typing import Optional, Generator, List, Tuple, Dict
 
 from gtmcore.labbook.schemas import CURRENT_SCHEMA as LABBOOK_CURRENT_SCHEMA
 from gtmcore.dataset.schemas import CURRENT_SCHEMA as DATASET_CURRENT_SCHEMA
@@ -17,6 +17,7 @@ from gtmcore.configuration.utils import call_subprocess
 from gtmcore.labbook.labbook import LabBook
 from gtmcore.inventory.branching import BranchManager
 from gtmcore.dataset.dataset import Dataset
+from gtmcore.inventory import Repository
 from gtmcore.dataset.storage import SUPPORTED_STORAGE_BACKENDS
 from gtmcore.activity import ActivityStore, ActivityDetailRecord, ActivityDetailType, ActivityRecord, ActivityType
 
@@ -48,11 +49,12 @@ class InventoryManager(object):
         return isinstance(other, InventoryManager) \
                and self.inventory_root == other.inventory_root
 
-    def query_labbook_owner(self, labbook: LabBook) -> str:
-        """Returns the LabBook's owner in the Inventory. """
-        tokens = labbook.root_dir.rsplit('/', 3)
-        if tokens[-2] != 'labbooks':
-            raise InventoryException(f'Unexpected root in {str(labbook)}')
+    def query_owner(self, repository: Repository) -> str:
+        """Returns the Repository's owner in the Inventory. """
+        tokens = repository.root_dir.rsplit('/', 3)
+        # expected pattern: gigantum/<username>/<owner>/<labbook or dataset>/<project or dataset name>
+        if len(tokens) < 3 or tokens[-2] not in ['labbooks', 'datasets']:
+            raise InventoryException(f'Unexpected root in {str(repository)}')
         return tokens[-3]
 
     def _put_labbook(self, path: str, username: str, owner: str) -> LabBook:
@@ -160,6 +162,8 @@ class InventoryManager(object):
                              if os.path.isdir(os.path.join(user_root, d))])
         repository_paths = []
         for owner_dir in owner_dirs:
+            if not os.path.isdir(os.path.join(owner_dir, f'{repository_type}s')):
+                continue
             repository_dirs = sorted([os.path.join(owner_dir, f'{repository_type}s', l)
                                       for l in os.listdir(os.path.join(owner_dir, f'{repository_type}s'))
                                       if os.path.isdir(os.path.join(owner_dir, f'{repository_type}s', l))])
@@ -187,8 +191,6 @@ class InventoryManager(object):
         local_labbooks = []
         for username, owner, lbname in self.list_repository_ids(username, 'labbook'):
             try:
-                # We can be reasonably confident that anything loaded here
-                # will not be totally invalid (e.g., no git or gigantum dir)
                 labbook = self.load_labbook(username, owner, lbname)
                 local_labbooks.append(labbook)
             except Exception as e:
@@ -197,9 +199,9 @@ class InventoryManager(object):
         if sort_mode == "name":
             return natsorted(local_labbooks, key=lambda lb: lb.name)
         elif sort_mode == 'modified_on':
-            return sorted(local_labbooks, key=lambda l: l.modified_on)
+            return sorted(local_labbooks, key=lambda lb: lb.modified_on)
         elif sort_mode == 'created_on':
-            return sorted(local_labbooks, key=lambda l: l.creation_date)
+            return sorted(local_labbooks, key=lambda lb: lb.creation_date)
         else:
             raise InventoryException(f"Invalid sort mode {sort_mode}")
 
@@ -475,14 +477,15 @@ class InventoryManager(object):
 
             # Commit
             dataset.git.add_all()
+            dataset.git.create_branch(name="gm.workspace")
+            bm = BranchManager(dataset, username=username)
 
             # NOTE: this string is used to indicate there are no more activity records to get. Changing the string will
             # break activity paging.
             # TODO: Improve method for detecting the first activity record
             dataset.git.commit(f"Creating new empty Dataset: {dataset_name}")
-
-            # TODO: Move to branch manager class
-            dataset.git.create_branch(name="workspace")
+            user_workspace_branch = f"gm.workspace-{username}"
+            bm.create_branch(user_workspace_branch)
 
             # Create Activity Record
             adr = ActivityDetailRecord(ActivityDetailType.DATASET, show=False, importance=0)

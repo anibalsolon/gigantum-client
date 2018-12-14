@@ -172,7 +172,7 @@ export default class LocalLabbookPanel extends Component {
         to={`/projects/${edge.node.owner}/${edge.node.name}`}
         onClick={() => this.props.goToLabbook(edge.node.name, edge.node.owner)}
         key={`local${edge.node.name}`}
-        className="Card Card--text column-4-span-3 flex flex--column justify--space-between"
+        className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
       >
 
         <div className="LocalLabbooks__row--icons">

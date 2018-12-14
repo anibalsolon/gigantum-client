@@ -7,7 +7,7 @@ import './LabbookPaginationLoader.scss';
 export default class LabbookPaginationLoader extends Component {
   render() {
     const PaginationLoaderCSS = classNames({
-      [`Card column-4-span-3 flex flex--column justify--space-between LabbookPaginationLoader LabbookPaginationLoader--${this.props.index}`]: this.props.isLoadingMore,
+      [`Card Card--300 column-4-span-3 flex flex--column justify--space-between LabbookPaginationLoader LabbookPaginationLoader--${this.props.index}`]: this.props.isLoadingMore,
       'LabbookPaginationLoader--hidden': !this.props.isLoadingMore,
     });
 

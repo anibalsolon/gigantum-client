@@ -8,6 +8,7 @@ import JobStatus from 'JS/utils/JobStatus';
 // mutations
 import ExportLabbookMutation from 'Mutations/ExportLabbookMutation';
 import SyncLabbookMutation from 'Mutations/branches/SyncLabbookMutation';
+import SyncDatasetMutation from 'Mutations/branches/SyncDatasetMutation';
 import BuildImageMutation from 'Mutations/BuildImageMutation';
 // queries
 import UserIdentity from 'JS/Auth/UserIdentity';
@@ -172,7 +173,7 @@ class BranchMenu extends Component {
   *  @return {string}
   */
   _togglePublishModal() {
-    if (!this.props.isMainWorkspace) {
+    if (!this.props.isMainWorkspace && this.props.sectionType === 'labbook') {
       setWarningMessage('Publishing is currently only available on the main workspace branch.');
     } else if (this.props.isExporting) {
       this.setState({ publishWarningVisible: true });
@@ -196,7 +197,7 @@ class BranchMenu extends Component {
   *  @return {string}
   */
   _sync() {
-    if (!this.props.isMainWorkspace) {
+    if (!this.props.isMainWorkspace && this.props.sectionType === 'labbook') {
       setWarningMessage('Syncing is currently only available on the main workspace branch.');
     } else if (this.props.isExporting) {
       this.setState({ syncWarningVisible: true });
@@ -207,7 +208,7 @@ class BranchMenu extends Component {
         this.setState({ menuOpen: false });
       }
 
-      if ((status === 'Stopped') || (status === 'Rebuild')) {
+      if ((status === 'Stopped') || (status === 'Rebuild') || this.props.sectionType !== 'labbook') {
         const id = uuidv4();
         const self = this;
 
@@ -228,34 +229,49 @@ class BranchMenu extends Component {
 
                 const successCall = () => {
                   this.props.setSyncingState(false);
-                  BuildImageMutation(
-                    this.state.labbookName,
-                    this.state.owner,
-                    false,
-                    (response, error) => {
-                      if (error) {
-                        console.error(error);
+                  if (this.props.sectionType === 'labbook') {
+                    BuildImageMutation(
+                      this.state.labbookName,
+                      this.state.owner,
+                      false,
+                      (response, error) => {
+                        if (error) {
+                          console.error(error);
 
-                        setMultiInfoMessage(id, `ERROR: Failed to build ${this.state.labookName}`, null, true, error);
-                      }
-                    },
-                  );
+                          setMultiInfoMessage(id, `ERROR: Failed to build ${this.state.labookName}`, null, true, error);
+                        }
+                      },
+                    );
+                  }
 
                   setContainerMenuVisibility(false);
                 };
-
-                SyncLabbookMutation(
-                  this.state.owner,
-                  this.state.labbookName,
-                  false,
-                  successCall,
-                  failureCall,
-                  (error) => {
-                    if (error) {
-                      failureCall();
-                    }
-                  },
-                );
+                this.props.sectionType === 'labbook' ?
+                  SyncLabbookMutation(
+                    this.state.owner,
+                    this.state.labbookName,
+                    false,
+                    successCall,
+                    failureCall,
+                    (error) => {
+                      if (error) {
+                        failureCall();
+                      }
+                    },
+                  )
+                  :
+                  SyncDatasetMutation(
+                    this.state.owner,
+                    this.state.labbookName,
+                    false,
+                    successCall,
+                    failureCall,
+                    (error) => {
+                      if (error) {
+                        failureCall();
+                      }
+                    },
+                  );
               } else {
                 this.props.auth.renewToken(true, () => {
                   self.setState({ showLoginPrompt: true });
@@ -572,9 +588,11 @@ class BranchMenu extends Component {
         {
           this.state.forceSyncModalVisible &&
 
-          <ForceSync toggleSyncModal={this._toggleSyncModal} />
+          <ForceSync
+            toggleSyncModal={this._toggleSyncModal}
+            sectionType={this.props.sectionType}
+          />
         }
-
         {
           this.state.publishModalVisible &&
 
@@ -587,6 +605,7 @@ class BranchMenu extends Component {
             buttonText="Publish"
             header="Publish"
             modalStateValue="visibilityModalVisible"
+            sectionType={this.props.sectionType}
             setPublishingState={this.props.setPublishingState}
             checkSessionIsValid={this._checkSessionIsValid}
             toggleModal={this._togglePublishModal}
@@ -603,6 +622,7 @@ class BranchMenu extends Component {
           this.state.visibilityModalVisible &&
 
           <VisibilityModal
+            sectionType={this.props.sectionType}
             owner={this.state.owner}
             labbookName={this.state.labbookName}
             auth={this.props.auth}

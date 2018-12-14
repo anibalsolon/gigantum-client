@@ -1,12 +1,6 @@
-
-//@import "neat";
 @import '../../node_modules/normalize-sass/normalize';
 @import '../../node_modules/simplemde/dist/simplemde.min.css';
-@import  'vendor/materialize.scss';
 
-@import 'vendor/fileBrowser/browser.scss';
-@import 'vendor/fileBrowser/list-style.scss';
-@import 'vendor/fileBrowser/table-style.scss';
 @import 'vendor/fileIcons/fileIcons.scss';
 @import 'vendor/font-awesome/fontawesome.scss';
 @import 'vendor/carousel.scss';
@@ -50,12 +44,9 @@
 //labbook components
 @import 'components/labbook/detail.scss';
 @import 'components/labbook/userNote.scss';
-@import 'components/labbook/code.scss';
 @import 'components/labbook/dataBrowser.scss';
 @import 'components/labbook/containerStatus.scss';
 @import 'components/labbook/detailPanel.scss';
-@import 'components/labbook/favorite.scss';
-@import 'components/labbook/recent.scss';
 //wizard components
 @import 'components/wizard/wizardModal';
 @import 'components/wizard/selectBase';
@@ -80,14 +71,8 @@ body .fa {
   background-color: $white;
   animation: fade-in-modal forwards .25s;
   opacity: 0.5;
-}
-
-.modal__cover{
   z-index: index($elements, modalCover);
 }
-
-
-
 
 @keyframes fade-in-modal{
   0% {
@@ -140,6 +125,8 @@ code {
     color: white;
   }
 }
+
+
 
 .yt-lightbox{
   width: 100%;

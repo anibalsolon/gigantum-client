@@ -1,35 +1,33 @@
 
-      import React from 'react'
+      import React from 'react';
       import renderer from 'react-test-renderer';
-      import {mount} from 'enzyme'
+      import { mount } from 'enzyme';
       import OutputFavorites from 'Components/labbook/outputData/OutputFavorites';
 
-      import relayTestingUtils from 'relay-testing-utils'
+      import relayTestingUtils from '@gigantum/relay-testing-utils';
 
-      import json from './__relaydata__/OutputFavorites.json'
+      import json from './__relaydata__/OutputFavorites.json';
 
 
-      const setContainerState = () =>{
+      const setContainerState = () => {
 
-      }
+      };
 
       const fixtures = {
         labbook: json.data.labbook,
         labbookId: json.data.labbook.id,
         isLocked: false,
-        setContainerState
-      }
+        setContainerState,
+      };
 
       test('Test InputFavorites', () => {
-
         const wrapper = renderer.create(
 
-           <OutputFavorites {...fixtures}/>
+           <OutputFavorites {...fixtures}/>,
 
         );
 
-        const tree = wrapper.toJSON()
+        const tree = wrapper.toJSON();
 
-        expect(tree).toMatchSnapshot()
-
-      })
+        expect(tree).toMatchSnapshot();
+      });

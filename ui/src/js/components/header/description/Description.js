@@ -82,9 +82,9 @@ export default class Description extends Component {
   _editingDescription() {
     if (!this.state.editingDescription) {
       let element = document.getElementsByClassName('Description__container')[0];
-      let width = element.offsetWidth;
-      let height = element.offsetHeight;
-      this.setState({ editingDescription: true, textareaWidth: `${width - 30}px`, textareaHeight: `${height - 4}px` });
+      let width = element.offsetWidth - 30;
+      let height = element.offsetHeight - 4;
+      this.setState({ editingDescription: true, textareaWidth: `${width}px`, textareaHeight: `${height}px` });
     }
   }
 

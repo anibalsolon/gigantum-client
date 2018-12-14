@@ -185,7 +185,7 @@ class Dataset extends Component {
               description={dataset.description}
               toggleBranchesView={() => {}}
               branchName={''}
-              labbook={{ visibility: '' }}
+              dataset={dataset}
               sectionType={'dataset'}
               {...this.props}
             />
@@ -297,6 +297,8 @@ const DatasetFragmentContainer = createFragmentContainer(
           owner
           #createdOnUtc
           modifiedOnUtc
+          defaultRemote
+          visibility
           datasetType {
               name
               storageType

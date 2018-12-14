@@ -1,52 +1,48 @@
-import React from 'react'
+import React from 'react';
 import renderer from 'react-test-renderer';
-import {shallow, mount} from 'enzyme';
-import history from 'JS/history'
+import { shallow, mount } from 'enzyme';
+import history from 'JS/history';
 
-import json from './__relaydata__/RemoteLabbooks.json'
 import RemoteLabbooks from 'Components/dashboard/labbooks/remoteLabbooks/RemoteLabbooks';
-import relayTestingUtils from 'relay-testing-utils'
+import relayTestingUtils from '@gigantum/relay-testing-utils';
+import json from './__relaydata__/RemoteLabbooks.json';
 
-history.location.pathname = 'hostname/labbooks/cloud'
+history.location.pathname = 'hostname/labbooks/cloud';
 
-const variables = {first:20}
+const variables = { first: 20 };
 
 const fixtures = {
   remoteLabbooks: json.data.labbookList,
   labbookList: json.data.labbookList,
   labbookListId: json.data.labbookList.remoteLabbooks.id,
   auth: {
-    login: ()=>{
-    }
+    login: () => {
+    },
   },
-  history: history,
-  showModal: ()=>{},
-  goToLabbook: ()=>{},
-  filterLabbooks: (labbooks, filter)=>{
-    return labbooks
-  },
+  history,
+  showModal: () => {},
+  goToLabbook: () => {},
+  filterLabbooks: (labbooks, filter) => labbooks,
   filterState: 'cloud',
-  setFilterValue: ()=>{},
-  forceLocalView: ()=>{},
-  changeRefetchState: ()=>{},
+  setFilterValue: () => {},
+  forceLocalView: () => {},
+  changeRefetchState: () => {},
 
-}
-
+};
 
 
 test('Test RemoteLabbooks rendering', () => {
-
   const localLabbooks = renderer.create(
 
-     relayTestingUtils.relayWrap(<RemoteLabbooks {...fixtures} />, {}, json.data)
+     relayTestingUtils.relayWrap(<RemoteLabbooks {...fixtures} />, {}, json.data),
 
   );
 
-  const tree = localLabbooks.toJSON()
+  const tree = localLabbooks.toJSON();
 
 
-  expect(tree).toMatchSnapshot()
-})
+  expect(tree).toMatchSnapshot();
+});
 
 
 // describe('RemoteLabbooks panel', () => {
@@ -149,6 +145,4 @@ test('Test RemoteLabbooks rendering', () => {
 // })
 
 
-
-
-export default variables
+export default variables;

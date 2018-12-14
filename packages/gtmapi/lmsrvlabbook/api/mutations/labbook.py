@@ -40,6 +40,7 @@ from gtmcore.gitlib.gitlab import GitLabManager
 from gtmcore.environment import ComponentManager
 
 from lmsrvcore.api.mutations import ChunkUploadMutation, ChunkUploadInput
+from lmsrvcore.api.connections import ListBasedConnection
 from lmsrvcore.auth.user import get_logged_in_username, get_logged_in_author
 from lmsrvcore.auth.identity import parse_token
 
@@ -328,7 +329,7 @@ class ImportRemoteLabbook(graphene.relay.ClientIDMutation):
         logger.info(f"Getting from remote, make_owner = {make_owner}")
         lb = loaders.from_remote(remote_url, username, owner, labbook_name, labbook=lb,
                                  make_owner=make_owner)
-        import_owner = InventoryManager().query_labbook_owner(lb)
+        import_owner = InventoryManager().query_owner(lb)
         # TODO: Fix cursor implementation, this currently doesn't make sense
         cursor = base64.b64encode(f"{0}".encode('utf-8'))
         lbedge = LabbookConnection.Edge(node=Labbook(owner=import_owner, name=labbook_name),
@@ -473,27 +474,25 @@ class AddLabbookFile(graphene.relay.ClientIDMutation, ChunkUploadMutation):
                                        cursor=cursor))
 
 
-class DeleteLabbookFile(graphene.ClientIDMutation):
+class DeleteLabbookFiles(graphene.ClientIDMutation):
     class Input:
         owner = graphene.String(required=True)
         labbook_name = graphene.String(required=True)
         section = graphene.String(required=True)
-        file_path = graphene.String(required=True)
-        is_directory = graphene.Boolean(required=False)
+        file_paths = graphene.List(graphene.String, required=True)
 
     success = graphene.Boolean()
 
     @classmethod
-    def mutate_and_get_payload(cls, root, info, owner, labbook_name, section,
-                               file_path, is_directory=False,
-                               client_mutation_id=None):
+    def mutate_and_get_payload(cls, root, info, owner, labbook_name, section, file_paths, client_mutation_id=None):
         username = get_logged_in_username()
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
-        with lb.lock():
-            FileOperations.delete_file(lb, section=section, relative_path=file_path)
 
-        return DeleteLabbookFile(success=True)
+        with lb.lock():
+            FileOperations.delete_files(lb, section, file_paths)
+
+        return DeleteLabbookFiles(success=True)
 
 
 class MoveLabbookFile(graphene.ClientIDMutation):
@@ -506,34 +505,39 @@ class MoveLabbookFile(graphene.ClientIDMutation):
         src_path = graphene.String(required=True)
         dst_path = graphene.String(required=True)
 
-    new_labbook_file_edge = graphene.Field(LabbookFileConnection.Edge)
+    updated_edges = graphene.relay.ConnectionField(LabbookFileConnection)
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, owner, labbook_name, section, src_path, dst_path,
-                               client_mutation_id=None):
+                               client_mutation_id=None, **kwargs):
         username = get_logged_in_username()
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
 
         with lb.lock():
-            file_info = FileOperations.move_file(lb, section, src_path, dst_path)
+            mv_results = FileOperations.move_file(lb, section, src_path, dst_path)
 
-        # Prime dataloader with labbook you already loaded
-        dataloader = LabBookLoader()
-        dataloader.prime(f"{owner}&{labbook_name}&{lb.name}", lb)
+        file_edges = list()
+        for file_dict in mv_results:
+            file_edges.append(LabbookFile(owner=owner,
+                                          name=labbook_name,
+                                          section=section,
+                                          key=file_dict['key'],
+                                          is_dir=file_dict['is_dir'],
+                                          is_favorite=file_dict['is_favorite'],
+                                          modified_at=file_dict['modified_at'],
+                                          size=str(file_dict['size'])))
 
-        # Create data to populate edge
-        create_data = {'owner': owner,
-                       'name': labbook_name,
-                       'section': section,
-                       'key': file_info['key'],
-                       '_file_info': file_info}
+        cursors = [base64.b64encode("{}".format(cnt).encode("UTF-8")).decode("UTF-8")
+                   for cnt, x in enumerate(file_edges)]
 
-        # TODO: Fix cursor implementation, this currently doesn't make sense
-        cursor = base64.b64encode(f"{0}".encode('utf-8'))
+        lbc = ListBasedConnection(file_edges, cursors, kwargs)
+        lbc.apply()
 
-        return MoveLabbookFile(new_labbook_file_edge=LabbookFileConnection.Edge(node=LabbookFile(**create_data),
-                                                                                cursor=cursor))
+        edge_objs = []
+        for edge, cursor in zip(lbc.edges, lbc.cursors):
+            edge_objs.append(LabbookFileConnection.Edge(node=edge, cursor=cursor))
+        return MoveLabbookFile(updated_edges=LabbookFileConnection(edges=edge_objs, page_info=lbc.page_info))
 
 
 class MakeLabbookDirectory(graphene.ClientIDMutation):

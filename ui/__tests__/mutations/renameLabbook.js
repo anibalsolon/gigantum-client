@@ -1,12 +1,12 @@
-//vendor
-import fs from 'fs'
-import os from 'os'
-//mutations
+// vendor
+import fs from 'fs';
+import os from 'os';
+// mutations
 import RenameLabbookMutation from 'Mutations/RenameLabbookMutation';
-//config
-import testConfig from './config'
+// config
+import testConfig from './config';
 
-let owner = JSON.parse(fs.readFileSync(os.homedir() + testConfig.ownerLocation, 'utf8')).username
+let owner = JSON.parse(fs.readFileSync(os.homedir() + testConfig.ownerLocation, 'utf8')).username;
 
 const RenameLabbook = {
   renameLabbook: (originalLabbookName, newLabbookName, clientMutationId, callback) => {
@@ -14,9 +14,9 @@ const RenameLabbook = {
       owner,
       originalLabbookName,
       newLabbookName,
-      callback
-    )
-  }
-}
+      callback,
+    );
+  },
+};
 
 export default RenameLabbook;

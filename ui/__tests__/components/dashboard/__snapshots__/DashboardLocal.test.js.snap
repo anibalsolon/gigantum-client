@@ -193,7 +193,7 @@ exports[`Test DashboardLocal snapshot 1`] = `
       className="grid"
     >
       <div
-        className="ImportModule Card Card--add Card--import column-4-span-3"
+        className="ImportModule Card Card-300 Card--line-50 Card--text-center Card--add Card--import column-4-span-3"
         id="dropZone"
         onDragEnd={[Function]}
         onDragOver={[Function]}
@@ -287,8 +287,8 @@ exports[`Test DashboardLocal snapshot 1`] = `
               className="hidden importLabbook"
             >
               Clicking on the Import Existing' button transition the card to Import mode. 
-               You can import by using a URL of a published Project or by uploading an exported Project's .zip file. 
-               You can also directly import Projects that have been shared with you in the Cloud view.
+ You can import by using a URL of a published Project or by uploading an exported Project's .zip file. 
+ You can also directly import Projects that have been shared with you in the Cloud view.
             </div>
           </div>
         </div>
@@ -297,7 +297,7 @@ exports[`Test DashboardLocal snapshot 1`] = `
         />
       </div>
       <a
-        className="Card Card--text column-4-span-3 flex flex--column justify--space-between"
+        className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
         href="/projects/cbutler/zab"
         onClick={[Function]}
       >
@@ -325,12 +325,9 @@ exports[`Test DashboardLocal snapshot 1`] = `
               className="LocalLabbooks__panel-title"
               onClick={[Function]}
             >
-              <span
-                className={undefined}
-              >
+              <span>
                 <span
                   className=""
-                  style={undefined}
                 >
                   zab
                 </span>
@@ -340,14 +337,17 @@ exports[`Test DashboardLocal snapshot 1`] = `
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner "
           >
-            Created by cbutler
+            cbutler
+          </p>
+          <p
+            className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner"
+          >
+            Created on 12/07/18
           </p>
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
           >
-            <span
-              className={undefined}
-            />
+            <span />
           </p>
         </div>
         <div
@@ -356,7 +356,7 @@ exports[`Test DashboardLocal snapshot 1`] = `
         />
       </a>
       <a
-        className="Card Card--text column-4-span-3 flex flex--column justify--space-between"
+        className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
         href="/projects/cbutler/untracked-labbook"
         onClick={[Function]}
       >
@@ -384,12 +384,9 @@ exports[`Test DashboardLocal snapshot 1`] = `
               className="LocalLabbooks__panel-title"
               onClick={[Function]}
             >
-              <span
-                className={undefined}
-              >
+              <span>
                 <span
                   className=""
-                  style={undefined}
                 >
                   untracked-labbook
                 </span>
@@ -399,14 +396,17 @@ exports[`Test DashboardLocal snapshot 1`] = `
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner "
           >
-            Created by cbutler
+            cbutler
+          </p>
+          <p
+            className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner"
+          >
+            Created on 12/07/18
           </p>
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
           >
-            <span
-              className={undefined}
-            />
+            <span />
           </p>
         </div>
         <div
@@ -415,7 +415,7 @@ exports[`Test DashboardLocal snapshot 1`] = `
         />
       </a>
       <a
-        className="Card Card--text column-4-span-3 flex flex--column justify--space-between"
+        className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
         href="/projects/cbutler/untracked-2"
         onClick={[Function]}
       >
@@ -443,12 +443,9 @@ exports[`Test DashboardLocal snapshot 1`] = `
               className="LocalLabbooks__panel-title"
               onClick={[Function]}
             >
-              <span
-                className={undefined}
-              >
+              <span>
                 <span
                   className=""
-                  style={undefined}
                 >
                   untracked-2
                 </span>
@@ -458,14 +455,17 @@ exports[`Test DashboardLocal snapshot 1`] = `
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner "
           >
-            Created by cbutler
+            cbutler
+          </p>
+          <p
+            className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner"
+          >
+            Created on 12/07/18
           </p>
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
           >
-            <span
-              className={undefined}
-            />
+            <span />
           </p>
         </div>
         <div
@@ -474,7 +474,7 @@ exports[`Test DashboardLocal snapshot 1`] = `
         />
       </a>
       <a
-        className="Card Card--text column-4-span-3 flex flex--column justify--space-between"
+        className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
         href="/projects/cbutler/untracked"
         onClick={[Function]}
       >
@@ -502,12 +502,9 @@ exports[`Test DashboardLocal snapshot 1`] = `
               className="LocalLabbooks__panel-title"
               onClick={[Function]}
             >
-              <span
-                className={undefined}
-              >
+              <span>
                 <span
                   className=""
-                  style={undefined}
                 >
                   untracked
                 </span>
@@ -517,14 +514,17 @@ exports[`Test DashboardLocal snapshot 1`] = `
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner "
           >
-            Created by cbutler
+            cbutler
+          </p>
+          <p
+            className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner"
+          >
+            Created on 12/07/18
           </p>
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
           >
-            <span
-              className={undefined}
-            />
+            <span />
           </p>
         </div>
         <div
@@ -533,7 +533,7 @@ exports[`Test DashboardLocal snapshot 1`] = `
         />
       </a>
       <a
-        className="Card Card--text column-4-span-3 flex flex--column justify--space-between"
+        className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
         href="/projects/dmk/trump-tweets"
         onClick={[Function]}
       >
@@ -561,12 +561,9 @@ exports[`Test DashboardLocal snapshot 1`] = `
               className="LocalLabbooks__panel-title"
               onClick={[Function]}
             >
-              <span
-                className={undefined}
-              >
+              <span>
                 <span
                   className=""
-                  style={undefined}
                 >
                   trump-tweets
                 </span>
@@ -576,17 +573,19 @@ exports[`Test DashboardLocal snapshot 1`] = `
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner "
           >
-            Created by dmk
+            dmk
+          </p>
+          <p
+            className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner"
+          >
+            Created on 12/07/18
           </p>
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
           >
-            <span
-              className={undefined}
-            >
+            <span>
               <span
                 className=""
-                style={undefined}
               >
                 A LabBook to analyze Trumps stupid tweets
               </span>
@@ -599,7 +598,7 @@ exports[`Test DashboardLocal snapshot 1`] = `
         />
       </a>
       <a
-        className="Card Card--text column-4-span-3 flex flex--column justify--space-between"
+        className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
         href="/projects/cbutler/tracking-endabled"
         onClick={[Function]}
       >
@@ -627,12 +626,9 @@ exports[`Test DashboardLocal snapshot 1`] = `
               className="LocalLabbooks__panel-title"
               onClick={[Function]}
             >
-              <span
-                className={undefined}
-              >
+              <span>
                 <span
                   className=""
-                  style={undefined}
                 >
                   tracking-endabled
                 </span>
@@ -642,14 +638,17 @@ exports[`Test DashboardLocal snapshot 1`] = `
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner "
           >
-            Created by cbutler
+            cbutler
+          </p>
+          <p
+            className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner"
+          >
+            Created on 12/07/18
           </p>
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
           >
-            <span
-              className={undefined}
-            />
+            <span />
           </p>
         </div>
         <div
@@ -658,7 +657,7 @@ exports[`Test DashboardLocal snapshot 1`] = `
         />
       </a>
       <a
-        className="Card Card--text column-4-span-3 flex flex--column justify--space-between"
+        className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
         href="/projects/cbutler/tracked-2"
         onClick={[Function]}
       >
@@ -686,12 +685,9 @@ exports[`Test DashboardLocal snapshot 1`] = `
               className="LocalLabbooks__panel-title"
               onClick={[Function]}
             >
-              <span
-                className={undefined}
-              >
+              <span>
                 <span
                   className=""
-                  style={undefined}
                 >
                   tracked-2
                 </span>
@@ -701,14 +697,17 @@ exports[`Test DashboardLocal snapshot 1`] = `
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner "
           >
-            Created by cbutler
+            cbutler
+          </p>
+          <p
+            className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner"
+          >
+            Created on 12/07/18
           </p>
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
           >
-            <span
-              className={undefined}
-            />
+            <span />
           </p>
         </div>
         <div
@@ -717,7 +716,7 @@ exports[`Test DashboardLocal snapshot 1`] = `
         />
       </a>
       <a
-        className="Card Card--text column-4-span-3 flex flex--column justify--space-between"
+        className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
         href="/projects/cbutler/tpub"
         onClick={[Function]}
       >
@@ -745,12 +744,9 @@ exports[`Test DashboardLocal snapshot 1`] = `
               className="LocalLabbooks__panel-title"
               onClick={[Function]}
             >
-              <span
-                className={undefined}
-              >
+              <span>
                 <span
                   className=""
-                  style={undefined}
                 >
                   tpub
                 </span>
@@ -760,14 +756,17 @@ exports[`Test DashboardLocal snapshot 1`] = `
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner "
           >
-            Created by cbutler
+            cbutler
+          </p>
+          <p
+            className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner"
+          >
+            Created on 12/07/18
           </p>
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
           >
-            <span
-              className={undefined}
-            />
+            <span />
           </p>
         </div>
         <div
@@ -776,7 +775,7 @@ exports[`Test DashboardLocal snapshot 1`] = `
         />
       </a>
       <a
-        className="Card Card--text column-4-span-3 flex flex--column justify--space-between"
+        className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
         href="/projects/cbutler/thisiasdmadskadssfdkjjssdfs-jasjdasj"
         onClick={[Function]}
       >
@@ -804,12 +803,9 @@ exports[`Test DashboardLocal snapshot 1`] = `
               className="LocalLabbooks__panel-title"
               onClick={[Function]}
             >
-              <span
-                className={undefined}
-              >
+              <span>
                 <span
                   className=""
-                  style={undefined}
                 >
                   thisiasdmadskadssfdkjjssdfs-jasjdasj
                 </span>
@@ -819,14 +815,17 @@ exports[`Test DashboardLocal snapshot 1`] = `
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner "
           >
-            Created by cbutler
+            cbutler
+          </p>
+          <p
+            className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner"
+          >
+            Created on 12/07/18
           </p>
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
           >
-            <span
-              className={undefined}
-            />
+            <span />
           </p>
         </div>
         <div
@@ -835,7 +834,7 @@ exports[`Test DashboardLocal snapshot 1`] = `
         />
       </a>
       <a
-        className="Card Card--text column-4-span-3 flex flex--column justify--space-between"
+        className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
         href="/projects/dmk/testing-notifications"
         onClick={[Function]}
       >
@@ -863,12 +862,9 @@ exports[`Test DashboardLocal snapshot 1`] = `
               className="LocalLabbooks__panel-title"
               onClick={[Function]}
             >
-              <span
-                className={undefined}
-              >
+              <span>
                 <span
                   className=""
-                  style={undefined}
                 >
                   testing-notifications
                 </span>
@@ -878,17 +874,19 @@ exports[`Test DashboardLocal snapshot 1`] = `
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner "
           >
-            Created by dmk
+            dmk
+          </p>
+          <p
+            className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner"
+          >
+            Created on 12/07/18
           </p>
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
           >
-            <span
-              className={undefined}
-            >
+            <span>
               <span
                 className=""
-                style={undefined}
               >
                 sdfsdf
               </span>
@@ -901,7 +899,7 @@ exports[`Test DashboardLocal snapshot 1`] = `
         />
       </a>
       <a
-        className="Card Card--text column-4-span-3 flex flex--column justify--space-between"
+        className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
         href="/projects/cbutler/testing-activity-feed"
         onClick={[Function]}
       >
@@ -929,12 +927,9 @@ exports[`Test DashboardLocal snapshot 1`] = `
               className="LocalLabbooks__panel-title"
               onClick={[Function]}
             >
-              <span
-                className={undefined}
-              >
+              <span>
                 <span
                   className=""
-                  style={undefined}
                 >
                   testing-activity-feed
                 </span>
@@ -944,17 +939,19 @@ exports[`Test DashboardLocal snapshot 1`] = `
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner "
           >
-            Created by cbutler
+            cbutler
+          </p>
+          <p
+            className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner"
+          >
+            Created on 12/07/18
           </p>
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
           >
-            <span
-              className={undefined}
-            >
+            <span>
               <span
                 className=""
-                style={undefined}
               >
                 testing labbook activity feed
               </span>
@@ -967,7 +964,7 @@ exports[`Test DashboardLocal snapshot 1`] = `
         />
       </a>
       <a
-        className="Card Card--text column-4-span-3 flex flex--column justify--space-between"
+        className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
         href="/projects/cbutler/test-uploader-1"
         onClick={[Function]}
       >
@@ -995,12 +992,9 @@ exports[`Test DashboardLocal snapshot 1`] = `
               className="LocalLabbooks__panel-title"
               onClick={[Function]}
             >
-              <span
-                className={undefined}
-              >
+              <span>
                 <span
                   className=""
-                  style={undefined}
                 >
                   test-uploader-1
                 </span>
@@ -1010,17 +1004,19 @@ exports[`Test DashboardLocal snapshot 1`] = `
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner "
           >
-            Created by cbutler
+            cbutler
+          </p>
+          <p
+            className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner"
+          >
+            Created on 12/07/18
           </p>
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
           >
-            <span
-              className={undefined}
-            >
+            <span>
               <span
                 className=""
-                style={undefined}
               >
                 Test uoload
               </span>
@@ -1033,7 +1029,7 @@ exports[`Test DashboardLocal snapshot 1`] = `
         />
       </a>
       <a
-        className="Card Card--text column-4-span-3 flex flex--column justify--space-between"
+        className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
         href="/projects/dmk/test-lb"
         onClick={[Function]}
       >
@@ -1061,12 +1057,9 @@ exports[`Test DashboardLocal snapshot 1`] = `
               className="LocalLabbooks__panel-title"
               onClick={[Function]}
             >
-              <span
-                className={undefined}
-              >
+              <span>
                 <span
                   className=""
-                  style={undefined}
                 >
                   test-lb
                 </span>
@@ -1076,17 +1069,19 @@ exports[`Test DashboardLocal snapshot 1`] = `
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner "
           >
-            Created by dmk
+            dmk
+          </p>
+          <p
+            className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner"
+          >
+            Created on 12/07/18
           </p>
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
           >
-            <span
-              className={undefined}
-            >
+            <span>
               <span
                 className=""
-                style={undefined}
               >
                 This a short description
               </span>
@@ -1099,7 +1094,7 @@ exports[`Test DashboardLocal snapshot 1`] = `
         />
       </a>
       <a
-        className="Card Card--text column-4-span-3 flex flex--column justify--space-between"
+        className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
         href="/projects/cbutler/test-labbook"
         onClick={[Function]}
       >
@@ -1127,12 +1122,9 @@ exports[`Test DashboardLocal snapshot 1`] = `
               className="LocalLabbooks__panel-title"
               onClick={[Function]}
             >
-              <span
-                className={undefined}
-              >
+              <span>
                 <span
                   className=""
-                  style={undefined}
                 >
                   test-labbook
                 </span>
@@ -1142,17 +1134,19 @@ exports[`Test DashboardLocal snapshot 1`] = `
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner "
           >
-            Created by cbutler
+            cbutler
+          </p>
+          <p
+            className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner"
+          >
+            Created on 12/07/18
           </p>
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
           >
-            <span
-              className={undefined}
-            >
+            <span>
               <span
                 className=""
-                style={undefined}
               >
                 here is my labbook
               </span>
@@ -1165,7 +1159,7 @@ exports[`Test DashboardLocal snapshot 1`] = `
         />
       </a>
       <a
-        className="Card Card--text column-4-span-3 flex flex--column justify--space-between"
+        className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
         href="/projects/cbutler/test-building-status-2"
         onClick={[Function]}
       >
@@ -1193,12 +1187,9 @@ exports[`Test DashboardLocal snapshot 1`] = `
               className="LocalLabbooks__panel-title"
               onClick={[Function]}
             >
-              <span
-                className={undefined}
-              >
+              <span>
                 <span
                   className=""
-                  style={undefined}
                 >
                   test-building-status-2
                 </span>
@@ -1208,14 +1199,17 @@ exports[`Test DashboardLocal snapshot 1`] = `
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner "
           >
-            Created by cbutler
+            cbutler
+          </p>
+          <p
+            className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner"
+          >
+            Created on 12/07/18
           </p>
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
           >
-            <span
-              className={undefined}
-            />
+            <span />
           </p>
         </div>
         <div
@@ -1224,7 +1218,7 @@ exports[`Test DashboardLocal snapshot 1`] = `
         />
       </a>
       <a
-        className="Card Card--text column-4-span-3 flex flex--column justify--space-between"
+        className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
         href="/projects/cbutler/test-building-state"
         onClick={[Function]}
       >
@@ -1252,12 +1246,9 @@ exports[`Test DashboardLocal snapshot 1`] = `
               className="LocalLabbooks__panel-title"
               onClick={[Function]}
             >
-              <span
-                className={undefined}
-              >
+              <span>
                 <span
                   className=""
-                  style={undefined}
                 >
                   test-building-state
                 </span>
@@ -1267,14 +1258,17 @@ exports[`Test DashboardLocal snapshot 1`] = `
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner "
           >
-            Created by cbutler
+            cbutler
+          </p>
+          <p
+            className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner"
+          >
+            Created on 12/07/18
           </p>
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
           >
-            <span
-              className={undefined}
-            />
+            <span />
           </p>
         </div>
         <div
@@ -1283,7 +1277,7 @@ exports[`Test DashboardLocal snapshot 1`] = `
         />
       </a>
       <a
-        className="Card Card--text column-4-span-3 flex flex--column justify--space-between"
+        className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
         href="/projects/cbutler/test-building-6"
         onClick={[Function]}
       >
@@ -1311,12 +1305,9 @@ exports[`Test DashboardLocal snapshot 1`] = `
               className="LocalLabbooks__panel-title"
               onClick={[Function]}
             >
-              <span
-                className={undefined}
-              >
+              <span>
                 <span
                   className=""
-                  style={undefined}
                 >
                   test-building-6
                 </span>
@@ -1326,14 +1317,17 @@ exports[`Test DashboardLocal snapshot 1`] = `
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner "
           >
-            Created by cbutler
+            cbutler
+          </p>
+          <p
+            className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner"
+          >
+            Created on 12/07/18
           </p>
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
           >
-            <span
-              className={undefined}
-            />
+            <span />
           </p>
         </div>
         <div
@@ -1342,7 +1336,7 @@ exports[`Test DashboardLocal snapshot 1`] = `
         />
       </a>
       <a
-        className="Card Card--text column-4-span-3 flex flex--column justify--space-between"
+        className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
         href="/projects/cbutler/test-building-5"
         onClick={[Function]}
       >
@@ -1370,12 +1364,9 @@ exports[`Test DashboardLocal snapshot 1`] = `
               className="LocalLabbooks__panel-title"
               onClick={[Function]}
             >
-              <span
-                className={undefined}
-              >
+              <span>
                 <span
                   className=""
-                  style={undefined}
                 >
                   test-building-5
                 </span>
@@ -1385,14 +1376,17 @@ exports[`Test DashboardLocal snapshot 1`] = `
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner "
           >
-            Created by cbutler
+            cbutler
+          </p>
+          <p
+            className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner"
+          >
+            Created on 12/07/18
           </p>
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
           >
-            <span
-              className={undefined}
-            />
+            <span />
           </p>
         </div>
         <div
@@ -1401,7 +1395,7 @@ exports[`Test DashboardLocal snapshot 1`] = `
         />
       </a>
       <a
-        className="Card Card--text column-4-span-3 flex flex--column justify--space-between"
+        className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
         href="/projects/cbutler/test-building-4"
         onClick={[Function]}
       >
@@ -1429,12 +1423,9 @@ exports[`Test DashboardLocal snapshot 1`] = `
               className="LocalLabbooks__panel-title"
               onClick={[Function]}
             >
-              <span
-                className={undefined}
-              >
+              <span>
                 <span
                   className=""
-                  style={undefined}
                 >
                   test-building-4
                 </span>
@@ -1444,14 +1435,17 @@ exports[`Test DashboardLocal snapshot 1`] = `
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner "
           >
-            Created by cbutler
+            cbutler
+          </p>
+          <p
+            className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner"
+          >
+            Created on 12/07/18
           </p>
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
           >
-            <span
-              className={undefined}
-            />
+            <span />
           </p>
         </div>
         <div
@@ -1460,7 +1454,7 @@ exports[`Test DashboardLocal snapshot 1`] = `
         />
       </a>
       <a
-        className="Card Card--text column-4-span-3 flex flex--column justify--space-between"
+        className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
         href="/projects/cbutler/test-building-3"
         onClick={[Function]}
       >
@@ -1488,12 +1482,9 @@ exports[`Test DashboardLocal snapshot 1`] = `
               className="LocalLabbooks__panel-title"
               onClick={[Function]}
             >
-              <span
-                className={undefined}
-              >
+              <span>
                 <span
                   className=""
-                  style={undefined}
                 >
                   test-building-3
                 </span>
@@ -1503,14 +1494,17 @@ exports[`Test DashboardLocal snapshot 1`] = `
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner "
           >
-            Created by cbutler
+            cbutler
+          </p>
+          <p
+            className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner"
+          >
+            Created on 12/07/18
           </p>
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
           >
-            <span
-              className={undefined}
-            />
+            <span />
           </p>
         </div>
         <div

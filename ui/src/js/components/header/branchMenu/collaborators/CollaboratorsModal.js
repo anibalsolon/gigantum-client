@@ -50,7 +50,7 @@ export default class CollaboratorsModal extends Component {
   }
 
   /**
-  *  @param {Int}
+  *  @param {number}
   *  iterate value of index within the bounds of the array size
   *  @return {}
   */

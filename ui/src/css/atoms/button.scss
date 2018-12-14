@@ -57,3 +57,130 @@ button:disabled {
   background: $grey-light;
   border: 2px solid $grey;
 }
+
+.Btn{
+   background-color: $azure;
+   border: 0px;
+   border-radius: 8px;
+   outline: none;
+
+   &:focus {
+     outline: none;
+   }
+
+   &:hover{
+     background-color: $turquise;
+   }
+
+   &--large {
+     padding: 10px 30px;
+   }
+
+   &--medium {
+     padding: 5px 15px;
+   }
+
+   &--small{
+     padding: 0px;
+   }
+
+   &--round {
+     height: 34px;
+     width: 34px;
+     border-radius: 15px;
+   }
+
+   &--check {
+     background: url(~Images/icons/check-selected.svg) no-repeat center center;
+     background-size: 30px;
+
+
+     &:focus {
+       background: url(~Images/icons/check-selected.svg) no-repeat center center;
+       border: 0px;
+       background-size: 30px;
+     }
+
+     &:hover {
+       background: url(~Images/icons/check-selected.svg) no-repeat center center;
+       border: 0px;
+        background-size: 34px;
+     }
+   }
+
+   &--uncheck {
+     background: url(~Images/icons/check-unselected.svg) no-repeat center center;
+     background-size: 30px;
+
+
+     &:focus {
+       background: url(~Images/icons/check-unselected.svg) no-repeat center center;
+       background-size: 30px;
+       border: 0px;
+     }
+
+     &:hover {
+       background: url(~Images/icons/check-unselected.svg) no-repeat center center;
+       background-size: 34px;
+       border: 0px;
+     }
+   }
+
+   &--partial {
+     background: url(~Images/icons/minus.svg) no-repeat center center;
+     background-size: 30px;
+     &:focus {
+       background: url(~Images/icons/minus.svg) no-repeat center center;
+       background-size: 30px;
+       border: 0px;
+     }
+
+     &:hover {
+       background: url(~Images/icons/minus.svg) no-repeat center center;
+       background-size: 34px;
+       border: 0px;
+     }
+   }
+
+   &--close {
+     background: url(~Images/icons/close.svg) no-repeat center center;
+     background-size: 30px;
+     border: 0px;
+
+     &:focus {
+       background: url(~Images/icons/close.svg) no-repeat center center;
+       background-size: 30px;
+       border: 0px;
+     }
+
+     &:hover {
+       background: url(~Images/icons/close.svg) no-repeat center center;
+       background-size: 34px;
+       border: 0px;
+     }
+   }
+
+   &--delete {
+     background: url(~Images/icons/trash-dark.svg) no-repeat center center;
+     background-size: 20px;
+     border: 0px;
+
+     &:focus {
+       background: url(~Images/icons/trash-dark.svg) no-repeat center center;
+       background-size: 20px;
+       border: 0px;
+     }
+
+     &:hover {
+       background: url(~Images/icons/trash-azure.svg) no-repeat center center;
+       background-size: 20px;
+       border: 0px;
+     }
+
+     &:disabled {
+       background: url(~Images/icons/trash.svg) no-repeat center center;
+       background-size: 20px;
+       border: 0px;
+     }
+  }
+}

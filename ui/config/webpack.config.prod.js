@@ -13,6 +13,7 @@ const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
 const paths = require('./paths');
 const getClientEnvironment = require('./env');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 const ProgressBarPlugin = require('progress-bar-webpack-plugin');
 
 // Webpack uses `publicPath` to determine where the app is being served from.
@@ -185,15 +186,14 @@ module.exports = {
         include: paths.appSrc,
         loader: require.resolve('babel-loader'),
         options: {
-
           compact: true,
-        }
+        },
       },
 
       {
         exclude: [
           /\.css$/,
-          /\.scss$/
+          /\.scss$/,
         ],
         test: /\.(js|jsx)$/,
         include: paths.submodules,
@@ -213,17 +213,17 @@ module.exports = {
       // use the "style" loader inside the async code so CSS from them won't be
       // in the main CSS file.
       {
-          test: /\.(scss|css)$/,
-          loaders: [
-            'style-loader',
-            'css-loader',
-            {
-              loader: 'sass-loader',
-              options:{
-                sourceMap: true
-              }
-            }
-          ]
+        test: /\.(scss|css)$/,
+        loaders: [
+          'style-loader',
+          'css-loader',
+          {
+            loader: 'sass-loader',
+            options: {
+              sourceMap: true,
+            },
+          },
+        ],
       },
       // TODO: fix #101, code commented out until issue is fixed
       // {
@@ -284,51 +284,14 @@ module.exports = {
       // Remember to add the new extension(s) to the "file" loader exclusion list.
     ],
   },
-  // optimization:{
-  //   runtimeChunk: 'single',
-  //   splitChunks: {
-  //     chunks: 'all',
-  //     maxInitialRequests: Infinity,
-  //     minSize: 0,
-  //     cacheGroups: {
-  //       vendor: {
-  //         test: /[\\/]node_modules[\\/]/,
-  //         name(module) {
-  //           // get the name. E.g. node_modules/packageName/not/this/part.js
-  //           // or node_modules/packageName
-  //           const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)[1];
-
-  //           // npm package names are URL-safe, but some servers don't like @ symbols
-  //           return `npm.${packageName.replace('@', '')}`;
-  //         },
-  //       },
-  //     },
-  //   },
-  //   // minimizer: [
-  //   //   new UglifyJsPlugin({
-  //   //     cache: true,
-  //   //     parallel: true,
-  //   //   })
-  //   // ],
-  // },
-
-    optimization: {
-      minimize: true,
-      minimizer: [
-        new UglifyJsPlugin({
-          sourceMap: false,
-          uglifyOptions: {
-              compress: {
-                  unused: false,
-                  dead_code: false,
-                  warnings: true
-              },
-              output: {
-                  comments: true
-              }
-          }
-        })
-      ]
+  // updated to tesser as it's meant to perform better with babel 7
+  optimization: {
+    minimize: true,
+    minimizer: [
+      new TerserPlugin({
+        extractComments: true
+      })
+    ],
   },
   plugins: [
     new ProgressBarPlugin(),
@@ -364,7 +327,7 @@ module.exports = {
     new webpack.DefinePlugin(env.stringified),
     // Minify the code.
 
-    //deprecated
+    // deprecated
     // new webpack.optimize.UglifyJsPlugin({
     //   splitChunks: {
     //    chunks: 'all'
@@ -407,7 +370,6 @@ module.exports = {
           // This message occurs for every build and is a bit too noisy.
           return;
         }
-        console.log(message);
       },
       minify: true,
       // For unknown URLs, fallback to the index page

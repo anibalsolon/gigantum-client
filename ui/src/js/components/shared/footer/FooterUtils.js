@@ -6,12 +6,13 @@ import { setMultiInfoMessage, setErrorMessage } from 'JS/redux/reducers/footer';
 import { setForceRefetch, setRefetchPending } from 'JS/redux/reducers/labbook/environment/packageDependencies';
 // mutations
 import FetchLabbookEdgeMutation from 'Mutations/FetchLabbookEdgeMutation';
+import FetchDatasetEdgeMutation from 'Mutations/FetchDatasetEdgeMutation';
 
 const ansi_up = new AnsiUp();
 
 const FooterUtils = {
   /**
-   *  @param {Int}
+   *  @param {number}
    *  iterate value of index within the bounds of the array size
    *  @return {}
    */
@@ -79,20 +80,32 @@ const FooterUtils = {
               refetch();
             } else if (response.data.jobStatus.status === 'finished') {
               setMultiInfoMessage(response.data.jobStatus.id, message, true, null, [{ message: html }]);
-              if ((type === 'syncLabbook') || (type === 'publishLabbook')) {
+              if ((type === 'syncLabbook') || (type === 'publishLabbook') || (type === 'publishDataset') || (type === 'syncDataset')) {
                 successCall();
-                const metaDataArr = JSON.parse(response.data.jobStatus.jobMetadata).labbook.split('|');
+                const section = type.indexOf('Dataset') > -1 ? 'dataset' : 'labbook';
+                const metaDataArr = JSON.parse(response.data.jobStatus.jobMetadata)[section].split('|');
                 const owner = metaDataArr[1];
                 const labbookName = metaDataArr[2];
-                FetchLabbookEdgeMutation(
-                  owner,
-                  labbookName,
-                  (error) => {
-                    if (error) {
-                      console.error(error);
-                    }
-                  },
-                );
+                section === 'labbook' ?
+                  FetchLabbookEdgeMutation(
+                    owner,
+                    labbookName,
+                    (error) => {
+                      if (error) {
+                        console.error(error);
+                      }
+                    },
+                  )
+                  :
+                  FetchDatasetEdgeMutation(
+                    owner,
+                    labbookName,
+                    (error) => {
+                      if (error) {
+                        console.error(error);
+                      }
+                    },
+                  );
               }
             } else if (response.data.jobStatus.status === 'failed') {
               const method = JSON.parse(response.data.jobStatus.jobMetadata).method;
@@ -101,7 +114,6 @@ const FooterUtils = {
                 errorMessage = 'Project failed to build: Check for and remove invalid dependencies and try again.';
               }
               if ((type === 'syncLabbook') || (type === 'publishLabbook')) {
-                console.log(response.data);
                 failureCall(response.data.jobStatus.failureMessage);
               }
               html += `\n<span style="color:rgb(255,85,85)">${response.data.jobStatus.failureMessage}</span>`;

@@ -38,7 +38,7 @@ from gtmcore.inventory.branching import BranchManager
 class TestLabbookShareProtocol(object):
 
     @mock.patch('gtmcore.workflows.core.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
-    def  test_simple_publish_new_one_user(self, remote_bare_repo, mock_labbook_lfs_disabled):
+    def test_simple_publish_new_one_user(self, remote_bare_repo, mock_labbook_lfs_disabled):
         # Make sure you cannot clobber a remote branch with your local branch of the same name.
 
         ## 1 - Make initial set of contributions to Labbook.
@@ -62,7 +62,7 @@ class TestLabbookShareProtocol(object):
         assert not any(['gm.workspace-test' in str(x) for x in b['remote']])
 
         ## 2 - Now make more updates and do it again
-        FileOperations.delete_file(lb, section="code", relative_path="testy-tacked-dir")
+        FileOperations.delete_files(lb, "code", ["testy-tacked-dir"])
         assert not os.path.exists(os.path.join(lb.root_dir, 'code', 'testy-tacked-dir'))
         FileOperations.makedir(lb, relative_path='input/new-input-dir', create_activity_record=True)
         assert lb.active_branch == "gm.workspace-test"
@@ -152,7 +152,7 @@ class TestLabbookShareProtocol(object):
         assert bob_user_lb.active_branch == "gm.workspace-bob"
         FileOperations.makedir(bob_user_lb, relative_path='output/sample-output-dir-xxx', create_activity_record=True)
         FileOperations.makedir(bob_user_lb, relative_path='input/stuff-for-inputs-yyy', create_activity_record=True)
-        FileOperations.delete_file(bob_user_lb, section="code", relative_path='testy-tracked-dir')
+        FileOperations.delete_files(bob_user_lb, "code", ['testy-tracked-dir'])
         assert not os.path.exists(os.path.join(bob_user_lb.root_dir, 'code', 'testy-tracked-dir'))
         bob_wf.sync('bob')
 
@@ -226,7 +226,7 @@ class TestLabbookShareProtocol(object):
                                           labbook_name="labbook1", labbook=bob_user_lb)
         bob_wf = GitWorkflow(bob_user_lb)
         assert bob_user_lb.active_branch == "gm.workspace-bob"
-        FileOperations.delete_file(bob_user_lb, section='code', relative_path='testy-tracked-dir')
+        FileOperations.delete_files(bob_user_lb, 'code', ['testy-tracked-dir'])
         assert not os.path.exists(os.path.join(bob_user_lb.root_dir, 'code', 'testy-tracked-dir'))
         FileOperations.makedir(bob_user_lb, relative_path='input/stuff-for-inputs-yyy', create_activity_record=True)
         bob_wf.sync('bob')

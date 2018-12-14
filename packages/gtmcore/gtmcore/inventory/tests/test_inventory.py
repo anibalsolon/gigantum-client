@@ -1,5 +1,5 @@
 import pytest
-import shutil
+import getpass
 import os
 import yaml
 import time
@@ -35,7 +35,7 @@ class TestInventory(object):
                 l = inv_manager.create_labbook(ut_username, ow, lbname)
                 created_lbs.append(l)
 
-        get_owner = lambda x: InventoryManager(mock_config_file[0]).query_labbook_owner(x)
+        get_owner = lambda x: InventoryManager(mock_config_file[0]).query_owner(x)
         condensed_lbs = [(ut_username, get_owner(l), l.name) for l in created_lbs]
         inv_manager = InventoryManager(mock_config_file[0])
         t0 = time.time()
@@ -72,19 +72,6 @@ class TestInventory(object):
         assert labbooks[0].name == 'labbook3'
         assert labbooks[1].name == 'asdf'
         assert labbooks[2].name == 'labbook1'
-
-    def test_list_labbooks_skip_corrupted(self, mock_config_file):
-        """Test list create dated sorted labbooks"""
-        inv_manager = InventoryManager(mock_config_file[0])
-        lb1 = inv_manager.create_labbook("user1", "user1", "labbook3", description="my first labbook")
-        lb2 = inv_manager.create_labbook("user1", "user1", "asdf", description="my second labbook")
-        lb3 = inv_manager.create_labbook("user1", "user2", "labbook1", description="my other labbook")
-        shutil.rmtree(os.path.join(lb3.root_dir, '.git'))
-
-        labbooks = inv_manager.list_labbooks(username="user1", sort_mode="created_on")
-        assert len(labbooks) == 2
-        assert labbooks[0].name == 'labbook3'
-        assert labbooks[1].name == 'asdf'
 
     def test_list_labbooks_create_date_no_metadata(self, mock_config_file):
         """Test list create dated sorted labbooks"""
@@ -152,14 +139,6 @@ class TestInventory(object):
         assert labbooks[1].name == 'labbook1'
         assert labbooks[2].name == 'hhghg'
         assert labbooks[3].name == 'asdf'
-
-        # Now test that corrupted Projects are skipped (i.e., those with no git dir)
-        shutil.rmtree(os.path.join(lb1.root_dir, '.git'))
-        labbooks = inv_manager.list_labbooks(username="user1", sort_mode="modified_on")
-        assert len(labbooks) == 3
-        assert labbooks[0].name == 'labbook1'
-        assert labbooks[1].name == 'hhghg'
-        assert labbooks[2].name == 'asdf'
 
     def test_load_labbook_from_directory(self, mock_config_file):
         """Test loading a labbook from a directory"""
@@ -242,10 +221,18 @@ class TestInventory(object):
         assert lb_loaded.description == lb.description
         assert lb_loaded.key == 'test|test|labbook1'
 
-    def test_query_labbookowner(self, mock_config_file):
+    def test_query_owner(self, mock_config_file):
         inv_manager = InventoryManager(mock_config_file[0])
         lb = inv_manager.create_labbook("test", "test", "labbook1", description="my first labbook")
-        assert "test" == inv_manager.query_labbook_owner(lb)
+        assert "test" == inv_manager.query_owner(lb)
+
+    def test_query_owner_fail(self, mock_config_file):
+        inv_manager = InventoryManager(mock_config_file[0])
+        lb = inv_manager.create_labbook("test", "test", "labbook1", description="my first labbook")
+        new_location = shutil.move(lb.root_dir, '/tmp')
+        lb = inv_manager.load_labbook_from_directory(new_location)
+        with pytest.raises(InventoryException):
+            inv_manager.query_owner(lb)
 
 
 class TestCreateLabbooks(object):

@@ -1,18 +1,17 @@
-//mutations
+// mutations
 import CreateLabbookMutation from 'Mutations/CreateLabbookMutation';
-//config
-import testConfig from './config'
+// config
+import testConfig from './config';
 
 
 const CreateLabbook = {
     createLabbook: (labbbookName, isUntracked, callback) => {
-
       const {
         description,
         repository,
         componentId,
-        revision
-      } = testConfig
+        revision,
+      } = testConfig;
 
       CreateLabbookMutation(
       labbbookName,
@@ -21,9 +20,9 @@ const CreateLabbook = {
       componentId,
       revision,
       isUntracked,
-      callback
-    )
-  }
-}
+      callback,
+    );
+  },
+};
 
-export default CreateLabbook
+export default CreateLabbook;
