@@ -171,18 +171,18 @@ class GitLabManager(object):
 
         return user_id
 
-    def labbook_exists(self, namespace: str, labbook_name: str) -> bool:
+    def repository_exists(self, namespace: str, repository_name: str) -> bool:
         """Method to check if the remote repository already exists
 
         Args:
             namespace(str): Namespace in gitlab, currently the "owner"
-            labbook_name(str): LabBook name (i.e. project name in gitlab)
+            repository_name(str): Repository name (i.e. project name in gitlab)
 
         Returns:
             bool
         """
         # Call API to check for project
-        repo_id = self.get_repository_id(namespace, labbook_name)
+        repo_id = self.get_repository_id(namespace, repository_name)
         response = requests.get(f"https://{self.remote_host}/api/v4/projects/{repo_id}",
                                 headers={"PRIVATE-TOKEN": self.user_token}, timeout=10)
 
@@ -191,7 +191,7 @@ class GitLabManager(object):
         elif response.status_code == 404:
             return False
         else:
-            msg = f"Failed to check if {namespace}/{labbook_name} exists. Status Code: {response.status_code}"
+            msg = f"Failed to check if {namespace}/{repository_name} exists. Status Code: {response.status_code}"
             logger.error(msg)
             logger.error(response.json())
             raise ValueError(msg)
@@ -249,7 +249,7 @@ class GitLabManager(object):
             raise ValueError(msg)
 
     def fork_labbook(self, username: str, namespace: str, labbook_name: str):
-        if self.labbook_exists(namespace, labbook_name):
+        if self.repository_exists(namespace, labbook_name):
             raise ValueError(f"Remote repository {namespace}/{labbook_name}")
 
         repo_id = self.get_repository_id(namespace, labbook_name)
@@ -276,7 +276,7 @@ class GitLabManager(object):
         Returns:
 
         """
-        if self.labbook_exists(namespace, labbook_name):
+        if self.repository_exists(namespace, labbook_name):
             raise ValueError("Cannot create remote repository that already exists")
 
         # Raises ValueError if given visibility is not valid
@@ -332,7 +332,7 @@ class GitLabManager(object):
         Returns:
             None
         """
-        if not self.labbook_exists(namespace, labbook_name):
+        if not self.repository_exists(namespace, labbook_name):
             raise ValueError("Cannot remove remote repository that does not exist")
 
         # Remove project from quota service
@@ -361,23 +361,23 @@ class GitLabManager(object):
         else:
             logger.info(f"Deleted remote repository {namespace}/{labbook_name}")
 
-    def get_collaborators(self, namespace: str, labbook_name: str) -> Optional[List[Tuple[int, str, bool]]]:
+    def get_collaborators(self, namespace: str, repository_name: str) -> Optional[List[Tuple[int, str, bool]]]:
         """Method to get usernames and IDs of collaborators that have access to the repo
 
         The method returns a list of tuples where the entries in the tuple are (user id, username, is owner)
 
         Args:
             namespace(str): Namespace in gitlab, currently the "owner"
-            labbook_name(str): LabBook name (i.e. project name in gitlab)
+            repository_name(str): LabBook name (i.e. project name in gitlab)
 
         Returns:
             list
         """
-        if not self.labbook_exists(namespace, labbook_name):
+        if not self.repository_exists(namespace, repository_name):
             raise ValueError("Cannot get collaborators of a repository that does not exist")
 
         # Call API to get all collaborators
-        repo_id = self.get_repository_id(namespace, labbook_name)
+        repo_id = self.get_repository_id(namespace, repository_name)
         response = requests.get(f"https://{self.remote_host}/api/v4/projects/{repo_id}/members",
                                 headers={"PRIVATE-TOKEN": self.user_token}, timeout=10)
 
@@ -403,7 +403,7 @@ class GitLabManager(object):
         Returns:
             list
         """
-        if not self.labbook_exists(namespace, labbook_name):
+        if not self.repository_exists(namespace, labbook_name):
             raise ValueError("Cannot add a collaborator to a repository that does not exist")
 
         # Call API to get ID of the user
@@ -442,7 +442,7 @@ class GitLabManager(object):
         Returns:
 
         """
-        if not self.labbook_exists(namespace, labbook_name):
+        if not self.repository_exists(namespace, labbook_name):
             raise ValueError("Cannot remove a collaborator to a repository that does not exist")
 
         # Lookup username

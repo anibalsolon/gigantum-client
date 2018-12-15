@@ -267,7 +267,7 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
             if url:
                 return url[0]
             else:
-                logger.warning(f"There exist remotes in {str(lb)}, but no origin found.")
+                logger.warning(f"There exist remotes in {str(labbook)}, but no origin found.")
         return None
 
     def resolve_default_remote(self, info):
