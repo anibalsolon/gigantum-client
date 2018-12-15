@@ -258,3 +258,34 @@ input.Import__input--paste{
 .Import__dataset-title h4{
   font-size: 2rem;
 }
+
+.ImportModal{
+  color: $jet;
+  word-break: break-word;
+  line-height: 20px;
+  @include flex(space-around, column);
+  height: 100%;
+  width: 80%;
+  align-self: center;
+}
+
+.ImportDropzone{
+  @include flex(center, column);
+  align-self: center;
+  width: 350px;
+  height: 150px;
+  border: 1px solid $jet;
+  line-height: 20px;
+  word-break: break-word;
+  hr {
+    margin-bottom: 30px;
+    align-self: center;
+  }
+
+}
+
+.Import__buttonContainer {
+  button {
+    margin: 0 10px;
+  }
+}

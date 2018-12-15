@@ -38,6 +38,15 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
     # Creation date/timestamp in UTC in ISO format
     created_on_utc = graphene.types.datetime.DateTime()
 
+    # Store collaborator data so it is only fetched once per request
+    _collaborators = None
+
+    # List of collaborators
+    collaborators = graphene.List(graphene.String)
+
+    # A boolean indicating if the current user can manage collaborators
+    can_manage_collaborators = graphene.Boolean()
+
     # Last modified date/timestamp in UTC in ISO format
     modified_on_utc = graphene.types.datetime.DateTime()
 
@@ -93,8 +102,6 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         """Return the creation timestamp (if available - otherwise empty string)
 
         Args:
-            args:
-            context:
             info:
 
         Returns:
@@ -102,6 +109,104 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         """
         return info.context.dataset_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
             lambda dataset: dataset.creation_date)
+
+    def _fetch_collaborators(self, dataset, info):
+        """Helper method to fetch this dataset's collaborators
+
+        Args:
+            info: The graphene info object for this requests
+
+        """
+        # TODO: Future work will look up remote in Dataset data, allowing user to select remote.
+        default_remote = dataset.client_config.config['git']['default_remote']
+        admin_service = None
+        for remote in dataset.client_config.config['git']['remotes']:
+            if default_remote == remote:
+                admin_service = dataset.client_config.config['git']['remotes'][remote]['admin_service']
+                break
+
+        # Extract valid Bearer token
+        if "HTTP_AUTHORIZATION" in info.context.headers.environ:
+            token = parse_token(info.context.headers.environ["HTTP_AUTHORIZATION"])
+        else:
+            raise ValueError("Authorization header not provided. Must have a valid session to query for collaborators")
+
+        # Get collaborators from remote service
+        mgr = GitLabManager(default_remote, admin_service, token)
+        try:
+            self._collaborators = mgr.get_collaborators(self.owner, self.name)
+        except ValueError:
+            # If ValueError Raised, assume repo doesn't exist yet
+            self._collaborators = []
+
+    def helper_resolve_collaborators(self, dataset, info):
+        """Helper method to fetch this dataset's collaborators and generate the resulting list of collaborators
+
+        Args:
+            info: The graphene info object for this requests
+
+        """
+        self._fetch_collaborators(dataset, info)
+
+        return [x[1] for x in self._collaborators]
+
+    def resolve_collaborators(self, info):
+        """Method to get the list of collaborators for a dataset
+
+        Args:
+            info:
+
+        Returns:
+
+        """
+        if self._collaborators is None:
+            # If here, put the fetch for collaborators in the promise
+            return info.context.dataset_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
+                lambda dataset: self.helper_resolve_collaborators(dataset, info))
+
+        # If here, you've already fetched the collaborators once and it's already saved in this Dataset object
+        return [x[1] for x in self._collaborators]
+
+    def helper_resolve_can_manage_collaborators(self, dataset, info):
+        """Helper method to fetch this dataset's collaborators and check if user can manage collaborators
+
+        Args:
+            info: The graphene info object for this requests
+
+        """
+        self._fetch_collaborators(dataset, info)
+
+        can_manage = False
+        username = get_logged_in_username()
+        for c in self._collaborators:
+            if c[1] == username:
+                if c[2] is True:
+                    can_manage = True
+
+        return can_manage
+
+    def resolve_can_manage_collaborators(self, info):
+        """Method to check if the user is the "owner" of the dataset and can manage collaborators
+
+        Args:
+            info:
+
+        Returns:
+
+        """
+        if self._collaborators is None:
+            # If here, put the fetch for collaborators in the promise
+            return info.context.dataset_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
+                lambda dataset: self.helper_resolve_can_manage_collaborators(dataset, info))
+
+        can_manage = False
+        username = get_logged_in_username()
+        for c in self._collaborators:
+            if c[1] == username:
+                if c[2] is True:
+                    can_manage = True
+
+        return can_manage
 
     def resolve_modified_on_utc(self, info):
         """Return the creation timestamp (if available - otherwise empty string)
@@ -190,7 +295,7 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         return ActivityDetailObject(id=f"dataset&{self.owner}&{self.name}&{key}",
                                     owner=self.owner,
                                     name=self.name,
-                                     _repository_type='dataset',
+                                    _repository_type='dataset',
                                     key=key)
 
     def resolve_detail_records(self, info, keys):
@@ -253,7 +358,7 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
 
     @staticmethod
     def helper_resolve_visibility(dataset, info):
-        # TODO: Future work will look up remote in LabBook data, allowing user to select remote.
+        # TODO: Future work will look up remote in Dataset data, allowing user to select remote.
         default_remote = dataset.client_config.config['git']['default_remote']
         admin_service = None
         for remote in dataset.client_config.config['git']['remotes']:
@@ -285,14 +390,14 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
 
     @staticmethod
     def helper_resolve_default_remote(dataset):
-        """Helper to extract the default remote from a labbook"""
+        """Helper to extract the default remote from a dataset"""
         remotes = dataset.git.list_remotes()
         if remotes:
             url = [x['url'] for x in remotes if x['name'] == 'origin']
             if url:
                 return url[0]
             else:
-                dataset.warning(f"There exist remotes in {str(lb)}, but no origin found.")
+                dataset.warning(f"There exist remotes in {str(dataset)}, but no origin found.")
         return None
 
     def resolve_default_remote(self, info):
