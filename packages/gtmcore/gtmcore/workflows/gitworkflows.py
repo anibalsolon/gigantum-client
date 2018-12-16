@@ -42,7 +42,6 @@ class GitWorkflow(object):
         """ Run a `git gc` on the repository. """
         core.git_garbage_collect(self.repository)
 
-
     def publish(self, username: str, access_token: Optional[str] = None, remote: str = "origin",
                 public: bool = False, feedback_callback: Callable = lambda _ : None) -> None:
         """ Publish this repository to the remote GitLab instance.

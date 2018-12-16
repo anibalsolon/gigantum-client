@@ -20,7 +20,7 @@
 import graphene
 from lmsrvlabbook.api.mutations import (CreateLabbook, BuildImage, StartContainer,
                                         AddPackageComponents, CreateUserNote, StopContainer,
-                                        ImportLabbook, DeleteLabbook,
+                                        ImportLabbook, DeleteLabbook, ImportRemoteDataset,
                                         ImportRemoteLabbook, AddLabbookRemote,
                                         ExportLabbook, AddLabbookFile, MoveLabbookFile, DeleteLabbookFiles,
                                         MakeLabbookDirectory, RemoveUserIdentity,
@@ -34,7 +34,8 @@ from lmsrvlabbook.api.mutations import (CreateLabbook, BuildImage, StartContaine
                                         DeleteRemoteLabbook,
                                         CompleteBatchUploadTransaction, SetVisibility, FetchLabbookEdge,
                                         CreateDataset, AddDatasetFile, CompleteDatasetUploadTransaction,
-                                        FetchDatasetEdge, SetDatasetVisibility, SyncDataset)
+                                        FetchDatasetEdge, SetDatasetVisibility, SyncDataset,
+                                        AddDatasetCollaborator, DeleteDatasetCollaborator)
 
 
 class LabbookMutations(graphene.ObjectType):
@@ -45,6 +46,9 @@ class LabbookMutations(graphene.ObjectType):
 
     # Import a labbook from a remote Git repository.
     import_remote_labbook = ImportRemoteLabbook.Field()
+
+    # Import a Dataset from the Gitlab repository
+    import_remote_dataset = ImportRemoteDataset.Field()
 
     # Export a labbook and return URL to its zipped archive.
     export_labbook = ExportLabbook.Field()
@@ -133,6 +137,10 @@ class LabbookMutations(graphene.ObjectType):
 
     # Delete a collaborator from a LabBook
     delete_collaborator = DeleteLabbookCollaborator.Field()
+
+    # Adds a dataset collaborator
+    add_dataset_collaborator = AddDatasetCollaborator.Field()
+    delete_dataset_collaborator = DeleteDatasetCollaborator.Field()
 
     # Write a readme to a LabBook
     write_readme = WriteReadme.Field()

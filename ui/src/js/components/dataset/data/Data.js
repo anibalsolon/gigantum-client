@@ -47,6 +47,7 @@ class Data extends Component {
   }
 
   render() {
+    console.log(this.props)
     if (this.props.datasets) {
       return (
 
@@ -88,7 +89,8 @@ class Data extends Component {
               clearSelectedFiles={this._clearSelectedFiles}
               datasetsId={this.props.datasetsId}
               dataId={this.props.datasets.id}
-              data={this.props.datasets}
+              dataset={this.props.datasets}
+              // dataset={this.props.datasets.dataset}
               loadStatus={this._loadStatus}
               type={this.props.type}
             />
@@ -106,7 +108,7 @@ export default createFragmentContainer(
   graphql`
     fragment Data_datasets on Dataset{
       id
-      ...DataBrowser_data
+      ...DataBrowser_dataset
     }
   `,
 );

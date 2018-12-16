@@ -21,6 +21,14 @@ export const CollaboratorsQuery = graphql`
     }
   }`;
 
+export const CollaboratorsDatasetQuery = graphql`
+query CollaboratorsDatasetQuery($name: String!, $owner: String!){
+  dataset(name: $name, owner: $owner){
+    collaborators
+    canManageCollaborators
+  }
+}`;
+
 
 class CollaboratorButton extends Component {
   constructor(props) {
@@ -98,11 +106,12 @@ class CollaboratorButton extends Component {
     const self = this;
     const { labbookName, owner } = this.props;
     let { collaborators, canManageCollaborators } = store.getState().collaborators;
+
     collaborators = collaborators && collaborators[labbookName];
     canManageCollaborators = canManageCollaborators && canManageCollaborators[labbookName];
     return (
       <QueryRenderer
-        query={CollaboratorsQuery}
+        query={this.props.sectionType === 'dataset' ? CollaboratorsDatasetQuery : CollaboratorsQuery}
         environment={environment}
         variables={{
             name: labbookName,
@@ -110,44 +119,43 @@ class CollaboratorButton extends Component {
           }}
         render={({ props, error }) => {
               if (props) {
-                const { labbook } = props;
-
-                this.canManageCollaborators = labbook.canManageCollaborators;
-                this.collaborators = labbook.collaborators;
+                let section;
+                section = this.props.sectionType === 'dataset' ? props.dataset : props.labbook;
+                console.log(props)
+                this.canManageCollaborators = section.canManageCollaborators;
+                this.collaborators = section.collaborators;
 
                 const collaboratorButtonCSS = classNames({
-                    disabled: !labbook.canManageCollaborators && this.state.sessionValid,
+                    disabled: !section.canManageCollaborators && this.state.sessionValid,
                     'BranchMenu__btn--flat': true,
                   }),
 
                   collaboratorCSS = classNames({
                     'BranchMenu__item BranchMenu__item--collaborators': true,
-                    disabled: !labbook.canManageCollaborators && this.state.sessionValid,
+                    disabled: !section.canManageCollaborators && this.state.sessionValid,
                   }),
 
-                  collaboratorFilteredArr = labbook.collaborators && labbook.collaborators.filter(name => name !== owner);
+                  collaboratorFilteredArr = section.collaborators && section.collaborators.filter(name => name !== owner);
 
-                const collaboratorNames = self._getCollaboratorList(labbook.collaborators, collaboratorFilteredArr);
+                const collaboratorNames = self._getCollaboratorList(section.collaborators, collaboratorFilteredArr);
 
                 return (
 
                   <li className={collaboratorCSS}>
                     <button
                       onClick={() => this._toggleCollaborators()}
-                      className={collaboratorButtonCSS}
-                    >
+                      className={collaboratorButtonCSS}>
                       Collaborators
-
                       <p className="BranchMenu__collaborator-names">{collaboratorNames}</p>
-
                     </button>
 
                     {
                       this.state.collaboratorModalVisible &&
                         <CollaboratorsModal
+                          sectionType={this.props.sectionType}
                           key="CollaboratorsModal"
                           ref="collaborators"
-                          collaborators={labbook.collaborators}
+                          collaborators={section.collaborators}
                           owner={owner}
                           labbookName={labbookName}
                           toggleCollaborators={this._toggleCollaborators}

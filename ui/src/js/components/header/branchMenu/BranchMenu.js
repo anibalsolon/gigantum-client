@@ -659,6 +659,7 @@ class BranchMenu extends Component {
               key={this.state.collabKey}
               ref="collaborators"
               auth={this.props.auth}
+              sectionType={this.props.sectionType}
               owner={owner}
               labbookName={labbookName}
               checkSessionIsValid={this._checkSessionIsValid}

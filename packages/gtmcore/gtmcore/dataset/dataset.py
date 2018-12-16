@@ -41,7 +41,8 @@ class Dataset(Repository):
     def __init__(self, config_file: Optional[str] = None, namespace: Optional[str] = None,
                  author: Optional[GitAuthor] = None) -> None:
         super().__init__(config_file, author)
-
+        # TODO - Need a more formalizes solution for differentiating Datasets from other repo types
+        self.client_config.config['git']['lfs_enabled'] = False
         self.namespace = namespace
 
     def __str__(self):
