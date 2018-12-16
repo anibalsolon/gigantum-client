@@ -3,6 +3,8 @@ import getpass
 import os
 import yaml
 import datetime
+import shutil
+import tempfile
 import time
 
 from gtmcore.dataset.dataset import Dataset
@@ -133,7 +135,7 @@ class TestInventoryDatasets(object):
         with pytest.raises(ValueError):
             ds.name = 'd' * 101
 
-    def test_create_labbook_that_exists(self, mock_config_file):
+    def test_create_dataset_that_exists(self, mock_config_file):
         """Test trying to create a labbook with a name that already exists locally"""
         inv_manager = InventoryManager(mock_config_file[0])
         auth = GitAuthor(name="username", email="user1@test.com")
@@ -144,6 +146,37 @@ class TestInventoryDatasets(object):
             inv_manager.create_dataset("test", "test", "dataset1", "gigantum_object_v1",
                                        description="my first dataset",
                                        author=auth)
+
+    def test_load_dataset_from_file(self, mock_config_file):
+        inv_manager = InventoryManager(mock_config_file[0])
+        auth = GitAuthor(name="username", email="user1@test.com")
+        ds = inv_manager.create_dataset("test", "test", "dataset1", "gigantum_object_v1",
+                                        description="my first dataset",
+                                        author=auth)
+
+        with tempfile.TemporaryDirectory() as tempdir:
+            r = shutil.move(ds.root_dir, tempdir)
+            ds_loaded_from_file = inv_manager.load_dataset_from_directory(r)
+
+        # Test failing case - invalid dir
+        with pytest.raises(InventoryException):
+            r = inv_manager.load_dataset_from_directory('/tmp')
+
+    def test_put_dataset(self, mock_config_file):
+        inv_manager = InventoryManager(mock_config_file[0])
+        auth = GitAuthor(name="username", email="user1@test.com")
+        ds = inv_manager.create_dataset("test", "test", "dataset1", "gigantum_object_v1",
+                                        description="my first dataset",
+                                        author=auth)
+
+        orig_location = ds.root_dir
+        with tempfile.TemporaryDirectory() as tempdir:
+            r = shutil.move(ds.root_dir, tempdir)
+            ds_loaded_from_file = inv_manager.load_dataset_from_directory(r)
+            assert not os.path.exists(orig_location)
+            assert orig_location not in [d.root_dir for d in inv_manager.list_datasets('test')]
+            placed_ds = inv_manager.put_dataset(r, 'test', 'test')
+            assert placed_ds.root_dir in [d.root_dir for d in inv_manager.list_datasets('test')]
 
     def test_list_datasets_empty(self, mock_labbook):
         """Test list datasets when no dataset directory exists for the user"""
@@ -219,4 +252,3 @@ class TestInventoryDatasets(object):
             inv_manager.create_dataset("test", "test", "dataset1", "asdfdfgh",
                                        description="my first dataset",
                                        author=auth)
-

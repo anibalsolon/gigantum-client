@@ -516,6 +516,36 @@ class InventoryManager(object):
         ds = self.load_dataset(username, owner, dataset_name)
         shutil.rmtree(ds.root_dir, ignore_errors=True)
 
+
+    def put_dataset(self, path: str, username: str, owner: str) -> Dataset:
+        try:
+            return self._put_dataset(path, username, owner)
+        except Exception as e:
+            logger.error(e)
+            raise InventoryException(e)
+
+    def _put_dataset(self, path: str, username: str, owner: str) -> Dataset:
+        # Validate that given path contains labbook
+        temp_ds = self.load_dataset_from_directory(path)
+
+        p = os.path.join(self.inventory_root, username, owner, 'datasets')
+        dir_name = os.path.basename(path)
+        if os.path.exists(p) and dir_name in os.listdir(p):
+            raise InventoryException(f"Dataset directory {dir_name} already exists")
+
+        if not os.path.exists(p):
+            os.makedirs(p, exist_ok=True)
+
+        if os.path.exists(os.path.join(p, dir_name)):
+            raise InventoryException(f"Dataset directory {dir_name} already exists")
+
+        final_path = shutil.move(path, p)
+        assert os.path.dirname(final_path) != 'datasets', \
+               f"shutil.move used incorrectly"
+
+        ds = self.load_dataset_from_directory(final_path)
+        return ds
+
     def load_dataset(self, username: str, owner: str, dataset_name: str,
                      author: Optional[GitAuthor] = None) -> Dataset:
         """Method to load a dataset from disk
@@ -540,6 +570,27 @@ class InventoryManager(object):
             return ds
         except Exception as e:
             raise InventoryException(f"Cannot retrieve ({username}, {owner}, {dataset_name}): {e}")
+
+    def load_dataset_from_directory(self, path: str, author: Optional[GitAuthor] = None) -> Dataset:
+        """ Load a Dataset temporarily from an arbitrary directory.
+
+        Args:
+            path: Path to candidate dataset - generally somewhere in /tmp
+            author: Optional GitAuthor
+
+        Returns:
+            Dataset object
+        """
+        try:
+            ds = Dataset(config_file=self.config_file)
+            ds._set_root_dir(path)
+            ds._load_gigantum_data()
+            ds._validate_gigantum_data()
+            ds.author = author
+            return ds
+        except Exception as e:
+            logger.error(e)
+            raise InventoryException(e)
 
     def list_datasets(self, username: str, sort_mode: str = "name") -> List[Dataset]:
         """ Return list of all available datasets for a given user

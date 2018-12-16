@@ -1,5 +1,9 @@
 # source: http://localhost:10000/api/labbook/
+<<<<<<< HEAD
 # timestamp: Fri Dec 14 2018 14:05:27 GMT-0500 (Eastern Standard Time)
+=======
+# timestamp: Fri Dec 14 2018 18:28:12 GMT-0500 (Eastern Standard Time)
+>>>>>>> e004e76d1ec2ed4907b7319de9b17241f2b3b33b
 
 schema {
   query: LabbookQuery
@@ -98,6 +102,18 @@ input AddCustomDockerInput {
 
 type AddCustomDockerPayload {
   updatedEnvironment: Environment
+  clientMutationId: String
+}
+
+input AddDatasetCollaboratorInput {
+  owner: String!
+  datasetName: String!
+  username: String!
+  clientMutationId: String
+}
+
+type AddDatasetCollaboratorPayload {
+  updatedDataset: Dataset
   clientMutationId: String
 }
 
@@ -380,6 +396,8 @@ type Dataset implements Node & GitRepository {
   datasetType: DatasetType
   schemaVersion: Int
   createdOnUtc: DateTime
+  collaborators: [String]
+  canManageCollaborators: Boolean
   modifiedOnUtc: DateTime
   activityRecords(before: String, after: String, first: Int, last: Int): ActivityConnection
   allFiles(before: String, after: String, first: Int, last: Int): DatasetFileConnection
@@ -467,6 +485,18 @@ value as specified by
 [iso8601](https://en.wikipedia.org/wiki/ISO_8601).
 """
 scalar DateTime
+
+input DeleteDatasetCollaboratorInput {
+  owner: String!
+  datasetName: String!
+  username: String!
+  clientMutationId: String
+}
+
+type DeleteDatasetCollaboratorPayload {
+  updatedDataset: Dataset
+  clientMutationId: String
+}
 
 input DeleteExperimentalBranchInput {
   owner: String!
@@ -616,6 +646,18 @@ input ImportLabbookInput {
 
 type ImportLabbookPayload {
   importJobKey: String
+  clientMutationId: String
+}
+
+input ImportRemoteDatasetInput {
+  owner: String!
+  datasetName: String!
+  remoteUrl: String!
+  clientMutationId: String
+}
+
+type ImportRemoteDatasetPayload {
+  newDatasetEdge: DatasetEdge
   clientMutationId: String
 }
 
@@ -806,6 +848,7 @@ type LabbookList implements Node {
 type LabbookMutations {
   importLabbook(input: ImportLabbookInput!): ImportLabbookPayload
   importRemoteLabbook(input: ImportRemoteLabbookInput!): ImportRemoteLabbookPayload
+  importRemoteDataset(input: ImportRemoteDatasetInput!): ImportRemoteDatasetPayload
   exportLabbook(input: ExportLabbookInput!): ExportLabbookPayload
   createLabbook(input: CreateLabbookInput!): CreateLabbookPayload
   deleteLabbook(input: DeleteLabbookInput!): DeleteLabbookPayload
@@ -835,6 +878,8 @@ type LabbookMutations {
   removeFavorite(input: RemoveLabbookFavoriteInput!): RemoveLabbookFavoritePayload
   addCollaborator(input: AddLabbookCollaboratorInput!): AddLabbookCollaboratorPayload
   deleteCollaborator(input: DeleteLabbookCollaboratorInput!): DeleteLabbookCollaboratorPayload
+  addDatasetCollaborator(input: AddDatasetCollaboratorInput!): AddDatasetCollaboratorPayload
+  deleteDatasetCollaborator(input: DeleteDatasetCollaboratorInput!): DeleteDatasetCollaboratorPayload
   writeReadme(input: WriteReadmeInput!): WriteReadmePayload
   createExperimentalBranch(input: CreateExperimentalBranchInput!): CreateExperimentalBranchPayload
   deleteExperimentalBranch(input: DeleteExperimentalBranchInput!): DeleteExperimentalBranchPayload

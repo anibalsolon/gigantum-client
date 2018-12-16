@@ -237,10 +237,8 @@ Dataset__nav end
 }
 
 .Datasets__listing {
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: visible;
 
   height: calc(100% - 90px);
-
-  @include flex(center, row);
+  @include flex(flex-start, row);
 }

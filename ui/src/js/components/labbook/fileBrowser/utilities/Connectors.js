@@ -170,6 +170,7 @@ const uploadDirContent = (dndItem, props, mutationData, fileSizeData) => {
   let path;
   dndItem.dirContent.then((fileList) => {
       if (fileList.length) {
+        console.log(props)
         let key = props.data ? props.data.edge.node.key : props.fileKey ? props.fileKey : '';
         path = key === '' ? '' : key.substr(0, key.lastIndexOf('/') || key.length);
 
@@ -346,8 +347,9 @@ function targetCollect(connect, monitor) {
   if (targets.length > 0) {
     // get the last target
     let lastTarget = targets[targets.length - 1];
+
     // if last target is a file remove it
-    if (lastTarget.props.data && !lastTarget.props.data.edge.node.isDir) {
+    if (lastTarget && lastTarget.props && lastTarget.props.data && lastTarget.props.data.edge && !lastTarget.props.data.edge.node.isDir) {
       targets.pop();
     }
     newLastTarget = targets[targets.length - 1];

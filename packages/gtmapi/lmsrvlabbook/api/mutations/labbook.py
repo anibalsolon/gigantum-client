@@ -327,8 +327,8 @@ class ImportRemoteLabbook(graphene.relay.ClientIDMutation):
         #       and do whatever with it.
         make_owner = not is_collab
         logger.info(f"Getting from remote, make_owner = {make_owner}")
-        lb = loaders.from_remote(remote_url, username, owner, labbook_name, labbook=lb,
-                                 make_owner=make_owner)
+        lb = loaders.labbook_from_remote(remote_url, username, owner, labbook=lb,
+                                         make_owner=make_owner)
         import_owner = InventoryManager().query_owner(lb)
         # TODO: Fix cursor implementation, this currently doesn't make sense
         cursor = base64.b64encode(f"{0}".encode('utf-8'))

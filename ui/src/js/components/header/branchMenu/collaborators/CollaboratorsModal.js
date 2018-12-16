@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 // Mutations
 import AddCollaboratorMutation from 'Mutations/AddCollaboratorMutation';
+import AddDatasetCollaboratorMutation from 'Mutations/AddDatasetCollaboratorMutation';
 import DeleteCollaboratorMutation from 'Mutations/DeleteCollaboratorMutation';
 // components
 import ButtonLoader from 'Components/shared/ButtonLoader';
@@ -139,34 +140,62 @@ export default class CollaboratorsModal extends Component {
 
     // waiting for backend updates
     this.setState({ addCollaboratorButtonDisabled: true, buttonLoaderAddCollaborator: 'loading' });
+    this.props.sectionType === 'dataset' ?
+      AddDatasetCollaboratorMutation(
+        labbookName,
+        owner,
+        newCollaborator,
+        (response, error) => {
+          const { buttonLoaderRemoveCollaborator } = this.state;
 
-    AddCollaboratorMutation(
-      labbookName,
-      owner,
-      newCollaborator,
-      (response, error) => {
-        const { buttonLoaderRemoveCollaborator } = this.state;
+          buttonLoaderRemoveCollaborator[newCollaborator] = '';
 
-        buttonLoaderRemoveCollaborator[newCollaborator] = '';
+          this.setState({ newCollaborator: '', addCollaboratorButtonDisabled: false, buttonLoaderRemoveCollaborator });
 
-        this.setState({ newCollaborator: '', addCollaboratorButtonDisabled: false, buttonLoaderRemoveCollaborator });
+          this.collaboratorSearch.value = '';
 
-        this.collaboratorSearch.value = '';
+          if (error) {
+            setErrorMessage('Could not add collaborator', error);
 
-        if (error) {
-          setErrorMessage('Could not add collaborator', error);
+            this.setState({ buttonLoaderAddCollaborator: 'error' });
+          } else {
+            this.setState({ buttonLoaderAddCollaborator: 'finished' });
+          }
 
-          this.setState({ buttonLoaderAddCollaborator: 'error' });
-        } else {
-          this.setState({ buttonLoaderAddCollaborator: 'finished' });
-        }
+          setTimeout(() => {
+            this.setState({ buttonLoaderAddCollaborator: '' });
+          }, 2000);
+        },
 
-        setTimeout(() => {
-          this.setState({ buttonLoaderAddCollaborator: '' });
-        }, 2000);
-      },
+      )
+      :
+      AddCollaboratorMutation(
+        labbookName,
+        owner,
+        newCollaborator,
+        (response, error) => {
+          const { buttonLoaderRemoveCollaborator } = this.state;
 
-    );
+          buttonLoaderRemoveCollaborator[newCollaborator] = '';
+
+          this.setState({ newCollaborator: '', addCollaboratorButtonDisabled: false, buttonLoaderRemoveCollaborator });
+
+          this.collaboratorSearch.value = '';
+
+          if (error) {
+            setErrorMessage('Could not add collaborator', error);
+
+            this.setState({ buttonLoaderAddCollaborator: 'error' });
+          } else {
+            this.setState({ buttonLoaderAddCollaborator: 'finished' });
+          }
+
+          setTimeout(() => {
+            this.setState({ buttonLoaderAddCollaborator: '' });
+          }, 2000);
+        },
+
+      );
   }
   /**
   *  @param {object} params

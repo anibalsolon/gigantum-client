@@ -1,24 +1,21 @@
 // vendor
 import React, { Component } from 'react';
 import { Route, Switch } from 'react-router-dom';
-import {
-  createFragmentContainer,
-  graphql,
-} from 'react-relay';
+import { createFragmentContainer, graphql } from 'react-relay';
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
 import Loadable from 'react-loadable';
-// store
-import store from 'JS/redux/store';
-import { setStickyState } from 'JS/redux/reducers/dataset/dataset';
-import { setCallbackRoute } from 'JS/redux/reducers/routes';
 // components
 import DatasetHeader from '../header/Header';
 import Login from 'Components/login/Login';
 import Loader from 'Components/shared/Loader';
 import ErrorBoundary from 'Components/shared/ErrorBoundary';
+// store
+import store from 'JS/redux/store';
+import { setStickyState } from 'JS/redux/reducers/dataset/dataset';
+import { setCallbackRoute } from 'JS/redux/reducers/routes';
 // utils
 import { getFilesFromDragEvent } from 'JS/utils/html-dir-content';
 // assets
@@ -61,7 +58,6 @@ class Dataset extends Component {
   UNSAFE_componentWillReceiveProps(nextProps) {
     setCallbackRoute(nextProps.location.pathname);
   }
-
   /**
     @param {}
     subscribe to store to update state

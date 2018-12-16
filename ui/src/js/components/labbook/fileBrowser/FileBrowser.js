@@ -58,7 +58,8 @@ class FileBrowser extends Component {
         let childrenState = {};
 
 
-        let files = props.files.edges.concat(datasetJSON.edges)
+        let files = (props.type !== 'dataset') ? props.files.edges.concat(datasetJSON.edges) : props.files.edges;
+        console.log(props, files)
         files.forEach((edge) => {
           if (edge.node && edge.node.key) {
             let key = edge.node.key;
@@ -102,7 +103,7 @@ class FileBrowser extends Component {
     */
     componentDidMount() {
       this.fileHandler = new FileFormatter(fileHandler);
-      const files = this.props.files.edges.concat(datasetJSON.edges);
+      const files = this.props.type !== 'dataset' ? this.props.files.edges.concat(datasetJSON.edges) : this.props.files.edges;
       this.fileHandler.postMessage({ files, search: this.state.search });
       this.fileHandler.addEventListener('message', (evt) => {
         if (this.state.fileHash !== evt.data.hash) {
@@ -123,7 +124,8 @@ class FileBrowser extends Component {
       if (this.state.search === '' && element.value !== '') {
         element.value = '';
       }
-      const files = this.props.files.edges.concat(datasetJSON.edges);
+      const files = this.props.type !== 'dataset' ? this.props.files.edges.concat(datasetJSON.edges) : this.props.files.edges;
+
       this.fileHandler.postMessage({ files, search: this.state.search });
     }
     /**
