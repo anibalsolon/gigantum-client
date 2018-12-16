@@ -106,6 +106,7 @@ class CollaboratorButton extends Component {
     const self = this;
     const { labbookName, owner } = this.props;
     let { collaborators, canManageCollaborators } = store.getState().collaborators;
+
     collaborators = collaborators && collaborators[labbookName];
     canManageCollaborators = canManageCollaborators && canManageCollaborators[labbookName];
     return (
@@ -119,8 +120,8 @@ class CollaboratorButton extends Component {
         render={({ props, error }) => {
               if (props) {
                 let section;
-                section = this.props.sectionType === 'dataset' ? props.dataset : this.props.labbook;
-
+                section = this.props.sectionType === 'dataset' ? props.dataset : props.labbook;
+                console.log(props)
                 this.canManageCollaborators = section.canManageCollaborators;
                 this.collaborators = section.collaborators;
 
@@ -143,12 +144,9 @@ class CollaboratorButton extends Component {
                   <li className={collaboratorCSS}>
                     <button
                       onClick={() => this._toggleCollaborators()}
-                      className={collaboratorButtonCSS}
-                    >
+                      className={collaboratorButtonCSS}>
                       Collaborators
-
                       <p className="BranchMenu__collaborator-names">{collaboratorNames}</p>
-
                     </button>
 
                     {
