@@ -17,6 +17,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+from gtmcore.activity.processors.jupyterlab import JupyterLabCellVisibilityProcessor
 from gtmcore.activity.tests.fixtures import redis_client, mock_kernel
 from gtmcore.fixtures import mock_labbook
 import uuid
@@ -46,12 +47,13 @@ class TestJupyterLabNotebookMonitor(object):
         monitor = JupyterLabNotebookMonitor("test", "test", mock_labbook[2].name,
                                             monitor_key, config_file=mock_labbook[0])
 
-        assert len(monitor.processors) == 5
+        assert len(monitor.processors) == 6
         assert type(monitor.processors[0]) == JupyterLabCodeProcessor
         assert type(monitor.processors[1]) == JupyterLabFileChangeProcessor
         assert type(monitor.processors[2]) == JupyterLabPlaintextProcessor
         assert type(monitor.processors[3]) == JupyterLabImageExtractorProcessor
-        assert type(monitor.processors[4]) == ActivityShowBasicProcessor
+        assert type(monitor.processors[4]) == JupyterLabCellVisibilityProcessor
+        assert type(monitor.processors[5]) == ActivityShowBasicProcessor
 
     def test_start(self, redis_client, mock_labbook, mock_kernel):
         """Test processing notebook activity"""

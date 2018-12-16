@@ -244,7 +244,8 @@ _GTM_ACTIVITY_END_"""
 
         adr2.importance = 200
 
-        ar.update_detail_object(adr2, 1)
+        with ar.inspect_detail_objects():
+            ar.update_detail_object(adr2, 1)
 
         assert len(ar._detail_objects) == 2
         assert ar._detail_objects[0][3].data['text/plain'] == 'second'

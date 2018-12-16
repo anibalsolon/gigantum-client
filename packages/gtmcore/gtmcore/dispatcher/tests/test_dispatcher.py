@@ -219,7 +219,7 @@ class TestDispatcher(object):
         erm.update_repositories()
         erm.index_repositories()
 
-        # Create a labook
+        # Create a labbook
         lb = InventoryManager(mock_config_file[0]).create_labbook('unittester', 'unittester',
                                                                   'unittest-start-stop-job',
                                                                   description="Testing docker building.")
