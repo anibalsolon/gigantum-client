@@ -10,7 +10,9 @@ import datetime
 
 from gtmcore.activity.serializers import Serializer
 from gtmcore.exceptions import GigantumException
+from gtmcore.logging import LMLogger
 
+logger = LMLogger.get_logger()
 
 class ActivityType(Enum):
     """Enumeration representing the type of Activity Record"""
@@ -370,29 +372,39 @@ class ActivityRecord(object):
             # Using unpacking here to get implicit assertion that records are four elements
             yield [obj for _, _, _, obj in self._detail_objects]
         finally:
-            # We regenerate our list, in case the user modified it:
-            old_details = [obj for _, _, _, obj in self._detail_objects]
-            self._detail_objects = []
-            for idx, detail in enumerate(old_details):
-                # We don't filter on .startswith('ex') here, so we can use other tags in future
-                for tag in detail.tags:
-                    try:
-                        # Currently show is the only attribute we update
-                        directive = self._tags_to_update[tag]
-                        if directive == 'show':
-                            detail.show = True
-                        elif directive == 'hide':
-                            detail.show = False
-                        elif directive == 'ignore':
-                            # We skip to the next detail object - this will be dropped
-                            continue
+            if self._tags_to_update:
+                logger.info(f'_tags_to_update: {self._tags_to_update}')
+                # We regenerate our list, in case the user modified it:
+                old_details = [obj for _, _, _, obj in self._detail_objects]
+                self._detail_objects = []
+                for idx, detail in enumerate(old_details):
+                    # Default behavior is 'auto' whether it's in the comment or not
+                    directive = 'auto'
 
-                    except KeyError:
-                        pass
+                    # We don't filter on .startswith('ex') here, so we can use other tags in future
+                    # Note also that
+                    for tag in detail.tags:
+                        try:
+                            # Currently show is the only attribute we update
+                            directive = self._tags_to_update[tag]
+                            if directive == 'show':
+                                detail.show = True
+                                break
+                            elif directive == 'hide':
+                                detail.show = False
+                                break
+                            elif directive in ['ignore', 'auto']:
+                                # 'ignore' is handled below - this will be dropped
+                                break
 
-                self.add_detail_object(detail)
+                        except KeyError:
+                            pass
 
-            self._tags_to_update = {}
+                    if directive != 'ignore':
+                        self.add_detail_object(detail)
+
+                self._tags_to_update = {}
+
             self._sort_detail_objects()
             self._in_modify = False
 
