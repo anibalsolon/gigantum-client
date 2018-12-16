@@ -21,7 +21,7 @@ const uploadLabbookChunk = (file, chunk, accessToken, getChunkCallback) => {
   });
 };
 
-const updateTotalStatus = (file, labbookName, owner, transactionId, type) => {
+const updateTotalStatus = (file, labbookName, owner, transactionId, section) => {
   const fileCount = store.getState().footer.fileCount + 1;
   const totalFiles = store.getState().footer.totalFiles;
   const progressBarPercentage = ((fileCount / totalFiles) * 100);
@@ -30,7 +30,8 @@ const updateTotalStatus = (file, labbookName, owner, transactionId, type) => {
   if (fileCount === totalFiles) {
     setFinishedUploading();
     setUploadMessageUpdate(`Uploaded ${totalFiles} files. Please wait while upload is finalizing.`, null, progressBarPercentage);
-    type === 'dataset' ?
+    console.log(section)
+    section === 'data' ?
       CompleteDatasetUploadTransactionMutation(
         'connectionKey',
         owner,
@@ -57,7 +58,7 @@ const updateTotalStatus = (file, labbookName, owner, transactionId, type) => {
   }
 };
 
-const updateChunkStatus = (file, chunkData, labbookName, owner, transactionId, type) => {
+const updateChunkStatus = (file, chunkData, labbookName, owner, transactionId, section) => {
   const {
     fileSizeKb,
     chunkSize,
@@ -70,7 +71,7 @@ const updateChunkStatus = (file, chunkData, labbookName, owner, transactionId, t
   if ((chunkSize * chunkIndex) >= (fileSizeKb * 1000)) {
     setFinishedUploading();
     setUploadMessageUpdate('Please wait while upload is finalizing.', null, (((chunkSize * chunkIndex) / (fileSizeKb * 1000)) * 100));
-    type === 'dataset' ?
+    section === 'data' ?
       CompleteDatasetUploadTransactionMutation(
         'connectionKey',
         owner,
@@ -108,10 +109,10 @@ const uploadFileBrowserChunk = (data, chunkData, file, chunk, accessToken, usern
           const lastChunk = (chunkData.totalChunks - 1) === chunkData.chunkIndex;
 
           if (lastChunk) {
-            updateTotalStatus(file, data.labbookName, username, data.transactionId, type);
+            updateTotalStatus(file, data.labbookName, username, data.transactionId, section);
           }
         } else {
-          updateChunkStatus(file, chunkData, data.labbookName, username, data.transactionId, type);
+          updateChunkStatus(file, chunkData, data.labbookName, username, data.transactionId, section);
         }
       } else {
         const errorBody = error.length && error[0].message ? error[0].message : error;

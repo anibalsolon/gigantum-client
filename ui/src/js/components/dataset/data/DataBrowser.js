@@ -24,7 +24,7 @@ class DataBrowser extends Component {
   */
   componentDidUpdate() {
     this.props.loadStatus(this.state.moreLoading);
-    if (!this.state.moreLoading && this.props.data.allFiles && this.props.data.allFiles.edges.length < 3 && this.props.data.allFiles.pageInfo.hasNextPage) {
+    if (!this.state.moreLoading && this.props.dataset && this.props.dataset.allFiles && this.props.dataset.allFiles.edges.length < 3 && this.props.dataset.allFiles.pageInfo.hasNextPage) {
       this._loadMore();
     }
   }
@@ -34,8 +34,9 @@ class DataBrowser extends Component {
   */
   componentDidMount() {
     this.props.loadStatus(this.state.moreLoading);
-    if (this.props.data.allFiles &&
-      this.props.data.allFiles.pageInfo.hasNextPage) {
+    console.log(this.props)
+    if (this.props.dataset && this.props.dataset.allFiles &&
+      this.props.dataset.allFiles.pageInfo.hasNextPage) {
       this._loadMore(); // routes query only loads 2, call loadMore
     } else {
       this.setState({ moreLoading: false });
@@ -57,8 +58,8 @@ class DataBrowser extends Component {
           console.error(error);
         }
 
-        if (self.props.data.allFiles &&
-         self.props.data.allFiles.pageInfo.hasNextPage) {
+        if (self.props.dataset.allFiles &&
+         self.props.dataset.allFiles.pageInfo.hasNextPage) {
           self._loadMore();
         } else {
           this.setState({ moreLoading: false });
@@ -76,12 +77,12 @@ class DataBrowser extends Component {
   }
 
   render() {
-    if (this.props.data && this.props.data.allFiles) {
-      let dataFiles = this.props.data.allFiles;
-      if (this.props.data.allFiles.edges.length === 0) {
+    if (this.props.dataset && this.props.dataset.allFiles) {
+      let dataFiles = this.props.dataset.allFiles;
+      if (this.props.dataset.allFiles.edges.length === 0) {
         dataFiles = {
           edges: [],
-          pageInfo: this.props.data.allFiles.pageInfo,
+          pageInfo: this.props.dataset.allFiles.pageInfo,
         };
       }
 
@@ -110,8 +111,8 @@ export default createPaginationContainer(
   DataBrowser,
   {
 
-    data: graphql`
-      fragment DataBrowser_data on Dataset{
+    dataset: graphql`
+      fragment DataBrowser_dataset on Dataset{
         allFiles(after: $cursor, first: $first)@connection(key: "DataBrowser_allFiles", filters: []){
           edges{
             node{
@@ -136,7 +137,8 @@ export default createPaginationContainer(
   {
     direction: 'forward',
     getConnectionFromProps(props) {
-      return props.data && props.data.allFiles;
+      console.log(props);
+      return props.dataset && props.dataset.allFiles;
     },
     getFragmentVariables(prevVars, totalCount) {
       return {
@@ -146,7 +148,7 @@ export default createPaginationContainer(
     },
     getVariables(props, { count, cursor }, fragmentVariables) {
       const { owner, labbookName } = store.getState().routes;
-
+      console.log(props)
       return {
         first: count,
         cursor,
@@ -164,7 +166,7 @@ export default createPaginationContainer(
         dataset(name: $name, owner: $owner){
            id
            description
-           ...DataBrowser_data
+           ...DataBrowser_dataset
         }
       }
     `,
