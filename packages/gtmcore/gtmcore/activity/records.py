@@ -390,7 +390,7 @@ class ActivityRecord(object):
                     except KeyError:
                         pass
 
-                    self.add_detail_object(detail)
+                self.add_detail_object(detail)
 
             self._tags_to_update = {}
             self._sort_detail_objects()
