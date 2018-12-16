@@ -24,7 +24,7 @@ from typing import Optional, Callable, List
 
 from gtmcore.exceptions import GigantumException
 from gtmcore.configuration.utils import call_subprocess
-from gtmcore.inventory.inventory import InventoryManager
+from gtmcore.inventory.inventory import InventoryManager, Repository
 from gtmcore.labbook import LabBook
 from gtmcore.logging import LMLogger
 from gtmcore.workflows import core
@@ -40,25 +40,24 @@ class ZipExporter(object):
     """Provides project import from a zipfile, and export to a zip file."""
 
     @classmethod
-    def _export_zip(cls, labbook_path: str, lb_export_directory: str,
-                    config_file: Optional[str] = None,) -> str:
-        if not os.path.isdir(lb_export_directory):
-            os.makedirs(lb_export_directory, exist_ok=True)
+    def _export_zip(cls, repo: Repository, export_directory: str,
+                    config_file: Optional[str] = None, ) -> str:
+        if not os.path.isdir(export_directory):
+            os.makedirs(export_directory, exist_ok=True)
 
-        labbook = InventoryManager(config_file).load_labbook_from_directory(labbook_path)
-        core.sync_locally(labbook)
+        core.sync_locally(repo)
 
-        labbook_dir, _ = labbook.root_dir.rsplit(os.path.sep, 1)
+        repo_dir, _ = repo.root_dir.rsplit(os.path.sep, 1)
 
-        lb_zip_name = f'{labbook.name}-' \
-                      f'{labbook.git.log()[0]["commit"][:6]}'
-        zip_path = f'{lb_zip_name}.zip'
-        exported_path = os.path.join(lb_export_directory, zip_path)
+        repo_zip_name = f'{repo.name}-' \
+                      f'{repo.git.log()[0]["commit"][:6]}'
+        zip_path = f'{repo_zip_name}.zip'
+        exported_path = os.path.join(export_directory, zip_path)
 
         try:
             # zip data using subprocess - NOTE! Python zipfile library does not work correctly.
-            call_subprocess(['zip', '-r', exported_path, os.path.basename(labbook.root_dir)],
-                            cwd=labbook_dir, check=True)
+            call_subprocess(['zip', '-r', exported_path, os.path.basename(repo.root_dir)],
+                            cwd=repo_dir, check=True)
             assert os.path.exists(exported_path)
             return exported_path
         except:
@@ -68,11 +67,20 @@ class ZipExporter(object):
                 pass
             raise
 
+    @classmethod
+    def export_labbook(cls, labbook_path: str, lb_export_directory: str) -> str:
+        try:
+            labbook = InventoryManager().load_labbook_from_directory(labbook_path)
+            return cls._export_zip(labbook, lb_export_directory)
+        except Exception as e:
+            logger.error(e)
+            raise ZipWorkflowException(e)
 
     @classmethod
-    def export_zip(cls, labbook_path: str, lb_export_directory: str) -> str:
+    def export_dataset(cls, dataset_path: str, ds_export_directory: str) -> str:
         try:
-            return cls._export_zip(labbook_path, lb_export_directory)
+            dataset = InventoryManager().load_dataset_from_directory(dataset_path)
+            return cls._export_zip(dataset, ds_export_directory)
         except Exception as e:
             logger.error(e)
             raise ZipWorkflowException(e)

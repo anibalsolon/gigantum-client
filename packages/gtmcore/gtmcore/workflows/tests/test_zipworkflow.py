@@ -89,12 +89,12 @@ class TestLabbookImportZipping(object):
     def test_fail_export_garbled_export(self):
         # Test giving a path that doesn't exist
         with pytest.raises(ZipWorkflowException):
-            ZipExporter.export_zip('/not/a/real/path', '.')
+            ZipExporter.export_labbook('/not/a/real/path', '.')
 
     def test_fail_export_not_a_labbook(self):
         # Pass in a valid directory, but one that is not an LB
         with pytest.raises(ZipWorkflowException):
-            ZipExporter.export_zip('/var', '.')
+            ZipExporter.export_labbook('/var', '.')
 
     def test_success_import_valid_labbook_from_windows(self, mock_config_file):
         import_zip = os.path.join(resource_filename('gtmcore','workflows/tests'),
@@ -146,7 +146,7 @@ class TestLabbookImportZipping(object):
         lb = inv_manager.create_labbook('unittester', 'unittester', 'unittest-zip')
 
         with tempfile.TemporaryDirectory() as tempd:
-            path = ZipExporter.export_zip(lb.root_dir, tempd)
+            path = ZipExporter.export_labbook(lb.root_dir, tempd)
             newlb = ZipExporter.import_zip(path, "unittester2", "unittester2",
                                            mock_config_file[0])
             assert not os.path.exists(path)
@@ -155,7 +155,7 @@ class TestLabbookImportZipping(object):
             assert newlb.active_branch == 'gm.workspace-unittester2'
 
             # Now try with same user as exporter
-            path2 = ZipExporter.export_zip(lb.root_dir, tempd)
+            path2 = ZipExporter.export_labbook(lb.root_dir, tempd)
             shutil.rmtree(lb.root_dir)
             lb2 = ZipExporter.import_zip(path2, "unittester", "unittester",
                                          mock_config_file[0])
