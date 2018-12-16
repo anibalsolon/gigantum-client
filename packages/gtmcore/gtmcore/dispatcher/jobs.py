@@ -146,9 +146,9 @@ def import_labboook_from_zip(archive_path: str, username: str, owner: str,
                 f"username={username}, owner={owner}, config_file={config_file})")
 
     try:
-        lb = ZipExporter.import_zip(archive_path, username, owner,
-                                    config_file=config_file,
-                                    update_meta=update_meta)
+        lb = ZipExporter.import_labbook(archive_path, username, owner,
+                                        config_file=config_file,
+                                        update_meta=update_meta)
         return lb.root_dir
     except Exception as e:
         logger.exception(f"(Job {p}) Error on import_labbook_from_zip({archive_path}): {e}")
