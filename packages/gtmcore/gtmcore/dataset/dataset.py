@@ -169,7 +169,7 @@ class Dataset(Repository):
             df.flush()
 
     def _load_gigantum_data(self) -> None:
-        """Method to load the labbook YAML file to a dictionary
+        """Method to load the dataset YAML file to a dictionary
 
         Returns:
             None
@@ -181,7 +181,7 @@ class Dataset(Repository):
             self._data = yaml.load(df)
 
     def _validate_gigantum_data(self) -> None:
-        """Method to validate the LabBook data file contents
+        """Method to validate the Dataset data file contents
 
         Returns:
             None
@@ -194,5 +194,6 @@ class Dataset(Repository):
 
         # Validate schema is supported by running version of the software and valid
         if not validate_dataset_schema(self.schema, self.data):
+            import json
             errmsg = f"Schema in Dataset {str(self)} does not match indicated version {self.schema}"
             raise ValueError(errmsg)
