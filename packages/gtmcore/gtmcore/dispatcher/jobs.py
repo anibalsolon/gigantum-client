@@ -119,6 +119,22 @@ def export_labbook_as_zip(labbook_path: str, lb_export_directory: str) -> str:
         raise
 
 
+def export_dataset_as_zip(dataset_path: str, ds_export_directory: str) -> str:
+    """Return path to archive file of exported labbook. """
+    p = os.getpid()
+    logger = LMLogger.get_logger()
+    logger.info(f"(Job {p}) Starting export_dataset_as_zip({dataset_path})")
+
+    try:
+        lb = InventoryManager().load_dataset_from_directory(dataset_path)
+        with lb.lock():
+            path = ZipExporter.export_dataset(lb.root_dir, ds_export_directory)
+        return path
+    except Exception as e:
+        logger.exception(f"(Job {p}) Error on export_dataset_as_zip: {e}")
+        raise
+
+
 def import_labboook_from_zip(archive_path: str, username: str, owner: str,
                              config_file: Optional[str] = None) -> str:
     """Method to import a labbook from a zip file
@@ -152,6 +168,45 @@ def import_labboook_from_zip(archive_path: str, username: str, owner: str,
         return lb.root_dir
     except Exception as e:
         logger.exception(f"(Job {p}) Error on import_labbook_from_zip({archive_path}): {e}")
+        raise
+    finally:
+        if os.path.exists(archive_path):
+            os.remove(archive_path)
+
+
+def import_dataset_from_zip(archive_path: str, username: str, owner: str,
+                            config_file: Optional[str] = None) -> str:
+    """Method to import a dataset from a zip file
+
+    Args:
+        archive_path(str): Path to the uploaded zip
+        username(str): Username
+        owner(str): Owner username
+        config_file(str): Optional path to a labmanager config file
+
+    Returns:
+        str: directory path of imported labbook
+    """
+
+    def update_meta(msg):
+        job = get_current_job()
+        if not job:
+            return
+        job.meta['feedback'] = msg
+        job.save_meta()
+
+    p = os.getpid()
+    logger = LMLogger.get_logger()
+    logger.info(f"(Job {p}) Starting import_dataset_from_zip(archive_path={archive_path},"
+                f"username={username}, owner={owner}, config_file={config_file})")
+
+    try:
+        lb = ZipExporter.import_dataset(archive_path, username, owner,
+                                        config_file=config_file,
+                                        update_meta=update_meta)
+        return lb.root_dir
+    except Exception as e:
+        logger.exception(f"(Job {p}) Error on import_dataset_from_zip({archive_path}): {e}")
         raise
     finally:
         if os.path.exists(archive_path):

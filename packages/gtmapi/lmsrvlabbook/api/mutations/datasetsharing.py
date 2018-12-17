@@ -1,16 +1,20 @@
 import base64
 import graphene
+import os
 
 from gtmcore.dataset import Dataset
 from gtmcore.inventory import loaders
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.dispatcher import Dispatcher, jobs
+from gtmcore.configuration import Configuration
 from gtmcore.logging import LMLogger
 from gtmcore.gitlib.gitlab import GitLabManager
 
 from lmsrvcore.api import logged_mutation
 from lmsrvcore.auth.identity import parse_token
 from lmsrvcore.auth.user import get_logged_in_username, get_logged_in_author
+from lmsrvcore.api.mutations import ChunkUploadMutation, ChunkUploadInput
+
 from lmsrvlabbook.api.connections.dataset import DatasetConnection
 from lmsrvlabbook.api.objects.dataset import Dataset as DatasetObject
 
@@ -284,3 +288,60 @@ class DeleteDatasetCollaborator(graphene.relay.ClientIDMutation):
                        "name": dataset_name}
 
         return DeleteDatasetCollaborator(updated_dataset=DatasetObject(**create_data))
+
+
+class ExportDataset(graphene.relay.ClientIDMutation):
+    class Input:
+        owner = graphene.String(required=True)
+        dataset_name = graphene.String(required=True)
+
+    job_key = graphene.String()
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, owner, labbook_name, client_mutation_id=None):
+        username = get_logged_in_username()
+        working_directory = Configuration().config['git']['working_directory']
+        ds = InventoryManager().load_dataset(username, owner, labbook_name,
+                                             author=get_logged_in_author())
+
+        job_metadata = {'method': 'export_dataset_as_zip',
+                        'dataset': ds.key}
+        job_kwargs = {'dataset_path': ds.root_dir,
+                      'ds_export_directory': os.path.join(working_directory, 'export')}
+        dispatcher = Dispatcher()
+        job_key = dispatcher.dispatch_task(jobs.export_dataset_as_zip,
+                                           kwargs=job_kwargs,
+                                           metadata=job_metadata)
+
+        return ExportDataset(job_key=job_key.key_str)
+
+
+class ImportDataset(graphene.relay.ClientIDMutation, ChunkUploadMutation):
+    class Input:
+        chunk_upload_params = ChunkUploadInput(required=True)
+
+    import_job_key = graphene.String()
+
+    @classmethod
+    def mutate_and_wait_for_chunks(cls, info, **kwargs):
+        return ImportDataset()
+
+    @classmethod
+    def mutate_and_process_upload(cls, info, **kwargs):
+        if not cls.upload_file_path:
+            logger.error('No file uploaded')
+            raise ValueError('No file uploaded')
+
+        username = get_logged_in_username()
+        job_metadata = {'method': 'import_dataset_from_zip'}
+        job_kwargs = {
+            'archive_path': cls.upload_file_path,
+            'username': username,
+            'owner': username
+        }
+        dispatcher = Dispatcher()
+        job_key = dispatcher.dispatch_task(jobs.import_labboook_from_zip,
+                                           kwargs=job_kwargs,
+                                           metadata=job_metadata)
+
+        return ImportDataset(import_job_key=job_key.key_str)
