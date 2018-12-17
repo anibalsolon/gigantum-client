@@ -57,6 +57,7 @@ const dispatchLoadingProgress = (workerData) => {
  uses redux to dispatch file upload failed status to the footer
 */
 const dispatchFailedStatus = () => {
+  console.log('dispatchFailedStatus');
   store.dispatch({
     type: 'UPLOAD_MESSAGE_UPDATE',
     payload: {
@@ -287,7 +288,7 @@ export default class ImportModule extends Component {
           }
         }).catch((error) => {
           console.log(error);
-
+          console.log('error');
           store.dispatch({
             type: 'UPLOAD_MESSAGE_UPDATE',
             payload: {
@@ -302,11 +303,12 @@ export default class ImportModule extends Component {
       } else if (workerData.chunkSize) {
         dispatchLoadingProgress(workerData);
       } else if (workerData[0]) {
+        console.log('UPLOAD_MESSAGE_UPDATE');
         store.dispatch({
           type: 'UPLOAD_MESSAGE_UPDATE',
           payload: {
             uploadMessage: workerData[0].message,
-            uploadError: true,
+            uploadError: false,
             id: '',
             percentage: 0,
           },
