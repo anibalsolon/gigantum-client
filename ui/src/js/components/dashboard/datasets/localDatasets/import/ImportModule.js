@@ -5,6 +5,7 @@ import uuidv4 from 'uuid/v4';
 // components
 import ToolTip from 'Components/shared/ToolTip';
 import Modal from 'Components/shared/Modal';
+import JobStatus from 'JS/utils/JobStatus';
 import ChunkUploader from 'JS/utils/ChunkUploader';
 // queries
 import UserIdentity from 'JS/Auth/UserIdentity';
@@ -20,14 +21,13 @@ import config from 'JS/config';
 
 let counter = 0;
 const dropZoneId = uuidv4();
-
 /*
  @param {object} workerData
  uses redux to dispatch file upload to the footer
 */
-const dispatchLoadingProgress = (wokerData) => {
-  let bytesUploaded = (wokerData.chunkSize * (wokerData.chunkIndex + 1)) / 1000;
-  const totalBytes = wokerData.fileSizeKb;
+const dispatchLoadingProgress = (workerData) => {
+  let bytesUploaded = (workerData.chunkSize * (workerData.chunkIndex + 1)) / 1000;
+  const totalBytes = workerData.fileSizeKb;
   bytesUploaded = bytesUploaded < totalBytes
     ? bytesUploaded
     : totalBytes;
@@ -50,6 +50,42 @@ const dispatchLoadingProgress = (wokerData) => {
     const width = Math.floor((bytesUploaded / totalBytes) * 100);
     document.getElementById('footerProgressBar').style.width = `${width}%`;
   }
+};
+
+/*
+ @param {}
+ uses redux to dispatch file upload failed status to the footer
+*/
+const dispatchFailedStatus = () => {
+  store.dispatch({
+    type: 'UPLOAD_MESSAGE_UPDATE',
+    payload: {
+      uploadMessage: 'Import failed',
+      id: '',
+      percentage: 0,
+      uploadError: true,
+    },
+  });
+};
+
+/*
+ @param {string} filePath
+  gets new labbook name and url route
+ @return
+*/
+const getRoute = (filepath) => {
+  const filename = filepath.split('/')[filepath.split('/').length - 1];
+  return filename.split('_')[0];
+};
+/*
+ @param {string} filePath
+ dispatched upload success message and passes labbookName/route to the footer
+*/
+const dispatchFinishedStatus = (filepath, history, buildImage) => {
+  const route = getRoute(filepath);
+  history.push(`/datasets/${localStorage.getItem('username')}/${route}`);
+  buildImage(route, localStorage.getItem('username'), uuidv4());
+  setUploadMessageRemove('', uuidv4(), 0);
 };
 
 export default class ImportModule extends Component {
@@ -215,8 +251,9 @@ export default class ImportModule extends Component {
       },
     });
 
-    const postMessage = (wokerData) => {
-      if (wokerData.importLabbook) {
+    const postMessage = (workerData) => {
+      console.log(workerData)
+      if (workerData.importDataset) {
         store.dispatch({
           type: 'UPLOAD_MESSAGE_UPDATE',
           payload: {
@@ -226,8 +263,9 @@ export default class ImportModule extends Component {
           },
         });
 
-        const importLabbook = wokerData.importLabbook;
-        JobStatus.getJobStatus(importLabbook.importJobKey).then((response) => {
+        const importDataset = workerData.importDataset;
+        JobStatus.getJobStatus(importDataset.importJobKey).then((response) => {
+          console.log(response)
           store.dispatch({
             type: 'UPLOAD_MESSAGE_UPDATE',
             payload: {
@@ -239,8 +277,10 @@ export default class ImportModule extends Component {
 
           if (response.jobStatus.status === 'finished') {
             self._clearState();
+            console.log('dispatchFinishedStatus')
             dispatchFinishedStatus(response.jobStatus.result, self.props.history, self._buildImage);
           } else if (response.jobStatus.status === 'failed') {
+            console.log('dispatchFailedStatus')
             dispatchFailedStatus();
 
             self._clearState();
@@ -259,14 +299,13 @@ export default class ImportModule extends Component {
           });
           self._clearState();
         });
-      } else if (wokerData.chunkSize) {
-        dispatchLoadingProgress(wokerData);
-      } else if (wokerData[0]) {
-        console.log(wokerData)
+      } else if (workerData.chunkSize) {
+        dispatchLoadingProgress(workerData);
+      } else if (workerData[0]) {
         store.dispatch({
           type: 'UPLOAD_MESSAGE_UPDATE',
           payload: {
-            uploadMessage: wokerData[0].message,
+            uploadMessage: workerData[0].message,
             uploadError: true,
             id: '',
             percentage: 0,
@@ -321,8 +360,11 @@ export default class ImportModule extends Component {
                   filename: file.name,
                 },
               ],
+              readyDataset: {
+                datasetName: file.name.replace('.zip', ''),
+                owner: localStorage.getItem('username'),
+              },
             });
-            self._fileUpload();
           };
 
           fileReader.onload = function () {
@@ -411,41 +453,45 @@ export default class ImportModule extends Component {
   *  @return {}
   */
   importDataset = (evt) => {
-    const id = uuidv4(),
-      datasetName = this.state.remoteURL.split('/')[this.state.remoteURL.split('/').length - 1],
-      owner = this.state.remoteURL.split('/')[this.state.remoteURL.split('/').length - 2],
-      remote = `https://repo.gigantum.io/${owner}/${datasetName}.git`;
-    const self = this;
+    if (!this.state.files[0]) {
+      const id = uuidv4(),
+        datasetName = this.state.remoteURL.split('/')[this.state.remoteURL.split('/').length - 1],
+        owner = this.state.remoteURL.split('/')[this.state.remoteURL.split('/').length - 2],
+        remote = `https://repo.gigantum.io/${owner}/${datasetName}.git`;
+      const self = this;
 
-    UserIdentity.getUserIdentity().then((response) => {
-      if (navigator.onLine) {
-        if (response.data) {
-          if (response.data.userIdentity.isSessionValid) {
-            self._importingState();
+      UserIdentity.getUserIdentity().then((response) => {
+        if (navigator.onLine) {
+          if (response.data) {
+            if (response.data.userIdentity.isSessionValid) {
+              self._importingState();
 
-            store.dispatch({
-              type: 'MULTIPART_INFO_MESSAGE',
-              payload: {
-                id,
-                message: 'Importing Dataset please wait',
-                isLast: false,
-                error: false,
-              },
-            });
+              store.dispatch({
+                type: 'MULTIPART_INFO_MESSAGE',
+                payload: {
+                  id,
+                  message: 'Importing Dataset please wait',
+                  isLast: false,
+                  error: false,
+                },
+              });
 
-            self._importRemoteDataset(owner, datasetName, remote, id);
-          } else {
-            this.props.auth.renewToken(true, () => {
-              this.setState({ showLoginPrompt: true });
-            }, () => {
-              this.importDataset();
-            });
+              self._importRemoteDataset(owner, datasetName, remote, id);
+            } else {
+              this.props.auth.renewToken(true, () => {
+                this.setState({ showLoginPrompt: true });
+              }, () => {
+                this.importDataset();
+              });
+            }
           }
+        } else {
+          this.setState({ showLoginPrompt: true });
         }
-      } else {
-        this.setState({ showLoginPrompt: true });
-      }
-    });
+      });
+    } else {
+      this._fileUpload();
+    }
   }
 
   /**
@@ -556,8 +602,13 @@ const ImportMain = ({ self }) => {
                     <div>Dataset Owner: {self.state.readyDataset.owner}</div>
                     <div>Dataset Name: {self.state.readyDataset.datasetName}</div>
                   </div> :
-                  <div className= "DropZone" >
-                    Drag and drop the exported Dataset here
+                  <div className= "DropZone">
+                    { self.state.files[0] ?
+                      <div>
+                        <p>{self.state.files[0].filename}</p>
+                      </div>
+                      : <p>Drag and drop the exported Dataset here</p>
+                    }
                   </div>
                 }
               </div>

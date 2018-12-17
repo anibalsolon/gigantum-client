@@ -167,11 +167,11 @@ class CollaboratorButton extends Component {
               } else if (collaborators !== null) {
                 const collaboratorButtonCSS = classNames({
                   disabled: !canManageCollaborators && this.state.sessionValid,
-                  'BranchMenu__item--flat-button': true,
+                  'BranchMenu__btn--flat': true,
                 });
 
                 const collaboratorCSS = classNames({
-                  'BranchMenu__item--collaborators': true,
+                  'BranchMenu__item BranchMenu__item--collaborators': true,
                   disabled: !canManageCollaborators && this.state.sessionValid,
                 });
 

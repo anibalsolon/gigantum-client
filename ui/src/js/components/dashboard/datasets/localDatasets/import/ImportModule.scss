@@ -274,7 +274,7 @@ input.Import__input--paste{
   align-self: center;
   width: 350px;
   height: 150px;
-  border: 1px solid $jet;
+  border: 1px dashed $jet;
   line-height: 20px;
   word-break: break-word;
   hr {
@@ -288,4 +288,9 @@ input.Import__input--paste{
   button {
     margin: 0 10px;
   }
+}
+
+.ImportModule__drop-area-highlight{
+  border: 2px dashed $azure;
+
 }

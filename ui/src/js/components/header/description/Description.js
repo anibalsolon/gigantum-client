@@ -15,8 +15,8 @@ export default class Description extends Component {
     super(props);
     this.state = {
       editingDescription: false,
-      descriptionText: this.props.description.replace(/\n/g, ' '),
-      lastSavedDescription: this.props.description.replace(/\n/g, ' '),
+      descriptionText: this.props.description ? this.props.description.replace(/\n/g, ' ') : '',
+      lastSavedDescription: this.props.description ? this.props.description.replace(/\n/g, ' ') : '',
       savingDescription: false,
       hovered: false,
       textareaWidth: '270px',

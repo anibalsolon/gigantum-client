@@ -22,10 +22,11 @@ const jobStatusQuery = graphql`
 const JobStatus = {
   getJobStatus: (jobKey) => {
     const variables = { jobKey };
-
+    console.log(jobKey)
     return new Promise((resolve, reject) => {
       const fetchData = function () {
         fetchQuery(jobStatusQuery(), variables).then((response) => {
+          console.log(response)
           if (response.data.jobStatus.status === 'started' || response.data.jobStatus.status === 'queued') {
             setTimeout(() => {
               fetchData();
