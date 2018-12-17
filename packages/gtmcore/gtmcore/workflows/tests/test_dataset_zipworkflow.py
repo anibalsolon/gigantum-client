@@ -96,20 +96,20 @@ class TestDatasetImportZipping(object):
         with pytest.raises(ZipWorkflowException):
             ZipExporter.export_dataset('/var', '.')
 
-    def test_success_import_valid_dataset_from_windows(self, mock_config_file):
-        import_zip = os.path.join(resource_filename('gtmcore','workflows/tests'),
-                                  'test_dataset_from_windows.zip')
-        dup_import = shutil.copy(import_zip, '/tmp/copy-of-test_dataset_from_windows.zip')
-
-        workspace = Configuration(mock_config_file[0]).config['git']['working_directory']
-
-        # Snapshots of directories before and after import - assert different
-        pre_snapshot = str(list(sorted(os.walk(workspace))))
-        z = ZipExporter()
-        x = z.import_dataset(dup_import, 'test', 'test', mock_config_file[0])
-        post_snapshot = str(list(sorted(os.walk(workspace))))
-        assert pre_snapshot != post_snapshot
-        assert x.active_branch == 'gm.workspace-test'
+    # def test_success_import_valid_dataset_from_windows(self, mock_config_file):
+    #     import_zip = os.path.join(resource_filename('gtmcore','workflows/tests'),
+    #                               'test_dataset_from_windows.zip')
+    #     dup_import = shutil.copy(import_zip, '/tmp/copy-of-test_dataset_from_windows.zip')
+    #
+    #     workspace = Configuration(mock_config_file[0]).config['git']['working_directory']
+    #
+    #     # Snapshots of directories before and after import - assert different
+    #     pre_snapshot = str(list(sorted(os.walk(workspace))))
+    #     z = ZipExporter()
+    #     x = z.import_dataset(dup_import, 'test', 'test', mock_config_file[0])
+    #     post_snapshot = str(list(sorted(os.walk(workspace))))
+    #     assert pre_snapshot != post_snapshot
+    #     assert x.active_branch == 'gm.workspace-test'
 
     def test_success_import_valid_dataset_from_macos(self, mock_config_file):
         import_zip = os.path.join(resource_filename('gtmcore','workflows/tests'),
