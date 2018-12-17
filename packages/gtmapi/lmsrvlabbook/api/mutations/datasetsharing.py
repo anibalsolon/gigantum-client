@@ -340,7 +340,7 @@ class ImportDataset(graphene.relay.ClientIDMutation, ChunkUploadMutation):
             'owner': username
         }
         dispatcher = Dispatcher()
-        job_key = dispatcher.dispatch_task(jobs.import_labboook_from_zip,
+        job_key = dispatcher.dispatch_task(jobs.import_dataset_from_zip,
                                            kwargs=job_kwargs,
                                            metadata=job_metadata)
 

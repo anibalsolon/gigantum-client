@@ -117,7 +117,8 @@ class ZipExporter(object):
             # This makes sure the working directory is set properly.
             core.sync_locally(repo, username=username)
 
-            #repo._data['owner']['username'] = owner
+            if 'owner' in repo._data:
+                repo._data['owner']['username'] = owner
             repo._save_gigantum_data()
             if not repo.is_repo_clean:
                 repo.git.add('.gigantum/labbook.yaml')
