@@ -24,4 +24,4 @@ from lmsrvlabbook.api.mutations.dataset import (CreateDataset, AddDatasetFile, C
                                                 FetchDatasetEdge)
 from lmsrvlabbook.api.mutations.datasetsharing import (PublishDataset, SyncDataset, ImportRemoteDataset,
                                                        SetDatasetVisibility, AddDatasetCollaborator,
-                                                       DeleteDatasetCollaborator)
+                                                       DeleteDatasetCollaborator, ImportDataset, ExportDataset)

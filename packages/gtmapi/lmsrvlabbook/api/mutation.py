@@ -37,6 +37,8 @@ from lmsrvlabbook.api.mutations import (CreateLabbook, BuildImage, StartContaine
                                         FetchDatasetEdge, SetDatasetVisibility, SyncDataset,
                                         AddDatasetCollaborator, DeleteDatasetCollaborator)
 
+from lmsrvlabbook.api.mutations import (ImportDataset, ExportDataset)
+
 
 class LabbookMutations(graphene.ObjectType):
     """Entry point for all graphql mutations"""
@@ -49,6 +51,10 @@ class LabbookMutations(graphene.ObjectType):
 
     # Import a Dataset from the Gitlab repository
     import_remote_dataset = ImportRemoteDataset.Field()
+
+    # Import/Export datasets as zip files
+    import_dataset = ImportDataset.Field()
+    export_dataset = ExportDataset.Field()
 
     # Export a labbook and return URL to its zipped archive.
     export_labbook = ExportLabbook.Field()
