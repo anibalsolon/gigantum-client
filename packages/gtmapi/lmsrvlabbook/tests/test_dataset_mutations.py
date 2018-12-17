@@ -20,23 +20,23 @@ from gtmcore.inventory.inventory import InventoryManager
 
 from lmsrvcore.middleware import error_middleware, DataloaderMiddleware
 
-@pytest.fixture()
-def mock_create_datasets(fixture_working_dir):
-    # Create a dataset in the temporary directory
-    # Create a temporary dataset
-    ds = InventoryManager(fixture_working_dir[0]).create_dataset("default", "default", "labbook1",
-                                                                 "gigantum_object_v1",
-                                                                 description="Cats dataset 1")
-
-    # Create a file in the dir
-    with open(os.path.join(fixture_working_dir[1], 'sillyfile'), 'w') as sf:
-        sf.write("1234567")
-        sf.seek(0)
-    FileOperations.insert_file(ds, 'code', sf.name)
-
-    assert os.path.isfile(os.path.join(ds.root_dir, 'code', 'sillyfile'))
-    # name of the config file, temporary working directory, the schema
-    yield fixture_working_dir
+# @pytest.fixture()
+# def mock_create_datasets(fixture_working_dir):
+#     # Create a dataset in the temporary directory
+#     # Create a temporary dataset
+#     ds = InventoryManager(fixture_working_dir[0]).create_dataset("default", "default", "dataset1",
+#                                                                  "gigantum_object_v1",
+#                                                                  description="Cats dataset 1")
+#
+#     # Create a file in the dir
+#     with open(os.path.join(fixture_working_dir[1], 'sillyfile'), 'w') as sf:
+#         sf.write("1234567")
+#         sf.seek(0)
+#     FileOperations.insert_file(ds, 'code', sf.name)
+#
+#     assert os.path.isfile(os.path.join(ds.root_dir, 'code', 'sillyfile'))
+#     # name of the config file, temporary working directory, the schema
+#     yield fixture_working_dir
 
 class TestDatasetMutations(object):
     def test_create_dataset(self, fixture_working_dir, snapshot):
@@ -171,8 +171,8 @@ class TestDatasetMutations(object):
                      "storage_type": "gigantum_object_v1"}
 
         # create_result = create_client.execute(create_query, variable_values=create_variables)
-        fixture_working_dir[2].execute(create_query, variable_values=create_variables)
         # assert 'errors' not in create_result
+        fixture_working_dir[2].execute(create_query, variable_values=create_variables)
 
         client = Client(fixture_working_dir[3], middleware=[DataloaderMiddleware()])
 

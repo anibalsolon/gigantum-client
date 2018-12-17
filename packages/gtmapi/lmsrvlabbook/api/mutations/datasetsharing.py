@@ -263,15 +263,15 @@ class DeleteDatasetCollaborator(graphene.relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, owner, dataset_name, username, client_mutation_id=None):
         logged_in_username = get_logged_in_username()
-        lb = InventoryManager().load_dataset(logged_in_username, owner, dataset_name,
+        ds = InventoryManager().load_dataset(logged_in_username, owner, dataset_name,
                                              author=get_logged_in_author())
 
         # TODO: Future work will look up remote in LabBook data, allowing user to select remote.
-        default_remote = lb.client_config.config['git']['default_remote']
+        default_remote = ds.client_config.config['git']['default_remote']
         admin_service = None
-        for remote in lb.client_config.config['git']['remotes']:
+        for remote in ds.client_config.config['git']['remotes']:
             if default_remote == remote:
-                admin_service = lb.client_config.config['git']['remotes'][remote]['admin_service']
+                admin_service = ds.client_config.config['git']['remotes'][remote]['admin_service']
                 break
 
         # Extract valid Bearer token

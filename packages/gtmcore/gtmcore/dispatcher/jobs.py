@@ -120,7 +120,7 @@ def export_labbook_as_zip(labbook_path: str, lb_export_directory: str) -> str:
 
 
 def export_dataset_as_zip(dataset_path: str, ds_export_directory: str) -> str:
-    """Return path to archive file of exported labbook. """
+    """Return path to archive file of exported dataset. """
     p = os.getpid()
     logger = LMLogger.get_logger()
     logger.info(f"(Job {p}) Starting export_dataset_as_zip({dataset_path})")
