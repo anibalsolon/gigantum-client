@@ -126,9 +126,9 @@ def export_dataset_as_zip(dataset_path: str, ds_export_directory: str) -> str:
     logger.info(f"(Job {p}) Starting export_dataset_as_zip({dataset_path})")
 
     try:
-        lb = InventoryManager().load_dataset_from_directory(dataset_path)
-        with lb.lock():
-            path = ZipExporter.export_dataset(lb.root_dir, ds_export_directory)
+        ds = InventoryManager().load_dataset_from_directory(dataset_path)
+        with ds.lock():
+            path = ZipExporter.export_dataset(ds.root_dir, ds_export_directory)
         return path
     except Exception as e:
         logger.exception(f"(Job {p}) Error on export_dataset_as_zip: {e}")

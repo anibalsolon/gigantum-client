@@ -298,10 +298,10 @@ class ExportDataset(graphene.relay.ClientIDMutation):
     job_key = graphene.String()
 
     @classmethod
-    def mutate_and_get_payload(cls, root, info, owner, labbook_name, client_mutation_id=None):
+    def mutate_and_get_payload(cls, root, info, owner, dataset_name, client_mutation_id=None):
         username = get_logged_in_username()
         working_directory = Configuration().config['git']['working_directory']
-        ds = InventoryManager().load_dataset(username, owner, labbook_name,
+        ds = InventoryManager().load_dataset(username, owner, dataset_name,
                                              author=get_logged_in_author())
 
         job_metadata = {'method': 'export_dataset_as_zip',
