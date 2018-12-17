@@ -368,7 +368,7 @@ def build_image_for_jupyterlab():
                 lb, docker_image_id = ContainerOperations.build_image(labbook=lb, username="default")
 
                 # Note: The final field is the owner
-                yield lb, ib, docker_client, docker_image_id, client, "default"
+                yield lb, ib, docker_client, docker_image_id, client, "unittester"
 
             finally:
                 try:

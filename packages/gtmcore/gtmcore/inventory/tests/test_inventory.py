@@ -1,3 +1,5 @@
+import shutil
+
 import pytest
 import getpass
 import os
