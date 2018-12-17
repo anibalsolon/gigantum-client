@@ -140,51 +140,51 @@ class TestDatasetMutations(object):
 
                 chunk.close()
 
-    def test_export_dataset(self, fixture_working_dir):
-        """Test export"""
-        class DummyContext(object):
-            def __init__(self, file_handle):
-                self.dataset_loader = None
-                self.files = {'uploadChunk': file_handle}
-
-        # create_client = Client(fixture_working_dir[2], middleware=[DataloaderMiddleware()])
-
-        create_query = """
-                mutation myCreateDataset($name: String!, $desc: String!, $storage_type: String!) {
-                  createDataset(input: {name: $name, description: $desc, 
-                                        storageType: $storage_type}) {
-                    dataset {
-                      id
-                      name
-                      description
-                      schemaVersion
-                      datasetType{
-                        name
-                        id
-                        description
-                      }
-                    }
-                  }
-                }
-                """
-        create_variables = {"name": "test-dataset-1", "desc": "my test dataset",
-                     "storage_type": "gigantum_object_v1"}
-
-        # create_result = create_client.execute(create_query, variable_values=create_variables)
-        # assert 'errors' not in create_result
-        fixture_working_dir[2].execute(create_query, variable_values=create_variables)
-
-        client = Client(fixture_working_dir[3], middleware=[DataloaderMiddleware()])
-
-        query = """
-                mutation myMutation($owner: String!, $datasetName: String!) {
-                  exportDataset(input: {owner: $owner, datasetName: $datasetName}) {
-                      jobKey
-                  }
-                }
-                """
-        variables = {"datasetName": "test-dataset-1", "owner": "default"}
-        result = client.execute(query, variable_values=variables)
-        assert "errors" not in result
-        assert type(result['data']['exportDataset']['jobKey']) == str
-        assert "rq:job:" in result['data']['exportDataset']['jobKey']
+    # def test_export_dataset(self, fixture_working_dir):
+    #     """Test export"""
+    #     class DummyContext(object):
+    #         def __init__(self, file_handle):
+    #             self.dataset_loader = None
+    #             self.files = {'uploadChunk': file_handle}
+    #
+    #     # create_client = Client(fixture_working_dir[2], middleware=[DataloaderMiddleware()])
+    #
+    #     create_query = """
+    #             mutation myCreateDataset($name: String!, $desc: String!, $storage_type: String!) {
+    #               createDataset(input: {name: $name, description: $desc,
+    #                                     storageType: $storage_type}) {
+    #                 dataset {
+    #                   id
+    #                   name
+    #                   description
+    #                   schemaVersion
+    #                   datasetType{
+    #                     name
+    #                     id
+    #                     description
+    #                   }
+    #                 }
+    #               }
+    #             }
+    #             """
+    #     create_variables = {"name": "test-dataset-1", "desc": "my test dataset",
+    #                  "storage_type": "gigantum_object_v1"}
+    #
+    #     # create_result = create_client.execute(create_query, variable_values=create_variables)
+    #     # assert 'errors' not in create_result
+    #     fixture_working_dir[2].execute(create_query, variable_values=create_variables)
+    #
+    #     client = Client(fixture_working_dir[3], middleware=[DataloaderMiddleware()])
+    #
+    #     query = """
+    #             mutation myMutation($owner: String!, $datasetName: String!) {
+    #               exportDataset(input: {owner: $owner, datasetName: $datasetName}) {
+    #                   jobKey
+    #               }
+    #             }
+    #             """
+    #     variables = {"datasetName": "test-dataset-1", "owner": "default"}
+    #     result = client.execute(query, variable_values=variables)
+    #     assert "errors" not in result
+    #     assert type(result['data']['exportDataset']['jobKey']) == str
+    #     assert "rq:job:" in result['data']['exportDataset']['jobKey']
