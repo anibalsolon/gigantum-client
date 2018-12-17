@@ -177,9 +177,10 @@ class ActivityStore(object):
             record.linked_commit = uuid.uuid4().hex
 
         # Write all ActivityDetailObjects to the datastore
-        for idx, detail in enumerate(record.detail_objects):
-            updated_detail = self.put_detail_record(detail[3])
-            record.update_detail_object(updated_detail, idx)
+        with record.inspect_detail_objects() as details:
+            for idx, detail in enumerate(details):
+                updated_detail = self.put_detail_record(detail)
+                record.update_detail_object(updated_detail, idx)
 
         # Add everything in the repo activity/log directory
         self.repository.git.add_all(self.detaildb.root_path)

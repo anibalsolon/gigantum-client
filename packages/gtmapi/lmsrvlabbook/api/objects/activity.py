@@ -1,22 +1,3 @@
-# Copyright (c) 2018 FlashX, LLC
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
 import graphene
 from graphene.types import datetime
 
@@ -314,15 +295,16 @@ class ActivityRecordObject(graphene.ObjectType, interfaces=(graphene.relay.Node,
                 self._load_activity_record(info)
 
             # Load detail objects from database
-            self.detail_objects = [ActivityDetailObject(id=f"{self._repository_type}&{self.owner}&{self.name}&{r[3].key}",
-                                                        owner=self.owner,
-                                                        name=self.name,
-                                                        _repository_type=self._repository_type,
-                                                        key=r[3].key,
-                                                        show=r[3].show,
-                                                        tags=r[3].tags,
-                                                        importance=r[3].importance,
-                                                        action=ActivityActionTypeEnum.get(r[3].action.value).value,
-                                                        type=ActivityDetailTypeEnum.get(r[3].type.value).value) for r in self._activity_record.detail_objects]
+            with self._activity_record.inspect_detail_objects() as details:
+                self.detail_objects = [ActivityDetailObject(id=f"{self._repository_type}&{self.owner}&{self.name}&{d.key}",
+                                                            owner=self.owner,
+                                                            name=self.name,
+                                                            _repository_type=self._repository_type,
+                                                            key=d.key,
+                                                            show=d.show,
+                                                            tags=d.tags,
+                                                            importance=d.importance,
+                                                            action=d.action,
+                                                            type=d.type) for d in details]
 
         return self.detail_objects
