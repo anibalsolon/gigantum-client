@@ -707,7 +707,7 @@ const ImportMain = ({ self }) => {
   </div>);
 };
 
-const ImportDropZone = ({ self }) => (<div id="dropZone" className={`Import__section--import ${dropZoneId}`}>
+const ImportDropZone = ({ self }) => (<div id={dropZoneId} className={`Import__section--import ${dropZoneId}`}>
 
   <div className={`btn--close ${dropZoneId}`} onClick={() => self._toggleImportScreen(false)} />
 

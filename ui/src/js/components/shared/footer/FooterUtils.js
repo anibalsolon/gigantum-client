@@ -38,7 +38,9 @@ const FooterUtils = {
       const resultKey = resultType ? resultType[key] : false;
 
       if (resultKey) {
+        console.log(result[type][key])
         JobStatus.updateFooterStatus(result[type][key]).then((response) => {
+          console.log(response)
           if (response.data &&
             response.data.jobStatus &&
             response.data.jobStatus.jobMetadata) {

@@ -5,6 +5,7 @@ import uuidv4 from 'uuid/v4';
 // components
 import ToolTip from 'Components/shared/ToolTip';
 import Modal from 'Components/shared/Modal';
+import ChunkUploader from 'JS/utils/ChunkUploader';
 // queries
 import UserIdentity from 'JS/Auth/UserIdentity';
 // store
@@ -13,6 +14,43 @@ import store from 'JS/redux/store';
 import './ImportModule.scss';
 // mutations
 import ImportRemoteDatasetMutation from 'Mutations/ImportRemoteDatasetMutation';
+// config
+import config from 'JS/config';
+
+
+let counter = 0;
+const dropZoneId = uuidv4();
+
+/*
+ @param {object} workerData
+ uses redux to dispatch file upload to the footer
+*/
+const dispatchLoadingProgress = (wokerData) => {
+  let bytesUploaded = (wokerData.chunkSize * (wokerData.chunkIndex + 1)) / 1000;
+  const totalBytes = wokerData.fileSizeKb;
+  bytesUploaded = bytesUploaded < totalBytes
+    ? bytesUploaded
+    : totalBytes;
+  const totalBytesString = config.humanFileSize(totalBytes);
+  const bytesUploadedString = config.humanFileSize(bytesUploaded);
+
+  store.dispatch({
+    type: 'UPLOAD_MESSAGE_UPDATE',
+    payload: {
+      id: '',
+      uploadMessage: `${bytesUploadedString} of ${totalBytesString} uploaded`,
+      totalBytes,
+      percentage: (Math.floor((bytesUploaded / totalBytes) * 100) <= 100)
+        ? Math.floor((bytesUploaded / totalBytes) * 100)
+        : 100,
+    },
+  });
+
+  if (document.getElementById('footerProgressBar')) {
+    const width = Math.floor((bytesUploaded / totalBytes) * 100);
+    document.getElementById('footerProgressBar').style.width = `${width}%`;
+  }
+};
 
 export default class ImportModule extends Component {
   constructor(props) {
@@ -23,17 +61,52 @@ export default class ImportModule extends Component {
       remoteURL: '',
       files: [],
     };
+    this._fileUpload = this._fileUpload.bind(this);
     this._importingState = this._importingState.bind(this);
     this._clearState = this._clearState.bind(this);
+    this._drop = this._drop.bind(this);
+    this._dragover = this._dragover.bind(this);
+    this._dragleave = this._dragleave.bind(this);
+    this._dragenter = this._dragenter.bind(this);
+    this._fileUpload = this._fileUpload.bind(this);
   }
 
+  componentWillUnmount() {
+    window.removeEventListener('drop', this._drop);
+    window.removeEventListener('dragover', this._dragover);
+    window.removeEventListener('dragleave', this._dragleave);
+    window.removeEventListener('dragenter', this._dragenter);
+  }
+
+  componentDidMount() {
+    const fileInput = document.getElementById('file__input');
+    if (fileInput) {
+      fileInput.onclick = (evt) => {
+        evt.cancelBubble = true;
+        evt.stopPropagation(evt);
+      };
+    }
+
+    window.addEventListener('drop', this._drop);
+    window.addEventListener('dragover', this._dragover);
+    window.addEventListener('dragleave', this._dragleave);
+    window.addEventListener('dragenter', this._dragenter);
+  }
   /**
-  *  @param {}
-  *  clears state of file and sets css back to import
-  *  @return {}
+  *  @param {object}
+  *  detects when a file has been dropped
   */
-  _clearState = () => {
-    this.setState({ files: [], isImporting: false, readyDataset: null });
+  _drop(evt) {
+    if (document.getElementById('dropZone')) {
+      this._toggleImportScreen(false);
+      document.getElementById('dropZone').classList.remove('ImportModule__drop-area-highlight');
+    }
+
+    if (evt.target.classList.contains(dropZoneId)) {
+      evt.preventDefault();
+      evt.dataTransfer.effectAllowed = 'none';
+      evt.dataTransfer.dropEffect = 'none';
+    }
   }
 
   /**
@@ -44,6 +117,261 @@ export default class ImportModule extends Component {
   _importingState = () => {
     this.setState({ isImporting: true });
   }
+
+  /**
+  *  @param {object}
+  *  detects when file has been dragged over the DOM
+  */
+  _dragover(evt) {
+    if (document.getElementById('dropZone')) {
+      this._toggleImportScreen(true);
+
+      document.getElementById('dropZone').classList.add('ImportModule__drop-area-highlight');
+    }
+
+    if (evt.target.classList.contains(dropZoneId) < 0) {
+      evt.preventDefault();
+      evt.dataTransfer.effectAllowed = 'none';
+      evt.dataTransfer.dropEffect = 'none';
+    }
+  }
+  /**
+  *  @param {object}
+  *  detects when file leaves dropzone
+  */
+  _dragleave(evt) {
+    counter--;
+
+    if (evt.target.classList && evt.target.classList.contains(dropZoneId) < 0) {
+      if (document.getElementById('dropZone')) {
+        if (counter === 0) {
+          this._toggleImportScreen(false);
+
+          document.getElementById('dropZone').classList.remove('ImportModule__drop-area-highlight');
+        }
+      }
+    }
+  }
+
+  /**
+  *  @param {object}
+  *  detects when file enters dropzone
+  */
+  _dragenter(evt) {
+    counter++;
+
+    if (document.getElementById('dropZone')) {
+      this._toggleImportScreen(true);
+
+      document.getElementById('dropZone').classList.add('ImportModule__drop-area-highlight');
+    }
+
+    if (evt.target.classList && evt.target.classList.contains(dropZoneId) < 0) {
+      evt.preventDefault();
+      evt.dataTransfer.effectAllowed = 'none';
+      evt.dataTransfer.dropEffect = 'none';
+    }
+  }
+  /**
+  *  @param {}
+  *  shows import screen
+  *  uses transition delay
+  *  @return {}
+  */
+  _toggleImportScreen(value) {
+    this.setState({ importTransition: value });
+
+    setTimeout(() => {
+      this.setState({ importingScreen: value });
+    }, 250);
+  }
+
+  /**
+  *  @param {Object}
+  *   trigger file upload
+  */
+  _fileUpload = () => { // this code is going to be moved to the footer to complete the progress bar
+    const self = this;
+
+    this._importingState();
+    const filepath = this.state.files[0].filename;
+
+    const data = {
+      file: this.state.files[0].file,
+      filepath,
+      username: localStorage.getItem('username'),
+      accessToken: localStorage.getItem('access_token'),
+      type: 'dataset',
+    };
+
+    // dispatch loading progress
+    store.dispatch({
+      type: 'UPLOAD_MESSAGE_SETTER',
+      payload: {
+        uploadMessage: 'Prepparing Import ...',
+        totalBytes: this.state.files[0].file.size / 1000,
+        percentage: 0,
+        id: '',
+      },
+    });
+
+    const postMessage = (wokerData) => {
+      if (wokerData.importLabbook) {
+        store.dispatch({
+          type: 'UPLOAD_MESSAGE_UPDATE',
+          payload: {
+            uploadMessage: 'Upload Complete',
+            percentage: 100,
+            id: '',
+          },
+        });
+
+        const importLabbook = wokerData.importLabbook;
+        JobStatus.getJobStatus(importLabbook.importJobKey).then((response) => {
+          store.dispatch({
+            type: 'UPLOAD_MESSAGE_UPDATE',
+            payload: {
+              uploadMessage: 'Unzipping Project',
+              percentage: 100,
+              id: '',
+            },
+          });
+
+          if (response.jobStatus.status === 'finished') {
+            self._clearState();
+            dispatchFinishedStatus(response.jobStatus.result, self.props.history, self._buildImage);
+          } else if (response.jobStatus.status === 'failed') {
+            dispatchFailedStatus();
+
+            self._clearState();
+          }
+        }).catch((error) => {
+          console.log(error);
+
+          store.dispatch({
+            type: 'UPLOAD_MESSAGE_UPDATE',
+            payload: {
+              uploadMessage: 'Import failed',
+              uploadError: true,
+              id: '',
+              percentage: 0,
+            },
+          });
+          self._clearState();
+        });
+      } else if (wokerData.chunkSize) {
+        dispatchLoadingProgress(wokerData);
+      } else if (wokerData[0]) {
+        console.log(wokerData)
+        store.dispatch({
+          type: 'UPLOAD_MESSAGE_UPDATE',
+          payload: {
+            uploadMessage: wokerData[0].message,
+            uploadError: true,
+            id: '',
+            percentage: 0,
+          },
+        });
+        self._clearState();
+      }
+    };
+
+    ChunkUploader.chunkFile(data, postMessage);
+  }
+
+    /**
+    *  @param {object} dataTransfer
+    *  preventDefault on dragOver event
+    */
+    _getBlob = (dataTransfer) => {
+      let chunkSize = 1024;
+      let offset = 0;
+      let fileReader = new FileReader();
+      let file;
+      function seek() {
+        if (offset >= file.size) {
+          return;
+        }
+        var slice = file.slice(offset, offset + chunkSize);
+        fileReader.readAsArrayBuffer(slice);
+      }
+      const self = this;
+      for (let i = 0; i < dataTransfer.files.length; i++) {
+        file = dataTransfer.files[0];
+        if (file.name.slice(file.name.length - 4, file.name.length) !== '.lbk' && file.name.slice(file.name.length - 4, file.name.length) !== '.zip') {
+          this.setState({ error: true });
+
+          setTimeout(() => {
+            self.setState({ error: false });
+          }, 5000);
+        } else {
+          this.setState({ error: false });
+
+          fileReader.onloadend = function (evt) {
+            const arrayBuffer = evt.target.result;
+
+            const blob = new Blob([new Uint8Array(arrayBuffer)]);
+
+            self.setState({
+              files: [
+                {
+                  blob,
+                  file,
+                  arrayBuffer,
+                  filename: file.name,
+                },
+              ],
+            });
+            self._fileUpload();
+          };
+
+          fileReader.onload = function () {
+            var view = new Uint8Array(fileReader.result);
+            for (var i = 0; i < view.length; ++i) {
+              if (view[i] === 10 || view[i] === 13) {
+                return;
+              }
+            }
+            offset += chunkSize;
+            seek();
+          };
+          seek();
+        }
+      }
+    }
+
+    /**
+    *  @param {Object} event
+    *  preventDefault on dragOver event
+    */
+    _dragoverHandler = (evt) => { // use evt, event is a reserved word in chrome
+      evt.preventDefault(); // this kicks the event up the event loop
+    }
+
+    /**
+    *  @param {Object} event
+    *  handle file drop and get file data
+    */
+    _dropHandler = (evt) => {
+      // use evt, event is a reserved word in chrome
+      const dataTransfer = evt.dataTransfer;
+      evt.preventDefault();
+      evt.dataTransfer.effectAllowed = 'none';
+      evt.dataTransfer.dropEffect = 'none';
+      this._getBlob(dataTransfer);
+
+      return false;
+    }
+
+  /**
+  *  @param {}
+  *  clears state of file and sets css back to import
+  *  @return {}
+  */
+  _clearState = () => {
+    this.setState({ files: [], isImporting: false, readyDataset: null });
+  }
+
   /**
   *  @param {}
   *  closes import modal
@@ -184,7 +512,7 @@ export default class ImportModule extends Component {
 
     return (<Fragment>
 
-      <div id="dropZone" className="ImportModule Card Card--line-50 Card--text-center Card--add Card--import column-4-span-3" key="addLabbook" ref={div => this.dropZone = div} type="file" onDragEnd={evt => this._dragendHandler(evt)} onDrop={evt => this._dropHandler(evt)} onDragOver={evt => this._dragoverHandler(evt)}>
+      <div className="ImportModule Card Card--line-50 Card--text-center Card--add Card--import column-4-span-3" key="AddDatasetCollaboratorPayload">
         <ImportMain self={this} />
         <div className={loadingMaskCSS} />
       </div>
@@ -219,7 +547,7 @@ const ImportMain = ({ self }) => {
                 defaultValue={self.state.remoteUrl}
               />
 
-              <div className="ImportDropzone">
+              <div id="dropZone" className="ImportDropzone" ref={div => self.dropZone = div} type="file" onDragEnd={evt => self._dragendHandler(evt)} onDrop={evt => self._dropHandler(evt)} onDragOver={evt => self._dragoverHandler(evt)}>
                 {
                   self.state.readyDataset ?
                   <div className="Import__ReadyDataset">
@@ -281,4 +609,3 @@ const ImportMain = ({ self }) => {
 
   </div>);
 };
-

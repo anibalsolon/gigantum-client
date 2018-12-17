@@ -7,6 +7,7 @@ import { connect } from 'react-redux';
 import JobStatus from 'JS/utils/JobStatus';
 // mutations
 import ExportLabbookMutation from 'Mutations/ExportLabbookMutation';
+import ExportDatasetMutation from 'Mutations/ExportDatasetMutation';
 import SyncLabbookMutation from 'Mutations/branches/SyncLabbookMutation';
 import SyncDatasetMutation from 'Mutations/branches/SyncDatasetMutation';
 import BuildImageMutation from 'Mutations/BuildImageMutation';
@@ -422,25 +423,45 @@ class BranchMenu extends Component {
     if (store.getState().containerStatus.status !== 'Running') {
       this.setState({ exporting: true, menuOpen: false });
 
-      setInfoMessage(`Exporting ${this.state.labbookName} Project`);
+      const exportType = (this.props.sectionType === 'dataset') ? 'Dataset' : 'Project';
+
+      setInfoMessage(`Exporting ${this.state.labbookName} ${exportType}`);
 
       this.props.setExportingState(true);
+      if (this.props.sectionType !== 'dataset') {
+        ExportLabbookMutation(
+          this.state.owner,
+          this.state.labbookName,
+          (response, error) => {
+            if (response.exportLabbook) {
+              this._jobStatus(response.exportLabbook.jobKey);
+            } else {
+              console.log(error);
 
-      ExportLabbookMutation(
-        this.state.owner,
-        this.state.labbookName,
-        (response, error) => {
-          if (response.exportLabbook) {
-            this._jobStatus(response.exportLabbook.jobKey);
-          } else {
-            console.log(error);
+              this.props.setExportingState(false);
 
-            this.props.setExportingState(false);
+              setErrorMessage('Export Failed', error);
+            }
+          },
+        );
+      } else {
+        console.log('datset')
+        ExportDatasetMutation(
+          this.state.owner,
+          this.state.labbookName,
+          (response, error) => {
+            if (response.exportDataset) {
+              this._jobStatus(response.exportDataset.jobKey);
+            } else {
+              console.log(error);
 
-            setErrorMessage('Export Failed', error);
-          }
-        },
-      );
+              this.props.setExportingState(false);
+
+              setErrorMessage('Export Failed', error);
+            }
+          },
+        );
+      }
     } else {
       this._showContainerMenuMessage('exporting', true);
     }
