@@ -69,10 +69,10 @@ class FileBrowser extends Component {
                 const tempKey = `${splitKey.slice(0, index).join('/')}/`;
                 if (!childrenState[tempKey] && tempKey !== '/') {
                   childrenState[tempKey] = {
-                    isSelected: (state.childrenState && state.childrenState[key]) ? state.childrenState[key].isSelected : false,
-                    isIncomplete: (state.childrenState && state.childrenState[key]) ? state.childrenState[key].isIncomplete : false,
-                    isExpanded: (state.childrenState && state.childrenState[key]) ? state.childrenState[key].isExpanded : false,
-                    isAddingFolder: (state.childrenState && state.childrenState[key]) ? state.childrenState[key].isAddingFolder : false,
+                    isSelected: (state.childrenState && state.childrenState[tempKey]) ? state.childrenState[tempKey].isSelected : false,
+                    isIncomplete: (state.childrenState && state.childrenState[tempKey]) ? state.childrenState[tempKey].isIncomplete : false,
+                    isExpanded: (state.childrenState && state.childrenState[tempKey]) ? state.childrenState[tempKey].isExpanded : false,
+                    isAddingFolder: (state.childrenState && state.childrenState[tempKey]) ? state.childrenState[tempKey].isAddingFolder : false,
                     edge,
                   };
                 }
@@ -229,7 +229,7 @@ class FileBrowser extends Component {
 
     Object.keys(this.state.childrenState).forEach((key) => {
       deletedKeys.forEach((deletedKey) => {
-        if (key.startsWith(deletedKey)) {
+        if (key.startsWith(deletedKey) && this.state.childrenState[key]) {
           let { edge } = this.state.childrenState[key];
           delete this.state.childrenState[key];
           comparePaths.push(edge.node.key);

@@ -144,11 +144,11 @@ snapshots['TestEnvironmentServiceQueries.test_package_query_with_errors 1'] = {
                     'version': '100.00'
                 },
                 {
-                    'id': 'UGFja2FnZUNvbXBvbmVudDpwaXAmc2NpcHkmMS4xLjA=',
+                    'id': 'UGFja2FnZUNvbXBvbmVudDpwaXAmc2NpcHkmMS4yLjA=',
                     'isValid': True,
                     'manager': 'pip',
                     'package': 'scipy',
-                    'version': '1.1.0'
+                    'version': '1.2.0'
                 },
                 {
                     'id': 'UGFja2FnZUNvbXBvbmVudDpwaXAmYXNkZmFzZGZhc2RmJg==',
@@ -175,11 +175,11 @@ snapshots['TestEnvironmentServiceQueries.test_package_query 1'] = {
                     'version': '1.14.2'
                 },
                 {
-                    'id': 'UGFja2FnZUNvbXBvbmVudDpwaXAmc2NpcHkmMS4xLjA=',
+                    'id': 'UGFja2FnZUNvbXBvbmVudDpwaXAmc2NpcHkmMS4yLjA=',
                     'isValid': True,
                     'manager': 'pip',
                     'package': 'scipy',
-                    'version': '1.1.0'
+                    'version': '1.2.0'
                 }
             ]
         }

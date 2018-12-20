@@ -100,7 +100,7 @@ class TestDataloaderPackage(object):
         version_list = promise1.get()
         assert len(version_list) == 3
         assert version_list[0] == "5.0.0"
-        assert version_list[1] == "1.1.0"
+        assert version_list[1] == "1.2.0"
         assert version_list[2] == "1.15.4"
 
     def test_load_invalid_package(self, build_image_for_jupyterlab):

@@ -158,7 +158,7 @@ class TestPipPackageManager(object):
         assert result[1].error is True
 
         assert result[2].package == "scipy"
-        assert result[2].version == "1.1.0"
+        assert result[2].version == "1.2.0"
         assert result[2].error is False
 
         assert result[3].package == "asdfasdfasdf"
