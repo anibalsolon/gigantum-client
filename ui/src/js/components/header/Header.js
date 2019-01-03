@@ -243,6 +243,7 @@ class LabbookHeader extends Component {
 
                   <ContainerStatus
                     ref="ContainerStatus"
+                    auth={this.props.auth}
                     base={labbook.environment.base}
                     containerStatus={labbook.environment.containerStatus}
                     imageStatus={labbook.environment.imageStatus}
@@ -407,6 +408,7 @@ const NavItem = ({
       id={item.id}
       className={navItemCSS}
       onClick={() => self._setSelectedComponent(item.id)}
+      title={Config.navTitles[item.id]}
     >
 
       <Link
