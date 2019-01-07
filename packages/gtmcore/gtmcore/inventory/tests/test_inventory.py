@@ -163,7 +163,7 @@ class TestInventory(object):
 
         # Validate labbook data file
         with open(os.path.join(labbook_dir, ".gigantum", "labbook.yaml"), "rt") as data_file:
-            data = yaml.load(data_file)
+            data = yaml.safe_load(data_file)
 
         assert data["labbook"]["name"] == "labbook1"
         assert data["labbook"]["description"] == "my first labbook"
@@ -203,7 +203,7 @@ class TestInventory(object):
 
         # Validate labbook data file
         with open(os.path.join(labbook_dir, ".gigantum", "labbook.yaml"), "rt") as data_file:
-            data = yaml.load(data_file)
+            data = yaml.safe_load(data_file)
 
         assert data["labbook"]["name"] == "labbook1"
         assert data["labbook"]["description"] == "my first labbook"
@@ -264,7 +264,7 @@ class TestCreateLabbooks(object):
 
         # Validate labbook data file
         with open(os.path.join(labbook_dir, ".gigantum", "labbook.yaml"), "rt") as data_file:
-            data = yaml.load(data_file)
+            data = yaml.safe_load(data_file)
 
         assert data["labbook"]["name"] == "labbook1"
         assert data["labbook"]["description"] == "my first labbook"
@@ -300,7 +300,7 @@ class TestCreateLabbooks(object):
 
         # Validate labbook data file
         with open(os.path.join(labbook_dir, ".gigantum", "labbook.yaml"), "rt") as data_file:
-            data = yaml.load(data_file)
+            data = yaml.safe_load(data_file)
 
         assert data["labbook"]["name"] == "labbook1"
         assert data["labbook"]["description"] == "my first labbook"
@@ -333,7 +333,7 @@ class TestCreateLabbooks(object):
 
         # Validate labbook data file
         with open(os.path.join(labbook_dir, ".gigantum", "labbook.yaml"), "rt") as data_file:
-            data = yaml.load(data_file)
+            data = yaml.safe_load(data_file)
 
         assert data["labbook"]["name"] == "labbook1"
         assert data["labbook"]["description"] == "my first labbook"
