@@ -85,10 +85,6 @@ class TestJobs(object):
             assert os.path.exists(os.path.join(imported_lb_path, '.gigantum', 'env', 'Dockerfile'))
 
             assert import_lb.data['owner']['username'] == 'unittester2'
-
-            # After importing, the new user (in this case "cat") should be the current, active workspace.
-            # And be created, if necessary.
-            assert import_lb.active_branch == "gm.workspace-unittester2"
             assert not import_lb.has_remote
 
             # Repeat the above, except with the original user (e.g., re-importing their own labbook)
@@ -99,10 +95,8 @@ class TestJobs(object):
             # New path should reflect username of new owner and user.
             assert user_import_lb
             import_lb2 = InventoryManager(mock_config_with_repo[0]).load_labbook_from_directory(user_import_lb)
-            assert import_lb2.data['owner']['username'] == 'unittester'
             # After importing, the new user (in this case "cat") should be the current, active workspace.
             # And be created, if necessary.
-            assert import_lb2.active_branch == "gm.workspace-unittester"
             assert not import_lb2.has_remote
 
             build_kwargs = {
@@ -168,10 +162,6 @@ class TestJobs(object):
             assert os.path.exists(os.path.join(imported_lb_path, '.gigantum', 'env', 'Dockerfile'))
 
             assert import_lb.data['owner']['username'] == 'unittester2'
-
-            # After importing, the new user (in this case "cat") should be the current, active workspace.
-            # And be created, if necessary.
-            assert import_lb.active_branch == "gm.workspace-unittester2"
             assert not import_lb.has_remote
 
     def test_fail_import_export_zip(self, mock_config_with_repo):
