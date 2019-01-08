@@ -84,7 +84,6 @@ class TestJobs(object):
             ib.assemble_dockerfile(write=True)
             assert os.path.exists(os.path.join(imported_lb_path, '.gigantum', 'env', 'Dockerfile'))
 
-            assert import_lb.data['owner']['username'] == 'unittester2'
             assert not import_lb.has_remote
 
             # Repeat the above, except with the original user (e.g., re-importing their own labbook)
@@ -161,7 +160,6 @@ class TestJobs(object):
             ib.assemble_dockerfile(write=True)
             assert os.path.exists(os.path.join(imported_lb_path, '.gigantum', 'env', 'Dockerfile'))
 
-            assert import_lb.data['owner']['username'] == 'unittester2'
             assert not import_lb.has_remote
 
     def test_fail_import_export_zip(self, mock_config_with_repo):

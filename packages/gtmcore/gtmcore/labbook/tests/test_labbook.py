@@ -43,7 +43,6 @@ class TestLabBook(object):
         assert parts[0] == "test"
         assert parts[1] == "test"
         assert parts[2] == "labbook1"
-        assert parts[3] == "gm.workspace"
         assert len(parts[5]) == 10
 
         # Check repo is clean
@@ -86,7 +85,6 @@ class TestLabBook(object):
 
         # Reload and see changes
         lb_loaded = im.load_labbook("test", "test", "new-labbook-1")
-        assert lb_loaded.active_branch == 'gm.workspace-test'
 
         assert lb_loaded.root_dir == os.path.join(mock_config_file[1], "test", "test", "labbooks", "new-labbook-1")
         assert type(lb) == LabBook

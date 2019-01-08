@@ -201,7 +201,6 @@ class InventoryManager(object):
                                  name=labbook_name, description=description,
                                  author=author, bypass_lfs=True)
         lb = self.load_labbook_from_directory(path, author=author)
-        assert lb.active_branch == f'gm.workspace-{username}'
         return lb
 
     def create_labbook(self, username: str, owner: str, labbook_name: str,

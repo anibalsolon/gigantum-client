@@ -168,7 +168,6 @@ class TestInventory(object):
         assert data["owner"]["username"] == "test"
 
         lb_loaded = InventoryManager(mock_config_file[0]).load_labbook_from_directory(labbook_dir)
-        assert lb.active_branch == 'gm.workspace-test'
 
         assert lb_loaded.root_dir == os.path.join(mock_config_file[1], "test", "test", "labbooks", "labbook1")
         assert type(lb) == LabBook
@@ -209,7 +208,6 @@ class TestInventory(object):
 
         lb_loaded = inv_manager.load_labbook("test", "test", "labbook1")
 
-        assert lb_loaded.active_branch == 'gm.workspace-test'
         assert lb_loaded.root_dir == os.path.join(mock_config_file[1], "test",
                                                   "test", "labbooks", "labbook1")
         assert type(lb) == LabBook
