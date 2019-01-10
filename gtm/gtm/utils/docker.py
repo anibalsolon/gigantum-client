@@ -20,8 +20,50 @@
 import socket
 import json
 import os
+
 import docker
-import re
+from docker.errors import NotFound
+
+
+class DockerVolume(object):
+    """Class to manage docker volumes used within the build system
+    """
+    def __init__(self, volume_name: str, client=None) -> None:
+        self.volume_name = volume_name
+
+        if not client:
+            self.client = get_docker_client()
+        else:
+            self.client = client
+
+    def exists(self) -> bool:
+        """Check if a docker volume exists
+
+        Returns:
+            bool
+        """
+        try:
+            self.client.volumes.get(self.volume_name)
+            return True
+        except NotFound:
+            return False
+
+    def create(self) -> None:
+        """Create the volume
+
+        Returns:
+            None
+        """
+        self.client.volumes.create(self.volume_name)
+
+    def remove(self) -> None:
+        """Remove the volume
+
+        Returns:
+            None
+        """
+        volume = self.client.volumes.get(self.volume_name)
+        volume.remove()
 
 
 def _get_docker_server_api_version() -> str:

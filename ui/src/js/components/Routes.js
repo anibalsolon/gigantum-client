@@ -101,12 +101,12 @@ class Routes extends Component {
   render() {
     if (!this.state.hasError) {
       const headerCSS = classNames({
-        Header: this.props.validSession,
+        Header: true,
         hidden: !this.props.validSession,
         'is-demo': window.location.hostname === config.demoHostName,
       });
       const routesCSS = classNames({
-        Routes__main: this.props.validSession,
+        Routes__main: true,
         'Routes__main-no-auth': !this.props.validSession,
       });
 
