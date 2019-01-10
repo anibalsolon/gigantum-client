@@ -47,7 +47,7 @@ exports[`Test LocalLabbooks rendering 1`] = `
     <p
       className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner"
     >
-      Created on 12/07/18
+      Created on 01/08/19
     </p>
     <p
       className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
@@ -56,7 +56,7 @@ exports[`Test LocalLabbooks rendering 1`] = `
     </p>
   </div>
   <div
-    className="Tooltip LocalLabbookPanel__undefined"
+    className="Tooltip-Listing LocalLabbookPanel__undefined"
     data-tooltip="undefined"
   />
 </a>

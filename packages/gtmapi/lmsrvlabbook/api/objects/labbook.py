@@ -19,17 +19,18 @@
 # SOFTWARE.
 import base64
 import graphene
+import os
 
 from gtmcore.logging import LMLogger
 from gtmcore.dispatcher import Dispatcher
 from gtmcore.inventory.branching import BranchManager
-from gtmcore.inventory.inventory import InventoryManager
+from gtmcore.inventory.inventory import InventoryManager, InventoryException
 from gtmcore.activity import ActivityStore
 from gtmcore.gitlib.gitlab import GitLabManager
 from gtmcore.files import FileOperations
 from gtmcore.environment.utils import get_package_manager
 
-from lmsrvcore.auth.user import get_logged_in_username
+from lmsrvcore.auth.user import get_logged_in_username, get_logged_in_author
 
 from lmsrvcore.api.connections import ListBasedConnection
 from lmsrvcore.api.interfaces import GitRepository
@@ -44,6 +45,7 @@ from lmsrvlabbook.api.objects.labbooksection import LabbookSection
 from lmsrvlabbook.api.connections.activity import ActivityConnection
 from lmsrvlabbook.api.objects.activity import ActivityDetailObject, ActivityRecordObject
 from lmsrvlabbook.api.objects.packagecomponent import PackageComponent, PackageComponentInput
+from lmsrvlabbook.api.objects.dataset import Dataset
 
 logger = LMLogger.get_logger()
 
@@ -135,6 +137,8 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
     packages = graphene.List(PackageComponent, package_input=graphene.List(PackageComponentInput))
 
     visibility = graphene.String()
+
+    linked_datasets = graphene.List(Dataset)
 
     @classmethod
     def get_node(cls, info, id):
@@ -607,3 +611,26 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
 
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
             lambda labbook: self.helper_resolve_visibility(labbook, info))
+
+    @staticmethod
+    def helper_resolve_linked_datasets(labbook, info):
+        submodules = labbook.git.list_submodules()
+        datasets = list()
+        for submodule in submodules:
+            try:
+                namespace, dataset_name = submodule['name'].split("&")
+                submodule_dir = os.path.join(labbook.root_dir, '.gigantum', 'datasets', namespace, dataset_name)
+                ds = InventoryManager().load_dataset_from_directory(submodule_dir, author=get_logged_in_author())
+                ds.namespace = namespace
+                info.context.dataset_loader.prime(f"{get_logged_in_username()}&{namespace}&{dataset_name}", ds)
+
+                datasets.append(Dataset(owner=namespace, name=dataset_name))
+            except InventoryException:
+                continue
+
+        return datasets
+
+    def resolve_linked_datasets(self, info):
+        """ """
+        return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
+            lambda labbook: self.helper_resolve_linked_datasets(labbook, info))

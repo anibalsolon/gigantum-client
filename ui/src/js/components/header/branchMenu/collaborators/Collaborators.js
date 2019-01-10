@@ -121,7 +121,6 @@ class CollaboratorButton extends Component {
               if (props) {
                 let section;
                 section = this.props.sectionType === 'dataset' ? props.dataset : props.labbook;
-                console.log(props)
                 this.canManageCollaborators = section.canManageCollaborators;
                 this.collaborators = section.collaborators;
 

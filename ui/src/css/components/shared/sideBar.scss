@@ -130,7 +130,7 @@
     content: "";
     position: absolute;
     @include triangle('left', 14px, $background-color);
-    right: 0;
+    right: -40px;
     margin-top: 15px;
 }
 

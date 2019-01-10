@@ -206,9 +206,9 @@ exports[`Test DashboardRemote 1`] = `
             Import
           </button>
           <button
-            className="RemoteLabbooks__icon RemoteLabbooks__icon--delete-disabled"
-            data-tooltip="Can only delete remote projects created by you"
-            disabled={true}
+            className="RemoteLabbooks__icon RemoteLabbooks__icon--delete"
+            data-tooltip=""
+            disabled={false}
             onClick={[Function]}
           >
             Delete
@@ -227,7 +227,7 @@ exports[`Test DashboardRemote 1`] = `
                 <span
                   className=""
                 >
-                  update-test
+                  zab
                 </span>
               </span>
             </h6>
@@ -235,12 +235,12 @@ exports[`Test DashboardRemote 1`] = `
           <p
             className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
           >
-            dmk
+            cbutler
           </p>
           <p
             className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
           >
-            Created on 12/07/18
+            Created on 01/08/19
           </p>
           <p
             className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
@@ -254,7 +254,7 @@ exports[`Test DashboardRemote 1`] = `
           </p>
         </div>
         <div
-          className="Tooltip RemoteLabbooks__undefined"
+          className="Tooltip-Listing RemoteLabbooks__undefined"
           data-tooltip="undefined"
         />
       </div>
@@ -265,11 +265,209 @@ exports[`Test DashboardRemote 1`] = `
           className="RemoteLabbooks__row RemoteLabbooks__row--icon"
         >
           <button
-            className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud"
-            data-tooltip="Project exists locally"
-            disabled={true}
+            className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud-download"
+            disabled={false}
+            onClick={[Function]}
           >
-            Imported
+            Import
+          </button>
+          <button
+            className="RemoteLabbooks__icon RemoteLabbooks__icon--delete"
+            data-tooltip=""
+            disabled={false}
+            onClick={[Function]}
+          >
+            Delete
+          </button>
+        </div>
+        <div
+          className="RemoteLabbooks__row RemoteLabbooks__row--text"
+        >
+          <div
+            className="RemoteLabbooks__row RemoteLabbooks__row--title"
+          >
+            <h6
+              className="RemoteLabbooks__panel-title"
+            >
+              <span>
+                <span
+                  className=""
+                >
+                  untracked-labbook
+                </span>
+              </span>
+            </h6>
+          </div>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
+          >
+            cbutler
+          </p>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
+          >
+            Created on 01/08/19
+          </p>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
+          >
+            Modified a few seconds ago
+          </p>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
+          >
+            <span />
+          </p>
+        </div>
+        <div
+          className="Tooltip-Listing RemoteLabbooks__undefined"
+          data-tooltip="undefined"
+        />
+      </div>
+      <div
+        className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
+      >
+        <div
+          className="RemoteLabbooks__row RemoteLabbooks__row--icon"
+        >
+          <button
+            className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud-download"
+            disabled={false}
+            onClick={[Function]}
+          >
+            Import
+          </button>
+          <button
+            className="RemoteLabbooks__icon RemoteLabbooks__icon--delete"
+            data-tooltip=""
+            disabled={false}
+            onClick={[Function]}
+          >
+            Delete
+          </button>
+        </div>
+        <div
+          className="RemoteLabbooks__row RemoteLabbooks__row--text"
+        >
+          <div
+            className="RemoteLabbooks__row RemoteLabbooks__row--title"
+          >
+            <h6
+              className="RemoteLabbooks__panel-title"
+            >
+              <span>
+                <span
+                  className=""
+                >
+                  untracked-2
+                </span>
+              </span>
+            </h6>
+          </div>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
+          >
+            cbutler
+          </p>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
+          >
+            Created on 01/08/19
+          </p>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
+          >
+            Modified a few seconds ago
+          </p>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
+          >
+            <span />
+          </p>
+        </div>
+        <div
+          className="Tooltip-Listing RemoteLabbooks__undefined"
+          data-tooltip="undefined"
+        />
+      </div>
+      <div
+        className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
+      >
+        <div
+          className="RemoteLabbooks__row RemoteLabbooks__row--icon"
+        >
+          <button
+            className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud-download"
+            disabled={false}
+            onClick={[Function]}
+          >
+            Import
+          </button>
+          <button
+            className="RemoteLabbooks__icon RemoteLabbooks__icon--delete"
+            data-tooltip=""
+            disabled={false}
+            onClick={[Function]}
+          >
+            Delete
+          </button>
+        </div>
+        <div
+          className="RemoteLabbooks__row RemoteLabbooks__row--text"
+        >
+          <div
+            className="RemoteLabbooks__row RemoteLabbooks__row--title"
+          >
+            <h6
+              className="RemoteLabbooks__panel-title"
+            >
+              <span>
+                <span
+                  className=""
+                >
+                  untracked
+                </span>
+              </span>
+            </h6>
+          </div>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
+          >
+            cbutler
+          </p>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
+          >
+            Created on 01/08/19
+          </p>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
+          >
+            Modified a few seconds ago
+          </p>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
+          >
+            <span />
+          </p>
+        </div>
+        <div
+          className="Tooltip-Listing RemoteLabbooks__undefined"
+          data-tooltip="undefined"
+        />
+      </div>
+      <div
+        className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
+      >
+        <div
+          className="RemoteLabbooks__row RemoteLabbooks__row--icon"
+        >
+          <button
+            className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud-download"
+            disabled={false}
+            onClick={[Function]}
+          >
+            Import
           </button>
           <button
             className="RemoteLabbooks__icon RemoteLabbooks__icon--delete-disabled"
@@ -306,7 +504,7 @@ exports[`Test DashboardRemote 1`] = `
           <p
             className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
           >
-            Created on 12/07/18
+            Created on 01/08/19
           </p>
           <p
             className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
@@ -316,11 +514,17 @@ exports[`Test DashboardRemote 1`] = `
           <p
             className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
           >
-            <span />
+            <span>
+              <span
+                className=""
+              >
+                A LabBook to analyze Trumps stupid tweets
+              </span>
+            </span>
           </p>
         </div>
         <div
-          className="Tooltip RemoteLabbooks__undefined"
+          className="Tooltip-Listing RemoteLabbooks__undefined"
           data-tooltip="undefined"
         />
       </div>
@@ -338,9 +542,141 @@ exports[`Test DashboardRemote 1`] = `
             Import
           </button>
           <button
-            className="RemoteLabbooks__icon RemoteLabbooks__icon--delete-disabled"
-            data-tooltip="Can only delete remote projects created by you"
-            disabled={true}
+            className="RemoteLabbooks__icon RemoteLabbooks__icon--delete"
+            data-tooltip=""
+            disabled={false}
+            onClick={[Function]}
+          >
+            Delete
+          </button>
+        </div>
+        <div
+          className="RemoteLabbooks__row RemoteLabbooks__row--text"
+        >
+          <div
+            className="RemoteLabbooks__row RemoteLabbooks__row--title"
+          >
+            <h6
+              className="RemoteLabbooks__panel-title"
+            >
+              <span>
+                <span
+                  className=""
+                >
+                  tracking-endabled
+                </span>
+              </span>
+            </h6>
+          </div>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
+          >
+            cbutler
+          </p>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
+          >
+            Created on 01/08/19
+          </p>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
+          >
+            Modified a few seconds ago
+          </p>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
+          >
+            <span />
+          </p>
+        </div>
+        <div
+          className="Tooltip-Listing RemoteLabbooks__undefined"
+          data-tooltip="undefined"
+        />
+      </div>
+      <div
+        className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
+      >
+        <div
+          className="RemoteLabbooks__row RemoteLabbooks__row--icon"
+        >
+          <button
+            className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud-download"
+            disabled={false}
+            onClick={[Function]}
+          >
+            Import
+          </button>
+          <button
+            className="RemoteLabbooks__icon RemoteLabbooks__icon--delete"
+            data-tooltip=""
+            disabled={false}
+            onClick={[Function]}
+          >
+            Delete
+          </button>
+        </div>
+        <div
+          className="RemoteLabbooks__row RemoteLabbooks__row--text"
+        >
+          <div
+            className="RemoteLabbooks__row RemoteLabbooks__row--title"
+          >
+            <h6
+              className="RemoteLabbooks__panel-title"
+            >
+              <span>
+                <span
+                  className=""
+                >
+                  tracked-2
+                </span>
+              </span>
+            </h6>
+          </div>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
+          >
+            cbutler
+          </p>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
+          >
+            Created on 01/08/19
+          </p>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
+          >
+            Modified a few seconds ago
+          </p>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
+          >
+            <span />
+          </p>
+        </div>
+        <div
+          className="Tooltip-Listing RemoteLabbooks__undefined"
+          data-tooltip="undefined"
+        />
+      </div>
+      <div
+        className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
+      >
+        <div
+          className="RemoteLabbooks__row RemoteLabbooks__row--icon"
+        >
+          <button
+            className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud-download"
+            disabled={false}
+            onClick={[Function]}
+          >
+            Import
+          </button>
+          <button
+            className="RemoteLabbooks__icon RemoteLabbooks__icon--delete"
+            data-tooltip=""
+            disabled={false}
             onClick={[Function]}
           >
             Delete
@@ -367,12 +703,12 @@ exports[`Test DashboardRemote 1`] = `
           <p
             className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
           >
-            bill2
+            cbutler
           </p>
           <p
             className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
           >
-            Created on 12/07/18
+            Created on 01/08/19
           </p>
           <p
             className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
@@ -386,7 +722,7 @@ exports[`Test DashboardRemote 1`] = `
           </p>
         </div>
         <div
-          className="Tooltip RemoteLabbooks__undefined"
+          className="Tooltip-Listing RemoteLabbooks__undefined"
           data-tooltip="undefined"
         />
       </div>
@@ -397,16 +733,16 @@ exports[`Test DashboardRemote 1`] = `
           className="RemoteLabbooks__row RemoteLabbooks__row--icon"
         >
           <button
-            className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud"
-            data-tooltip="Project exists locally"
-            disabled={true}
+            className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud-download"
+            disabled={false}
+            onClick={[Function]}
           >
-            Imported
+            Import
           </button>
           <button
-            className="RemoteLabbooks__icon RemoteLabbooks__icon--delete-disabled"
-            data-tooltip="Can only delete remote projects created by you"
-            disabled={true}
+            className="RemoteLabbooks__icon RemoteLabbooks__icon--delete"
+            data-tooltip=""
+            disabled={false}
             onClick={[Function]}
           >
             Delete
@@ -425,7 +761,7 @@ exports[`Test DashboardRemote 1`] = `
                 <span
                   className=""
                 >
-                  test-lb
+                  thisiasdmadskadssfdkjjssdfs-jasjdasj
                 </span>
               </span>
             </h6>
@@ -433,12 +769,12 @@ exports[`Test DashboardRemote 1`] = `
           <p
             className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
           >
-            dmk
+            cbutler
           </p>
           <p
             className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
           >
-            Created on 12/07/18
+            Created on 01/08/19
           </p>
           <p
             className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
@@ -452,7 +788,7 @@ exports[`Test DashboardRemote 1`] = `
           </p>
         </div>
         <div
-          className="Tooltip RemoteLabbooks__undefined"
+          className="Tooltip-Listing RemoteLabbooks__undefined"
           data-tooltip="undefined"
         />
       </div>
@@ -463,11 +799,11 @@ exports[`Test DashboardRemote 1`] = `
           className="RemoteLabbooks__row RemoteLabbooks__row--icon"
         >
           <button
-            className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud"
-            data-tooltip="Project exists locally"
-            disabled={true}
+            className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud-download"
+            disabled={false}
+            onClick={[Function]}
           >
-            Imported
+            Import
           </button>
           <button
             className="RemoteLabbooks__icon RemoteLabbooks__icon--delete-disabled"
@@ -504,7 +840,7 @@ exports[`Test DashboardRemote 1`] = `
           <p
             className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
           >
-            Created on 12/07/18
+            Created on 01/08/19
           </p>
           <p
             className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
@@ -514,11 +850,17 @@ exports[`Test DashboardRemote 1`] = `
           <p
             className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
           >
-            <span />
+            <span>
+              <span
+                className=""
+              >
+                sdfsdf
+              </span>
+            </span>
           </p>
         </div>
         <div
-          className="Tooltip RemoteLabbooks__undefined"
+          className="Tooltip-Listing RemoteLabbooks__undefined"
           data-tooltip="undefined"
         />
       </div>
@@ -529,11 +871,11 @@ exports[`Test DashboardRemote 1`] = `
           className="RemoteLabbooks__row RemoteLabbooks__row--icon"
         >
           <button
-            className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud"
-            data-tooltip="Project exists locally"
-            disabled={true}
+            className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud-download"
+            disabled={false}
+            onClick={[Function]}
           >
-            Imported
+            Import
           </button>
           <button
             className="RemoteLabbooks__icon RemoteLabbooks__icon--delete"
@@ -570,7 +912,7 @@ exports[`Test DashboardRemote 1`] = `
           <p
             className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
           >
-            Created on 12/07/18
+            Created on 01/08/19
           </p>
           <p
             className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
@@ -580,11 +922,17 @@ exports[`Test DashboardRemote 1`] = `
           <p
             className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
           >
-            <span />
+            <span>
+              <span
+                className=""
+              >
+                testing labbook activity feed
+              </span>
+            </span>
           </p>
         </div>
         <div
-          className="Tooltip RemoteLabbooks__undefined"
+          className="Tooltip-Listing RemoteLabbooks__undefined"
           data-tooltip="undefined"
         />
       </div>
@@ -595,11 +943,11 @@ exports[`Test DashboardRemote 1`] = `
           className="RemoteLabbooks__row RemoteLabbooks__row--icon"
         >
           <button
-            className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud"
-            data-tooltip="Project exists locally"
-            disabled={true}
+            className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud-download"
+            disabled={false}
+            onClick={[Function]}
           >
-            Imported
+            Import
           </button>
           <button
             className="RemoteLabbooks__icon RemoteLabbooks__icon--delete"
@@ -623,7 +971,7 @@ exports[`Test DashboardRemote 1`] = `
                 <span
                   className=""
                 >
-                  test-book
+                  test-uploader-1
                 </span>
               </span>
             </h6>
@@ -636,7 +984,7 @@ exports[`Test DashboardRemote 1`] = `
           <p
             className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
           >
-            Created on 12/07/18
+            Created on 01/08/19
           </p>
           <p
             className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
@@ -646,143 +994,17 @@ exports[`Test DashboardRemote 1`] = `
           <p
             className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
           >
-            <span />
-          </p>
-        </div>
-        <div
-          className="Tooltip RemoteLabbooks__undefined"
-          data-tooltip="undefined"
-        />
-      </div>
-      <div
-        className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
-      >
-        <div
-          className="RemoteLabbooks__row RemoteLabbooks__row--icon"
-        >
-          <button
-            className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud"
-            data-tooltip="Project exists locally"
-            disabled={true}
-          >
-            Imported
-          </button>
-          <button
-            className="RemoteLabbooks__icon RemoteLabbooks__icon--delete"
-            data-tooltip=""
-            disabled={false}
-            onClick={[Function]}
-          >
-            Delete
-          </button>
-        </div>
-        <div
-          className="RemoteLabbooks__row RemoteLabbooks__row--text"
-        >
-          <div
-            className="RemoteLabbooks__row RemoteLabbooks__row--title"
-          >
-            <h6
-              className="RemoteLabbooks__panel-title"
-            >
-              <span>
-                <span
-                  className=""
-                >
-                  temp-labook22
-                </span>
+            <span>
+              <span
+                className=""
+              >
+                Test uoload
               </span>
-            </h6>
-          </div>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
-          >
-            cbutler
-          </p>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
-          >
-            Created on 12/07/18
-          </p>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
-          >
-            Modified a few seconds ago
-          </p>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
-          >
-            <span />
+            </span>
           </p>
         </div>
         <div
-          className="Tooltip RemoteLabbooks__undefined"
-          data-tooltip="undefined"
-        />
-      </div>
-      <div
-        className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
-      >
-        <div
-          className="RemoteLabbooks__row RemoteLabbooks__row--icon"
-        >
-          <button
-            className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud"
-            data-tooltip="Project exists locally"
-            disabled={true}
-          >
-            Imported
-          </button>
-          <button
-            className="RemoteLabbooks__icon RemoteLabbooks__icon--delete"
-            data-tooltip=""
-            disabled={false}
-            onClick={[Function]}
-          >
-            Delete
-          </button>
-        </div>
-        <div
-          className="RemoteLabbooks__row RemoteLabbooks__row--text"
-        >
-          <div
-            className="RemoteLabbooks__row RemoteLabbooks__row--title"
-          >
-            <h6
-              className="RemoteLabbooks__panel-title"
-            >
-              <span>
-                <span
-                  className=""
-                >
-                  temp
-                </span>
-              </span>
-            </h6>
-          </div>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
-          >
-            cbutler
-          </p>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
-          >
-            Created on 12/07/18
-          </p>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
-          >
-            Modified a few seconds ago
-          </p>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
-          >
-            <span />
-          </p>
-        </div>
-        <div
-          className="Tooltip RemoteLabbooks__undefined"
+          className="Tooltip-Listing RemoteLabbooks__undefined"
           data-tooltip="undefined"
         />
       </div>
@@ -821,601 +1043,7 @@ exports[`Test DashboardRemote 1`] = `
                 <span
                   className=""
                 >
-                  t3
-                </span>
-              </span>
-            </h6>
-          </div>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
-          >
-            bill2
-          </p>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
-          >
-            Created on 12/07/18
-          </p>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
-          >
-            Modified a few seconds ago
-          </p>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
-          >
-            <span />
-          </p>
-        </div>
-        <div
-          className="Tooltip RemoteLabbooks__undefined"
-          data-tooltip="undefined"
-        />
-      </div>
-      <div
-        className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
-      >
-        <div
-          className="RemoteLabbooks__row RemoteLabbooks__row--icon"
-        >
-          <button
-            className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud"
-            data-tooltip="Project exists locally"
-            disabled={true}
-          >
-            Imported
-          </button>
-          <button
-            className="RemoteLabbooks__icon RemoteLabbooks__icon--delete"
-            data-tooltip=""
-            disabled={false}
-            onClick={[Function]}
-          >
-            Delete
-          </button>
-        </div>
-        <div
-          className="RemoteLabbooks__row RemoteLabbooks__row--text"
-        >
-          <div
-            className="RemoteLabbooks__row RemoteLabbooks__row--title"
-          >
-            <h6
-              className="RemoteLabbooks__panel-title"
-            >
-              <span>
-                <span
-                  className=""
-                >
-                  spade
-                </span>
-              </span>
-            </h6>
-          </div>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
-          >
-            cbutler
-          </p>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
-          >
-            Created on 12/07/18
-          </p>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
-          >
-            Modified a few seconds ago
-          </p>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
-          >
-            <span />
-          </p>
-        </div>
-        <div
-          className="Tooltip RemoteLabbooks__undefined"
-          data-tooltip="undefined"
-        />
-      </div>
-      <div
-        className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
-      >
-        <div
-          className="RemoteLabbooks__row RemoteLabbooks__row--icon"
-        >
-          <button
-            className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud"
-            data-tooltip="Project exists locally"
-            disabled={true}
-          >
-            Imported
-          </button>
-          <button
-            className="RemoteLabbooks__icon RemoteLabbooks__icon--delete-disabled"
-            data-tooltip="Can only delete remote projects created by you"
-            disabled={true}
-            onClick={[Function]}
-          >
-            Delete
-          </button>
-        </div>
-        <div
-          className="RemoteLabbooks__row RemoteLabbooks__row--text"
-        >
-          <div
-            className="RemoteLabbooks__row RemoteLabbooks__row--title"
-          >
-            <h6
-              className="RemoteLabbooks__panel-title"
-            >
-              <span>
-                <span
-                  className=""
-                >
-                  snappy
-                </span>
-              </span>
-            </h6>
-          </div>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
-          >
-            gigantum-examples
-          </p>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
-          >
-            Created on 12/07/18
-          </p>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
-          >
-            Modified a few seconds ago
-          </p>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
-          >
-            <span />
-          </p>
-        </div>
-        <div
-          className="Tooltip RemoteLabbooks__undefined"
-          data-tooltip="undefined"
-        />
-      </div>
-      <div
-        className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
-      >
-        <div
-          className="RemoteLabbooks__row RemoteLabbooks__row--icon"
-        >
-          <button
-            className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud"
-            data-tooltip="Project exists locally"
-            disabled={true}
-          >
-            Imported
-          </button>
-          <button
-            className="RemoteLabbooks__icon RemoteLabbooks__icon--delete"
-            data-tooltip=""
-            disabled={false}
-            onClick={[Function]}
-          >
-            Delete
-          </button>
-        </div>
-        <div
-          className="RemoteLabbooks__row RemoteLabbooks__row--text"
-        >
-          <div
-            className="RemoteLabbooks__row RemoteLabbooks__row--title"
-          >
-            <h6
-              className="RemoteLabbooks__panel-title"
-            >
-              <span>
-                <span
-                  className=""
-                >
-                  set-public-test-calum-true
-                </span>
-              </span>
-            </h6>
-          </div>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
-          >
-            cbutler
-          </p>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
-          >
-            Created on 12/07/18
-          </p>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
-          >
-            Modified a few seconds ago
-          </p>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
-          >
-            <span />
-          </p>
-        </div>
-        <div
-          className="Tooltip RemoteLabbooks__undefined"
-          data-tooltip="undefined"
-        />
-      </div>
-      <div
-        className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
-      >
-        <div
-          className="RemoteLabbooks__row RemoteLabbooks__row--icon"
-        >
-          <button
-            className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud"
-            data-tooltip="Project exists locally"
-            disabled={true}
-          >
-            Imported
-          </button>
-          <button
-            className="RemoteLabbooks__icon RemoteLabbooks__icon--delete"
-            data-tooltip=""
-            disabled={false}
-            onClick={[Function]}
-          >
-            Delete
-          </button>
-        </div>
-        <div
-          className="RemoteLabbooks__row RemoteLabbooks__row--text"
-        >
-          <div
-            className="RemoteLabbooks__row RemoteLabbooks__row--title"
-          >
-            <h6
-              className="RemoteLabbooks__panel-title"
-            >
-              <span>
-                <span
-                  className=""
-                >
-                  set-public-test-calum
-                </span>
-              </span>
-            </h6>
-          </div>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
-          >
-            cbutler
-          </p>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
-          >
-            Created on 12/07/18
-          </p>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
-          >
-            Modified a few seconds ago
-          </p>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
-          >
-            <span />
-          </p>
-        </div>
-        <div
-          className="Tooltip RemoteLabbooks__undefined"
-          data-tooltip="undefined"
-        />
-      </div>
-      <div
-        className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
-      >
-        <div
-          className="RemoteLabbooks__row RemoteLabbooks__row--icon"
-        >
-          <button
-            className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud-download"
-            disabled={false}
-            onClick={[Function]}
-          >
-            Import
-          </button>
-          <button
-            className="RemoteLabbooks__icon RemoteLabbooks__icon--delete-disabled"
-            data-tooltip="Can only delete remote projects created by you"
-            disabled={true}
-            onClick={[Function]}
-          >
-            Delete
-          </button>
-        </div>
-        <div
-          className="RemoteLabbooks__row RemoteLabbooks__row--text"
-        >
-          <div
-            className="RemoteLabbooks__row RemoteLabbooks__row--title"
-          >
-            <h6
-              className="RemoteLabbooks__panel-title"
-            >
-              <span>
-                <span
-                  className=""
-                >
-                  sdfdsfsdfsdf
-                </span>
-              </span>
-            </h6>
-          </div>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
-          >
-            joel
-          </p>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
-          >
-            Created on 12/07/18
-          </p>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
-          >
-            Modified a few seconds ago
-          </p>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
-          >
-            <span />
-          </p>
-        </div>
-        <div
-          className="Tooltip RemoteLabbooks__undefined"
-          data-tooltip="undefined"
-        />
-      </div>
-      <div
-        className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
-      >
-        <div
-          className="RemoteLabbooks__row RemoteLabbooks__row--icon"
-        >
-          <button
-            className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud-download"
-            disabled={false}
-            onClick={[Function]}
-          >
-            Import
-          </button>
-          <button
-            className="RemoteLabbooks__icon RemoteLabbooks__icon--delete-disabled"
-            data-tooltip="Can only delete remote projects created by you"
-            disabled={true}
-            onClick={[Function]}
-          >
-            Delete
-          </button>
-        </div>
-        <div
-          className="RemoteLabbooks__row RemoteLabbooks__row--text"
-        >
-          <div
-            className="RemoteLabbooks__row RemoteLabbooks__row--title"
-          >
-            <h6
-              className="RemoteLabbooks__panel-title"
-            >
-              <span>
-                <span
-                  className=""
-                >
-                  rootpy3
-                </span>
-              </span>
-            </h6>
-          </div>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
-          >
-            gigantum-examples
-          </p>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
-          >
-            Created on 12/07/18
-          </p>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
-          >
-            Modified a few seconds ago
-          </p>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
-          >
-            <span />
-          </p>
-        </div>
-        <div
-          className="Tooltip RemoteLabbooks__undefined"
-          data-tooltip="undefined"
-        />
-      </div>
-      <div
-        className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
-      >
-        <div
-          className="RemoteLabbooks__row RemoteLabbooks__row--icon"
-        >
-          <button
-            className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud"
-            data-tooltip="Project exists locally"
-            disabled={true}
-          >
-            Imported
-          </button>
-          <button
-            className="RemoteLabbooks__icon RemoteLabbooks__icon--delete-disabled"
-            data-tooltip="Can only delete remote projects created by you"
-            disabled={true}
-            onClick={[Function]}
-          >
-            Delete
-          </button>
-        </div>
-        <div
-          className="RemoteLabbooks__row RemoteLabbooks__row--text"
-        >
-          <div
-            className="RemoteLabbooks__row RemoteLabbooks__row--title"
-          >
-            <h6
-              className="RemoteLabbooks__panel-title"
-            >
-              <span>
-                <span
-                  className=""
-                >
-                  rootpy3
-                </span>
-              </span>
-            </h6>
-          </div>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
-          >
-            randalg
-          </p>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
-          >
-            Created on 12/07/18
-          </p>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
-          >
-            Modified a few seconds ago
-          </p>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
-          >
-            <span />
-          </p>
-        </div>
-        <div
-          className="Tooltip RemoteLabbooks__undefined"
-          data-tooltip="undefined"
-        />
-      </div>
-      <div
-        className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
-      >
-        <div
-          className="RemoteLabbooks__row RemoteLabbooks__row--icon"
-        >
-          <button
-            className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud"
-            data-tooltip="Project exists locally"
-            disabled={true}
-          >
-            Imported
-          </button>
-          <button
-            className="RemoteLabbooks__icon RemoteLabbooks__icon--delete"
-            data-tooltip=""
-            disabled={false}
-            onClick={[Function]}
-          >
-            Delete
-          </button>
-        </div>
-        <div
-          className="RemoteLabbooks__row RemoteLabbooks__row--text"
-        >
-          <div
-            className="RemoteLabbooks__row RemoteLabbooks__row--title"
-          >
-            <h6
-              className="RemoteLabbooks__panel-title"
-            >
-              <span>
-                <span
-                  className=""
-                >
-                  random-picture-generator
-                </span>
-              </span>
-            </h6>
-          </div>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
-          >
-            cbutler
-          </p>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
-          >
-            Created on 12/07/18
-          </p>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
-          >
-            Modified a few seconds ago
-          </p>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
-          >
-            <span />
-          </p>
-        </div>
-        <div
-          className="Tooltip RemoteLabbooks__undefined"
-          data-tooltip="undefined"
-        />
-      </div>
-      <div
-        className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
-      >
-        <div
-          className="RemoteLabbooks__row RemoteLabbooks__row--icon"
-        >
-          <button
-            className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud-download"
-            disabled={false}
-            onClick={[Function]}
-          >
-            Import
-          </button>
-          <button
-            className="RemoteLabbooks__icon RemoteLabbooks__icon--delete-disabled"
-            data-tooltip="Can only delete remote projects created by you"
-            disabled={true}
-            onClick={[Function]}
-          >
-            Delete
-          </button>
-        </div>
-        <div
-          className="RemoteLabbooks__row RemoteLabbooks__row--text"
-        >
-          <div
-            className="RemoteLabbooks__row RemoteLabbooks__row--title"
-          >
-            <h6
-              className="RemoteLabbooks__panel-title"
-            >
-              <span>
-                <span
-                  className=""
-                >
-                  python-data-science-handbook
+                  test-lb
                 </span>
               </span>
             </h6>
@@ -1428,7 +1056,7 @@ exports[`Test DashboardRemote 1`] = `
           <p
             className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
           >
-            Created on 12/07/18
+            Created on 01/08/19
           </p>
           <p
             className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
@@ -1438,11 +1066,17 @@ exports[`Test DashboardRemote 1`] = `
           <p
             className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
           >
-            <span />
+            <span>
+              <span
+                className=""
+              >
+                This a short description
+              </span>
+            </span>
           </p>
         </div>
         <div
-          className="Tooltip RemoteLabbooks__undefined"
+          className="Tooltip-Listing RemoteLabbooks__undefined"
           data-tooltip="undefined"
         />
       </div>
@@ -1453,11 +1087,11 @@ exports[`Test DashboardRemote 1`] = `
           className="RemoteLabbooks__row RemoteLabbooks__row--icon"
         >
           <button
-            className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud"
-            data-tooltip="Project exists locally"
-            disabled={true}
+            className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud-download"
+            disabled={false}
+            onClick={[Function]}
           >
-            Imported
+            Import
           </button>
           <button
             className="RemoteLabbooks__icon RemoteLabbooks__icon--delete"
@@ -1481,7 +1115,7 @@ exports[`Test DashboardRemote 1`] = `
                 <span
                   className=""
                 >
-                  pulish-temp4
+                  test-labbook
                 </span>
               </span>
             </h6>
@@ -1494,7 +1128,79 @@ exports[`Test DashboardRemote 1`] = `
           <p
             className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
           >
-            Created on 12/07/18
+            Created on 01/08/19
+          </p>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
+          >
+            Modified a few seconds ago
+          </p>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
+          >
+            <span>
+              <span
+                className=""
+              >
+                here is my labbook
+              </span>
+            </span>
+          </p>
+        </div>
+        <div
+          className="Tooltip-Listing RemoteLabbooks__undefined"
+          data-tooltip="undefined"
+        />
+      </div>
+      <div
+        className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
+      >
+        <div
+          className="RemoteLabbooks__row RemoteLabbooks__row--icon"
+        >
+          <button
+            className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud-download"
+            disabled={false}
+            onClick={[Function]}
+          >
+            Import
+          </button>
+          <button
+            className="RemoteLabbooks__icon RemoteLabbooks__icon--delete"
+            data-tooltip=""
+            disabled={false}
+            onClick={[Function]}
+          >
+            Delete
+          </button>
+        </div>
+        <div
+          className="RemoteLabbooks__row RemoteLabbooks__row--text"
+        >
+          <div
+            className="RemoteLabbooks__row RemoteLabbooks__row--title"
+          >
+            <h6
+              className="RemoteLabbooks__panel-title"
+            >
+              <span>
+                <span
+                  className=""
+                >
+                  test-building-status-2
+                </span>
+              </span>
+            </h6>
+          </div>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
+          >
+            cbutler
+          </p>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
+          >
+            Created on 01/08/19
           </p>
           <p
             className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
@@ -1508,7 +1214,337 @@ exports[`Test DashboardRemote 1`] = `
           </p>
         </div>
         <div
-          className="Tooltip RemoteLabbooks__undefined"
+          className="Tooltip-Listing RemoteLabbooks__undefined"
+          data-tooltip="undefined"
+        />
+      </div>
+      <div
+        className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
+      >
+        <div
+          className="RemoteLabbooks__row RemoteLabbooks__row--icon"
+        >
+          <button
+            className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud-download"
+            disabled={false}
+            onClick={[Function]}
+          >
+            Import
+          </button>
+          <button
+            className="RemoteLabbooks__icon RemoteLabbooks__icon--delete"
+            data-tooltip=""
+            disabled={false}
+            onClick={[Function]}
+          >
+            Delete
+          </button>
+        </div>
+        <div
+          className="RemoteLabbooks__row RemoteLabbooks__row--text"
+        >
+          <div
+            className="RemoteLabbooks__row RemoteLabbooks__row--title"
+          >
+            <h6
+              className="RemoteLabbooks__panel-title"
+            >
+              <span>
+                <span
+                  className=""
+                >
+                  test-building-state
+                </span>
+              </span>
+            </h6>
+          </div>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
+          >
+            cbutler
+          </p>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
+          >
+            Created on 01/08/19
+          </p>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
+          >
+            Modified a few seconds ago
+          </p>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
+          >
+            <span />
+          </p>
+        </div>
+        <div
+          className="Tooltip-Listing RemoteLabbooks__undefined"
+          data-tooltip="undefined"
+        />
+      </div>
+      <div
+        className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
+      >
+        <div
+          className="RemoteLabbooks__row RemoteLabbooks__row--icon"
+        >
+          <button
+            className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud-download"
+            disabled={false}
+            onClick={[Function]}
+          >
+            Import
+          </button>
+          <button
+            className="RemoteLabbooks__icon RemoteLabbooks__icon--delete"
+            data-tooltip=""
+            disabled={false}
+            onClick={[Function]}
+          >
+            Delete
+          </button>
+        </div>
+        <div
+          className="RemoteLabbooks__row RemoteLabbooks__row--text"
+        >
+          <div
+            className="RemoteLabbooks__row RemoteLabbooks__row--title"
+          >
+            <h6
+              className="RemoteLabbooks__panel-title"
+            >
+              <span>
+                <span
+                  className=""
+                >
+                  test-building-6
+                </span>
+              </span>
+            </h6>
+          </div>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
+          >
+            cbutler
+          </p>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
+          >
+            Created on 01/08/19
+          </p>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
+          >
+            Modified a few seconds ago
+          </p>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
+          >
+            <span />
+          </p>
+        </div>
+        <div
+          className="Tooltip-Listing RemoteLabbooks__undefined"
+          data-tooltip="undefined"
+        />
+      </div>
+      <div
+        className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
+      >
+        <div
+          className="RemoteLabbooks__row RemoteLabbooks__row--icon"
+        >
+          <button
+            className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud-download"
+            disabled={false}
+            onClick={[Function]}
+          >
+            Import
+          </button>
+          <button
+            className="RemoteLabbooks__icon RemoteLabbooks__icon--delete"
+            data-tooltip=""
+            disabled={false}
+            onClick={[Function]}
+          >
+            Delete
+          </button>
+        </div>
+        <div
+          className="RemoteLabbooks__row RemoteLabbooks__row--text"
+        >
+          <div
+            className="RemoteLabbooks__row RemoteLabbooks__row--title"
+          >
+            <h6
+              className="RemoteLabbooks__panel-title"
+            >
+              <span>
+                <span
+                  className=""
+                >
+                  test-building-5
+                </span>
+              </span>
+            </h6>
+          </div>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
+          >
+            cbutler
+          </p>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
+          >
+            Created on 01/08/19
+          </p>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
+          >
+            Modified a few seconds ago
+          </p>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
+          >
+            <span />
+          </p>
+        </div>
+        <div
+          className="Tooltip-Listing RemoteLabbooks__undefined"
+          data-tooltip="undefined"
+        />
+      </div>
+      <div
+        className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
+      >
+        <div
+          className="RemoteLabbooks__row RemoteLabbooks__row--icon"
+        >
+          <button
+            className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud-download"
+            disabled={false}
+            onClick={[Function]}
+          >
+            Import
+          </button>
+          <button
+            className="RemoteLabbooks__icon RemoteLabbooks__icon--delete"
+            data-tooltip=""
+            disabled={false}
+            onClick={[Function]}
+          >
+            Delete
+          </button>
+        </div>
+        <div
+          className="RemoteLabbooks__row RemoteLabbooks__row--text"
+        >
+          <div
+            className="RemoteLabbooks__row RemoteLabbooks__row--title"
+          >
+            <h6
+              className="RemoteLabbooks__panel-title"
+            >
+              <span>
+                <span
+                  className=""
+                >
+                  test-building-4
+                </span>
+              </span>
+            </h6>
+          </div>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
+          >
+            cbutler
+          </p>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
+          >
+            Created on 01/08/19
+          </p>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
+          >
+            Modified a few seconds ago
+          </p>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
+          >
+            <span />
+          </p>
+        </div>
+        <div
+          className="Tooltip-Listing RemoteLabbooks__undefined"
+          data-tooltip="undefined"
+        />
+      </div>
+      <div
+        className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
+      >
+        <div
+          className="RemoteLabbooks__row RemoteLabbooks__row--icon"
+        >
+          <button
+            className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud-download"
+            disabled={false}
+            onClick={[Function]}
+          >
+            Import
+          </button>
+          <button
+            className="RemoteLabbooks__icon RemoteLabbooks__icon--delete"
+            data-tooltip=""
+            disabled={false}
+            onClick={[Function]}
+          >
+            Delete
+          </button>
+        </div>
+        <div
+          className="RemoteLabbooks__row RemoteLabbooks__row--text"
+        >
+          <div
+            className="RemoteLabbooks__row RemoteLabbooks__row--title"
+          >
+            <h6
+              className="RemoteLabbooks__panel-title"
+            >
+              <span>
+                <span
+                  className=""
+                >
+                  test-building-3
+                </span>
+              </span>
+            </h6>
+          </div>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
+          >
+            cbutler
+          </p>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
+          >
+            Created on 01/08/19
+          </p>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
+          >
+            Modified a few seconds ago
+          </p>
+          <p
+            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
+          >
+            <span />
+          </p>
+        </div>
+        <div
+          className="Tooltip-Listing RemoteLabbooks__undefined"
           data-tooltip="undefined"
         />
       </div>

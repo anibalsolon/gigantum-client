@@ -41,8 +41,7 @@ const updateTotalStatus = (file, labbookName, owner, transactionId, section) => 
   if (fileCount === totalFiles) {
     setFinishedUploading();
     setUploadMessageUpdate(`Uploaded ${totalFiles} files. Please wait while upload is finalizing.`, null, progressBarPercentage);
-    console.log(section)
-    section === 'data' ?
+    if (section === 'data') {
       CompleteDatasetUploadTransactionMutation(
         'connectionKey',
         owner,
@@ -53,8 +52,8 @@ const updateTotalStatus = (file, labbookName, owner, transactionId, section) => 
         (response, error) => {
           setUploadMessageRemove(`Uploaded ${totalFiles} files. Please wait while upload is finalizing.`, null, progressBarPercentage);
         },
-      )
-      :
+      );
+      } else {
       CompleteBatchUploadTransactionMutation(
         'connectionKey',
         owner,
@@ -66,6 +65,7 @@ const updateTotalStatus = (file, labbookName, owner, transactionId, section) => 
           setUploadMessageRemove(`Uploaded ${totalFiles} files. Please wait while upload is finalizing.`, null, progressBarPercentage);
         },
       );
+    }
   }
 };
 
@@ -82,7 +82,7 @@ const updateChunkStatus = (file, chunkData, labbookName, owner, transactionId, s
   if ((chunkSize * chunkIndex) >= (fileSizeKb * 1000)) {
     setFinishedUploading();
     setUploadMessageUpdate('Please wait while upload is finalizing.', null, (((chunkSize * chunkIndex) / (fileSizeKb * 1000)) * 100));
-    section === 'data' ?
+    if (section === 'data') {
       CompleteDatasetUploadTransactionMutation(
         'connectionKey',
         owner,
@@ -93,8 +93,8 @@ const updateChunkStatus = (file, chunkData, labbookName, owner, transactionId, s
         (response, error) => {
           setUploadMessageRemove('Please wait while upload is finalizing.', null, (((chunkSize * chunkIndex) / (fileSizeKb * 1000)) * 100));
         },
-      )
-      :
+      );
+    } else {
       CompleteBatchUploadTransactionMutation(
         'connectionKey',
         owner,
@@ -106,6 +106,7 @@ const updateChunkStatus = (file, chunkData, labbookName, owner, transactionId, s
           setUploadMessageRemove('Please wait while upload is finalizing.', null, (((chunkSize * chunkIndex) / (fileSizeKb * 1000)) * 100));
         },
       );
+    }
   }
 };
 
@@ -131,7 +132,7 @@ const uploadFileBrowserChunk = (data, chunkData, file, chunk, accessToken, usern
       }
     };
 
-    section === 'data' ?
+    if (section === 'data') {
       AddDatasetFileMutation(
         data.connectionKey,
         username,
@@ -142,8 +143,8 @@ const uploadFileBrowserChunk = (data, chunkData, file, chunk, accessToken, usern
         accessToken,
         data.transactionId,
         cbFunction,
-      )
-      :
+      );
+    } else {
       AddLabbookFileMutation(
         data.connectionKey,
         username,
@@ -157,6 +158,7 @@ const uploadFileBrowserChunk = (data, chunkData, file, chunk, accessToken, usern
         [],
         cbFunction,
       );
+    }
   } else if (chunk.fileSizeKb > (48 * 1000)) {
     setPauseChunkUpload(data, chunkData, section, username);
   }

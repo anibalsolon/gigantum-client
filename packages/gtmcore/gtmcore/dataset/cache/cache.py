@@ -1,5 +1,6 @@
 import abc
 import os
+from typing import Optional
 
 from gtmcore.dataset import Dataset
 
@@ -12,12 +13,12 @@ class CacheManager(metaclass=abc.ABCMeta):
 
     """
 
-    def __init__(self, dataset: Dataset, username: str) -> None:
+    def __init__(self, dataset: Dataset, username: Optional[str]) -> None:
         """
 
         Args:
             dataset: Current dataset object
-            username: Username of current logged in user
+            username: Username of current logged in user, which may be required by the CacheManager implementation
         """
         self.dataset = dataset
         self.username = username

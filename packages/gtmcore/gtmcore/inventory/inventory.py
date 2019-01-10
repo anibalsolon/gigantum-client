@@ -5,6 +5,8 @@ import json
 import datetime
 from natsort import natsorted
 from pkg_resources import resource_filename
+import pathlib
+import subprocess
 
 from typing import Optional, Generator, List, Tuple, Dict
 
@@ -20,7 +22,9 @@ from gtmcore.inventory.branching import BranchManager
 from gtmcore.dataset.dataset import Dataset
 from gtmcore.inventory import Repository
 from gtmcore.dataset.storage import SUPPORTED_STORAGE_BACKENDS
-from gtmcore.activity import ActivityStore, ActivityDetailRecord, ActivityDetailType, ActivityRecord, ActivityType
+from gtmcore.activity import ActivityStore, ActivityDetailRecord, ActivityDetailType, ActivityRecord, ActivityType, \
+    ActivityAction
+from gtmcore.dataset.manifest import Manifest
 
 
 logger = LMLogger.get_logger()
@@ -93,7 +97,33 @@ class InventoryManager(object):
             LabBook
         """
         try:
-            return self._put_labbook(path, username, owner)
+            lb = self._put_labbook(path, username, owner)
+
+            # Init dataset submodules if present
+            if len(lb.git.repo.submodules) > 0:
+
+                # Link datasets
+                for submodule in lb.git.list_submodules():
+                    try:
+
+                        namespace, dataset_name = submodule['name'].split("&")
+                        rel_submodule_dir = os.path.join('.gigantum', 'datasets', namespace, dataset_name)
+                        submodule_dir = os.path.join(lb.root_dir, rel_submodule_dir)
+                        call_subprocess(['git', 'submodule', 'init', rel_submodule_dir],
+                                        cwd=lb.root_dir, check=True)
+                        call_subprocess(['git', 'submodule', 'update', rel_submodule_dir],
+                                        cwd=lb.root_dir, check=True)
+
+                        ds = InventoryManager().load_dataset_from_directory(submodule_dir)
+                        ds.namespace = namespace
+                        manifest = Manifest(ds, username)
+                        manifest.link_revision()
+
+                    except Exception as err:
+                        logger.exception(f"Failed to import submodule: {submodule['name']}")
+                        continue
+
+            return lb
         except Exception as e:
             logger.error(e)
             raise InventoryException(e)
@@ -470,7 +500,7 @@ class InventoryManager(object):
             dataset._save_gigantum_data()
 
             # Create an empty storage.json file
-            dataset.storage_config = {}
+            dataset.backend_config = {}
 
             # Create .gitignore default file
             shutil.copyfile(os.path.join(resource_filename('gtmcore', 'dataset'), 'gitignore.default'),
@@ -621,3 +651,36 @@ class InventoryManager(object):
             return sorted(local_datasets, key=lambda ds: ds.creation_date)
         else:
             raise InventoryException(f"Invalid sort mode {sort_mode}")
+
+    def link_dataset_to_labbook(self, dataset_url: str, dataset_namespace: str, dataset_name: str, labbook: LabBook):
+        # add submodule and init
+        submodules_root = os.path.join(labbook.root_dir, '.gigantum', 'datasets')
+        submodule_dir = os.path.join(submodules_root, dataset_namespace, dataset_name)
+        if not os.path.exists(os.path.join(submodules_root, dataset_namespace)):
+            pathlib.Path(os.path.join(submodules_root, dataset_namespace)).mkdir(parents=True, exist_ok=True)
+
+        url, _ = dataset_url.split('.git')
+        subprocess.run(['git', 'submodule', 'add', '--name', f"{dataset_namespace}&{dataset_name}", url,
+                        os.path.join('.gigantum', 'datasets', dataset_namespace, dataset_name)],
+                       check=True, cwd=labbook.root_dir)
+        commit = labbook.git.commit("adding submodule ref")
+        labbook.git.update_submodules(init=True)
+
+        ds = self.load_dataset_from_directory(submodule_dir)
+        dataset_revision = ds.git.repo.head.commit.hexsha
+
+        # Add Activity Record
+        adr = ActivityDetailRecord(ActivityDetailType.DATASET, show=False, action=ActivityAction.CREATE)
+        adr.add_value('text/markdown',
+                      f"Linked Dataset `{dataset_namespace}/{dataset_name}` to "
+                      f"project at revision `{dataset_revision}`")
+        ar = ActivityRecord(ActivityType.DATASET,
+                            message=f"Linked Dataset {dataset_namespace}/{dataset_name} to project.",
+                            linked_commit=commit.hexsha,
+                            tags=["dataset"],
+                            show=True)
+        ar.add_detail_object(adr)
+        ars = ActivityStore(labbook)
+        ars.create_activity_record(ar)
+
+        return ds

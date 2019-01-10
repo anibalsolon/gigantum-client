@@ -71,6 +71,7 @@ export default class Activity extends Component {
   }
 
   UNSAFE_componentWillReceiveProps(nextProps) {
+    this.sectionType = nextProps[nextProps.sectionType];
     const activityRecords = nextProps[nextProps.sectionType].activityRecords;
     if (activityRecords && JSON.stringify(this._transformActivity(activityRecords)) !== JSON.stringify(this.state.activityRecords)) {
       const prevCommit = this.sectionType && this.sectionType.activityRecords.edges && this.sectionType.activityRecords.edges[0].node;

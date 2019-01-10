@@ -52,12 +52,13 @@ export default class Modal extends Component {
     @param {number} i
     add tag to list
   */
-  _handleAddition = (tag) => {
+  _handleAddition = (tag, category) => {
     const { tags } = this.props;
 
     tags.push({
       id: tags.length + 1,
       text: tag,
+      className: category ? 'AdvancedSearch__filter' : '',
     });
 
     this.props.setTags(tags);
@@ -79,12 +80,27 @@ export default class Modal extends Component {
 
   render() {
     const { tags } = this.props;
+    const suggestions = [];
+    Object.keys(this.props.filterCategories).forEach((category) => {
+      this.props.filterCategories[category].forEach((key) => {
+        if (suggestions.indexOf(key) === -1) {
+          suggestions.push(key);
+        }
+      });
+    });
+
+    const advancedSearchCSS = classNames({
+      AdvancedSearch: true,
+      'AdvancedSearch--tagsExist': tags.length,
+    });
+
     return (
-      <div className="AdvancedSearch">
+      <div className={advancedSearchCSS}>
         <ReactTags
            id="TagsInput"
            tags={tags}
-           inline
+           autocomplete
+           suggestions={suggestions}
            placeholder="Search by keyword, tags or filters"
            handleDelete={(index) => { this._handleDelete(index); }}
            handleAddition={(tag) => { this._handleAddition(tag); }}
@@ -113,7 +129,7 @@ export default class Modal extends Component {
                         this.props.filterCategories[category].map(filter =>
                             <li
                                 key={filter}
-                                onClick={() => this._handleAddition(filter)}
+                                onClick={() => this._handleAddition(filter, category)}
                             >
                                 {filter}
                             </li>)

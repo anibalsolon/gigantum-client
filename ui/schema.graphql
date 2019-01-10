@@ -1,5 +1,5 @@
 # source: http://localhost:10000/api/labbook/
-# timestamp: Thu Jan 03 2019 14:00:12 GMT-0500 (Eastern Standard Time)
+# timestamp: Mon Jan 07 2019 15:58:23 GMT-0500 (Eastern Standard Time)
 
 schema {
   query: LabbookQuery
@@ -125,7 +125,7 @@ input AddDatasetFileInput {
 """
 Mutation to add a file to a labbook. File should be sent in the
 `uploadFile` key as a multi-part/form upload.
-file_path is the relative path from the labbook section specified.
+file_path is the relative path in the dataset.
 """
 type AddDatasetFilePayload {
   newDatasetFileEdge: DatasetFileEdge
@@ -428,6 +428,7 @@ type DatasetFile implements Node & GitRepository {
   key: String!
   isDir: Boolean
   isFavorite: Boolean
+  isLocal: Boolean
   modifiedAt: Int
   size: String
 }
@@ -555,6 +556,22 @@ input DeleteRemoteLabbookInput {
 """Delete a labbook from the remote repository."""
 type DeleteRemoteLabbookPayload {
   success: Boolean
+  clientMutationId: String
+}
+
+input DownloadDatasetFilesInput {
+  datasetOwner: String!
+  datasetName: String!
+  labbookOwner: String
+  labbookName: String
+  allKeys: Boolean
+  keys: [String]
+  clientMutationId: String
+}
+
+type DownloadDatasetFilesPayload {
+  updatedFileEdges: [DatasetFileEdge]
+  statusMessage: String
   clientMutationId: String
 }
 
@@ -758,6 +775,7 @@ type Labbook implements Node & GitRepository {
   backgroundJobs: [JobStatus]
   packages(packageInput: [PackageComponentInput]): [PackageComponent]
   visibility: String
+  linkedDatasets: [Dataset]
 }
 
 """An object representing a commit to a LabBook"""
@@ -912,6 +930,8 @@ type LabbookMutations {
   fetchDatasetEdge(input: FetchDatasetEdgeInput!): FetchDatasetEdgePayload
   setDatasetVisibility(input: SetDatasetVisibilityInput!): SetDatasetVisibilityPayload
   syncDataset(input: SyncDatasetInput!): SyncDatasetPayload
+  downloadDatasetFiles(input: DownloadDatasetFilesInput!): DownloadDatasetFilesPayload
+  linkDataset(input: LinkDatasetInput!): LinkDatasetPayload
 }
 
 """
@@ -993,6 +1013,18 @@ type LabbookSection implements Node & GitRepository {
   isUntracked: Boolean
   hasFiles: Boolean
   hasFavorites: Boolean
+}
+
+input LinkDatasetInput {
+  owner: String!
+  labbookName: String!
+  datasetUrl: String!
+  clientMutationId: String
+}
+
+type LinkDatasetPayload {
+  newDatasetEdge: DatasetEdge
+  clientMutationId: String
 }
 
 input MakeLabbookDirectoryInput {

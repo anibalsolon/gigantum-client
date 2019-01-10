@@ -32,8 +32,10 @@ from gtmcore.activity.monitors.devenv import DevEnvMonitorManager
 from gtmcore.configuration import Configuration
 from gtmcore.configuration.utils import call_subprocess
 from gtmcore.labbook import LabBook
+
 from gtmcore.inventory.inventory  import InventoryManager
 from gtmcore.inventory  import Repository
+
 from gtmcore.logging import LMLogger
 from gtmcore.workflows import sync_locally, GitWorkflow, ZipExporter
 from gtmcore.container.core import (build_docker_image as build_image,
@@ -47,10 +49,8 @@ from gtmcore.container.core import (build_docker_image as build_image,
 # ANY use of globals will cause the following methods to fail.
 
 
-
-
 def publish_repository(repository: Repository, username: str, access_token: str,
-                    remote: Optional[str] = None, public: bool = False) -> None:
+                       remote: Optional[str] = None, public: bool = False, id_token: str = None) -> None:
     p = os.getpid()
     logger = LMLogger.get_logger()
     logger.info(f"(Job {p}) Starting publish_repository({str(repository)})")
@@ -69,14 +69,14 @@ def publish_repository(repository: Repository, username: str, access_token: str,
         with repository.lock():
             wf = GitWorkflow(repository)
             wf.publish(username=username, access_token=access_token, remote=remote or "origin",
-                       public=public, feedback_callback=update_meta)
+                       public=public, feedback_callback=update_meta, id_token=id_token)
     except Exception as e:
         logger.exception(f"(Job {p}) Error on publish_repository: {e}")
         raise
 
 
 def sync_repository(repository: Repository, username: str, remote: str = "origin",
-                 force: bool = False) -> int:
+                 force: bool = False, access_token: str = None, id_token: str = None) -> int:
     p = os.getpid()
     logger = LMLogger.get_logger()
     logger.info(f"(Job {p}) Starting sync_repository({str(repository)})")
@@ -95,7 +95,7 @@ def sync_repository(repository: Repository, username: str, remote: str = "origin
         with repository.lock():
             wf = GitWorkflow(repository)
             cnt = wf.sync(username=username, remote=remote, force=force,
-                          feedback_callback=update_meta)
+                          feedback_callback=update_meta, access_token=access_token, id_token=id_token)
         logger.info(f"(Job {p} Completed sync_repository with cnt={cnt}")
         return cnt
     except Exception as e:

@@ -6,227 +6,207 @@
     "edges": [
      {
       "node": {
-       "name": "update-test",
+       "id": "TGFiYm9vazpjYnV0bGVyJnphYg==",
+       "name": "zab",
        "description": "",
-       "owner": "dmk",
-       "id": "UmVtb3RlTGFiYm9vazpkbWsmdXBkYXRlLXRlc3Q=",
-       "isLocal": false,
-       "__typename": "RemoteLabbook"
+       "owner": "cbutler",
+       "__typename": "Labbook"
       },
       "cursor": "MA=="
      },
      {
       "node": {
+       "id": "TGFiYm9vazpjYnV0bGVyJnVudHJhY2tlZC1sYWJib29r",
+       "name": "untracked-labbook",
+       "description": "",
+       "owner": "cbutler",
+       "__typename": "Labbook"
+      },
+      "cursor": "MQ=="
+     },
+     {
+      "node": {
+       "id": "TGFiYm9vazpjYnV0bGVyJnVudHJhY2tlZC0y",
+       "name": "untracked-2",
+       "description": "",
+       "owner": "cbutler",
+       "__typename": "Labbook"
+      },
+      "cursor": "Mg=="
+     },
+     {
+      "node": {
+       "id": "TGFiYm9vazpjYnV0bGVyJnVudHJhY2tlZA==",
+       "name": "untracked",
+       "description": "",
+       "owner": "cbutler",
+       "__typename": "Labbook"
+      },
+      "cursor": "Mw=="
+     },
+     {
+      "node": {
+       "id": "TGFiYm9vazpkbWsmdHJ1bXAtdHdlZXRz",
        "name": "trump-tweets",
-       "description": "",
+       "description": "A LabBook to analyze Trumps stupid tweets",
        "owner": "dmk",
-       "id": "UmVtb3RlTGFiYm9vazpkbWsmdHJ1bXAtdHdlZXRz",
-       "isLocal": true,
-       "__typename": "RemoteLabbook"
+       "__typename": "Labbook"
       },
-      "cursor": "MA=="
+      "cursor": "NA=="
      },
      {
       "node": {
+       "id": "TGFiYm9vazpjYnV0bGVyJnRyYWNraW5nLWVuZGFibGVk",
+       "name": "tracking-endabled",
+       "description": "",
+       "owner": "cbutler",
+       "__typename": "Labbook"
+      },
+      "cursor": "NQ=="
+     },
+     {
+      "node": {
+       "id": "TGFiYm9vazpjYnV0bGVyJnRyYWNrZWQtMg==",
+       "name": "tracked-2",
+       "description": "",
+       "owner": "cbutler",
+       "__typename": "Labbook"
+      },
+      "cursor": "Ng=="
+     },
+     {
+      "node": {
+       "id": "TGFiYm9vazpjYnV0bGVyJnRwdWI=",
        "name": "tpub",
        "description": "",
-       "owner": "bill2",
-       "id": "UmVtb3RlTGFiYm9vazpiaWxsMiZ0cHVi",
-       "isLocal": false,
-       "__typename": "RemoteLabbook"
+       "owner": "cbutler",
+       "__typename": "Labbook"
       },
-      "cursor": "MA=="
+      "cursor": "Nw=="
      },
      {
       "node": {
-       "name": "test-lb",
+       "id": "TGFiYm9vazpjYnV0bGVyJnRoaXNpYXNkbWFkc2thZHNzZmRrampzc2Rmcy1qYXNqZGFzag==",
+       "name": "thisiasdmadskadssfdkjjssdfs-jasjdasj",
        "description": "",
-       "owner": "dmk",
-       "id": "UmVtb3RlTGFiYm9vazpkbWsmdGVzdC1sYg==",
-       "isLocal": true,
-       "__typename": "RemoteLabbook"
+       "owner": "cbutler",
+       "__typename": "Labbook"
       },
-      "cursor": "MA=="
+      "cursor": "OA=="
      },
      {
       "node": {
+       "id": "TGFiYm9vazpkbWsmdGVzdGluZy1ub3RpZmljYXRpb25z",
        "name": "testing-notifications",
-       "description": "",
+       "description": "sdfsdf",
        "owner": "dmk",
-       "id": "UmVtb3RlTGFiYm9vazpkbWsmdGVzdGluZy1ub3RpZmljYXRpb25z",
-       "isLocal": true,
-       "__typename": "RemoteLabbook"
+       "__typename": "Labbook"
       },
-      "cursor": "MA=="
+      "cursor": "OQ=="
      },
      {
       "node": {
+       "id": "TGFiYm9vazpjYnV0bGVyJnRlc3RpbmctYWN0aXZpdHktZmVlZA==",
        "name": "testing-activity-feed",
-       "description": "",
+       "description": "testing labbook activity feed",
        "owner": "cbutler",
-       "id": "UmVtb3RlTGFiYm9vazpjYnV0bGVyJnRlc3RpbmctYWN0aXZpdHktZmVlZA==",
-       "isLocal": true,
-       "__typename": "RemoteLabbook"
+       "__typename": "Labbook"
       },
-      "cursor": "MA=="
+      "cursor": "MTA="
      },
      {
       "node": {
-       "name": "test-book",
-       "description": "",
+       "id": "TGFiYm9vazpjYnV0bGVyJnRlc3QtdXBsb2FkZXItMQ==",
+       "name": "test-uploader-1",
+       "description": "Test uoload",
        "owner": "cbutler",
-       "id": "UmVtb3RlTGFiYm9vazpjYnV0bGVyJnRlc3QtYm9vaw==",
-       "isLocal": true,
-       "__typename": "RemoteLabbook"
+       "__typename": "Labbook"
       },
-      "cursor": "MA=="
+      "cursor": "MTE="
      },
      {
       "node": {
-       "name": "temp-labook22",
-       "description": "",
-       "owner": "cbutler",
-       "id": "UmVtb3RlTGFiYm9vazpjYnV0bGVyJnRlbXAtbGFib29rMjI=",
-       "isLocal": true,
-       "__typename": "RemoteLabbook"
-      },
-      "cursor": "MA=="
-     },
-     {
-      "node": {
-       "name": "temp",
-       "description": "",
-       "owner": "cbutler",
-       "id": "UmVtb3RlTGFiYm9vazpjYnV0bGVyJnRlbXA=",
-       "isLocal": true,
-       "__typename": "RemoteLabbook"
-      },
-      "cursor": "MA=="
-     },
-     {
-      "node": {
-       "name": "t3",
-       "description": "",
-       "owner": "bill2",
-       "id": "UmVtb3RlTGFiYm9vazpiaWxsMiZ0Mw==",
-       "isLocal": false,
-       "__typename": "RemoteLabbook"
-      },
-      "cursor": "MA=="
-     },
-     {
-      "node": {
-       "name": "spade",
-       "description": "",
-       "owner": "cbutler",
-       "id": "UmVtb3RlTGFiYm9vazpjYnV0bGVyJnNwYWRl",
-       "isLocal": true,
-       "__typename": "RemoteLabbook"
-      },
-      "cursor": "MA=="
-     },
-     {
-      "node": {
-       "name": "snappy",
-       "description": "",
-       "owner": "gigantum-examples",
-       "id": "UmVtb3RlTGFiYm9vazpnaWdhbnR1bS1leGFtcGxlcyZzbmFwcHk=",
-       "isLocal": true,
-       "__typename": "RemoteLabbook"
-      },
-      "cursor": "MA=="
-     },
-     {
-      "node": {
-       "name": "set-public-test-calum-true",
-       "description": "",
-       "owner": "cbutler",
-       "id": "UmVtb3RlTGFiYm9vazpjYnV0bGVyJnNldC1wdWJsaWMtdGVzdC1jYWx1bS10cnVl",
-       "isLocal": true,
-       "__typename": "RemoteLabbook"
-      },
-      "cursor": "MA=="
-     },
-     {
-      "node": {
-       "name": "set-public-test-calum",
-       "description": "",
-       "owner": "cbutler",
-       "id": "UmVtb3RlTGFiYm9vazpjYnV0bGVyJnNldC1wdWJsaWMtdGVzdC1jYWx1bQ==",
-       "isLocal": true,
-       "__typename": "RemoteLabbook"
-      },
-      "cursor": "MA=="
-     },
-     {
-      "node": {
-       "name": "sdfdsfsdfsdf",
-       "description": "",
-       "owner": "joel",
-       "id": "UmVtb3RlTGFiYm9vazpqb2VsJnNkZmRzZnNkZnNkZg==",
-       "isLocal": false,
-       "__typename": "RemoteLabbook"
-      },
-      "cursor": "MA=="
-     },
-     {
-      "node": {
-       "name": "rootpy3",
-       "description": "",
-       "owner": "gigantum-examples",
-       "id": "UmVtb3RlTGFiYm9vazpnaWdhbnR1bS1leGFtcGxlcyZyb290cHkz",
-       "isLocal": false,
-       "__typename": "RemoteLabbook"
-      },
-      "cursor": "MA=="
-     },
-     {
-      "node": {
-       "name": "rootpy3",
-       "description": "",
-       "owner": "randalg",
-       "id": "UmVtb3RlTGFiYm9vazpyYW5kYWxnJnJvb3RweTM=",
-       "isLocal": true,
-       "__typename": "RemoteLabbook"
-      },
-      "cursor": "MA=="
-     },
-     {
-      "node": {
-       "name": "random-picture-generator",
-       "description": "",
-       "owner": "cbutler",
-       "id": "UmVtb3RlTGFiYm9vazpjYnV0bGVyJnJhbmRvbS1waWN0dXJlLWdlbmVyYXRvcg==",
-       "isLocal": true,
-       "__typename": "RemoteLabbook"
-      },
-      "cursor": "MA=="
-     },
-     {
-      "node": {
-       "name": "python-data-science-handbook",
-       "description": "",
+       "id": "TGFiYm9vazpkbWsmdGVzdC1sYg==",
+       "name": "test-lb",
+       "description": "This a short description",
        "owner": "dmk",
-       "id": "UmVtb3RlTGFiYm9vazpkbWsmcHl0aG9uLWRhdGEtc2NpZW5jZS1oYW5kYm9vaw==",
-       "isLocal": false,
-       "__typename": "RemoteLabbook"
+       "__typename": "Labbook"
       },
-      "cursor": "MA=="
+      "cursor": "MTI="
      },
      {
       "node": {
-       "name": "pulish-temp4",
+       "id": "TGFiYm9vazpjYnV0bGVyJnRlc3QtbGFiYm9vaw==",
+       "name": "test-labbook",
+       "description": "here is my labbook",
+       "owner": "cbutler",
+       "__typename": "Labbook"
+      },
+      "cursor": "MTM="
+     },
+     {
+      "node": {
+       "id": "TGFiYm9vazpjYnV0bGVyJnRlc3QtYnVpbGRpbmctc3RhdHVzLTI=",
+       "name": "test-building-status-2",
        "description": "",
        "owner": "cbutler",
-       "id": "UmVtb3RlTGFiYm9vazpjYnV0bGVyJnB1bGlzaC10ZW1wNA==",
-       "isLocal": true,
-       "__typename": "RemoteLabbook"
+       "__typename": "Labbook"
       },
-      "cursor": "MA=="
+      "cursor": "MTQ="
+     },
+     {
+      "node": {
+       "id": "TGFiYm9vazpjYnV0bGVyJnRlc3QtYnVpbGRpbmctc3RhdGU=",
+       "name": "test-building-state",
+       "description": "",
+       "owner": "cbutler",
+       "__typename": "Labbook"
+      },
+      "cursor": "MTU="
+     },
+     {
+      "node": {
+       "id": "TGFiYm9vazpjYnV0bGVyJnRlc3QtYnVpbGRpbmctNg==",
+       "name": "test-building-6",
+       "description": "",
+       "owner": "cbutler",
+       "__typename": "Labbook"
+      },
+      "cursor": "MTY="
+     },
+     {
+      "node": {
+       "id": "TGFiYm9vazpjYnV0bGVyJnRlc3QtYnVpbGRpbmctNQ==",
+       "name": "test-building-5",
+       "description": "",
+       "owner": "cbutler",
+       "__typename": "Labbook"
+      },
+      "cursor": "MTc="
+     },
+     {
+      "node": {
+       "id": "TGFiYm9vazpjYnV0bGVyJnRlc3QtYnVpbGRpbmctNA==",
+       "name": "test-building-4",
+       "description": "",
+       "owner": "cbutler",
+       "__typename": "Labbook"
+      },
+      "cursor": "MTg="
+     },
+     {
+      "node": {
+       "id": "TGFiYm9vazpjYnV0bGVyJnRlc3QtYnVpbGRpbmctMw==",
+       "name": "test-building-3",
+       "description": "",
+       "owner": "cbutler",
+       "__typename": "Labbook"
+      },
+      "cursor": "MTk="
      }
     ],
     "pageInfo": {
-     "endCursor": "MA==",
+     "endCursor": "MTk=",
      "hasNextPage": true,
      "hasPreviousPage": false,
      "startCursor": "MA=="

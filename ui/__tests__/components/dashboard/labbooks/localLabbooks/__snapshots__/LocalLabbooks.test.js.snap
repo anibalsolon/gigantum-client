@@ -157,7 +157,7 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner"
         >
-          Created on 12/07/18
+          Created on 01/08/19
         </p>
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
@@ -166,7 +166,7 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
         </p>
       </div>
       <div
-        className="Tooltip LocalLabbookPanel__loading"
+        className="Tooltip-Listing LocalLabbookPanel__loading"
         data-tooltip="loading"
       />
     </a>
@@ -216,7 +216,7 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner"
         >
-          Created on 12/07/18
+          Created on 01/08/19
         </p>
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
@@ -225,7 +225,7 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
         </p>
       </div>
       <div
-        className="Tooltip LocalLabbookPanel__loading"
+        className="Tooltip-Listing LocalLabbookPanel__loading"
         data-tooltip="loading"
       />
     </a>
@@ -275,7 +275,7 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner"
         >
-          Created on 12/07/18
+          Created on 01/08/19
         </p>
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
@@ -284,7 +284,7 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
         </p>
       </div>
       <div
-        className="Tooltip LocalLabbookPanel__loading"
+        className="Tooltip-Listing LocalLabbookPanel__loading"
         data-tooltip="loading"
       />
     </a>
@@ -334,7 +334,7 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner"
         >
-          Created on 12/07/18
+          Created on 01/08/19
         </p>
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
@@ -343,7 +343,7 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
         </p>
       </div>
       <div
-        className="Tooltip LocalLabbookPanel__loading"
+        className="Tooltip-Listing LocalLabbookPanel__loading"
         data-tooltip="loading"
       />
     </a>
@@ -393,7 +393,7 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner"
         >
-          Created on 12/07/18
+          Created on 01/08/19
         </p>
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
@@ -408,7 +408,7 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
         </p>
       </div>
       <div
-        className="Tooltip LocalLabbookPanel__loading"
+        className="Tooltip-Listing LocalLabbookPanel__loading"
         data-tooltip="loading"
       />
     </a>

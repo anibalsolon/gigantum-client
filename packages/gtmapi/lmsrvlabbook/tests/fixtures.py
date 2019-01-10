@@ -104,7 +104,7 @@ def fixture_working_dir():
         app.config["LABMGR_ID_MGR"] = get_identity_manager(Configuration())
 
         with app.app_context():
-            # within this block, current_app points to app. Set current usert explicitly(this is done in the middleware)
+            # within this block, current_app points to app. Set current user explicitly(this is done in the middleware)
             flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
 
             # Create a test client

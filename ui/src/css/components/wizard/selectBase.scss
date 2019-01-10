@@ -50,9 +50,10 @@
 
 .SelectBase__select-container {
   min-width: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
   flex-wrap: nowrap;
+  border-bottom: 1px solid $azure;
+  margin-bottom: 15px;
+  height: 340px;
 }
 
 .SelectBase__viewer-container {
@@ -94,6 +95,9 @@
 .SelectBase__images {
   background: $white;
   max-height: 210px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  margin-top: 100px;
 }
 .SelectBase__images--hidden {
   overflow: hidden;
@@ -101,7 +105,6 @@
 
 
 .SelectBase__image-wrapper {
-  max-height: 210px;
   width: 100%;
 }
 
@@ -121,6 +124,7 @@
   cursor: pointer;
   &--expanded {
     height: auto !important;
+    padding-bottom: 20px;
   }
 }
 
@@ -137,7 +141,7 @@
 
 .SelectBase__image-text {
   @include flex(center, column);
-  word-break: beak-word;
+  word-break: break-word;
   padding: 5px;
   flex: 1;
   h6 {
@@ -146,8 +150,10 @@
     font-size: 14px;
   }
   p {
-    align-self: flex-start;
+    align-self: flex-end;
     padding: 5px 0;
+    word-break: break-word;
+    max-width: 375px;
   }
   ul {
     margin: 0;
@@ -238,7 +244,33 @@
 
 }
 .SelectBase__type{
+  font-size: 12px !important;
+}
+.SelectBase__name{
   color: $jet;
   font-weight: 1000;
+}
+.BaseSlide__wrapper{
+  margin: 0 5px;
+}
+
+.BaseSlide__wrapper--recent{
+  border-bottom: 1px dashed $romanSilver;
+  border-top: 1px dashed $romanSilver;
+  margin: 10px 5px;
+  position: relative;
+}
+
+.BaseSlide__mostRecent{
+  position: absolute;
+  background: white;
+  margin-left: 45%;
+  padding: 0 20px;
   font-size: 14px;
+  font-weight: 900;
+  top: -10px;
+}
+
+.SelectBase__readme{
+  @include flex(flex-end, column)
 }

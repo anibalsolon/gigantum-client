@@ -19,9 +19,9 @@ from lmsrvlabbook.api.mutations.environmentcomponent import (AddPackageComponent
 from lmsrvlabbook.api.mutations.user import RemoveUserIdentity
 from lmsrvlabbook.api.mutations.labbooksharing import SyncLabbook, PublishLabbook, SetVisibility
 
-## Dataset Mutations
+# Dataset Mutations
 from lmsrvlabbook.api.mutations.dataset import (CreateDataset, AddDatasetFile, CompleteDatasetUploadTransaction,
-                                                FetchDatasetEdge)
+                                                FetchDatasetEdge, LinkDataset, DownloadDatasetFiles)
 from lmsrvlabbook.api.mutations.datasetsharing import (PublishDataset, SyncDataset, ImportRemoteDataset,
                                                        SetDatasetVisibility, AddDatasetCollaborator,
                                                        DeleteDatasetCollaborator, ImportDataset, ExportDataset)

@@ -5,6 +5,7 @@ import classNames from 'classnames';
 import AddCollaboratorMutation from 'Mutations/AddCollaboratorMutation';
 import AddDatasetCollaboratorMutation from 'Mutations/AddDatasetCollaboratorMutation';
 import DeleteCollaboratorMutation from 'Mutations/DeleteCollaboratorMutation';
+import DeleteDatasetCollaboratorMutation from 'Mutations/DeleteDatasetCollaboratorMutation';
 // components
 import ButtonLoader from 'Components/shared/ButtonLoader';
 import Modal from 'Components/shared/Modal';
@@ -212,37 +213,69 @@ export default class CollaboratorsModal extends Component {
     buttonLoaderRemoveCollaborator[collaborator] = 'loading';
 
     this.setState({ buttonLoaderRemoveCollaborator });
+    if (this.props.sectionType === 'dataset') {
+      DeleteDatasetCollaboratorMutation(
+        this.state.labbookName,
+        this.state.owner,
+        collaborator,
+        (response, error) => {
+          this.refs[collaborator] && this.refs[collaborator].classList.remove('loading');
 
-    DeleteCollaboratorMutation(
-      this.state.labbookName,
-      this.state.owner,
-      collaborator,
-      (response, error) => {
-        this.refs[collaborator] && this.refs[collaborator].classList.remove('loading');
+          if (button) {
+            button.disabled = false;
+          }
 
-        if (button) {
-          button.disabled = false;
-        }
+          if (error) {
+            setErrorMessage('Could not remove collaborator', error);
 
-        if (error) {
-          setErrorMessage('Could not remove collaborator', error);
+            buttonLoaderRemoveCollaborator[collaborator] = 'error';
 
-          buttonLoaderRemoveCollaborator[collaborator] = 'error';
+            this.setState({ buttonLoaderRemoveCollaborator });
+          } else {
+            buttonLoaderRemoveCollaborator[collaborator] = 'finished';
 
-          this.setState({ buttonLoaderRemoveCollaborator });
-        } else {
-          buttonLoaderRemoveCollaborator[collaborator] = 'finished';
+            this.setState({ buttonLoaderRemoveCollaborator });
+          }
 
-          this.setState({ buttonLoaderRemoveCollaborator });
-        }
+          setTimeout(() => {
+            buttonLoaderRemoveCollaborator[collaborator] = '';
 
-        setTimeout(() => {
-          buttonLoaderRemoveCollaborator[collaborator] = '';
+            this.setState({ buttonLoaderRemoveCollaborator });
+          }, 2000);
+        },
+      )
+    } else {
+      DeleteCollaboratorMutation(
+        this.state.labbookName,
+        this.state.owner,
+        collaborator,
+        (response, error) => {
+          this.refs[collaborator] && this.refs[collaborator].classList.remove('loading');
 
-          this.setState({ buttonLoaderRemoveCollaborator });
-        }, 2000);
-      },
-    );
+          if (button) {
+            button.disabled = false;
+          }
+
+          if (error) {
+            setErrorMessage('Could not remove collaborator', error);
+
+            buttonLoaderRemoveCollaborator[collaborator] = 'error';
+
+            this.setState({ buttonLoaderRemoveCollaborator });
+          } else {
+            buttonLoaderRemoveCollaborator[collaborator] = 'finished';
+
+            this.setState({ buttonLoaderRemoveCollaborator });
+          }
+
+          setTimeout(() => {
+            buttonLoaderRemoveCollaborator[collaborator] = '';
+
+            this.setState({ buttonLoaderRemoveCollaborator });
+          }, 2000);
+        },
+      );
+    }
   }
 
   render() {

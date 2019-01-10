@@ -1,5 +1,6 @@
 import base64
 import graphene
+import flask
 import os
 
 from gtmcore.dataset import Dataset
@@ -17,6 +18,7 @@ from lmsrvcore.api.mutations import ChunkUploadMutation, ChunkUploadInput
 
 from lmsrvlabbook.api.connections.dataset import DatasetConnection
 from lmsrvlabbook.api.objects.dataset import Dataset as DatasetObject
+from lmsrvlabbook.api.connections.datasetfile import DatasetFileConnection, DatasetFile
 
 logger = LMLogger.get_logger()
 
@@ -50,6 +52,7 @@ class PublishDataset(graphene.relay.ClientIDMutation):
         job_kwargs = {'repository': ds,
                       'username': username,
                       'access_token': token,
+                      'id_token': flask.g.id_token,
                       'public': set_public}
         dispatcher = Dispatcher()
         job_key = dispatcher.dispatch_task(jobs.publish_repository, kwargs=job_kwargs, metadata=job_metadata)
@@ -102,7 +105,10 @@ class SyncDataset(graphene.relay.ClientIDMutation):
                         'dataset': ds.key}
         job_kwargs = {'repository': ds,
                       'username': username,
-                      'force': force}
+                      'force': force,
+                      'access_token': token,
+                      'id_token': flask.g.id_token}
+
         dispatcher = Dispatcher()
         job_key = dispatcher.dispatch_task(jobs.sync_repository, kwargs=job_kwargs, metadata=job_metadata)
         logger.info(f"Syncing Dataset {ds.root_dir} in background job with key {job_key.key_str}")
@@ -327,15 +333,15 @@ class ImportDataset(graphene.relay.ClientIDMutation, ChunkUploadMutation):
         return ImportDataset()
 
     @classmethod
-    def mutate_and_process_upload(cls, info, **kwargs):
-        if not cls.upload_file_path:
+    def mutate_and_process_upload(cls, info, upload_file_path, upload_filename, **kwargs):
+        if not upload_file_path:
             logger.error('No file uploaded')
             raise ValueError('No file uploaded')
 
         username = get_logged_in_username()
         job_metadata = {'method': 'import_dataset_from_zip'}
         job_kwargs = {
-            'archive_path': cls.upload_file_path,
+            'archive_path': upload_file_path,
             'username': username,
             'owner': username
         }

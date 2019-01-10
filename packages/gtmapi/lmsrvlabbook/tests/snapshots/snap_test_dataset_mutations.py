@@ -40,3 +40,37 @@ snapshots['TestDatasetMutations.test_create_dataset 2'] = {
         }
     }
 }
+
+snapshots['TestDatasetMutations.test_download_dataset_files 1'] = {
+    'data': {
+        'downloadDatasetFiles': {
+            'updatedFileEdges': [
+                {
+                    'node': {
+                        'isLocal': True,
+                        'key': 'test1.txt',
+                        'name': 'dataset100',
+                        'size': '10'
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestDatasetMutations.test_download_dataset_files 2'] = {
+    'data': {
+        'downloadDatasetFiles': {
+            'updatedFileEdges': [
+                {
+                    'node': {
+                        'id': 'RGF0YXNldEZpbGU6ZGVmYXVsdCZkYXRhc2V0MTAwJnRlc3QyLnR4dA==',
+                        'isLocal': True,
+                        'name': 'dataset100',
+                        'size': '7'
+                    }
+                }
+            ]
+        }
+    }
+}

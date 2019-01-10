@@ -445,7 +445,6 @@ class BranchMenu extends Component {
           },
         );
       } else {
-        console.log('datset')
         ExportDatasetMutation(
           this.state.owner,
           this.state.labbookName,

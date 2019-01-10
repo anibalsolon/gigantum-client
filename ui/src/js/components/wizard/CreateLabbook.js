@@ -142,9 +142,7 @@ export default class CreateLabbook extends React.Component {
       this.props.toggleDisabledContinue((evt.target.value === '') || (isMatch === false));
     }
     const textLength = 260 - evt.target.value.length;
-    if (textLength >= 100) {
-      state.textWarning = 'CreateLabbook__warning--hidden';
-    } else if ((textLength <= 100) && (textLength > 50)) {
+    if (textLength > 50) {
       state.textWarning = 'CreateLabbook__warning--green';
     } else if ((textLength <= 50) && (textLength > 20)) {
       state.textWarning = 'CreateLabbook__warning--yellow';

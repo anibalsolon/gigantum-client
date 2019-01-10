@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { graphql, QueryRenderer } from 'react-relay';
 import queryString from 'querystring';
 // components
-import DatasetSets from './datasets/Datasets';
 import LocalLabbooksContainer from './labbooks/localLabbooks/LocalLabbooksContainer';
 import LocalDatasetsContainer from './datasets/localDatasets/LocalDatasetsContainer';
 import RemoteLabbooksContainer from './labbooks/remoteLabbooks/RemoteLabbooksContainer';

@@ -61,7 +61,7 @@ class TestInventoryDatasets(object):
         assert log_data[0]['committer']['name'] == "Gigantum AutoCommit"
         assert log_data[0]['committer']['email'] == "noreply@gigantum.io"
 
-        assert os.path.exists(os.path.join(ds.root_dir, '.gigantum', 'storage.json')) is True
+        assert os.path.exists(os.path.join(ds.root_dir, '.gigantum', 'backend.json')) is True
 
     def test_dataset_attributes(self, mock_config_file):
         inv_manager = InventoryManager(mock_config_file[0])
@@ -81,9 +81,9 @@ class TestInventoryDatasets(object):
 
         assert ds.storage_type == "gigantum_object_v1"
 
-        assert ds.storage_config == {}
-        ds.storage_config = {"my_config": 123}
-        assert ds.storage_config == {"my_config": 123}
+        assert ds.backend_config == {}
+        ds.backend_config = {"my_config": 123}
+        assert ds.backend_config == {"my_config": 123}
 
     def test_delete_dataset(self, mock_config_file):
         inv_manager = InventoryManager(mock_config_file[0])

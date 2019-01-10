@@ -29,12 +29,15 @@ export default class LocalDatasetPanel extends Component {
     const edge = this.props.edge;
     const status = this.state.status;
     const textStatus = this.state.textStatus;
-
-
+    const link = this.props.noLink ? '#' : `/datasets/${edge.node.owner}/${edge.node.name}`;
     return (
       <Link
-        to={`/datasets/${edge.node.owner}/${edge.node.name}`}
-        onClick={() => this.props.goToDataset(edge.node.name, edge.node.owner)}
+        to={link}
+        onClick={() => {
+          if (this.props.goToDataset) {
+            this.props.goToDataset(edge.node.name, edge.node.owner);
+          }
+        }}
         key={`local${edge.node.name}`}
         className="Card Card--text column-4-span-3 flex flex--column justify--space-between"
       >
@@ -49,7 +52,11 @@ export default class LocalDatasetPanel extends Component {
 
             <h6
               className="LocalDatasets__panel-title"
-              onClick={() => this.props.goToDataset(edge.node.name, edge.node.owner)}
+              onClick={() => {
+                if (this.props.goToDataset) {
+                  this.props.goToDataset(edge.node.name, edge.node.owner);
+                }
+              }}
             >
 
               <Highlighter

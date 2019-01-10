@@ -3,7 +3,9 @@ import React, { Component } from 'react';
 import uuidv4 from 'uuid/v4';
 // mutations
 import SetVisibilityMutation from 'Mutations/SetVisibilityMutation';
+import SetDatasetVisibilityMutation from 'Mutations/SetDatasetVisibilityMutation';
 import PublishLabbookMutation from 'Mutations/branches/PublishLabbookMutation';
+import PublishDatasetMutation from 'Mutations/branches/PublishDatasetMutation';
 // component
 import Modal from 'Components/shared/Modal';
 // store
@@ -58,19 +60,35 @@ export default class PublishModal extends Component {
         if (response.data) {
           if (response.data.userIdentity.isSessionValid) {
             if (this.props.visibility !== visibility) {
-              SetVisibilityMutation(
-                owner,
-                labbookName,
-                visibility,
-                (response, error) => {
-                  if (error) {
-                    console.log(error);
-                    setErrorMessage('Visibility change failed', error);
-                  } else {
-                    setInfoMessage(`Visibility changed to ${visibility}`);
-                  }
-                },
-              );
+              if (this.props.sectionType === 'labbook') {
+                SetVisibilityMutation(
+                  owner,
+                  labbookName,
+                  visibility,
+                  (response, error) => {
+                    if (error) {
+                      console.log(error);
+                      setErrorMessage('Visibility change failed', error);
+                    } else {
+                      setInfoMessage(`Visibility changed to ${visibility}`);
+                    }
+                  },
+                );
+              } else {
+                SetDatasetVisibilityMutation(
+                  owner,
+                  labbookName,
+                  visibility,
+                  (response, error) => {
+                    if (error) {
+                      console.log(error);
+                      setErrorMessage('Visibility change failed', error);
+                    } else {
+                      setInfoMessage(`Visibility changed to ${visibility}`);
+                    }
+                  },
+                );
+              }
             }
           } else {
             self.props.auth.renewToken(true, () => {
@@ -132,19 +150,34 @@ export default class PublishModal extends Component {
                   self.props.setRemoteSession();
                 };
 
-                PublishLabbookMutation(
-                  owner,
-                  labbookName,
-                  labbookId,
-                  this.state.isPublic,
-                  successCall,
-                  failureCall,
-                  (response, error) => {
-                    if (error) {
-                      failureCall();
-                    }
-                  },
-                );
+                if (this.props.sectionType === 'labbook') {
+                  PublishLabbookMutation(
+                    owner,
+                    labbookName,
+                    labbookId,
+                    this.state.isPublic,
+                    successCall,
+                    failureCall,
+                    (response, error) => {
+                      if (error) {
+                        failureCall();
+                      }
+                    },
+                  );
+                } else {
+                  PublishDatasetMutation(
+                    owner,
+                    labbookName,
+                    this.state.isPublic,
+                    successCall,
+                    failureCall,
+                    (response, error) => {
+                      if (error) {
+                        failureCall();
+                      }
+                    },
+                  );
+                }
               }
             } else {
               self.props.showContainerMenuMessage('publishing', true);

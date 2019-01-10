@@ -211,7 +211,7 @@ export default class WizardModal extends React.Component {
           }, 2000);
         } else {
           const { owner, name } = response.createLabbook.labbook;
-
+          localStorage.setItem('latest_base', componentId);
           this.setState({
             createLabbookButtonState: 'finished',
           });
@@ -313,6 +313,7 @@ export default class WizardModal extends React.Component {
             handleClose={() => this._hideModal()}
             header={currentComponent.header}
             preHeader={currentComponent.preHeader}
+            noPadding
             renderContent={() =>
               (<div>
                 {

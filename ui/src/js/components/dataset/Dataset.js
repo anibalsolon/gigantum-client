@@ -32,7 +32,7 @@ const Activity = Loadable({
 });
 
 const Data = Loadable({
-  loader: () => import('./data/Data'),
+  loader: () => import('../filesShared/sectionWrapper/sectionWrapperFragments/Data'),
   loading: Loading,
   delay: 500,
 });
@@ -48,15 +48,17 @@ class Dataset extends Component {
     this._toggleBranchesView = this._toggleBranchesView.bind(this);
     this._branchViewClickedOff = this._branchViewClickedOff.bind(this);
     setCallbackRoute(props.location.pathname);
+    const { labbookName, owner } = store.getState().routes;
+    document.title = `${owner}/${labbookName}`;
   }
-
-  UNSAFE_componentWillMount() {
-    const { datasetName, owner } = store.getState().routes;
-    document.title = `${owner}/${datasetName}`;
-  }
-
-  UNSAFE_componentWillReceiveProps(nextProps) {
+  /**
+    @param {object} nextProps
+    @param {object} state
+    calls setCallbackRoute on prop change
+  */
+  static getDerivedStateFromProps(nextProps, state) {
     setCallbackRoute(nextProps.location.pathname);
+    return state;
   }
   /**
     @param {}
@@ -244,9 +246,10 @@ class Dataset extends Component {
                         >
 
                           <Data
-                               datasets={dataset}
+                               dataset={dataset}
                                datasetId={dataset.id}
                                type="dataset"
+                               section="data"
                              />
 
                         </ErrorBoundary>)}
@@ -304,7 +307,7 @@ const DatasetFragmentContainer = createFragmentContainer(
               icon
               url
           }
-          ...Data_datasets
+          ...Data_dataset
           ...DatasetActivityContainer_dataset
       }`,
   },

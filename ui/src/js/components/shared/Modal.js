@@ -11,17 +11,24 @@ export default class Modal extends Component {
   }
 
   render() {
-    const modelContentCSS = classNames({
+    const modalContentCSS = classNames({
       Modal__content: true,
       [this.props.size]: this.props.size, // large, medium, small
       [this.props.icon]: this.props.icon,
     });
+    const modalContainerCSS = classNames({
+      'Modal__sub-container': true,
+      'Modal__sub-container--nopadding': this.props.noPadding,
+    });
     return (
       <div className="Modal">
 
-        <div className="Modal__cover" />
+        <div
+          className="Modal__cover"
+          onClick={this.props.handleClose}
+        />
 
-        <div className={modelContentCSS}>
+        <div className={modalContentCSS}>
           {
             this.props.handleClose &&
             <div
@@ -41,7 +48,7 @@ export default class Modal extends Component {
                 <hr />
               </Fragment>
             }
-            <div className="Modal__sub-container">
+            <div className={modalContainerCSS}>
               {
                 this.props.renderContent()
               }

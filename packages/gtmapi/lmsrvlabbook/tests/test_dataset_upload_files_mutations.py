@@ -8,7 +8,6 @@ from graphene.test import Client
 from werkzeug.datastructures import FileStorage
 
 from gtmcore.inventory.inventory import InventoryManager
-from gtmcore.dataset.files import DatasetFileOperations
 from gtmcore.dataset.cache.filesystem import HostFilesystemCache
 from gtmcore.dataset.manifest import Manifest
 from lmsrvcore.middleware import DataloaderMiddleware
@@ -121,7 +120,7 @@ class TestDatasetUploadFilesMutations(object):
         r = client.execute(complete_query, context_value=DummyContext(file))
         assert 'errors' not in r
 
-        m = Manifest(ds, fsc.cache_root)
+        m = Manifest(ds, 'default')
         status = m.status()
         assert len(status.created) == 0
         assert len(status.modified) == 0

@@ -47,6 +47,9 @@
   button{
     align-self: center;
   }
+  &--nopadding{
+    padding: 0;
+  }
 }
 
 .Modal__content.large{

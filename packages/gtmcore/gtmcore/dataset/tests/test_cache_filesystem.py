@@ -1,6 +1,6 @@
 import pytest
+import os
 
-from gtmcore.exceptions import GigantumException
 from gtmcore.fixtures.datasets import mock_dataset_with_cache_dir
 from gtmcore.dataset.cache import get_cache_manager_class
 from gtmcore.dataset.cache.filesystem import HostFilesystemCache
@@ -13,10 +13,12 @@ class TestHostFilesystemCache(object):
         hfc = cm(ds, "tester")
         assert isinstance(hfc, HostFilesystemCache)
 
-        assert hfc.cache_root == f'/mnt/gigantum/.labmanager/datasets/tester/tester/{ds.name}'
+        assert hfc.cache_root == os.path.join(ds.client_config.config.get('git')['working_directory'], '.labmanager',
+                                              'datasets', 'tester', 'tester', ds.name)
 
         rev = mock_dataset_with_cache_dir[2]
-        assert hfc.current_revision_dir == f'/mnt/gigantum/.labmanager/datasets/tester/tester/{ds.name}/{rev}'
+        assert hfc.current_revision_dir == os.path.join(ds.client_config.config.get('git')['working_directory'],
+                                                        '.labmanager', 'datasets', 'tester', 'tester', ds.name, rev)
 
     def test_get_cache_manager_class_no_config(self, mock_dataset_with_cache_dir):
         ds = mock_dataset_with_cache_dir[0]
@@ -29,6 +31,5 @@ class TestHostFilesystemCache(object):
         hfc = cm(ds, "tester")
         assert isinstance(hfc, HostFilesystemCache)
 
-        assert hfc.cache_root == f'/mnt/gigantum/.labmanager/datasets/tester/tester/{ds.name}'
-
-
+        assert hfc.cache_root == os.path.join(ds.client_config.config.get('git')['working_directory'], '.labmanager',
+                                              'datasets', 'tester', 'tester', ds.name)

@@ -120,7 +120,7 @@ class TestHashing(object):
 
         # Touch file, so only change mtime
         time.sleep(1.1)
-        Path(sh._get_abs_path(filename)).touch()
+        Path(sh.get_abs_path(filename)).touch()
         assert sh.has_changed_fast(filename) is True
 
         sh.hash([filename])

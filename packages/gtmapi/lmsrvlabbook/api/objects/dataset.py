@@ -9,7 +9,6 @@ from lmsrvcore.api.interfaces import GitRepository
 from lmsrvcore.api.connections import ListBasedConnection
 
 from gtmcore.dataset.manifest import Manifest
-from gtmcore.dataset.cache.filesystem import HostFilesystemCache
 from gtmcore.gitlib.gitlab import GitLabManager
 from gtmcore.inventory.inventory import InventoryManager
 
@@ -329,11 +328,10 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
 
     def helper_resolve_all_files(self, dataset, kwargs):
         """Helper method to populate the DatasetFileConnection"""
-
-        fsc = HostFilesystemCache(dataset, get_logged_in_username())
-        manifest = Manifest(dataset, fsc.cache_root)
+        manifest = Manifest(dataset, get_logged_in_username())
 
         # Generate naive cursors
+        # TODO: Use manifest pagination interface
         edges = manifest.list()
         cursors = [base64.b64encode("{}".format(cnt).encode("UTF-8")).decode("UTF-8") for cnt, x in enumerate(edges)]
 

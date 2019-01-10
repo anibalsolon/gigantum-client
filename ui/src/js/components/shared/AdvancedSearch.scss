@@ -1,5 +1,13 @@
 @import '~Styles/_imports.scss';
 
+
+.AdvancedSearch {
+    position: fixed;
+    margin-bottom: 200px;
+    width: 798px;
+    z-index: 1;
+}
+
 .AdvancedSearch__input {
     margin-bottom: 0 !important;
 }
@@ -65,6 +73,11 @@
 
 div.ReactTags__tags {
     position: relative;
+    display:flex;
+    flex-direction: column-reverse;
+}
+.ReactTags__suggestions {
+    z-index: 1;
 }
 
 
@@ -75,7 +88,7 @@ div.ReactTags__tagInput {
 }
 div.ReactTags__tagInput input.ReactTags__tagInputField,
 div.ReactTags__tagInput input.ReactTags__tagInputField:focus {
-    width: 100%;
+    width: calc(100% + 2px) !important;
     height: 48px;
     margin: 0;
     font-size: 16px;
@@ -88,9 +101,10 @@ div.ReactTags__selected span.ReactTags__tag {
     background: #eee;
     font-size: 16px;
     display: inline-block;
-    padding: 12px 5px;
-    margin: 0 5px;
+    padding: 7px 5px;
+    margin: 5px 5px;
     border-radius: 2px;
+    height: 37px;
 }
 
 span.ReactTags__tag:first-child{
@@ -130,4 +144,5 @@ div.ReactTags__suggestions ul li.ReactTags__activeSuggestion {
 .ReactTags__selected {
     display: flex;
     height: auto;
+    top: 100px;
   }

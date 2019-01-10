@@ -104,3 +104,4 @@ gtm-env/
 /.idea
 .DS_Store
 build/
+/node_modules

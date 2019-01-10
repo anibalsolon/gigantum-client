@@ -4,6 +4,7 @@ from typing import List, Tuple
 import pickle
 import os
 from collections import namedtuple
+from gtmcore.dataset.manifest.eventloop import get_event_loop
 
 
 HashResult = namedtuple('HashResult', ['hash', 'fast_hash', 'filename'])
@@ -46,7 +47,7 @@ class SmartHash(object):
         with open(self.fast_hash_file, 'wb') as mf:
             pickle.dump(self.fast_hash_data, mf, pickle.HIGHEST_PROTOCOL)
 
-    def _get_abs_path(self, relative_path: str) -> str:
+    def get_abs_path(self, relative_path: str) -> str:
         """Method to generate the absolute path to the file
 
         Args:
@@ -55,6 +56,9 @@ class SmartHash(object):
         Returns:
 
         """
+        if relative_path[0] == '/':
+            relative_path = relative_path[1:]
+
         return os.path.join(self.file_cache_root, self.current_revision, relative_path)
 
     def is_cached(self, path) -> bool:
@@ -105,9 +109,13 @@ class SmartHash(object):
         self._save_fast_hash_file()
 
     async def async_stat(self, path):
-        return os.stat(self._get_abs_path(path))
+        try:
+            result = os.stat(self.get_abs_path(path))
+        except FileNotFoundError:
+            result = None
+        return result
 
-    def fast_hash(self, path_list: list, save: bool=True) -> List[HashResult]:
+    def fast_hash(self, path_list: list, save: bool = True) -> List[HashResult]:
         """
 
         Note, the delimiter `||` is used as it's unlikely to be in a path. Hash structure:
@@ -121,19 +129,20 @@ class SmartHash(object):
         Returns:
 
         """
+        loop = get_event_loop()
         tasks = [asyncio.ensure_future(self.async_stat(path)) for path in path_list]
-
-        loop = asyncio.get_event_loop()
         loop.run_until_complete(asyncio.ensure_future(asyncio.wait(tasks)))
 
         fast_hash_result = list()
         for p, r in zip(path_list, tasks):
-            hash_val = f"{p}||{r.result()[6]}||{r.result()[8]}||{r.result()[9]}"
-            fast_hash_result.append(HashResult(filename=p,
-                                               hash=None,
-                                               fast_hash=hash_val))
-            if save:
-                self.fast_hash_data[p] = hash_val
+            stat_data = r.result()
+            if stat_data:
+                hash_val = f"{p}||{stat_data[6]}||{stat_data[8]}||{stat_data[9]}"
+                fast_hash_result.append(HashResult(filename=p,
+                                                   hash=None,
+                                                   fast_hash=hash_val))
+                if save:
+                    self.fast_hash_data[p] = hash_val
 
         if save:
             self._save_fast_hash_file()
@@ -156,7 +165,7 @@ class SmartHash(object):
         """
         h = blake2b()
 
-        with open(self._get_abs_path(path), 'rb') as fh:
+        with open(self.get_abs_path(path), 'rb') as fh:
             file_buffer = await self.read_block(fh, blocksize)
             while len(file_buffer) > 0:
                 h.update(file_buffer)
@@ -173,9 +182,8 @@ class SmartHash(object):
         Returns:
             Tuple
         """
+        loop = get_event_loop()
         tasks = [asyncio.ensure_future(self.async_hash_file(path, self.hashing_block_size)) for path in path_list]
-
-        loop = asyncio.get_event_loop()
         loop.run_until_complete(asyncio.ensure_future(asyncio.wait(tasks)))
 
         fast_hash_result = self.fast_hash(path_list)

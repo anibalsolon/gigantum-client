@@ -129,6 +129,13 @@ export default class SelectBase extends React.Component {
     return this.props.environmentView;
   }
   /**
+    @param {string} nodeName
+    sets state of expanded detail
+  */
+  _setExpandedNode(nodeName) {
+    this.setState({ expandedNode: this.state.expandedNode === nodeName ? null : nodeName });
+  }
+  /**
     @param {object} datasetBases
     determines filter criteria for dataset types
     @return {object} filters
@@ -165,7 +172,6 @@ export default class SelectBase extends React.Component {
     const devTools = new Set();
 
     projectBases.forEach(({ node }) => {
-      console.log(node);
       node.tags.forEach((tag) => {
         if (!tags.has(tag)) {
           tags.add(tag);
@@ -229,12 +235,18 @@ export default class SelectBase extends React.Component {
   */
   _filterProjects(projects, existingFilters) {
     const tags = this.state.tags.map(tagObject => tagObject.text);
+    const mostRecent = localStorage.getItem('latest_base');
     const defaultLanguages = existingFilters.Languages;
     const defaultDevtools = existingFilters['Development Environments'];
     const defaultTags = existingFilters.Tags;
-    return projects.filter(({ node }) => {
+    let mostRecentNode;
+    const filteredProjects = projects.filter(({ node }) => {
       const lowercaseJSON = JSON.stringify(node);
       let isReturned = true;
+      if (mostRecent === node.componentId) {
+        isReturned = false;
+        mostRecentNode = { node };
+      }
       tags.forEach((tag) => {
         if (((defaultLanguages.indexOf(tag) > -1) && node.languages.indexOf(tag) === -1) ||
           ((defaultDevtools.indexOf(tag) > -1) && node.developmentTools.indexOf(tag) === -1) ||
@@ -245,6 +257,22 @@ export default class SelectBase extends React.Component {
       });
       return isReturned;
     });
+    if (mostRecentNode) {
+      let isMostRecentReturned = true;
+      const lowercaseJSON = JSON.stringify(mostRecentNode);
+      tags.forEach((tag) => {
+        if (((defaultLanguages.indexOf(tag) > -1) && mostRecentNode.node.languages.indexOf(tag) === -1) ||
+          ((defaultDevtools.indexOf(tag) > -1) && mostRecentNode.node.developmentTools.indexOf(tag) === -1) ||
+          ((defaultTags.indexOf(tag) > -1) && mostRecentNode.node.tags.indexOf(tag) === -1) ||
+          (lowercaseJSON.indexOf(tag.toLowerCase()) === -1)) {
+          isMostRecentReturned = false;
+        }
+      });
+      if (isMostRecentReturned) {
+      filteredProjects.unshift(mostRecentNode);
+      }
+    }
+    return filteredProjects;
   }
 
 
@@ -258,6 +286,7 @@ export default class SelectBase extends React.Component {
       'SelectBase__inner-container--datasets': true,
       'SelectBase__inner-container--viewer': this.state.viewingBase,
     });
+    const mostRecent = localStorage.getItem('latest_base');
 
     return (
       <div className="SelectBase">
@@ -276,7 +305,6 @@ export default class SelectBase extends React.Component {
                     'SelectBase__images--hidden': (this.state.selectedTab === 'none'),
                   });
 
-                  console.log(props.availableBases);
                   const filterCategories = this._createProjectFilters(props.availableBases.edges);
                   const filteredProjects = this._filterProjects(props.availableBases.edges, filterCategories);
                   return (
@@ -289,18 +317,29 @@ export default class SelectBase extends React.Component {
                       />
                         <div className={selecBaseImage}>
                           {
-                            filteredProjects.map(({ node }) => (
+                            filteredProjects.map(({ node }) => {
+                              const BaseWrapper = classNames({
+                                BaseSlide__wrapper: true,
+                                'BaseSlide__wrapper--recent': mostRecent === node.componentId,
+                              });
+                              const isMostRecent = mostRecent === node.componentId;
+                              return (
                               <div
                                 key={node.id}
-                                className="BaseSlide__wrapper"
+                                className={BaseWrapper}
                               >
+                                {
+                                  isMostRecent &&
+                                  <div className="BaseSlide__mostRecent">RECENT</div>
+                                }
                                 <BaseSlide
                                   key={`${node.id}_slide`}
                                   node={node}
                                   self={this}
                                 />
                               </div>
-                                ))
+                                );
+                              })
                           }
                         </div>
                       </div>
@@ -377,6 +416,16 @@ const BaseSlide = ({ node, self }) => {
   });
   let languages = node.languages.length > 1 ? 'Languages:' : 'Language:';
   node.languages.forEach((language, index) => languages += ` ${language}${index === node.languages.length - 1 ? '' : ','}`);
+  let environments = node.developmentTools.length > 1 ? 'Environments:' : 'Environment:';
+  node.developmentTools.forEach((environment, index) => environments += ` ${environment}${index === node.developmentTools.length - 1 ? '' : ','}`);
+  const installedPackagesDictionary = {};
+  node.installedPackages.forEach((val) => {
+    const pkg = val.split('|');
+    const pkgManager = pkg[0];
+    const pkgName = pkg[1];
+    const pkgVersion = pkg[2];
+    installedPackagesDictionary[pkgManager] ? installedPackagesDictionary[pkgManager].push({ pkgName, pkgVersion }) : installedPackagesDictionary[pkgManager] = [{ pkgName, pkgVersion }];
+  });
   return (<div
     onClick={() => self._selectBase(node)}
     className="SelectBase__image-wrapper"
@@ -396,30 +445,49 @@ const BaseSlide = ({ node, self }) => {
         <h6 className="SelectBase__name">{node.name}</h6>
         <h6 className="SelectBase__type">{`${node.osClass} ${node.osRelease}`}</h6>
         <h6 className="SelectBase__languages">{languages}</h6>
+        <h6 className="SelectBase__environments">{environments}</h6>
       </div>
       <div className="SelectBase__image-text">
         <p className="SelectBase__image-description">{node.description}</p>
+        {
+          self.state.expandedNode === node.name &&
+          <Fragment>
+            <hr/>
+            <ReactMarkdown source={node.readme} className="SelectBase__readme"/>
+            {
+              Object.keys(installedPackagesDictionary).length !== 0 &&
+              <table className="BaseDetails__table">
+                <thead>
+                  <tr>
+                    <th>Package Manager</th>
+                    <th>Package Name</th>
+                    <th>Version</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {
+                    Object.keys(installedPackagesDictionary).map((manager, index) => installedPackagesDictionary[manager].map(pkg => (
+                      <tr
+                        key={manager + pkg.pkgName + pkg.pgkVersion}
+                        className="BaseDetails__table-row"
+                      >
+                        <td>{manager}</td>
+                        <td>{pkg.pkgName}</td>
+                        <td>{pkg.pkgVersion}</td>
+                      </tr>
+                        )))
+                  }
+                </tbody>
+              </table>
+            }
+          </Fragment>
+        }
       </div>
-        {/* <div className="SelectBase__image-info">
-          <div className="SelectBase__image-languages">
-            <h6>Languages</h6>
-            <ul>
-              {
-              node.languages.map(language => (<li key={language}>{language}</li>))
-            }
-            </ul>
-          </div>
-          <div className="SelectBase__image-tools">
-            <h6>Tools</h6>
-            <ul>
-              {
-              node.developmentTools.map(tool => (<li key={tool}>{tool}</li>))
-            }
-            </ul>
-          </div>
-        </div> */}
         <div className={actionCSS}>
-          <button onClick={() => self.setState({ expandedNode: self.state.expandedNode === node.name ? null : node.name })} className="button--flat"></button>
+          <button
+            onClick={() => self._setExpandedNode(node.name)}
+            className="button--flat"
+          ></button>
         </div>
     </div>
   </div>);
@@ -471,7 +539,10 @@ const DatasetSlide = ({ node, self }) => {
         }
       </div>
       <div className={actionCSS}>
-        <button onClick={() => self.setState({ expandedNode: self.state.expandedNode === node.name ? null : node.name })} className="button--flat"></button>
+        <button
+            onClick={() => self._setExpandedNode(node.name)}
+            className="button--flat"
+        ></button>
       </div>
     </div>
   </div>);

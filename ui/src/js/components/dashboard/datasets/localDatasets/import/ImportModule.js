@@ -7,6 +7,7 @@ import ToolTip from 'Components/shared/ToolTip';
 import Modal from 'Components/shared/Modal';
 import JobStatus from 'JS/utils/JobStatus';
 import ChunkUploader from 'JS/utils/ChunkUploader';
+import { setUploadMessageRemove } from 'JS/redux/reducers/footer';
 // queries
 import UserIdentity from 'JS/Auth/UserIdentity';
 // store
@@ -57,7 +58,6 @@ const dispatchLoadingProgress = (workerData) => {
  uses redux to dispatch file upload failed status to the footer
 */
 const dispatchFailedStatus = () => {
-  console.log('dispatchFailedStatus');
   store.dispatch({
     type: 'UPLOAD_MESSAGE_UPDATE',
     payload: {
@@ -85,7 +85,6 @@ const getRoute = (filepath) => {
 const dispatchFinishedStatus = (filepath, history, buildImage) => {
   const route = getRoute(filepath);
   history.push(`/datasets/${localStorage.getItem('username')}/${route}`);
-  buildImage(route, localStorage.getItem('username'), uuidv4());
   setUploadMessageRemove('', uuidv4(), 0);
 };
 
@@ -253,7 +252,6 @@ export default class ImportModule extends Component {
     });
 
     const postMessage = (workerData) => {
-      console.log(workerData)
       if (workerData.importDataset) {
         store.dispatch({
           type: 'UPLOAD_MESSAGE_UPDATE',
@@ -266,7 +264,6 @@ export default class ImportModule extends Component {
 
         const importDataset = workerData.importDataset;
         JobStatus.getJobStatus(importDataset.importJobKey).then((response) => {
-          console.log(response)
           store.dispatch({
             type: 'UPLOAD_MESSAGE_UPDATE',
             payload: {
@@ -278,17 +275,14 @@ export default class ImportModule extends Component {
 
           if (response.jobStatus.status === 'finished') {
             self._clearState();
-            console.log('dispatchFinishedStatus')
             dispatchFinishedStatus(response.jobStatus.result, self.props.history, self._buildImage);
           } else if (response.jobStatus.status === 'failed') {
-            console.log('dispatchFailedStatus')
             dispatchFailedStatus();
 
             self._clearState();
           }
         }).catch((error) => {
           console.log(error);
-          console.log('error');
           store.dispatch({
             type: 'UPLOAD_MESSAGE_UPDATE',
             payload: {
@@ -303,7 +297,6 @@ export default class ImportModule extends Component {
       } else if (workerData.chunkSize) {
         dispatchLoadingProgress(workerData);
       } else if (workerData[0]) {
-        console.log('UPLOAD_MESSAGE_UPDATE');
         store.dispatch({
           type: 'UPLOAD_MESSAGE_UPDATE',
           payload: {
@@ -347,7 +340,7 @@ export default class ImportModule extends Component {
           }, 5000);
         } else {
           this.setState({ error: false });
-
+          let self = this;
           fileReader.onloadend = function (evt) {
             const arrayBuffer = evt.target.result;
 
@@ -363,7 +356,7 @@ export default class ImportModule extends Component {
                 },
               ],
               readyDataset: {
-                datasetName: file.name.replace('.zip', ''),
+                datasetName: self._getFilename(file.name),
                 owner: localStorage.getItem('username'),
               },
             });
@@ -552,6 +545,19 @@ export default class ImportModule extends Component {
     this.setState({ remoteURL: evt.target.value });
   }
 
+  /**
+  *  @param {String} filename
+  *  returns corrected version of filename
+  *  @return {}
+  */
+
+  _getFilename(filename) {
+    let fileArray = filename.split('-');
+    fileArray.pop();
+    let newFilename = fileArray.join('-');
+    return newFilename;
+  }
+
   render() {
     const loadingMaskCSS = classNames({
       'ImportModule__loading-mask': this.state.isImporting,
@@ -605,12 +611,7 @@ const ImportMain = ({ self }) => {
                     <div>Dataset Name: {self.state.readyDataset.datasetName}</div>
                   </div> :
                   <div className= "DropZone">
-                    { self.state.files[0] ?
-                      <div>
-                        <p>{self.state.files[0].filename}</p>
-                      </div>
-                      : <p>Drag and drop the exported Dataset here</p>
-                    }
+                     <p>Drag and drop the exported Dataset here</p>
                   </div>
                 }
               </div>

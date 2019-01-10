@@ -44,15 +44,15 @@ const Activity = Loadable({
   loading: Loading,
 });
 const Code = Loadable({
-  loader: () => import('./filesShared/sectionWrapper/sectionWrapperFragments/Code'),
+  loader: () => import('../filesShared/sectionWrapper/sectionWrapperFragments/Code'),
   loading: Loading,
 });
 const InputData = Loadable({
-  loader: () => import('./filesShared/sectionWrapper/sectionWrapperFragments/Input'),
+  loader: () => import('../filesShared/sectionWrapper/sectionWrapperFragments/Input'),
   loading: Loading,
 });
 const OutputData = Loadable({
-  loader: () => import('./filesShared/sectionWrapper/sectionWrapperFragments/Output'),
+  loader: () => import('../filesShared/sectionWrapper/sectionWrapperFragments/Output'),
   loading: Loading,
 });
 const Environment = Loadable({
