@@ -500,8 +500,6 @@ class InventoryManager(object):
 
             # Commit
             dataset.git.add_all()
-            dataset.git.create_branch(name="gm.workspace")
-            bm = BranchManager(dataset, username=username)
 
             # NOTE: this string is used to indicate there are no more activity records to get. Changing the string will
             # break activity paging.

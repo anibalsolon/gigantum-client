@@ -85,11 +85,6 @@ class BranchManager(object):
         return 'master'
 
     @property
-    def available_branches(self) -> List[str]:
-        # TODO(billvb): Migrate to Workflows
-        return [b for b in self.branches if f'gm.workspace-{self.username}' in b]
-
-    @property
     def branches_remote(self) -> List[str]:
         if self.repository.has_remote:
             return sorted([b.replace('origin/', '') for b in self.repository.get_branches()['remote']])
