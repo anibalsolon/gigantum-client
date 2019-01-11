@@ -20,19 +20,25 @@
 import graphene
 from lmsrvlabbook.api.mutations import (CreateLabbook, BuildImage, StartContainer,
                                         AddPackageComponents, CreateUserNote, StopContainer,
-                                        ImportLabbook, DeleteLabbook,
+                                        ImportLabbook, DeleteLabbook, ImportRemoteDataset,
                                         ImportRemoteLabbook, AddLabbookRemote,
                                         ExportLabbook, AddLabbookFile, MoveLabbookFile, DeleteLabbookFiles,
                                         MakeLabbookDirectory, RemoveUserIdentity,
                                         AddLabbookFavorite, RemoveLabbookFavorite, UpdateLabbookFavorite,
                                         AddLabbookCollaborator,
-                                        DeleteLabbookCollaborator, SyncLabbook, PublishLabbook,
+                                        DeleteLabbookCollaborator, SyncLabbook, PublishLabbook, PublishDataset,
                                         RemovePackageComponents,
                                         StartDevTool, SetLabbookDescription, CreateExperimentalBranch,
                                         DeleteExperimentalBranch,
                                         MergeFromBranch, WorkonBranch, WriteReadme, AddCustomDocker, RemoveCustomDocker,
                                         DeleteRemoteLabbook,
-                                        CompleteBatchUploadTransaction, SetVisibility, FetchLabbookEdge)
+                                        CompleteBatchUploadTransaction, SetVisibility, FetchLabbookEdge,
+                                        CreateDataset, AddDatasetFile, CompleteDatasetUploadTransaction,
+                                        FetchDatasetEdge, SetDatasetVisibility, SyncDataset,
+                                        AddDatasetCollaborator, DeleteDatasetCollaborator, DownloadDatasetFiles,
+                                        LinkDataset)
+
+from lmsrvlabbook.api.mutations import (ImportDataset, ExportDataset)
 
 
 class LabbookMutations(graphene.ObjectType):
@@ -43,6 +49,13 @@ class LabbookMutations(graphene.ObjectType):
 
     # Import a labbook from a remote Git repository.
     import_remote_labbook = ImportRemoteLabbook.Field()
+
+    # Import a Dataset from the Gitlab repository
+    import_remote_dataset = ImportRemoteDataset.Field()
+
+    # Import/Export datasets as zip files
+    import_dataset = ImportDataset.Field()
+    export_dataset = ExportDataset.Field()
 
     # Export a labbook and return URL to its zipped archive.
     export_labbook = ExportLabbook.Field()
@@ -61,6 +74,9 @@ class LabbookMutations(graphene.ObjectType):
 
     # Publish a labbook to a remote (for the first time
     publish_labbook = PublishLabbook.Field()
+
+    # Publish a dataset to a remote (for the first time
+    publish_dataset = PublishDataset.Field()
 
     # Sync a Labbook with remote (for collaboration)
     sync_labbook = SyncLabbook.Field()
@@ -129,6 +145,10 @@ class LabbookMutations(graphene.ObjectType):
     # Delete a collaborator from a LabBook
     delete_collaborator = DeleteLabbookCollaborator.Field()
 
+    # Adds a dataset collaborator
+    add_dataset_collaborator = AddDatasetCollaborator.Field()
+    delete_dataset_collaborator = DeleteDatasetCollaborator.Field()
+
     # Write a readme to a LabBook
     write_readme = WriteReadme.Field()
 
@@ -144,8 +164,32 @@ class LabbookMutations(graphene.ObjectType):
     # Work on a given feature branch (perform a git checkout).
     workon_experimental_branch = WorkonBranch.Field()
 
-    # Set a remote project visibiltiy
+    # Set a remote project visibility
     set_visibility = SetVisibility.Field()
 
     # Kludge-query to return a labbook edge when querying for job status
     fetch_labbook_edge = FetchLabbookEdge.Field()
+
+    # Create a new dataset on the file system.
+    create_dataset = CreateDataset.Field()
+
+    # Add a file to a dataset
+    add_dataset_file = AddDatasetFile.Field()
+
+    # Close an upload transaction to a dataset
+    complete_dataset_upload_transaction = CompleteDatasetUploadTransaction.Field()
+
+    # Kludge-query to return a dataset edge when querying for job status
+    fetch_dataset_edge = FetchDatasetEdge.Field()
+
+    # Set a remote dataset visibility
+    set_dataset_visibility = SetDatasetVisibility.Field()
+
+    # Sync a Dataset with remote (for collaboration)
+    sync_dataset = SyncDataset.Field()
+
+    # Download dataset files locally
+    download_dataset_files = DownloadDatasetFiles.Field()
+
+    # Link a dataset to a project
+    link_dataset = LinkDataset.Field()

@@ -49,7 +49,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
     <p
       className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
     >
-      Created on 12/07/18
+      Created on 01/08/19
     </p>
     <p
       className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
@@ -63,7 +63,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
     </p>
   </div>
   <div
-    className="Tooltip RemoteLabbooks__undefined"
+    className="Tooltip-Listing RemoteLabbooks__undefined"
     data-tooltip="undefined"
   />
 </div>
