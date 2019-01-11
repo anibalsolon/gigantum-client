@@ -224,7 +224,7 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
             # TODO(billvb) - Refactor for new branch model.
             username = get_logged_in_username()
             bm = BranchManager(lb, username=username)
-            return bm.branches
+            return [b for b in bm.branches if bm.active_branch != b]
 
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
             _mergeable)

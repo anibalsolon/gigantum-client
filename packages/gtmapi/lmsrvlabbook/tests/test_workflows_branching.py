@@ -145,8 +145,8 @@ class TestWorkflowsBranching(object):
         """
         r = client.execute(q)
         assert 'errors' not in r
-        assert len(r['data']['labbook']['mergeableBranchNames']) == 1
-        assert r['data']['labbook']['mergeableBranchNames'] == [bm.workspace_branch]
+        assert len(r['data']['labbook']['mergeableBranchNames']) == 2
+        assert r['data']['labbook']['mergeableBranchNames'] == ['master', 'tester1']
         assert r['data']['labbook']['workspaceBranchName'] == bm.workspace_branch
 
     def test_create_feature_branch_bad_name_fail(self, mock_create_labbooks):
@@ -225,7 +225,7 @@ class TestWorkflowsBranching(object):
         assert r['data']['createExperimentalBranch']['labbook']['activeBranchName'] \
             == 'valid-branch-name-working1'
         assert set(r['data']['createExperimentalBranch']['labbook']['availableBranchNames']) \
-            == set(['tester1', 'valid-branch-name-working1'])
+            == set(['tester1', 'master', 'valid-branch-name-working1'])
 
         assert lb.active_branch == 'valid-branch-name-working1'
         assert lb.is_repo_clean
