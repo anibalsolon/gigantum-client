@@ -393,19 +393,12 @@ class InventoryManager(object):
             shutil.copyfile(os.path.join(resource_filename('gtmcore', 'labbook'), 'gitignore.default'),
                             os.path.join(labbook.root_dir, ".gitignore"))
 
-            # Commit
             labbook.git.add_all()
-            labbook.git.create_branch(name="gm.workspace")
-            bm = BranchManager(labbook, username=username)
+
             # NOTE: this string is used to indicate there are no more activity records to get. Changing the string will
             # break activity paging.
             # TODO: Improve method for detecting the first activity record
             labbook.git.commit(f"Creating new empty LabBook: {name}")
-            user_workspace_branch = f"gm.workspace-{username}"
-            bm.create_branch(user_workspace_branch)
-
-            if labbook.active_branch != user_workspace_branch:
-                raise ValueError(f"active_branch should be '{user_workspace_branch}'")
 
             return labbook.root_dir
 
@@ -514,8 +507,6 @@ class InventoryManager(object):
             # break activity paging.
             # TODO: Improve method for detecting the first activity record
             dataset.git.commit(f"Creating new empty Dataset: {dataset_name}")
-            user_workspace_branch = f"gm.workspace-{username}"
-            bm.create_branch(user_workspace_branch)
 
             # Create Activity Record
             adr = ActivityDetailRecord(ActivityDetailType.DATASET, show=False, importance=0)

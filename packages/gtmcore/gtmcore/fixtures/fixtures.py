@@ -366,7 +366,7 @@ def remote_labbook_repo():
     im = InventoryManager(conf_file)
     lb = im.create_labbook('test', 'test', 'sample-repo-lb', description="my first labbook")
     bm = BranchManager(lb, username='test')
-    bm.create_branch('gm.workspace-test.testing-branch')
+    bm.create_branch('testing-branch')
 
 
     #with tempfile.TemporaryDirectory() as tmpdirname:
@@ -376,7 +376,7 @@ def remote_labbook_repo():
     FileOperations.insert_file(lb, "code", "/tmp/codefile.c")
 
     assert lb.is_repo_clean
-    bm.workon_branch('gm.workspace')
+    bm.workon_branch('master')
 
     # Location of the repo to push/pull from
     yield lb.root_dir

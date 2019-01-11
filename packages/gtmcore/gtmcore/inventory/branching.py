@@ -40,6 +40,10 @@ class BranchWorkflowViolation(BranchException):
     pass
 
 
+class MergeConflict(BranchException):
+    pass
+
+
 class InvalidBranchName(BranchException):
     pass
 
@@ -78,15 +82,23 @@ class BranchManager(object):
 
         TODO(billvb): Migrate to Workflows (does not belong here).
         """
-        b = f'gm.workspace-{self.username}'
-        if b not in self.branches:
-            raise BranchException(f'Cannot find user workspace branch {b}')
-        return b
+        return 'master'
 
     @property
     def available_branches(self) -> List[str]:
         # TODO(billvb): Migrate to Workflows
         return [b for b in self.branches if f'gm.workspace-{self.username}' in b]
+
+    @property
+    def branches_remote(self) -> List[str]:
+        if self.repository.has_remote:
+            return sorted([b.replace('origin/', '') for b in self.repository.get_branches()['remote']])
+        else:
+            return []
+
+    @property
+    def branches_local(self) -> List[str]:
+        return sorted(self.repository.get_branches()['local'])
 
     @property
     def branches(self) -> List[str]:
@@ -95,7 +107,15 @@ class BranchManager(object):
                                + self.repository.get_branches()['remote'])))
 
     def create_branch(self, title: str, revision: Optional[str] = None) -> str:
-        """Create and checkout (work on) a new managed branch."""
+        """Create and checkout (work on) a new managed branch.
+
+        Args:
+            title: Branch name
+            revision: Git commit hash or branch name to base branch from
+
+        Returns:
+            Name of newly created branch.
+        """
         if not self.is_branch_name_valid(title):
             raise InvalidBranchName(f'Branch name `{title}` invalid pattern')
 
@@ -187,7 +207,7 @@ class BranchManager(object):
                 except (git.exc.GitCommandError, subprocess.CalledProcessError) as merge_error:
                     logger.error(f"Merge conflict syncing {str(self.repository)} - Use `force` to overwrite.")
                     # TODO - This should be cleaned up (The UI attempts to match on the token "Cannot merge")
-                    raise BranchException(f"Cannot merge - {merge_error}")
+                    raise MergeConflict(f"Cannot merge - {merge_error}")
             self.repository.git.commit(f'Merged from branch `{other_branch}`')
             logger.info(f"{str(self.repository)} finished merge")
         except Exception as e:
