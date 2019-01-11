@@ -8,6 +8,8 @@ services:
       - "10000:10000"
       - "10001:10001"
       - "10002:10002"
+    expose:
+      - "6379"
     volumes:
       - {% WORKING_DIR %}:/mnt/gigantum:cached
       - //var/run/docker.sock:/var/run/docker.sock
@@ -17,7 +19,16 @@ services:
       - WINDOWS_HOST=1
       - HOST_WORK_DIR={% WORKING_DIR %}
       - PYCHARM-DEV=1
-    network_mode: "bridge"
+
+  redis-commander:
+    container_name: redis-commander
+    hostname: redis-commander
+    image: rediscommander/redis-commander:latest
+    restart: always
+    environment:
+      - REDIS_HOSTS=local:labmanager:6379
+    ports:
+      - "8081:8081"
 
 volumes:
   labmanager_share_vol:

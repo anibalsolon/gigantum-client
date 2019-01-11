@@ -22,6 +22,14 @@ process. Therefore, there are corresponding `*-config-override.yaml` files that
 allow the developer to control the contents of these files. For an example, see
 the section below for "Publishing" under "base images".
 
+### Redis
+
+Examining keys in Redis can be an important part of working with portions of the code-base.
+redis-commander is configured as part of the developer docker-compose configuration 
+for PyCharm. To use it, simply execute the following from `gigantum-client/build/developer`:
+
+    docker-compose up redis-commander
+
 base images
 -----------
 
