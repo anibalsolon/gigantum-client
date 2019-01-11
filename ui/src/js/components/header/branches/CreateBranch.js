@@ -29,7 +29,7 @@ export default class CreateBranchModal extends Component {
       textLength: 0,
       showError: false,
       branchName: '',
-      branchDescription: props.selected ? `Branch created on ${formatedCurrentTimestamp} to rollback workspace to ${formatedTimestamp}.` : props.description ? props.description : '',
+      branchDescription: props.selected ? `Branch created on ${formatedCurrentTimestamp} to rollback master to ${formatedTimestamp}.` : props.description ? props.description : '',
       createButtonClicked: false,
       buttonLoaderCreateBranch: '',
     };
@@ -246,7 +246,7 @@ export default class CreateBranchModal extends Component {
 
                       maxLength="240"
                       placeholder="Briefly describe this branch, its purpose and any other key details. "
-                      defaultValue={this.props.selected ? `Branch created on ${formatedCurrentTimestamp} to rollback workspace to ${formatedTimestamp}.` : this.props.description ? this.props.description : ''}
+                      defaultValue={this.props.selected ? `Branch created on ${formatedCurrentTimestamp} to rollback master to ${formatedTimestamp}.` : this.props.description ? this.props.description : ''}
                     />
                     <p className={`CreateBranch__warning ${this.state.textWarning}`}>{`${this.state.textLength} characters remaining`}</p>
                   </div>

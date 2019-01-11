@@ -174,9 +174,7 @@ class BranchMenu extends Component {
   *  @return {string}
   */
   _togglePublishModal() {
-    if (!this.props.isMainWorkspace && this.props.sectionType === 'labbook') {
-      setWarningMessage('Publishing is currently only available on the main workspace branch.');
-    } else if (this.props.isExporting) {
+    if (this.props.isExporting) {
       this.setState({ publishWarningVisible: true });
     } else {
       this.setState({ publishModalVisible: !this.state.publishModalVisible });
@@ -198,9 +196,7 @@ class BranchMenu extends Component {
   *  @return {string}
   */
   _sync() {
-    if (!this.props.isMainWorkspace && this.props.sectionType === 'labbook') {
-      setWarningMessage('Syncing is currently only available on the main workspace branch.');
-    } else if (this.props.isExporting) {
+    if (this.props.isExporting) {
       this.setState({ syncWarningVisible: true });
     } else {
       const status = store.getState().containerStatus.status;
@@ -773,6 +769,7 @@ class BranchMenu extends Component {
 
               <button
                 className="BranchMenu__btn--remote"
+                disabled={true}
                 onClick={() => this._togglePublishModal()}
               >
                 Publish
@@ -801,6 +798,7 @@ class BranchMenu extends Component {
 
               <button
                 className="BranchMenu__btn--sync"
+                disabled={true}
                 onClick={() => this._sync()}
               >
                 Sync Branch

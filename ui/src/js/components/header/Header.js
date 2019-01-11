@@ -234,7 +234,7 @@ class LabbookHeader extends Component {
                 setExportingState={this._setExportingState}
                 isExporting={this.props.isExporting}
                 toggleBranchesView={this.props.toggleBranchesView}
-                isMainWorkspace={branchName === 'workspace' || branchName === `gm.workspace-${localStorage.getItem('username')}`}
+                branchName={branchName}
                 auth={this.props.auth}
               />
               {

@@ -582,7 +582,7 @@ export default class Activity extends Component {
           { ((i !== 0) || (j !== 0)) &&
             <div className="Activity__submenu-container">
               {
-              (!(isLastRecordObj && isLastRecordNode && isLastPage) && this.props.isMainWorkspace && !!rollbackableDetails.length) && this.state.compressedElements.size === 0 &&
+              (!(isLastRecordObj && isLastRecordNode && isLastPage) && !!rollbackableDetails.length) && this.state.compressedElements.size === 0 &&
               <Fragment>
                 <ToolTip section="activitySubmenu" />
                 {

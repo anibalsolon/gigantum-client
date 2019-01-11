@@ -55,8 +55,7 @@ export default class BranchCard extends Component {
     const branchName = this.props.name;
     const { owner, labbookName } = this.state;
     const revision = null;
-    const cleanActiveBranchName = this._sanitizeBranchName(branchName);
-    setInfoMessage(`Checking out ${cleanActiveBranchName}`);
+    setInfoMessage(`Checking out ${branchName}`);
 
     requestAnimationFrame(() => {
       this.setState({
@@ -117,10 +116,8 @@ export default class BranchCard extends Component {
     const { owner, labbookName } = this.state;
     const { activeBranchName } = this.props;
     const { force } = params;
-    const cleanActiveBranchName = this._sanitizeBranchName(activeBranchName);
-    const cleanOtherBranchName = this._sanitizeBranchName(otherBranchName);
     const self = this;
-    setInfoMessage(`Merging ${cleanOtherBranchName} into ${cleanActiveBranchName}`);
+    setInfoMessage(`Merging ${otherBranchName} into ${activeBranchName}`);
     this.setState({ showLoader: true, buttonLoaderStateMerge: 'loading' });
 
     MergeFromBranchMutation(
@@ -130,7 +127,7 @@ export default class BranchCard extends Component {
       force,
       (response, error) => {
         if (error) {
-          setErrorMessage(`There was a problem merging ${cleanOtherBranchName} into ${cleanActiveBranchName}`, error);
+          setErrorMessage(`There was a problem merging ${activeBranchName} into ${otherBranchName}`, error);
 
           if (error[0].message.indexOf('Cannot merge') > -1) {
             self.setState({
@@ -141,7 +138,7 @@ export default class BranchCard extends Component {
           self.setState({ showLoader: false, buttonLoaderStateMerge: 'error' });
         }
         if (response.mergeFromBranch && response.mergeFromBranch.labbook) {
-          setInfoMessage(`${cleanOtherBranchName} merged into ${cleanActiveBranchName} successfully`);
+          setInfoMessage(`${otherBranchName} merged into ${activeBranchName} successfully`);
           self.setState({ showLoader: false, buttonLoaderStateMerge: 'finished' });
         }
         setTimeout(() => {
@@ -163,19 +160,6 @@ export default class BranchCard extends Component {
         );
       },
     );
-  }
-  /**
-  *  @param {string} branchName
-  *  makes branch name pretty
-  *  @return {string} prettyBranchName
-  */
-  _sanitizeBranchName(branchName) {
-    const { username } = this.state;
-    const workspace = `gm.workspace-${username}`;
-
-    const prettyBranchName = (branchName === workspace) ? 'workspace' : branchName.replace(`${workspace}.`, '');
-
-    return prettyBranchName;
   }
   /**
    * @param {}
@@ -204,8 +188,8 @@ export default class BranchCard extends Component {
   render() {
     const { owner, showLoader } = this.state,
       isCurrentBranch = (this.props.name === this.props.activeBranchName),
-      branchName = this._sanitizeBranchName(this.props.name),
-      showDelete = !isCurrentBranch && (this.props.name !== `gm.workspace-${owner}`);
+      branchName = this.props.name,
+      showDelete = !isCurrentBranch && (this.props.name !== 'master');
 
     return (
       <div className="BranchCard Card">

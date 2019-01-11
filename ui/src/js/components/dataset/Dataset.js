@@ -103,22 +103,6 @@ class Dataset extends Component {
   }
 
   /**
-    @param {string}
-    makes branch name pretty
-    @return {string}
-  */
-  _sanitizeBranchName(branchName) {
-    const username = localStorage.getItem('username');
-    const workspace = `gm.workspace-${username}`;
-
-    if (branchName) {
-      const prettyBranchName = (branchName === workspace) ? 'workspace' : branchName.replace(`${workspace}.`, '');
-
-      return prettyBranchName;
-    }
-  }
-
-  /**
     @param {}
     dispatches sticky state to redux to update state
   */

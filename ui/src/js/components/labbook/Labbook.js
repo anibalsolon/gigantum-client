@@ -127,22 +127,6 @@ class Labbook extends Component {
   }
 
   /**
-    @param {string}
-    makes branch name pretty
-    @return {string}
-  */
-  _sanitizeBranchName(branchName) {
-    const username = localStorage.getItem('username');
-    const workspace = `gm.workspace-${username}`;
-
-    if (branchName) {
-      const prettyBranchName = (branchName === workspace) ? 'workspace' : branchName.replace(`${workspace}.`, '');
-
-      return prettyBranchName;
-    }
-  }
-
-  /**
     @param {}
     dispatches sticky state to redux to update state
   */
@@ -198,7 +182,7 @@ class Labbook extends Component {
 
     if (this.props.labbook) {
       const { labbook, branchesOpen } = this.props;
-      const branchName = this._sanitizeBranchName(this.props.labbook.activeBranchName);
+      const branchName = this.props.labbook.activeBranchName;
 
       const labbookCSS = classNames({
         Labbook: true,
@@ -288,7 +272,7 @@ class Labbook extends Component {
                                activityRecords={this.props.activityRecords}
                                labbookId={labbook.id}
                                activeBranch={labbook.activeBranch}
-                               isMainWorkspace={branchName === 'workspace'}
+                               branchName={branchName}
                                setBuildingState={this._setBuildingState}
                                sectionType={'labbook'}
                                {...this.props}
