@@ -233,7 +233,7 @@ class TestWorkflowsBranching(object):
         assert lb.active_branch == 'gm.workspace-default.valid-branch-name-working1'
         assert lb.is_repo_clean
 
-    def test_create_feature_branch_success_update_description(self, mock_create_labbooks, snapshot):
+    def test_create_feature_branch_success_update_description(self, mock_create_labbooks):
         lb, client = mock_create_labbooks[0], mock_create_labbooks[1]
         bm = BranchManager(lb, username=UT_USERNAME)
         b1 = bm.create_branch(f"gm.workspace-{UT_USERNAME}.tester1")
@@ -259,11 +259,11 @@ class TestWorkflowsBranching(object):
         r = client.execute(q)
         assert 'errors' not in r
         assert r['data']['createExperimentalBranch']['labbook']['activeBranchName'] \
-               == 'gm.workspace-default.valid-branch-name-working1'
+               == 'valid-branch-name-working1'
         assert r['data']['createExperimentalBranch']['labbook']['description'] \
                == "Updated description"
 
-        assert bm.active_branch == 'gm.workspace-default.valid-branch-name-working1'
+        assert bm.active_branch == 'valid-branch-name-working1'
         assert lb.is_repo_clean
 
         # Make sure activity record was created when description was changed
@@ -417,7 +417,7 @@ class TestWorkflowsBranching(object):
         assert os.path.exists(os.path.join(lb.root_dir, 'code/sillydir1'))
         assert lb.is_repo_clean
 
-    def test_merge_into_feature_from_workspace_simple_success(self, mock_create_labbooks, snapshot):
+    def test_merge_into_feature_from_workspace_simple_success(self, mock_create_labbooks):
         lb, client = mock_create_labbooks[0], mock_create_labbooks[1]
         bm = BranchManager(lb, username=UT_USERNAME)
         og_hash = lb.git.commit_hash
@@ -453,8 +453,10 @@ class TestWorkflowsBranching(object):
         """
         r = client.execute(merge_q)
         assert 'errors' not in r
-        r['data']['mergeFromBranch']['labbook']['activeBranchName'] == 'gm.workspace-default.test-branch'
-        snapshot.assert_match(r)
+        assert r['data']['mergeFromBranch']['labbook']['activeBranchName'] == 'master'
+        assert r['data']['mergeFromBranch']['labbook']['name'] == 'unittest-workflow-branch-1'
+        assert 'master' in r['data']['mergeFromBranch']['labbook']['availableBranchNames']
+        assert 'test-branch' in r['data']['mergeFromBranch']['labbook']['availableBranchNames']
 
         assert lb.active_branch == b1
         assert os.path.exists(os.path.join(lb.root_dir, 'code/main-branch-dir1'))
@@ -494,10 +496,11 @@ class TestWorkflowsBranching(object):
         }}
         """
         r = client.execute(merge_q)
+
         assert 'errors' in r
         assert 'Cannot merge' in r['errors'][0]['message']
 
-    def test_conflicted_merge_from_force_success(self, mock_create_labbooks, snapshot):
+    def test_conflicted_merge_from_force_success(self, mock_create_labbooks):
         lb, client = mock_create_labbooks[0], mock_create_labbooks[1]
         with open('/tmp/s1.txt', 'w') as s1:
             s1.write('original-file\ndata')
@@ -525,7 +528,6 @@ class TestWorkflowsBranching(object):
                 labbook{{
                     name
                     description
-                    availableBranchNames
                     activeBranchName
                 }}
             }}
@@ -533,8 +535,7 @@ class TestWorkflowsBranching(object):
         """
         r = client.execute(merge_q)
         assert 'errors' not in r
-        snapshot.assert_match(r)
-        r['data']['mergeFromBranch']['labbook']['activeBranchName'] == 'gm.workspace-default'
+        assert r['data']['mergeFromBranch']['labbook']['activeBranchName'] == 'master'
 
     def test_reflect_deleted_files_on_merge_in(self, mock_create_labbooks):
         lb, client = mock_create_labbooks[0], mock_create_labbooks[1]

@@ -70,7 +70,7 @@ class CreateExperimentalBranch(graphene.relay.ClientIDMutation):
                                              author=get_logged_in_author())
         with lb.lock():
             bm = BranchManager(lb, username=username)
-            full_branch_title = bm.create_branch(title=f'gm.workspace-{username}.{branch_name}',
+            full_branch_title = bm.create_branch(title=branch_name,
                                                  revision=revision)
             logger.info(f"In {str(lb)} created new experimental feature branch: "
                         f"{full_branch_title}")

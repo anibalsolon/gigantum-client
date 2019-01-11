@@ -11,7 +11,7 @@ snapshots['TestNodeQueries.test_node_labbook_from_object 1'] = {
     'data': {
         'node': {
             'activeBranch': {
-                'refName': 'gm.workspace-default'
+                'refName': 'master'
             },
             'description': 'Test cat labbook from obj',
             'id': 'TGFiYm9vazpkZWZhdWx0JmNhdC1sYWItYm9vazE=',

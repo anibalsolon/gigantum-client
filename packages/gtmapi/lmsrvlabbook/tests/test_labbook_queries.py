@@ -429,7 +429,7 @@ class TestLabBookServiceQueries(object):
         assert r['data']['labbook']['schemaVersion'] == 1
         assert int(r['data']['labbook']['sizeBytes']) > 10000
         assert int(r['data']['labbook']['sizeBytes']) < 40000
-        assert r['data']['labbook']['activeBranch']['refName'] == 'gm.workspace-default'
+        assert r['data']['labbook']['activeBranch']['refName'] == 'master'
         assert r['data']['labbook']['activeBranch']['prefix'] is None
         assert r['data']['labbook']['name'] == 'labbook1'
         d = r['data']['labbook']['creationDateUtc']
