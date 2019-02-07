@@ -20,7 +20,7 @@
 import pytest
 import responses
 
-from gtmcore.gitlib.gitlab import GitLabManager
+from gtmcore.workflows.gitlab import GitLabManager
 
 
 @pytest.fixture()

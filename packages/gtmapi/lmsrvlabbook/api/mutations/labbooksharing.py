@@ -17,14 +17,14 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-import os
 import base64
 import graphene
 
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.dispatcher import Dispatcher, jobs
 from gtmcore.logging import LMLogger
-from gtmcore.gitlib.gitlab import GitLabManager
+from gtmcore.workflows.gitlab import GitLabManager
+from gtmcore.workflows import MergeOverride
 
 from lmsrvcore.api import logged_mutation
 from lmsrvcore.auth.identity import parse_token
@@ -76,13 +76,14 @@ class SyncLabbook(graphene.relay.ClientIDMutation):
     class Input:
         owner = graphene.String(required=True)
         labbook_name = graphene.String(required=True)
-        force = graphene.Boolean(required=False)
+        override_method = graphene.String(default="abort")
 
     job_key = graphene.String()
 
     @classmethod
     @logged_mutation
-    def mutate_and_get_payload(cls, root, info, owner, labbook_name, force=False, client_mutation_id=None):
+    def mutate_and_get_payload(cls, root, info, owner, labbook_name,
+                               override_method="abort", client_mutation_id=None):
         # Load LabBook
         username = get_logged_in_username()
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
@@ -95,7 +96,8 @@ class SyncLabbook(graphene.relay.ClientIDMutation):
                 token = parse_token(info.context.headers.environ["HTTP_AUTHORIZATION"])
 
         if not token:
-            raise ValueError("Authorization header not provided. Must have a valid session to query for collaborators")
+            raise ValueError("Authorization header not provided. "
+                             "Must have a valid session to query for collaborators")
 
         default_remote = lb.client_config.config['git']['default_remote']
         admin_service = None
@@ -111,11 +113,13 @@ class SyncLabbook(graphene.relay.ClientIDMutation):
         mgr = GitLabManager(default_remote, admin_service, access_token=token)
         mgr.configure_git_credentials(default_remote, username)
 
+        override = MergeOverride(override_method)
+
         job_metadata = {'method': 'sync_labbook',
                         'labbook': lb.key}
         job_kwargs = {'repository': lb,
                       'username': username,
-                      'force': force}
+                      'override': override}
         dispatcher = Dispatcher()
         job_key = dispatcher.dispatch_task(jobs.sync_repository, kwargs=job_kwargs, metadata=job_metadata)
         logger.info(f"Syncing LabBook {lb.root_dir} in background job with key {job_key.key_str}")

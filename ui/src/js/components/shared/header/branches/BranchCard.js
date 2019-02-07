@@ -6,6 +6,7 @@ import ForceMerge from './ForceMerge';
 import ButtonLoader from 'Components/common/ButtonLoader';
 // mutations
 import WorkonExperimentalBranchMutation from 'Mutations/branches/WorkonExperimentalBranchMutation';
+import ResetBranchToRemoteMutation from 'Mutations/branches/ResetBranchToRemoteMutation';
 import MergeFromBranchMutation from 'Mutations/branches/MergeFromBranchMutation';
 import BuildImageMutation from 'Mutations/BuildImageMutation';
 // store
@@ -31,10 +32,12 @@ export default class BranchCard extends Component {
       forceMergeVisible: false,
       buttonLoaderStateSwitch: '',
       buttonLoaderStateMerge: '',
+      buttonLoaderStateReset: '',
     };
 
     this._merge = this._merge.bind(this);
     this._checkoutBranch = this._checkoutBranch.bind(this);
+    this._resetBranch = this._resetBranch.bind(this);
     this._toggleModal = this._toggleModal.bind(this);
     this._handleToggleModal = this._handleToggleModal.bind(this);
   }
@@ -107,15 +110,78 @@ export default class BranchCard extends Component {
       },
     );
   }
+    /**
+    @param {}
+    checkout branch using WorkonExperimentalBranchMutation
+  */
+  _resetBranch() {
+    const self = this;
+    const branchName = this.props.name;
+    const { owner, labbookName } = this.state;
+    setInfoMessage(`Reseting branch: ${branchName}`);
+
+    requestAnimationFrame(() => {
+      this.setState({
+        showLoader: true,
+        buttonLoaderStateReset: 'loading',
+      });
+    });
+
+    ResetBranchToRemoteMutation(
+      owner,
+      labbookName,
+      (response, error) => {
+        if (error) {
+          console.error(error);
+          setErrorMessage('Problem Checking out Branch, check if you have a valid session and connection', error);
+
+          self.setState({
+            showLoader: false,
+            buttonLoaderStateReset: 'error',
+          });
+          setTimeout(() => {
+            self.setState({
+              buttonLoaderStateReset: '',
+            });
+          }, 2000);
+        } else {
+          setForceCancelRefetch(true);
+          self.setState({
+            showLoader: false,
+            buttonLoaderStateReset: 'finished',
+          });
+
+          setTimeout(() => {
+            self.setState({
+              buttonLoaderStateReset: '',
+            });
+          }, 3000);
+
+          this.props.setBuildingState(true);
+
+          BuildImageMutation(
+            labbookName,
+            owner,
+            false,
+            (response, error) => {
+              if (error) {
+                console.log(error);
+              }
+            },
+          );
+        }
+      },
+    );
+  }
   /**
-    @param {object,Object}
+    @param {Object} params
     merge branch using WorkonExperimentalBranchMutation
   */
-  _merge(evt, params) {
+  _merge(params) {
     const otherBranchName = this.props.name;
     const { owner, labbookName } = this.state;
     const { activeBranchName } = this.props;
-    const { force } = params;
+    const { method } = params;
     const self = this;
     setInfoMessage(`Merging ${otherBranchName} into ${activeBranchName}`);
     this.setState({ showLoader: true, buttonLoaderStateMerge: 'loading' });
@@ -124,7 +190,7 @@ export default class BranchCard extends Component {
       owner,
       labbookName,
       otherBranchName,
-      force,
+      method,
       (response, error) => {
         if (error) {
           setErrorMessage(`There was a problem merging ${activeBranchName} into ${otherBranchName}`, error);
@@ -216,7 +282,6 @@ export default class BranchCard extends Component {
           <ForceMerge
             key="ForceMerge__modal"
             merge={this._merge}
-            params={{ force: true }}
             toggleModal={this._toggleModal}
           />
         }
@@ -226,8 +291,17 @@ export default class BranchCard extends Component {
             className="BranchCard__btn--deleteLabbook button--flat"
           />
         }
-
         <div className="BranchCard__button">
+          {
+            isCurrentBranch && this.props.isRemote &&
+            <ButtonLoader
+              ref="buttonLoaderReset"
+              buttonState={this.state.buttonLoaderStateReset}
+              buttonText="Reset Branch"
+              buttonDisabled={showLoader}
+              clicked={this._resetBranch}
+            />
+          }
 
           {this.props.mergeFilter &&
 
@@ -235,13 +309,14 @@ export default class BranchCard extends Component {
             <ButtonLoader
               ref="buttonLoaderMerge"
               buttonState={this.state.buttonLoaderStateMerge}
-              params={{ force: false }}
+              params={{ method: null }}
               buttonText="Merge"
               buttonDisabled={showLoader}
               clicked={this._merge}
             />
 
           }
+
 
           {!this.props.mergeFilter &&
 
@@ -255,6 +330,11 @@ export default class BranchCard extends Component {
             />
 
           }
+        </div>
+        <div
+          className="BranchCard__badge"
+        >
+          {this.props.isRemote ? this.props.isLocal ? 'Local & Remote' : 'Remote' : 'Local'}
         </div>
       </div>
     );

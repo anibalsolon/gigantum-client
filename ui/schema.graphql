@@ -1,5 +1,5 @@
 # source: http://localhost:10000/api/labbook/
-# timestamp: Wed Jan 23 2019 17:43:01 GMT-0500 (Eastern Standard Time)
+# timestamp: Fri Feb 01 2019 13:57:28 GMT-0500 (Eastern Standard Time)
 
 schema {
   query: LabbookQuery
@@ -767,6 +767,8 @@ type Labbook implements Node & GitRepository {
   activeBranchName: String
   workspaceBranchName: String
   availableBranchNames: [String]
+  localBranchNames: [String]
+  remoteBranchNames: [String]
   mergeableBranchNames: [String]
   activeBranch: LabbookRef @deprecated(reason: "Can use workspaceBranchName instead")
   branches(before: String, after: String, first: Int, last: Int): LabbookRefConnection @deprecated(reason: "Can use availableBranchNames instead")
@@ -908,6 +910,7 @@ type LabbookMutations {
   publishDataset(input: PublishDatasetInput!): PublishDatasetPayload
   syncLabbook(input: SyncLabbookInput!): SyncLabbookPayload
   addLabbookRemote(input: AddLabbookRemoteInput!): AddLabbookRemotePayload
+  resetBranchToRemote(input: ResetBranchToRemoteInput!): ResetBranchToRemotePayload
   buildImage(input: BuildImageInput!): BuildImagePayload
   startContainer(input: StartContainerInput!): StartContainerPayload
   stopContainer(input: StopContainerInput!): StopContainerPayload
@@ -1060,7 +1063,7 @@ input MergeFromBranchInput {
   owner: String!
   labbookName: String!
   otherBranchName: String!
-  force: Boolean
+  overrideMethod: String
   clientMutationId: String
 }
 
@@ -1308,6 +1311,22 @@ type RemoveUserIdentityPayload {
   clientMutationId: String
 }
 
+input ResetBranchToRemoteInput {
+  owner: String!
+  labbookName: String!
+  clientMutationId: String
+}
+
+"""
+Undo all local history and then set current branch tip to match remote.
+
+Very useful when changes are made to master that cannot be pushed. 
+"""
+type ResetBranchToRemotePayload {
+  labbook: Labbook
+  clientMutationId: String
+}
+
 input SetDatasetVisibilityInput {
   owner: String!
   datasetName: String!
@@ -1396,7 +1415,7 @@ type SyncDatasetPayload {
 input SyncLabbookInput {
   owner: String!
   labbookName: String!
-  force: Boolean
+  overrideMethod: String
   clientMutationId: String
 }
 

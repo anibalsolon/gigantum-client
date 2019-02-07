@@ -25,6 +25,7 @@ from gtmcore.logging import LMLogger
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.inventory.branching import BranchManager
 from gtmcore.activity import ActivityStore, ActivityDetailRecord, ActivityDetailType, ActivityRecord, ActivityType
+from gtmcore.workflows import LabbookWorkflow, MergeOverride
 
 from lmsrvcore.auth.user import get_logged_in_username, get_logged_in_author
 from lmsrvlabbook.api.objects.labbook import Labbook
@@ -128,6 +129,30 @@ class WorkonBranch(graphene.relay.ClientIDMutation):
                                             name=labbook_name, owner=owner))
 
 
+class ResetBranchToRemote(graphene.relay.ClientIDMutation):
+    """ Undo all local history and then set current branch tip to match remote.
+
+    Very useful when changes are made to master that cannot be pushed. """
+
+    class Input:
+        owner = graphene.String(required=True)
+        labbook_name = graphene.String(required=True)
+
+    labbook = graphene.Field(Labbook)
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, owner, labbook_name, client_mutation_id=None):
+        username = get_logged_in_username()
+        lb = InventoryManager().load_labbook(username, owner, labbook_name,
+                                             author=get_logged_in_author())
+        with lb.lock():
+            wf = LabbookWorkflow(lb)
+            wf.reset(username)
+
+        return ResetBranchToRemote(Labbook(id="{}&{}".format(owner, labbook_name),
+                                           name=labbook_name, owner=owner))
+
+
 class MergeFromBranch(graphene.relay.ClientIDMutation):
     """Merge from another branch into the current active branch. Force if necessary. """
 
@@ -135,19 +160,28 @@ class MergeFromBranch(graphene.relay.ClientIDMutation):
         owner = graphene.String(required=True)
         labbook_name = graphene.String(required=True)
         other_branch_name = graphene.String(required=True)
-        force = graphene.Boolean()
+        override_method = graphene.String(default="abort")
 
     labbook = graphene.Field(Labbook)
 
     @classmethod
-    def mutate_and_get_payload(cls, root, info, owner, labbook_name, other_branch_name, force=False,
-                               client_mutation_id=None):
+    def mutate_and_get_payload(cls, root, info, owner, labbook_name, other_branch_name,
+                               override_method="abort", client_mutation_id=None):
         username = get_logged_in_username()
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
         with lb.lock():
+            override = MergeOverride(override_method)
             bm = BranchManager(lb, username=username)
-            bm.merge_from(other_branch=other_branch_name, force=force)
+            if override == MergeOverride.ABORT:
+                bm.merge_from(other_branch=other_branch_name)
+            elif override == MergeOverride.OURS:
+                bm.merge_use_ours(other_branch=other_branch_name)
+            elif override == MergeOverride.THEIRS:
+                bm.merge_use_theirs(other_branch=other_branch_name)
+            else:
+                raise ValueError(f"Unknown override method {override}")
 
         return MergeFromBranch(Labbook(id="{}&{}".format(owner, labbook_name),
                                                name=labbook_name, owner=owner))
+

@@ -10,7 +10,7 @@ from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.container.container import ContainerOperations
 from gtmcore.mitmproxy.mitmproxy import MITMProxyOperations
 from gtmcore.container.utils import infer_docker_image_name
-from gtmcore.workflows import GitWorkflow
+from gtmcore.workflows import LabbookWorkflow
 from gtmcore.logging import LMLogger
 from gtmcore.activity.services import stop_labbook_monitor
 
@@ -152,7 +152,7 @@ class StopContainer(graphene.relay.ClientIDMutation):
                 logger.warning(f'Removing multiple routes for {tool} on {proxy_endpoint} during Project container stop.')
             pr.remove(target[1:])
 
-        wf = GitWorkflow(lb)
+        wf = LabbookWorkflow(lb)
         wf.garbagecollect()
 
         # Clean up empty bind mount dirs from datasets if needed

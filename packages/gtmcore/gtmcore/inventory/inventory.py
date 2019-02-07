@@ -18,7 +18,6 @@ from gtmcore.logging import LMLogger
 from gtmcore.configuration import Configuration
 from gtmcore.configuration.utils import call_subprocess
 from gtmcore.labbook.labbook import LabBook
-from gtmcore.inventory.branching import BranchManager
 from gtmcore.dataset.dataset import Dataset
 from gtmcore.inventory import Repository
 from gtmcore.dataset.storage import SUPPORTED_STORAGE_BACKENDS

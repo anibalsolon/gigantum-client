@@ -9,7 +9,7 @@ from lmsrvcore.api.interfaces import GitRepository
 from lmsrvcore.api.connections import ListBasedConnection
 
 from gtmcore.dataset.manifest import Manifest
-from gtmcore.gitlib.gitlab import GitLabManager
+from gtmcore.workflows.gitlab import GitLabManager
 from gtmcore.inventory.inventory import InventoryManager
 
 from lmsrvlabbook.api.objects.datasettype import DatasetType

@@ -6,8 +6,8 @@ import uuidV4 from 'uuid/v4';
 import environment from 'JS/createRelayEnvironment';
 
 const mutation = graphql`
-  mutation MergeFromBranchMutation($input: MergeFromBranchInput!, $first: Int, $cursor: String, $hasNext: Boolean!){
-    mergeFromBranch(input: $input){
+  mutation ResetBranchToRemoteMutation($input: ResetBranchToRemoteInput!, $first: Int, $cursor: String, $hasNext: Boolean!){
+    resetBranchToRemote(input: $input){
       labbook{
         ...Labbook_labbook
       }
@@ -16,11 +16,9 @@ const mutation = graphql`
   }
 `;
 
-export default function MergeFromBranchMutation(
+export default function ResetBranchToRemoteMutation(
   owner,
   labbookName,
-  otherBranchName,
-  overrideMethod,
   callback,
 ) {
   const clientMutationId = uuidV4();
@@ -28,15 +26,12 @@ export default function MergeFromBranchMutation(
     input: {
       owner,
       labbookName,
-      otherBranchName,
-      overrideMethod,
       clientMutationId,
     },
     first: 2,
     cursor: null,
     hasNext: false,
   };
-
   commitMutation(
     environment,
     {
@@ -50,6 +45,8 @@ export default function MergeFromBranchMutation(
         callback(response, error);
       },
       onError: (err) => { console.error(err); },
+      updater: (store, response) => {
+      },
     },
   );
 }

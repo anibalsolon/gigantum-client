@@ -24,13 +24,13 @@ import os
 import pathlib
 from jose import jwt
 import json
-from typing import (Optional, Dict, Any)
+from typing import (Optional, Dict)
 
 from gtmcore.configuration import Configuration
 from gtmcore.logging import LMLogger
 from gtmcore.auth import User
 from gtmcore.dispatcher import (Dispatcher, jobs)
-from gtmcore.gitlib.gitlab import check_and_add_user
+from gtmcore.workflows.gitlab import check_and_add_user
 from gtmcore.workflows import ZipExporter
 
 

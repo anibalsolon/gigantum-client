@@ -17,27 +17,22 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-import datetime
 import importlib
 import json
 import os
 import time
 from typing import Optional
-import subprocess
-import shutil
 
 from rq import get_current_job
 
 from gtmcore.activity.monitors.devenv import DevEnvMonitorManager
-from gtmcore.configuration import Configuration
-from gtmcore.configuration.utils import call_subprocess
 from gtmcore.labbook import LabBook
 
 from gtmcore.inventory.inventory  import InventoryManager
 from gtmcore.inventory  import Repository
 
 from gtmcore.logging import LMLogger
-from gtmcore.workflows import sync_locally, GitWorkflow, ZipExporter
+from gtmcore.workflows import ZipExporter, LabbookWorkflow, DatasetWorkflow, MergeOverride
 from gtmcore.container.core import (build_docker_image as build_image,
                                      start_labbook_container as start_container,
                                      stop_labbook_container as stop_container)
@@ -67,7 +62,10 @@ def publish_repository(repository: Repository, username: str, access_token: str,
 
     try:
         with repository.lock():
-            wf = GitWorkflow(repository)
+            if isinstance(repository, LabBook):
+                wf = LabbookWorkflow(repository)
+            else:
+                wf = DatasetWorkflow(repository) # type: ignore
             wf.publish(username=username, access_token=access_token, remote=remote or "origin",
                        public=public, feedback_callback=update_meta, id_token=id_token)
     except Exception as e:
@@ -75,8 +73,9 @@ def publish_repository(repository: Repository, username: str, access_token: str,
         raise
 
 
-def sync_repository(repository: Repository, username: str, remote: str = "origin",
-                 force: bool = False, access_token: str = None, id_token: str = None) -> int:
+def sync_repository(repository: Repository, username: str, override: MergeOverride,
+                    remote: str = "origin", access_token: str = None,
+                    id_token: str = None) -> int:
     p = os.getpid()
     logger = LMLogger.get_logger()
     logger.info(f"(Job {p}) Starting sync_repository({str(repository)})")
@@ -93,9 +92,13 @@ def sync_repository(repository: Repository, username: str, remote: str = "origin
 
     try:
         with repository.lock():
-            wf = GitWorkflow(repository)
-            cnt = wf.sync(username=username, remote=remote, force=force,
-                          feedback_callback=update_meta, access_token=access_token, id_token=id_token)
+            if isinstance(repository, LabBook):
+                wf = LabbookWorkflow(repository)
+            else:
+                wf = DatasetWorkflow(repository) # type: ignore
+            cnt = wf.sync(username=username, remote=remote, override=override,
+                          feedback_callback=update_meta, access_token=access_token,
+                          id_token=id_token)
         logger.info(f"(Job {p} Completed sync_repository with cnt={cnt}")
         return cnt
     except Exception as e:

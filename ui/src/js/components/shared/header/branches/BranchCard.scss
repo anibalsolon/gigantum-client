@@ -65,3 +65,17 @@
     background-size: 24px;
   }
 }
+
+.BranchCard__button {
+  @include flex(flex-start, column)
+}
+
+.BranchCard__badge{
+  font-size: 14px;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: $romanSilver;
+  padding: 5px 10px;
+  color: $white;
+}

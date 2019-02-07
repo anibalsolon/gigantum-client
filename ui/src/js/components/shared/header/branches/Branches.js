@@ -93,13 +93,17 @@ export default class Branches extends Component {
 
         { labbook } = this.props,
 
-        branchArrayToFilter = this.props.mergeFilter ? labbook.mergeableBranchNames : labbook.availableBranchNames,
+        totalArrays = [labbook.remoteBranchNames, labbook.localBranchNames],
+
+        allBranchNames = [...new Set([].concat(...totalArrays))],
+
+        branchArrayToFilter = this.props.mergeFilter ? labbook.localBranchNames : allBranchNames,
 
         branches = this._filterBranches(branchArrayToFilter),
 
         branchesVisibleCount = this._determineVisibleBranchCount(),
 
-        showRightBumper = (listPositionIndex < (labbook.availableBranchNames.length - branchesVisibleCount)),
+        showRightBumper = (listPositionIndex < (allBranchNames.length - branchesVisibleCount)),
 
         width = listPositionIndex * (this.state.width / branches.length),
 
@@ -178,6 +182,8 @@ export default class Branches extends Component {
                       <BranchCard
                         activeBranchName={this.props.labbook.activeBranchName}
                         name={name}
+                        isRemote={labbook.remoteBranchNames.indexOf(name) !== -1}
+                        isLocal={labbook.localBranchNames.indexOf(name) !== -1}
                         labbookId={this.props.labbookId}
                         mergeFilter={this.props.mergeFilter}
                         branchesOpen={this.props.branchesOpen}

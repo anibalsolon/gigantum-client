@@ -37,7 +37,7 @@ from lmsrvlabbook.api.mutations import (CreateLabbook, BuildImage, StartContaine
                                         DeleteDatasetFiles, MoveDatasetFile, MakeDatasetDirectory,
                                         FetchDatasetEdge, SetDatasetVisibility, SyncDataset,
                                         AddDatasetCollaborator, DeleteDatasetCollaborator, DownloadDatasetFiles,
-                                        ModifyDatasetLink)
+                                        ModifyDatasetLink, ResetBranchToRemote)
 
 from lmsrvlabbook.api.mutations import (ImportDataset, ExportDataset)
 
@@ -84,6 +84,9 @@ class LabbookMutations(graphene.ObjectType):
 
     # Add a remote to the labbook
     add_labbook_remote = AddLabbookRemote.Field()
+
+    # Perform a git reset to remote on current branch
+    reset_branch_to_remote = ResetBranchToRemote.Field()
 
     # Build a docker image for a given Labbook.
     build_image = BuildImage.Field()

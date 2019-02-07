@@ -96,21 +96,6 @@ class TestDatasetImportZipping(object):
         with pytest.raises(ZipWorkflowException):
             ZipExporter.export_dataset('/var', '.')
 
-    # def test_success_import_valid_dataset_from_windows(self, mock_config_file):
-    #     import_zip = os.path.join(resource_filename('gtmcore','workflows/tests'),
-    #                               'test_dataset_from_windows.zip')
-    #     dup_import = shutil.copy(import_zip, '/tmp/copy-of-test_dataset_from_windows.zip')
-    #
-    #     workspace = Configuration(mock_config_file[0]).config['git']['working_directory']
-    #
-    #     # Snapshots of directories before and after import - assert different
-    #     pre_snapshot = str(list(sorted(os.walk(workspace))))
-    #     z = ZipExporter()
-    #     x = z.import_dataset(dup_import, 'test', 'test', mock_config_file[0])
-    #     post_snapshot = str(list(sorted(os.walk(workspace))))
-    #     assert pre_snapshot != post_snapshot
-    #     assert x.active_branch == 'gm.workspace-test'
-
     def test_success_import_valid_dataset_from_macos(self, mock_config_file):
         import_zip = os.path.join(resource_filename('gtmcore','workflows/tests'),
                                   'test_dataset.zip')
@@ -125,7 +110,8 @@ class TestDatasetImportZipping(object):
         x = z.import_dataset(dup_import, 'test', 'test', mock_config_file[0])
         post_snapshot = str(list(sorted(os.walk(workspace))))
         assert pre_snapshot != post_snapshot
-        assert x.active_branch == 'gm.workspace-test'
+        # TODO -- redo hardcoded zip file
+        assert x.active_branch == 'master'
 
     def test_fail_cannot_import_dataset_to_overwrite_name(self, mock_config_file):
         import_zip = os.path.join(resource_filename('gtmcore','workflows'),
@@ -153,7 +139,7 @@ class TestDatasetImportZipping(object):
             assert not os.path.exists(path)
             assert 'unittester2' == InventoryManager(mock_config_file[0]).query_owner(newds)
             assert newds.is_repo_clean
-            assert newds.active_branch == 'gm.workspace-unittester2'
+            assert newds.active_branch == 'master'
 
             # Now try with same user as exporter
             path2 = ZipExporter.export_dataset(ds.root_dir, tempd)
@@ -162,4 +148,4 @@ class TestDatasetImportZipping(object):
                                              mock_config_file[0])
             assert 'unittester' == InventoryManager(mock_config_file[0]).query_owner(lb2)
             assert lb2.is_repo_clean
-            assert lb2.active_branch == 'gm.workspace-unittester'
+            assert lb2.active_branch == 'master'

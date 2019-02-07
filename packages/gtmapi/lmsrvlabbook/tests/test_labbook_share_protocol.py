@@ -20,22 +20,18 @@
 import os
 import responses
 
-from lmsrvlabbook.tests.fixtures import fixture_working_dir_env_repo_scoped, fixture_working_dir, \
-    fixture_working_dir_lfs_disabled
-
 import pytest
 from mock import patch
 from werkzeug.test import EnvironBuilder
 from werkzeug.wrappers import Request
 
-from gtmcore.fixtures import (remote_labbook_repo, remote_bare_repo, mock_labbook,
-                               mock_config_file, _MOCK_create_remote_repo2)
+from gtmcore.fixtures import (_MOCK_create_remote_repo2, remote_bare_repo, mock_config_file)
 from gtmcore.labbook import LabBook
 from gtmcore.inventory.inventory import InventoryManager
-from gtmcore.inventory import loaders
-
-from gtmcore.workflows import GitWorkflow
+from gtmcore.workflows import LabbookWorkflow, GitWorkflow
 from gtmcore.files import FileOperations
+
+from .fixtures import fixture_working_dir, fixture_working_dir_lfs_disabled
 
 @pytest.fixture()
 def mock_create_labbooks(fixture_working_dir):
@@ -53,6 +49,7 @@ def mock_create_labbooks(fixture_working_dir):
     assert os.path.isfile(os.path.join(lb.root_dir, 'code', 'sillyfile'))
     # name of the config file, temporary working directory, the schema
     yield fixture_working_dir
+
 
 @pytest.fixture()
 def mock_create_labbooks_no_lfs(fixture_working_dir_lfs_disabled):
@@ -73,8 +70,8 @@ def mock_create_labbooks_no_lfs(fixture_working_dir_lfs_disabled):
 
 
 class TestLabbookShareProtocol(object):
-    @patch('gtmcore.workflows.core.create_remote_gitlab_repo', new=_MOCK_create_remote_repo2)
-    def test_publish_basic(self, fixture_working_dir, remote_bare_repo, mock_create_labbooks_no_lfs):
+    @patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=_MOCK_create_remote_repo2)
+    def test_publish_basic(self, fixture_working_dir, mock_create_labbooks_no_lfs):
 
         # Mock the request context so a fake authorization header is present
         builder = EnvironBuilder(path='/labbook', method='POST', headers={'Authorization': 'Bearer AJDFHASD'})
@@ -101,8 +98,8 @@ class TestLabbookShareProtocol(object):
         #assert r['data']['publishLabbook']['success'] is True
 
     @responses.activate
-    @patch('gtmcore.workflows.core.create_remote_gitlab_repo', new=_MOCK_create_remote_repo2)
-    def test_sync_1(self, remote_bare_repo, mock_create_labbooks_no_lfs, mock_config_file):
+    @patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=_MOCK_create_remote_repo2)
+    def test_sync_1(self, mock_create_labbooks_no_lfs, mock_config_file):
 
         # Setup responses mock for this test
         responses.add(responses.GET, 'https://usersrv.gigantum.io/key',
@@ -110,7 +107,7 @@ class TestLabbookShareProtocol(object):
 
         im = InventoryManager(mock_create_labbooks_no_lfs[0])
         test_user_lb = im.load_labbook('default', 'default', 'labbook1')
-        test_user_wf = GitWorkflow(test_user_lb)
+        test_user_wf = LabbookWorkflow(test_user_lb)
         test_user_wf.publish('default')
 
         # Mock the request context so a fake authorization header is present
@@ -118,14 +115,9 @@ class TestLabbookShareProtocol(object):
         env = builder.get_environ()
         req = Request(environ=env)
 
-        remote_url = test_user_lb.root_dir
-        assert remote_url
 
-        sally_lb = LabBook(mock_config_file[0])
-        sally_lb = loaders.labbook_from_remote(remote_url, username="sally", owner="default",
-                                               labbook=sally_lb)
-        sally_wf = GitWorkflow(sally_lb)
-        assert sally_lb.active_branch == "gm.workspace-sally"
+        sally_wf = LabbookWorkflow.import_from_remote(test_user_wf.remote, 'sally', config_file=mock_config_file[0])
+        sally_lb = sally_wf.labbook
         FileOperations.makedir(sally_lb, relative_path='code/sally-dir', create_activity_record=True)
         sally_wf.sync('sally')
 
@@ -142,6 +134,47 @@ class TestLabbookShareProtocol(object):
         r = mock_create_labbooks_no_lfs[2].execute(sync_query, context_value=req)
 
         assert 'errors' not in r
-        assert test_user_lb.active_branch == 'gm.workspace-default'
         # TODO - Pause and wait for job to report finished
  
+    @patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=_MOCK_create_remote_repo2)
+    def test_reset_branch_to_remote(self, fixture_working_dir, mock_create_labbooks_no_lfs):
+
+        # Mock the request context so a fake authorization header is present
+        builder = EnvironBuilder(path='/labbook', method='POST', headers={'Authorization': 'Bearer AJDFHASD'})
+        env = builder.get_environ()
+        req = Request(environ=env)
+
+        im = InventoryManager(mock_create_labbooks_no_lfs[0])
+        test_user_lb = im.load_labbook('default', 'default', 'labbook1')
+        wf = LabbookWorkflow(test_user_lb)
+        wf.publish(username='default')
+        hash_original = wf.labbook.git.commit_hash
+
+        new_file_path = os.path.join(wf.labbook.root_dir, 'input', 'new-file')
+        with open(new_file_path, 'w') as f: f.write('File data')
+        wf.labbook.sweep_uncommitted_changes()
+        hash_before_reset = wf.labbook.git.commit_hash
+
+        publish_query = f"""
+        mutation c {{
+            resetBranchToRemote(input: {{
+                labbookName: "labbook1",
+                owner: "default"
+            }}) {{
+                labbook {{
+                    activeBranch {{
+                        name
+                        commit {{
+                            shortHash
+                        }}
+                    }}
+                }}
+            }}
+        }}
+        """
+
+        r = mock_create_labbooks_no_lfs[2].execute(publish_query, context_value=req)
+        assert 'errors' not in r
+        hash_after_reset = r['data']['resetBranchToRemote']['labbook']['activeBranch']['commit']['shortHash']
+        assert hash_after_reset not in hash_before_reset
+        assert hash_after_reset in hash_original

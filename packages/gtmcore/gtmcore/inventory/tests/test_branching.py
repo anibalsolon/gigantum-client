@@ -1,6 +1,7 @@
 import pytest
 import os
 
+from gtmcore.configuration.utils import call_subprocess
 from gtmcore.inventory.branching import (BranchManager, InvalidBranchName, BranchWorkflowViolation,
     BranchException, MergeConflict)
 from gtmcore.files import FileOperations
@@ -81,11 +82,11 @@ class TestBranching(object):
 
         t = 'branch-to-make-and-then-delete'
         branch_name_to_delete = bm.create_branch(title=t)
-        assert branch_name_to_delete in bm.branches
+        assert branch_name_to_delete in bm.branches_local
 
         bm.workon_branch(bm.workspace_branch)
         bm.remove_branch(branch_name_to_delete)
-        assert branch_name_to_delete not in bm.branches
+        assert branch_name_to_delete not in bm.branches_local
 
     def test_fail_remove_branch_not_exist(self, mock_labbook_lfs_disabled):
         """ Test remove branch does raises exception when deleting nonexisting branch """
@@ -157,16 +158,30 @@ class TestBranching(object):
             s1.write('upstream-changes-from-workspace')
         FileOperations.insert_file(lb, section='code', src_file=s1.name, dst_path='')
 
+
+
         # Switch back to feature branch -- make sure that failed merges rollback to state before merge.
         bm.workon_branch(feature_name)
-        with pytest.raises(MergeConflict):
+        cp = bm.repository.git.commit_hash
+        try:
             bm.merge_from(bm.workspace_branch)
+            assert False, "merge_from should have thrown conflict"
+        except MergeConflict as m:
+            # Assert that the conflicted file(s) are as expected
+            assert m.file_conflicts == ['code/s1.txt']
         assert lb.is_repo_clean
 
         # Now try to force merge, and changes are taken from the workspace-branch
-        bm.merge_from(bm.workspace_branch, force=True)
+        bm.merge_use_ours(bm.workspace_branch)
         assert open(os.path.join(lb.root_dir, 'code', 's1.txt')).read(1000) == \
-            'upstream-changes-from-workspace'
+            'new-changes-in\nfeature-branch'
+        assert lb.is_repo_clean
+
+        # Reset this branch
+        call_subprocess(f'git reset --hard {cp}'.split(), cwd=bm.repository.root_dir)
+        bm.merge_use_theirs(bm.workspace_branch)
+        assert open(os.path.join(lb.root_dir, 'code', 's1.txt')).read(1000) == \
+               'upstream-changes-from-workspace'
         assert lb.is_repo_clean
 
     def test_success_rollback_basic(self, mock_labbook_lfs_disabled):

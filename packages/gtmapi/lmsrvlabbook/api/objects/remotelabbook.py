@@ -20,7 +20,7 @@
 import graphene
 
 from gtmcore.configuration import Configuration
-from gtmcore.gitlib.gitlab import GitLabManager
+from gtmcore.workflows.gitlab import GitLabManager
 from gtmcore.inventory.inventory import InventoryManager, InventoryException
 
 from lmsrvcore.api.interfaces import GitRepository

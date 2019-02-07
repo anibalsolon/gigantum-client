@@ -30,13 +30,14 @@ from gtmcore.container.container import ContainerOperations
 from gtmcore.dispatcher import (Dispatcher, jobs)
 from gtmcore.labbook import LabBook
 
-from gtmcore.inventory import loaders
+from gtmcore.workflows import loaders
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.exceptions import GigantumException
 from gtmcore.logging import LMLogger
 from gtmcore.files import FileOperations
 from gtmcore.activity import ActivityStore, ActivityDetailRecord, ActivityDetailType, ActivityRecord, ActivityType
-from gtmcore.gitlib.gitlab import GitLabManager
+from gtmcore.workflows.gitlab import GitLabManager
+from gtmcore.workflows import LabbookWorkflow
 from gtmcore.environment import ComponentManager
 
 from lmsrvcore.api.mutations import ChunkUploadMutation, ChunkUploadInput
@@ -313,26 +314,14 @@ class ImportRemoteLabbook(graphene.relay.ClientIDMutation):
         else:
             raise ValueError("Authorization header not provided. Must have a valid session to query for collaborators")
 
-        mgr = GitLabManager(default_remote, admin_service, token)
-        mgr.configure_git_credentials(default_remote, username)
-        try:
-            collaborators = [collab[1] for collab in mgr.get_collaborators(owner, labbook_name) or []]
-            is_collab = any([username == c for c in collaborators])
-        except:
-            is_collab = username == owner
+        gl_mgr = GitLabManager(default_remote, admin_service=admin_service, access_token=token)
+        gl_mgr.configure_git_credentials(default_remote, username)
 
-        # IF user is collaborator, then clone in order to support collaboration
-        # ELSE, this means we are cloning a public repo and can't push back
-        #       so we change to owner to the given user so they can (re)publish
-        #       and do whatever with it.
-        make_owner = not is_collab
-        logger.info(f"Getting from remote, make_owner = {make_owner}")
-        lb = loaders.labbook_from_remote(remote_url, username, owner, labbook=lb,
-                                         make_owner=make_owner)
-        import_owner = InventoryManager().query_owner(lb)
+        wf = LabbookWorkflow.import_from_remote(remote_url, username=username)
+        import_owner = InventoryManager().query_owner(wf.labbook)
         # TODO: Fix cursor implementation, this currently doesn't make sense
         cursor = base64.b64encode(f"{0}".encode('utf-8'))
-        lbedge = LabbookConnection.Edge(node=Labbook(owner=import_owner, name=labbook_name),
+        lbedge = LabbookConnection.Edge(node=Labbook(owner=import_owner, name=wf.labbook.name),
                                         cursor=cursor)
         return ImportRemoteLabbook(new_labbook_edge=lbedge)
 

@@ -26,7 +26,7 @@ from gtmcore.dispatcher import Dispatcher
 from gtmcore.inventory.branching import BranchManager
 from gtmcore.inventory.inventory import InventoryManager, InventoryException
 from gtmcore.activity import ActivityStore
-from gtmcore.gitlib.gitlab import GitLabManager
+from gtmcore.workflows.gitlab import GitLabManager
 from gtmcore.files import FileOperations
 from gtmcore.environment.utils import get_package_manager
 
@@ -81,6 +81,9 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
 
     # All available feature/rollback branches (Collectively known as experimental branches)
     available_branch_names = graphene.List(graphene.String)
+
+    local_branch_names = graphene.List(graphene.String)
+    remote_branch_names = graphene.List(graphene.String)
 
     # Names of branches that can be merged into the current active branch
     mergeable_branch_names = graphene.List(graphene.String)
@@ -218,7 +221,19 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
 
     def resolve_available_branch_names(self, info):
         fltr = lambda labbook: \
-            BranchManager(labbook, username=get_logged_in_username()).branches
+            BranchManager(labbook, username=get_logged_in_username()).branches_local
+        return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
+            fltr)
+
+    def resolve_local_branch_names(self, info):
+        fltr = lambda labbook: \
+            BranchManager(labbook, username=get_logged_in_username()).branches_local
+        return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
+            fltr)
+
+    def resolve_remote_branch_names(self, info):
+        fltr = lambda labbook: \
+            BranchManager(labbook, username=get_logged_in_username()).branches_remote
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
             fltr)
 
@@ -227,7 +242,7 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
             # TODO(billvb) - Refactor for new branch model.
             username = get_logged_in_username()
             bm = BranchManager(lb, username=username)
-            return [b for b in bm.branches if bm.active_branch != b]
+            return [b for b in bm.branches_local if bm.active_branch != b]
 
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
             _mergeable)

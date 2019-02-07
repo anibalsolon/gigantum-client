@@ -23,13 +23,13 @@ import subprocess
 import os
 from pkg_resources import resource_filename
 
-from gtmcore.inventory.inventory  import InventoryManager, InventoryException
+from gtmcore.inventory.inventory  import InventoryManager
 from gtmcore.configuration import Configuration
 from gtmcore.workflows import ZipExporter, ZipWorkflowException
 
-from gtmcore.fixtures import (mock_config_file, mock_labbook_lfs_disabled, mock_duplicate_labbook, remote_bare_repo,
-                               sample_src_file, _MOCK_create_remote_repo2 as _MOCK_create_remote_repo,
-                               mock_config_lfs_disabled)
+from gtmcore.fixtures import (mock_config_file, mock_labbook_lfs_disabled,
+                              mock_duplicate_labbook, remote_bare_repo,
+                              sample_src_file, mock_config_lfs_disabled)
 
 
 class TestLabbookImportZipping(object):
@@ -109,7 +109,6 @@ class TestLabbookImportZipping(object):
         x = z.import_labbook(dup_import, 'test', 'test', mock_config_file[0])
         post_snapshot = str(list(sorted(os.walk(workspace))))
         assert pre_snapshot != post_snapshot
-        assert x.active_branch == 'gm.workspace-test'
 
     def test_success_import_valid_labbook_from_macos(self, mock_config_file):
         import_zip = os.path.join(resource_filename('gtmcore','workflows/tests'),
@@ -125,7 +124,6 @@ class TestLabbookImportZipping(object):
         x = z.import_labbook(dup_import, 'test', 'test', mock_config_file[0])
         post_snapshot = str(list(sorted(os.walk(workspace))))
         assert pre_snapshot != post_snapshot
-        assert x.active_branch == 'gm.workspace-test'
 
     def test_fail_cannot_import_labbook_to_overwrite_name(self, mock_config_file):
         import_zip = os.path.join(resource_filename('gtmcore','workflows'),
@@ -152,7 +150,6 @@ class TestLabbookImportZipping(object):
             assert not os.path.exists(path)
             assert 'unittester2' == InventoryManager(mock_config_file[0]).query_owner(newlb)
             assert newlb.is_repo_clean
-            assert newlb.active_branch == 'gm.workspace-unittester2'
 
             # Now try with same user as exporter
             path2 = ZipExporter.export_labbook(lb.root_dir, tempd)
@@ -161,4 +158,3 @@ class TestLabbookImportZipping(object):
                                              mock_config_file[0])
             assert 'unittester' == InventoryManager(mock_config_file[0]).query_owner(lb2)
             assert lb2.is_repo_clean
-            assert lb2.active_branch == 'gm.workspace-unittester'

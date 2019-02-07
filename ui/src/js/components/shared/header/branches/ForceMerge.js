@@ -12,8 +12,8 @@ export default class ForceMerge extends Component {
   *  hides modal
   *  @return {}
   */
-  _forceMerge(evt) {
-    this.props.merge(evt, this.props.params);
+  _forceMerge(method) {
+    this.props.merge({ method });
     this.props.toggleModal('forceMergeVisible');
   }
 
@@ -22,25 +22,31 @@ export default class ForceMerge extends Component {
 
       <Modal
         handleClose={() => this.props.toggleModal('forceMergeVisible')}
-        header="Force Merge"
+        header="Merge Conflict"
         size="medium"
         renderContent={() =>
 
           (<Fragment>
-            <p className="ForceMege__text">Merge failed. Do you want to force merge?</p>
+            <p className="ForceMege__text">Merge failed due to conflicts. Which changes would you like to use?</p>
 
             <div className="ForceMege__buttonContainer">
 
               <button
-                onClick={() => this._forceMerge()}
+                onClick={() => this._forceMerge('ours')}
               >
-                Yes
+                Use Mine
+              </button>
+
+              <button
+                onClick={() => this._forceMerge('theirs')}
+              >
+                Use Theirs
               </button>
 
               <button
                 onClick={() => this.props.toggleModal('forceMergeVisible')}
               >
-                No
+                Abort
               </button>
 
             </div>

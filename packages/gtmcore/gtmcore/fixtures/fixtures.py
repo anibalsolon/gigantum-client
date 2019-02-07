@@ -21,7 +21,7 @@ import json
 import os
 import shutil
 import tempfile
-import uuid
+import requests
 import collections
 import git
 from pkg_resources import resource_filename
@@ -29,14 +29,14 @@ import pytest
 import uuid
 
 from gtmcore.configuration import Configuration
-from gtmcore.environment import RepositoryManager, ComponentManager
+from gtmcore.environment import RepositoryManager
 from gtmcore.inventory.inventory  import InventoryManager
 from gtmcore.activity.detaildb import ActivityDetailDB
 from gtmcore.activity import ActivityStore
 from gtmcore.gitlib.git import GitAuthor
 from gtmcore.files import FileOperations
 from gtmcore.inventory.branching import BranchManager
-import requests
+
 
 
 ENV_UNIT_TEST_REPO = 'gigantum_base-images-testing'
@@ -113,7 +113,7 @@ def _MOCK_create_remote_repo2(repository, username: str, visibility, access_toke
     ```
     """
     rand = str(uuid.uuid4())[:6]
-    working_dir = os.path.join(tempfile.gettempdir(), rand, repository.name)
+    working_dir = os.path.join(tempfile.gettempdir(), rand, 'testuser', repository.name)
     os.makedirs(working_dir, exist_ok=True)
     r = git.Repo.init(path=working_dir, bare=True)
     assert r.bare is True
@@ -122,11 +122,11 @@ def _MOCK_create_remote_repo2(repository, username: str, visibility, access_toke
     # Push branches
     # TODO: @billvb - need to refactor this once new branch model is in effect.
     original_branch = repository.git.repo.head.ref.name
-    repository.git.repo.heads['gm.workspace'].checkout()
-    repository.git.repo.git.push("origin", "gm.workspace")
+    repository.git.repo.heads['master'].checkout()
+    repository.git.repo.git.push("origin", "master")
 
-    # Set the head to gm.workspace on the remote
-    r.git.symbolic_ref('HEAD', 'refs/heads/gm.workspace')
+    # Set the head to master on the remote
+    r.git.symbolic_ref('HEAD', 'refs/heads/master')
 
     # Check back out the original user branch
     repository.git.repo.heads[original_branch].checkout()

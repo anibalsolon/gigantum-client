@@ -20,7 +20,7 @@ let tempID = 0;
 export default function SyncLabbookMutation(
   owner,
   labbookName,
-  force,
+  overrideMethod,
   successCall,
   failureCall,
   callback,
@@ -29,7 +29,7 @@ export default function SyncLabbookMutation(
     input: {
       owner,
       labbookName,
-      force,
+      overrideMethod,
       clientMutationId: tempID++,
     },
     first: 2,

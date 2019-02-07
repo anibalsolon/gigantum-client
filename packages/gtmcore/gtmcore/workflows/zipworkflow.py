@@ -28,7 +28,7 @@ from gtmcore.inventory.inventory import InventoryManager, Repository
 from gtmcore.labbook import LabBook
 from gtmcore.dataset import Dataset
 from gtmcore.logging import LMLogger
-from gtmcore.workflows import core
+from gtmcore.workflows import gitworkflows_utils
 
 logger = LMLogger.get_logger()
 
@@ -45,8 +45,6 @@ class ZipExporter(object):
                     config_file: Optional[str] = None, ) -> str:
         if not os.path.isdir(export_directory):
             os.makedirs(export_directory, exist_ok=True)
-
-        core.sync_locally(repo)
 
         repo_dir, _ = repo.root_dir.rsplit(os.path.sep, 1)
 
@@ -113,19 +111,6 @@ class ZipExporter(object):
             repo = fetch_method(unzipped_path)
             statusmsg = f'{statusmsg}\nCreating workspace branch...'
             update_meta(statusmsg)
-
-            # This makes sure the working directory is set properly.
-            core.sync_locally(repo, username=username)
-
-            if 'owner' in repo._data:
-                repo._data['owner']['username'] = owner
-            repo._save_gigantum_data()
-            if not repo.is_repo_clean:
-                repo.git.add('.gigantum/labbook.yaml')
-                repo.git.commit(message="Updated owner in labbook.yaml")
-
-            #if repo._data['owner']['username'] != owner:
-            #    raise ValueError(f'Error importing LabBook {repo} - cannot set owner')
 
             # Also, remove any lingering remotes.
             # If it gets re-published, it will be to a new remote.

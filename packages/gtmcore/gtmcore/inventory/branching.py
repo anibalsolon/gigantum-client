@@ -41,7 +41,10 @@ class BranchWorkflowViolation(BranchException):
 
 
 class MergeConflict(BranchException):
-    pass
+    def __init__(self, message, file_conflicts: List[str]) -> None:
+        super().__init__(message)
+        # List of file paths (relative to root) that are in conflict
+        self.file_conflicts = file_conflicts
 
 
 class InvalidBranchName(BranchException):
@@ -95,11 +98,9 @@ class BranchManager(object):
     def branches_local(self) -> List[str]:
         return sorted(self.repository.get_branches()['local'])
 
-    @property
-    def branches(self) -> List[str]:
-        """List all branches (local AND remote) available for checkout"""
-        return sorted(list(set(self.repository.get_branches()['local']
-                               + self.repository.get_branches()['remote'])))
+    def fetch(self) -> None:
+        """Perform a git fetch"""
+        self.repository.git.fetch()
 
     def create_branch(self, title: str, revision: Optional[str] = None) -> str:
         """Create and checkout (work on) a new managed branch.
@@ -114,7 +115,7 @@ class BranchManager(object):
         if not self.is_branch_name_valid(title):
             raise InvalidBranchName(f'Branch name `{title}` invalid pattern')
 
-        if title in self.branches:
+        if title in self.branches_local:
             raise InvalidBranchName(f'Branch name `{title}` already exists')
 
         self.repository.sweep_uncommitted_changes()
@@ -144,7 +145,7 @@ class BranchManager(object):
         Returns:
             None
         """
-        if target_branch not in self.branches:
+        if target_branch not in self.branches_local:
             raise InvalidBranchName(f'Cannot delete `{target_branch}`; does not exist')
 
         if target_branch == self.workspace_branch:
@@ -157,7 +158,7 @@ class BranchManager(object):
         # Note use "force=True" to prevent warning on merge.
         self.repository.git.delete_branch(target_branch, force=True)
 
-        if target_branch in self.branches:
+        if target_branch in self.branches_local:
             raise BranchWorkflowViolation(f'Removal of branch `{target_branch}` in {str(self.repository)} failed.')
 
     def _workon_branch(self, branch_name: str) -> None:
@@ -178,36 +179,55 @@ class BranchManager(object):
             logger.error(e)
             raise BranchException(e)
 
-    def merge_from(self, other_branch: str, force: bool = False) -> None:
-        """Pulls/merges `other_branch` into current branch.
+    def _infer_conflicted_files(self, merge_output: str):
+        return [l.split()[-1] for l in merge_output.split('\n')
+                if 'CONFLICT' in l and 'Merge conflict in ' in l]
+
+    def merge_from(self, other_branch: str) -> None:
+        """Pulls/merges `other_branch` into current branch. If in the event of a
+        conflict, it resets to the point prior to merge.
 
         Args:
             other_branch: Name of other branch to merge from
-            force: Force overwrite if conflicts occur
         """
 
-        if other_branch not in self.branches:
-            raise InvalidBranchName(f'Other branch {other_branch} not found')
 
-        logger.info(f"In {str(self.repository)} merging branch `{other_branch}` into `{self.active_branch}`...")
+        if other_branch not in self.branches_local:
+            raise InvalidBranchName(f'Branch {other_branch} not found')
+
+        checkpoint = self.repository.git.commit_hash
         try:
             self.repository.sweep_uncommitted_changes()
-            if force:
-                logger.warning("Using force to overwrite local changes")
-                call_subprocess(['git', 'merge', '-s', 'recursive', '-X', 'theirs', other_branch],
-                                cwd=self.repository.root_dir)
-            else:
-                try:
-                    call_subprocess(['git', 'merge', other_branch], cwd=self.repository.root_dir)
-                except (git.exc.GitCommandError, subprocess.CalledProcessError) as merge_error:
-                    logger.error(f"Merge conflict syncing {str(self.repository)} - Use `force` to overwrite.")
-                    # TODO - This should be cleaned up (The UI attempts to match on the token "Cannot merge")
-                    raise MergeConflict(f"Cannot merge - {merge_error}")
+            try:
+                call_subprocess(f'git merge {other_branch}'.split(), cwd=self.repository.root_dir)
+            except subprocess.CalledProcessError as merge_error:
+                logger.warning(f"Merge conflict syncing {str(self.repository)}")
+                # TODO - This should be cleaned up (The UI attempts to match on the token "Cannot merge")
+                conflicted_files = self._infer_conflicted_files(merge_error.stdout.decode())
+                raise MergeConflict(f"Cannot merge - {merge_error}",
+                                    file_conflicts=conflicted_files)
             self.repository.git.commit(f'Merged from branch `{other_branch}`')
-            logger.info(f"{str(self.repository)} finished merge")
         except Exception as e:
-            call_subprocess(['git', 'reset', '--hard'], cwd=self.repository.root_dir)
+            call_subprocess(f'git reset --hard {checkpoint}'.split(), cwd=self.repository.root_dir)
             raise e
+
+    def merge_use_ours(self, other_branch: str):
+        self.repository.sweep_uncommitted_changes()
+        ot = call_subprocess(f'git merge {other_branch}'.split(), cwd=self.repository.root_dir, check=False)
+        conf_files = self._infer_conflicted_files(ot)
+        if conf_files:
+            call_subprocess(f'git checkout --ours {" ".join(conf_files)}'.split(),
+                            cwd=self.repository.root_dir)
+        self.repository.sweep_uncommitted_changes(extra_msg=f"Merged {other_branch} using ours.")
+
+    def merge_use_theirs(self, other_branch: str):
+        self.repository.sweep_uncommitted_changes()
+        ot = call_subprocess(f'git merge {other_branch}'.split(), cwd=self.repository.root_dir, check=False)
+        conf_files = self._infer_conflicted_files(ot)
+        if conf_files:
+            call_subprocess(f'git checkout --theirs {" ".join(conf_files)}'.split(),
+                            cwd=self.repository.root_dir)
+        self.repository.sweep_uncommitted_changes(extra_msg=f"Merged {other_branch} using theirs.")
 
     def get_commits_behind_remote(self, remote_name: str = "origin") -> Tuple[str, int]:
         """Return the number of commits local branch is behind remote. Note, only works with
