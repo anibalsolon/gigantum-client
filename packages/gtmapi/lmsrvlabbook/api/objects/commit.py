@@ -96,7 +96,7 @@ class Branch(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepository
         lb = InventoryManager().load_labbook(get_logged_in_username(),
                                              self.owner,
                                              self.name)
-        return self.branch_name in BranchManager(lb).branches_remote
+        return self.branch_name in BranchManager(lb).branches_local
 
     def resolve_is_remote(self, info):
         lb = InventoryManager().load_labbook(get_logged_in_username(),

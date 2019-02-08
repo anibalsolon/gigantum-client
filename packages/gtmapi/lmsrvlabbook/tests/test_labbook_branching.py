@@ -110,7 +110,12 @@ class TestWorkflowsBranching(object):
         r = client.execute(q)
         pprint.pprint(r)
         assert 'errors' not in r
-        assert r['data']['labbook']['branches']['branchName'] == bm.branches_local
+        assert len(r['data']['labbook']['branches']) == 1
+        assert r['data']['labbook']['branches'][0]['branchName'] == bm.workspace_branch
+        assert r['data']['labbook']['branches'][0]['isLocal'] == True, "Should be local"
+        assert r['data']['labbook']['branches'][0]['isRemote'] == False, "There should be no remote branches"
+        assert r['data']['labbook']['branches'][0]['commitsBehind'] == 0
+        assert r['data']['labbook']['branches'][0]['isActive'] == True
 
     def test_query_mergeable_branches_from_main(self, mock_create_labbooks):
         lb, client = mock_create_labbooks[0], mock_create_labbooks[1]
@@ -124,14 +129,22 @@ class TestWorkflowsBranching(object):
         q = f"""
         {{
             labbook(name: "{UT_LBNAME}", owner: "{UT_USERNAME}") {{
-                mergeableBranchNames
+                branches {{
+                    branchName
+                    isMergeable
+                }}
             }}
         }}
         """
         r = client.execute(q)
         assert 'errors' not in r
-        assert len(r['data']['labbook']['mergeableBranchNames']) == 2
-        assert set(r['data']['labbook']['mergeableBranchNames']).issubset(set([b1, b2]))
+        assert len(r['data']['labbook']['branches']) == 3
+        assert r['data']['labbook']['branches'][0]['branchName'] == 'master'
+        assert r['data']['labbook']['branches'][0]['isMergeable'] == False
+        assert r['data']['labbook']['branches'][1]['branchName'] == 'tester1'
+        assert r['data']['labbook']['branches'][1]['isMergeable'] == True
+        assert r['data']['labbook']['branches'][2]['branchName'] == 'tester2'
+        assert r['data']['labbook']['branches'][2]['isMergeable'] == True
 
     def test_query_mergeable_branches_from_feature_branch(self, mock_create_labbooks):
         # Per current branch model, can only merge in workspace branch

@@ -307,7 +307,7 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
     def helper_resolve_branches(self, lb, kwargs):
         bm = BranchManager(lb)
         return [Branch(owner=self.owner, name=self.name, branch_name=b)
-                for b in set(bm.branches_local + bm.branches_remote)]
+                for b in sorted(set(bm.branches_local + bm.branches_remote))]
 
     def resolve_branches(self, info, **kwargs):
         """Method to page through branch Refs
