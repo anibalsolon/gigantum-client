@@ -72,6 +72,7 @@ class Activity extends Component {
   }
 
   UNSAFE_componentWillReceiveProps(nextProps) {
+    console.log('componentWillReceiveProps')
     const section = nextProps[nextProps.sectionType],
           activityRecords = nextProps[nextProps.sectionType].activityRecords,
           {
@@ -120,6 +121,8 @@ class Activity extends Component {
       this.setState({ refetchEnabled: true });
       this._refetch();
     }
+
+    this.setState({ activityRecords: this._transformActivity(activityRecords) });
   }
 
   componentWillUnmount() {
@@ -288,7 +291,7 @@ class Activity extends Component {
   */
   _loadMore() {
     const self = this,
-          { props } = this,
+          { props, state } = this,
           section = props[props.sectionType],
           activityRecords = section.activityRecords;
 
@@ -304,7 +307,7 @@ class Activity extends Component {
         if (error) {
           console.error(error);
         }
-
+        console.log(state)
         if ((activityRecords.pageInfo.hasNextPage) && (this._countUnexpandedRecords() < 7) && (this._countUnexpandedRecords() > 2)) {
           self._loadMore();
         } else {
@@ -424,6 +427,8 @@ class Activity extends Component {
         count = 0,
         previousTimeHash = null,
         clusterIndex = 0;
+
+    console.time('_transformActivity')
     activityRecords.edges.forEach((edge, index) => {
       if (edge && edge.node) {
          const date = (edge.node && edge.node.timestamp) ? new Date(edge.node.timestamp) : new Date(),
@@ -483,6 +488,10 @@ class Activity extends Component {
         }
       }
     });
+
+    console.timeEnd('_transformActivity')
+
+    console.log(activityTime)
     return activityTime;
   }
 
@@ -655,6 +664,7 @@ class Activity extends Component {
             'Activity__new-record box-shadow': true,
             'is-demo': window.location.hostname === config.demoHostName,
           });
+    console.log(section)
     if (section) {
       const recordDates = Object.keys(state.activityRecords),
             stickyDateCSS = classNames({

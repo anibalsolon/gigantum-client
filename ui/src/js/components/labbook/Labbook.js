@@ -25,6 +25,7 @@ import Login from 'Components/login/Login';
 import Loader from 'Components/common/Loader';
 import ErrorBoundary from 'Components/common/ErrorBoundary';
 import LabbookHeader from '../shared/header/Header';
+// import Activity from './activity/LabbookActivityContainer';
 // assets
 import './Labbook.scss';
 
@@ -269,8 +270,7 @@ class Labbook extends Component {
                       render={() => (
                         <ErrorBoundary
                           type="labbookSectionError"
-                          key="activity"
-                        >
+                          key="activity">
 
                           <Activity
                                key={`${props.labbookName}_activity`}
