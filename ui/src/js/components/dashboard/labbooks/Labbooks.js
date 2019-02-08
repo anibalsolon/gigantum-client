@@ -8,7 +8,7 @@ import WizardModal from 'Components/wizard/WizardModal';
 import Loader from 'Components/common/Loader';
 import LocalLabbooksContainer, { LocalLabbooks } from 'Components/dashboard/labbooks/localLabbooks/LocalLabbooks';
 import RemoteLabbooks from 'Components/dashboard/labbooks/remoteLabbooks/RemoteLabbooks';
-import LoginPrompt from 'Components/shared/header/branchMenu/modals/LoginPrompt';
+import LoginPrompt from 'Components/shared/header/actionsSection/modals/LoginPrompt';
 import ToolTip from 'Components/common/ToolTip';
 import LabbookFilterBy from './filters/LabbookFilterBy';
 import LabbookSort from './filters/LabbookSort';

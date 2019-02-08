@@ -34,7 +34,7 @@ export default function CreateExperimentalBranchMutation(
       description,
       clientMutationId,
     },
-    first: 2,
+    first: 10,
     cursor: null,
     hasNext: false,
   };

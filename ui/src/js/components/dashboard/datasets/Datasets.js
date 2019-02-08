@@ -8,7 +8,7 @@ import WizardModal from 'Components/wizard/WizardModal';
 import Loader from 'Components/common/Loader';
 import LocalDatasetsContainer, { LocalDatasets } from 'Components/dashboard/datasets/localDatasets/LocalDatasets';
 // import RemoteDatasets from 'Components/dashboard/datasets/remoteDatasets/RemoteDatasets';
-import LoginPrompt from 'Components/shared/header/branchMenu/modals/LoginPrompt';
+import LoginPrompt from 'Components/shared/header/actionsSection/modals/LoginPrompt';
 import ToolTip from 'Components/common/ToolTip';
 import DatasetFilterBy from './filters/DatasetFilterBy';
 import DatasetSort from './filters/DatasetSort';

@@ -1,7 +1,6 @@
 @import '~Styles/_imports.scss';
 
 .Description {
-    align-self: center;
     p {
       margin: 0;
       line-height: 24px;
@@ -39,17 +38,6 @@
         border: 1px solid transparent;
     &--hovered {
         border: 1px solid $romanSilver;
-    }
-}
-
-@media screen and (max-width: 1480px) and (min-width: 1140px) {
-    .Description__container{
-        max-width: 400px;
-    }
-}
-@media screen and (max-width: 1140px) and (min-width: 0) {
-    .Description__container{
-        max-width: 300px;
     }
 }
 
@@ -140,5 +128,16 @@
         height: 50px;
         width: 100%;
         z-index: 1;
+    }
+}
+
+@media screen and (max-width: 1480px) and (min-width: 1140px) {
+    .Description__container{
+        max-width: 400px;
+    }
+}
+@media screen and (max-width: 1140px) and (min-width: 0) {
+    .Description__container{
+        max-width: 300px;
     }
 }

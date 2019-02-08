@@ -28,7 +28,7 @@ export default function ResetBranchToRemoteMutation(
       labbookName,
       clientMutationId,
     },
-    first: 2,
+    first: 10,
     cursor: null,
     hasNext: false,
   };

@@ -31,7 +31,7 @@ export default function SyncLabbookMutation(
       labbookName,
       clientMutationId: tempID++,
     },
-    first: 2,
+    first: 10,
     cursor: null,
     hasNext: false,
   };

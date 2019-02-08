@@ -89,22 +89,22 @@ export default class Description extends Component {
   }
 
   render() {
-    const descriptionCSS = classNames({
-      Description__text: true,
-      empty: !this.state.descriptionText,
-    });
-
-    const descriptionContainerCSS = classNames({
-      Description__container: true,
-      'Description__container--hovered': this.state.hovered && !this.state.editingDescription,
-      'visibility-hidden': this.props.hovered,
-    });
-    const displayedText = this.state.descriptionText && this.state.descriptionText.length ? this.state.descriptionText : 'Add description...';
-    const defaultText = this.state.descriptionText ? this.state.descriptionText : '';
-    const textareaStyle = {
-      height: this.state.textareaHeight,
-      width: this.state.textareaWidth,
-    };
+    const { props, state } = this,
+          descriptionCSS = classNames({
+            Description__text: true,
+            empty: !this.state.descriptionText,
+          }),
+          descriptionContainerCSS = classNames({
+              Description__container: true,
+              'Description__container--hovered': this.state.hovered && !this.state.editingDescription,
+              'visibility-hidden': this.props.hovered,
+          }),
+          displayedText = this.state.descriptionText && this.state.descriptionText.length ? this.state.descriptionText : 'Add description...',
+          defaultText = this.state.descriptionText ? this.state.descriptionText : '',
+          textareaStyle = {
+            height: this.state.textareaHeight,
+            width: this.state.textareaWidth,
+          };
 
     return (
      <div className="Description">
@@ -112,8 +112,7 @@ export default class Description extends Component {
             <div className={descriptionContainerCSS}
                 onMouseEnter={() => this.setState({ hovered: true })}
                 onMouseLeave={() => this.setState({ hovered: false })}
-                onClick={() => this._editingDescription()}
-            >
+                onClick={() => this._editingDescription()}>
 
             {
                 this.state.editingDescription ?
@@ -135,8 +134,7 @@ export default class Description extends Component {
                     />
                     <div
                       className="Description__input-buttons"
-                      style={{ height: this.state.textareaHeight }}
-                    >
+                      style={{ height: state.textareaHeight }}>
                         <button
                           onClick={this._cancelDescription}
                           className="Description__input-cancel"
@@ -150,11 +148,8 @@ export default class Description extends Component {
                 :
                     <p className={descriptionCSS}>
                         {displayedText}
-                        {
-                            this.state.hovered &&
-                            <button
-                                className="Description__edit-button"
-                            />
+                        { state.hovered
+                          && <button className="Description__edit-button" />
                         }
                     </p>
             }

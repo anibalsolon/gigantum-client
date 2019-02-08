@@ -278,6 +278,7 @@ const DatasetFragmentContainer = createFragmentContainer(
           id
           description
           owner
+          name
           #createdOnUtc
           modifiedOnUtc
           defaultRemote

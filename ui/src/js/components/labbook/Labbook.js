@@ -407,6 +407,7 @@ const LabbookFragmentContainer = createFragmentContainer(
           readme
           defaultRemote
           owner
+          name
           creationDateUtc
           visibility
 

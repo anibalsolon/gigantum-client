@@ -32,7 +32,7 @@ export default function MergeFromBranchMutation(
       overrideMethod,
       clientMutationId,
     },
-    first: 2,
+    first: 10,
     cursor: null,
     hasNext: false,
   };

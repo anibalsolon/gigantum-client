@@ -1,13 +1,13 @@
 @import '~Styles/_imports.scss';
 
-.LabbookHeader__wrapper {
+.Header__wrapper {
 
   min-height: 30px;
 
   @include flex(space-between, row);
 }
 
-.LabbookHeader__bar{
+.Header__bar{
   flex-wrap: nowrap;
 
   height: 100px;
@@ -15,9 +15,10 @@
   @include flex(space-between, row);
 }
 
-.LabbookHeader {
+.Header {
   position: fixed;
   z-index: index($elements, labbookHeader);
+  @include flex(space-between, row);
 
   flex: 1 0 auto;
 
@@ -25,7 +26,7 @@
   min-width: 700px;
   height: 100px;
   min-height: 60px;
-  margin-top: 15px;
+  padding: 10px 0 0 0;
 
   transition: height 0.25s;
 
@@ -34,28 +35,28 @@
 
     width: calc(100% - 140px);
     height: 100px;
-    margin: -10px 0 0 -20px;
-    padding: 5px 20px 0;
+    margin: 0px 0 0 -20px;
+    padding: 20px 20px 0;
 
     background-color: $background-color;
     box-shadow: rgba(0, 0, 0, 0.1) 0px 5px 6px 2px;
 
-    .LabbookHeader__bar{
+    .Header__bar{
       height: 60px;
     }
 
-    .LabbookHeader__navContainer{
+    .Header__navContainer{
       position: absolute;
       margin: 0;
       bottom: 0;
       width: 100%;
-      .LabbookHeader__nav{
+      .Header__nav{
         border: none;
       }
 
     }
 
-    .LabbookHeader__name,
+    .Header__name,
     .Branches{
       display: none;
     }
@@ -70,7 +71,7 @@
 
     }
 
-    .LabbookHeader__columnContainer{
+    .Header__columnContainer{
       align-content: center;
       align-items: center;
 
@@ -84,7 +85,7 @@
           @include flex(flex-end, row);
       }
 
-      .LabbookHeader__section--title{
+      .Title {
         flex: 0 1;
 
         margin-top: 15px;
@@ -92,14 +93,14 @@
         white-space: nowrap;
       }
 
-      .LabbookHeader__branchTitle{
+      .Header__branchTitle{
         flex: 1;
 
         cursor: default;
 
         opacity: 0;
 
-        .LabbookHeader__name{
+        .Header__name{
           cursor: default;
         }
       }
@@ -134,20 +135,20 @@
       font-size: 0px;
     }
 
-    .LabbookHeader__branchTitle{
+    .Header__branchTitle{
         height: 0px;
     }
   }
 
 
   &--branchesOpen{
-    .LabbookHeader__navContainer{
+    .Header__navContainer{
       display: none;
     }
   }
 }
 
-.LabbookHeader__columnContainer{
+.Header__columnContainer{
   transition: height 0.5s;
 
   @include flex(space-between, column);
@@ -159,34 +160,21 @@
 }
 
 @media screen and (max-width: 1580px) and (min-width: 0) {
-  .LabbookHeader__columnContainer{
+  .Header__columnContainer{
       &--flex-1{
         max-width: 83%;
       }
   }
 }
 
-.LabbookHeader__section--title {
-  display: flex;
-  flex: 1 1 auto;
-  justify-content: flex-start;
 
-  height: 30px;
-  margin: 20px 0 0 0;
-  padding: 0px;
 
-  color: $slateBlue !important;
-
-  font-size: 16px;
-  line-height: 30px;
-}
-
-.LabbookHeader__name-container{
+.Header__name-container{
   @include flex(flex-start, row);
   min-width: 50%;
 }
 
-.LabbookHeader__name {
+.Header__name {
   overflow: hidden;
   align-content: baseline;
   align-self: flex-end;
@@ -207,7 +195,7 @@
   }
 }
 
-.LabbookHeader__branchToggle {
+.Header__branchToggle {
   align-self: center;
 
   width: 24px;
@@ -218,7 +206,7 @@
   cursor: pointer;
 }
 
-.LabbookHeader__branchTitle{
+.Header__branchTitle{
   opacity: 1;
 
   @include flex(space-between, row);
@@ -237,63 +225,30 @@
   }
 }
 
-.LabbookHeader__name:hover  {
+.Header__name:hover  {
   opacity: 1;
 }
 
-.LabbookHeader__branchName{
+.Header__branchName{
   color: $jet;
 
   font-size: 1.4vw;
 }
 
-.LabbookHeader__private{
-  display: inline-flex;
-
-  width: 30px;
-  height: 30px;
-  margin: 0 0 0 20px;
-
-  background: url(~Images/icons/lock-grey.svg) no-repeat center center;
-  background-size: 16px;
-
-  &--sticky{
-    top: 40px;
-    left: 120px
-  }
-}
-
-.LabbookHeader__public {
-  display: inline-flex;
-  overflow: visible;
-
-  width: 30px;
-  height: 30px;
-  margin: 0 0 0px 20px;
-
-  background: url(~Images/icons/earth-grey.svg) no-repeat center center;
-  background-size: 20px;
-
-  &--sticky {
-    top: 43px;
-    left: 120px;
-  }
-}
-
-.LabbookHeader__navContainer {
+.Header__navContainer {
   position: relative;
 
   transition: 0.5s all;
 }
 
-.LabbookHeader__nav {
+.Header__nav {
   white-space: nowrap;
   max-width: 1235px;
   min-width: 820px;
   border-bottom: 1px solid $grey;
 }
 
-.LabbookHeader__navItem{
+.Header__navItem{
   width: 137px;
 
   text-align: center;
@@ -320,7 +275,7 @@
   }
 }
 
-.LabbookHeader__navSlider{
+.Header__navSlider{
   position: absolute;
   bottom: 0;
 
@@ -337,8 +292,8 @@
 
 @for $i from 0 through 5 {
 
-  .LabbookHeader__navItem--#{$i}:hover ~ hr,
-  .LabbookHeader__navSlider--#{$i}{
+  .Header__navItem--#{$i}:hover ~ hr,
+  .Header__navSlider--#{$i}{
     @if $i == 0 {
       margin-left: $i * 14% + 1%;
     }
@@ -365,7 +320,7 @@
 
 @media screen and (max-width: 50000px) and (min-width: 1480px) {
 
-  .LabbookHeader--sticky{
+  .Header--sticky{
     margin: -10px 0 0 -35px;
   }
 }

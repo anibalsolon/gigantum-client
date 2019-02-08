@@ -1,0 +1,81 @@
+@import '~Styles/_imports.scss';
+
+
+.Collaborators{
+  background: url('~Images/icons/user.svg') no-repeat 7px center;
+  background-size: 24px;
+  width: 160px;
+  height: 40px;
+  padding-left: 40px;
+
+  a {
+    color: $romanSilver;
+    cursor: pointer;
+  }
+
+  p {
+    padding: 0px;
+    margin: -6px 0 0 0;
+    font-size: 12px;
+  }
+
+
+  &:hover {
+    background: $background-color url('~Images/icons/user.svg') no-repeat 7px center;
+    background-size: 24px;
+  }
+
+  &.disabled {
+    pointer-events: none;
+  }
+
+  &.disabled:hover{
+    background: $white url('~Images/icons/user.svg') no-repeat 7px center;
+    background-size: 24px;
+    background-color: $white;
+  }
+
+  &.disabled:hover button {
+    background-color: $white;
+  }
+}
+
+
+.Collaborators__btn {
+  width: 100%;
+  cursor: pointer;
+  margin: 1.5px 0;
+  background-color: $white;
+  border: 0px solid $white;
+  text-align: left;
+  padding: 0px;
+  color: $romanSilver;
+  font-size: 15px;
+
+  &:focus,
+  &:disabled, {
+    cursor: pointer;
+    background-color: $white;
+    border: 0px solid $white;
+    padding: 0px;
+    color: $romanSilver;
+  }
+
+  &:hover {
+    background-color: $background-color;
+    width: 100%;
+    cursor: pointer;
+    color: $romanSilver;
+    border: 0px solid $white;
+  }
+
+  &.disabled,
+  &.disabled:hover{
+      width: 100%;
+      margin: 1.5px 0;
+      background-color: $white;
+      border: 0px solid $white;
+      opacity: 0.3;
+   }
+
+}

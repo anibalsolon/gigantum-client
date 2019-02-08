@@ -1,0 +1,59 @@
+@import '~Styles/_imports.scss';
+
+.TitleSection {
+  @include flex(flex-start, column);
+  flex: 1 1 auto;
+  justify-content: flex-start;
+  align-items: flex-start;
+
+  min-height: 60px;
+  margin: 0px 0 0 0;
+  padding: 0px;
+
+  color: $slateBlue !important;
+
+  font-size: 16px;
+  line-height: 30px;
+}
+
+.TitleSection__namespace{
+   color: $jet;
+   height: 40px;
+   font-size: 26px;
+   @include flex(flex-start, row);
+   align-items: center;
+}
+
+
+.TitleSection__private{
+  display: inline-flex;
+
+  width: 30px;
+  height: 30px;
+  margin: 0 0 0 20px;
+
+  background: url(~Images/icons/lock-grey.svg) no-repeat center center;
+  background-size: 16px;
+
+  &--sticky{
+    top: 40px;
+    left: 120px
+  }
+}
+
+.TitleSection__public {
+  display: inline-flex;
+  overflow: visible;
+
+  width: 30px;
+  height: 30px;
+  margin: 0 0 0px 20px;
+
+  background: url(~Images/icons/earth-grey.svg) no-repeat center center;
+  background-size: 20px;
+
+  &--sticky {
+    top: 43px;
+    left: 120px;
+  }
+}

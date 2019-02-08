@@ -183,4 +183,37 @@ button:disabled {
        border: 0px;
      }
   }
+
+
+  &--flat {
+    padding: 0px 20px;
+    border: 0px solid $azure;
+    border-radius: 0px;
+    color: $font-grey;
+    background: none;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+
+  &--flat:hover {
+    color: $turquise;
+    background: none;
+    border: 0px solid $turquise;
+  }
+  &--flat:focus {
+    color: $azure;
+    background: none;
+    border: 0px solid $azure;
+  }
+  &--flat:disabled,
+  &--flat:disabled:focus,
+  &--flat:disabled:hover{
+    color: $grey;
+    background: $grey-light;
+    border: 2px solid $grey;
+  }
+
+  &--no-underline {
+    text-decoration: none;
+  }
 }

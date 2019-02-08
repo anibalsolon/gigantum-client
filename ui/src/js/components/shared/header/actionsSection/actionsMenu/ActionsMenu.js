@@ -11,26 +11,30 @@ import ExportDatasetMutation from 'Mutations/ExportDatasetMutation';
 import SyncLabbookMutation from 'Mutations/branches/SyncLabbookMutation';
 import SyncDatasetMutation from 'Mutations/branches/SyncDatasetMutation';
 import BuildImageMutation from 'Mutations/BuildImageMutation';
-// queries
-import UserIdentity from 'JS/Auth/UserIdentity';
-import LinkedLocalDatasetsQuery from './queries/LinkedLocalDatasetsQuery';
 // store
-import { setErrorMessage, setWarningMessage, setInfoMessage, setMultiInfoMessage } from 'JS/redux/reducers/footer';
+import {
+  setErrorMessage,
+  setWarningMessage,
+  setInfoMessage,
+  setMultiInfoMessage,
+} from 'JS/redux/reducers/footer';
 import store from 'JS/redux/store';
 import { setContainerMenuWarningMessage, setContainerMenuVisibility } from 'JS/redux/reducers/labbook/environment/environment';
+// queries
+import UserIdentity from 'JS/Auth/UserIdentity';
+import LinkedLocalDatasetsQuery from '../queries/LinkedLocalDatasetsQuery';
 // components
-import DeleteLabbook from './modals/DeleteLabbook';
-import ForceSync from './modals/ForceSync';
-import LoginPrompt from './modals/LoginPrompt';
-import VisibilityModal from './modals/VisibilityModal';
-import PublishDatasetsModal from './modals/PublishDatasetsModal';
 import CreateBranch from 'Components/shared/header/branches/CreateBranch';
-import Collaborators from './collaborators/Collaborators';
 import ToolTip from 'Components/common/ToolTip';
+import DeleteLabbook from '../modals/DeleteLabbook';
+import ForceSync from '../modals/ForceSync';
+import LoginPrompt from '../modals/LoginPrompt';
+import VisibilityModal from '../modals/VisibilityModal';
+import PublishDatasetsModal from '../modals/PublishDatasetsModal';
 // assets
-import './BranchMenu.scss';
+import './ActionsMenu.scss';
 
-class BranchMenu extends Component {
+class ActionsMenu extends Component {
   constructor(props) {
     super(props);
 
@@ -40,17 +44,12 @@ class BranchMenu extends Component {
       addNoteEnabled: false,
       isValid: true,
       createBranchVisible: false,
-      showCollaborators: false,
-      newCollaborator: '',
       showLoginPrompt: false,
       exporting: false,
       deleteModalVisible: false,
       forceSyncModalVisible: false,
       remoteUrl: this.props.remoteUrl,
       publishDisabled: false,
-      addCollaboratorButtonDisabled: false,
-      collaboratorBeingRemoved: null,
-      collabKey: uuidv4(),
       justOpened: true,
       setPublic: false,
       syncWarningVisible: false,
@@ -72,7 +71,6 @@ class BranchMenu extends Component {
     this._exportLabbook = this._exportLabbook.bind(this);
     this._toggleSyncModal = this._toggleSyncModal.bind(this);
     this._switchBranch = this._switchBranch.bind(this);
-    this._remountCollab = this._remountCollab.bind(this);
 
     this._handleToggleModal = this._handleToggleModal.bind(this);
     this._togglePublishModal = this._togglePublishModal.bind(this);
@@ -335,48 +333,48 @@ class BranchMenu extends Component {
   *  sets state of Collaborators
   *  @return {}
   */
-  _toggleCollaborators() {
-    const self = this;
-
-    this._checkSessionIsValid().then((response) => {
-      if (navigator.onLine) {
-        if (response.data) {
-          if (response.data.userIdentity.isSessionValid) {
-            if (this.state.canManageCollaborators) {
-              const self = this;
-
-              this.setState({ menuOpen: false });
-
-              this._checkSessionIsValid().then((response) => {
-                if (response.data) {
-                  if (response.data.userIdentity.isSessionValid) {
-                    this.setState({
-                      showCollaborators: !this.state.showCollaborators,
-                      newCollaborator: '',
-                    });
-
-                    this.refs.collaborators.inputTitle.value = '';
-                  } else {
-                    self.setState({ showLoginPrompt: true });
-                  }
-                }
-              });
-            } else {
-              this._showCollaboratorsWarning();
-            }
-          } else {
-            this.props.auth.renewToken(true, () => {
-              self.setState({ showLoginPrompt: true });
-            }, () => {
-              self._toggleCollaborators();
-            });
-          }
-        }
-      } else {
-        self.setState({ showLoginPrompt: true });
-      }
-    });
-  }
+  // _toggleCollaborators() {
+  //   const self = this;
+  //
+  //   this._checkSessionIsValid().then((response) => {
+  //     if (navigator.onLine) {
+  //       if (response.data) {
+  //         if (response.data.userIdentity.isSessionValid) {
+  //           if (this.state.canManageCollaborators) {
+  //             const self = this;
+  //
+  //             this.setState({ menuOpen: false });
+  //
+  //             this._checkSessionIsValid().then((response) => {
+  //               if (response.data) {
+  //                 if (response.data.userIdentity.isSessionValid) {
+  //                   this.setState({
+  //                     showCollaborators: !this.state.showCollaborators,
+  //                     newCollaborator: '',
+  //                   });
+  //
+  //                   this.refs.collaborators.inputTitle.value = '';
+  //                 } else {
+  //                   self.setState({ showLoginPrompt: true });
+  //                 }
+  //               }
+  //             });
+  //           } else {
+  //             this._showCollaboratorsWarning();
+  //           }
+  //         } else {
+  //           this.props.auth.renewToken(true, () => {
+  //             self.setState({ showLoginPrompt: true });
+  //           }, () => {
+  //             self._toggleCollaborators();
+  //           });
+  //         }
+  //       }
+  //     } else {
+  //       self.setState({ showLoginPrompt: true });
+  //     }
+  //   });
+  // }
 
   /**
   *  @param {}
@@ -655,7 +653,6 @@ class BranchMenu extends Component {
             showContainerMenuMessage={this._showContainerMenuMessage}
             resetState={this._resetState}
             resetPublishState={this._resetPublishState}
-            remountCollab={this._remountCollab}
             setRemoteSession={this._setRemoteSession}
           />
 
@@ -681,7 +678,6 @@ class BranchMenu extends Component {
             showContainerMenuMessage={this._showContainerMenuMessage}
             resetState={this._resetState}
             resetPublishState={this._resetPublishState}
-            remountCollab={this._remountCollab}
             setRemoteSession={this._setRemoteSession}
             localDatasets={this.state.localDatasets || []}
           />
@@ -723,19 +719,6 @@ class BranchMenu extends Component {
         <div className={branchMenuCSS}>
 
           <ul className="BranchMenu__list">
-
-            <Collaborators
-              key={this.state.collabKey}
-              ref="collaborators"
-              auth={this.props.auth}
-              sectionType={this.props.sectionType}
-              owner={owner}
-              labbookName={labbookName}
-              checkSessionIsValid={this._checkSessionIsValid}
-              showLoginPrompt={() => this.setState({ showLoginPrompt: true })}
-            />
-
-            <hr />
             {
               this.props.sectionType === 'labbook' &&
               <Fragment>
@@ -907,4 +890,4 @@ const mapDispatchToProps = dispatch => ({
   setContainerMenuWarningMessage,
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(BranchMenu);
+export default connect(mapStateToProps, mapDispatchToProps)(ActionsMenu);

@@ -32,7 +32,7 @@ export default function SyncDatasetMutation(
       force,
       clientMutationId: tempID++,
     },
-    first: 2,
+    first: 10,
     cursor: null,
     hasNext: false,
   };

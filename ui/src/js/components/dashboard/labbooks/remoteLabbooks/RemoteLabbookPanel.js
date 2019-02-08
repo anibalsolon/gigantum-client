@@ -13,7 +13,7 @@ import { setWarningMessage, setMultiInfoMessage } from 'JS/redux/reducers/footer
 // queries
 import UserIdentity from 'JS/Auth/UserIdentity';
 // components
-import LoginPrompt from 'Components/shared/header/branchMenu/modals/LoginPrompt';
+import LoginPrompt from 'Components/shared/header/actionsSection/modals/LoginPrompt';
 import Loader from 'Components/common/Loader';
 // assets
 import './RemoteLabbookPanel.scss';

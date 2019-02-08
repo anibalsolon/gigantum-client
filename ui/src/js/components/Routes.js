@@ -106,7 +106,7 @@ class Routes extends Component {
   render() {
     if (!this.state.hasError) {
       const headerCSS = classNames({
-        Header: true,
+        HeaderBar: true,
         'is-demo': window.location.hostname === config.demoHostName,
       });
       const routesCSS = classNames({

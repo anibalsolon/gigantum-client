@@ -2,14 +2,13 @@ import { QueryRenderer, graphql } from 'react-relay';
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
-
 // environment
 import environment from 'JS/createRelayEnvironment';
-// components
-import CollaboratorsModal from './CollaboratorsModal';
 // store
 import store from 'JS/redux/store';
 import { setCollaborators, setCanManageCollaborators } from 'JS/redux/reducers/labbook/branchMenu/collaborators/collaborators';
+// components
+import CollaboratorsModal from './CollaboratorsModal';
 // assets
 import './Collaborators.scss';
 
@@ -105,35 +104,49 @@ class CollaboratorButton extends Component {
     return collaboratorSubText;
   }
 
-  render() {
-    const self = this;
-    const { labbookName, owner } = this.props;
-    let { collaborators, canManageCollaborators } = store.getState().collaborators;
 
-    collaborators = collaborators && collaborators[labbookName];
-    canManageCollaborators = canManageCollaborators && canManageCollaborators[labbookName];
+  _getCollabororInfo(name) {
+    let { collaborators, canManageCollaborators } = store.getState().collaborators;
+    collaborators = collaborators && collaborators[name];
+    canManageCollaborators = canManageCollaborators && canManageCollaborators[name];
+    return { collaborators, canManageCollaborators };
+  }
+
+  render() {
+    const self = this,
+          { props, state } = this,
+          { sectionType } = props, // either labbook or dataset
+          // get section from props
+          section = props[sectionType],
+          {
+            name,
+            owner,
+          } = section,
+          query = (sectionType === 'dataset') ? CollaboratorsDatasetQuery : CollaboratorsQuery,
+          { collaborators, canManageCollaborators } = this._getCollabororInfo(name);
+
     return (
       <QueryRenderer
-        query={this.props.sectionType === 'dataset' ? CollaboratorsDatasetQuery : CollaboratorsQuery}
+        query={query}
         environment={environment}
         variables={{
-            name: labbookName,
+            name,
             owner,
           }}
         render={({ props, error }) => {
               if (props) {
                 let section;
-                section = this.props.sectionType === 'dataset' ? props.dataset : props.labbook;
+                section = sectionType === 'dataset' ? props.dataset : props.labbook;
                 this.canManageCollaborators = section.canManageCollaborators;
                 this.collaborators = section.collaborators;
 
                 const collaboratorButtonCSS = classNames({
                     disabled: !section.canManageCollaborators && this.state.sessionValid,
-                    'BranchMenu__btn--flat': true,
+                    'Collborators__btn Btn--flat Btn--no-underline': true,
                   }),
 
                   collaboratorCSS = classNames({
-                    'BranchMenu__item BranchMenu__item--collaborators': true,
+                    Collaborators: true,
                     disabled: !section.canManageCollaborators && this.state.sessionValid,
                   }),
 
@@ -143,7 +156,7 @@ class CollaboratorButton extends Component {
 
                 return (
 
-                  <li className={collaboratorCSS}>
+                  <div className={collaboratorCSS}>
                     <button
                       onClick={() => this._toggleCollaborators()}
                       className={collaboratorButtonCSS}>
@@ -159,21 +172,21 @@ class CollaboratorButton extends Component {
                           ref="collaborators"
                           collaborators={section.collaborators}
                           owner={owner}
-                          labbookName={labbookName}
+                          labbookName={name}
                           toggleCollaborators={this._toggleCollaborators}
                         />
 
                     }
-                  </li>
+                  </div>
                 );
               } else if (collaborators !== null) {
                 const collaboratorButtonCSS = classNames({
                   disabled: !canManageCollaborators && this.state.sessionValid,
-                  'BranchMenu__btn--flat': true,
+                  Collaborators__btn: true,
                 });
 
                 const collaboratorCSS = classNames({
-                  'BranchMenu__item BranchMenu__item--collaborators': true,
+                  Collaborators: true,
                   disabled: !canManageCollaborators && this.state.sessionValid,
                 });
 
@@ -183,15 +196,12 @@ class CollaboratorButton extends Component {
 
                 return (
 
-                  <li className={collaboratorCSS}>
+                  <div className={collaboratorCSS}>
                     <button
                       onClick={() => this._toggleCollaborators()}
-                      className={collaboratorButtonCSS}
-                    >
+                      className={collaboratorButtonCSS}>
                       Collaborators
-
                       <p className="BranchMenu__collaborator-names">{collaboratorNames}</p>
-
                     </button>
 
                     {
@@ -202,27 +212,27 @@ class CollaboratorButton extends Component {
                           ref="collaborators"
                           collaborators={collaborators}
                           owner={owner}
-                          labbookName={labbookName}
+                          labbookName={name}
                           toggleCollaborators={this._toggleCollaborators}
                         />,
                           <div
                             key="CollaboratorsModal__cover"
                             className="modal__cover--nested"
                           />,
-                      ]
+                        ]
 
                     }
-                  </li>
+                  </div>
                 );
               }
                 return (
-                  <li className="BranchMenu__item--collaborators disabled">
+                  <div className="Collaborators disabled">
                     <button
                       onClick={() => this.props.showLoginPrompt()}
-                      className="BranchMenu__item--flat-button disabled"
-                    >Collaborators
-                    </button>
-                  </li>
+                      className="Collaborators__btn disabled">
+                      Collaborators
+                     </button>
+                  </div>
                 );
           }}
       />
