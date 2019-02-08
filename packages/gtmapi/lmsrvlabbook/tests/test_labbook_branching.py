@@ -587,6 +587,6 @@ class TestWorkflowsBranching(object):
         """
         r = client.execute(merge_q)
         assert 'errors' not in r
-        r['data']['mergeFromBranch']['labbook']['activeBranchName'] == 'master'
+        assert r['data']['mergeFromBranch']['labbook']['activeBranchName'] == 'master'
         assert not os.path.exists(os.path.join(lb.root_dir, 'code', 's1.txt'))
 
