@@ -63,7 +63,7 @@ class BranchManager(object):
     TODO(billvb): Finish removing all workflow-specific fields
     """
 
-    def __init__(self, repository: Repository, username: str) -> None:
+    def __init__(self, repository: Repository, username: Optional[str] = None) -> None:
         self.repository = repository
         self.username = username
 

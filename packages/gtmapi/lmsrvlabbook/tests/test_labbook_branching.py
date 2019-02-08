@@ -97,14 +97,20 @@ class TestWorkflowsBranching(object):
         q = f"""
         {{
             labbook(name: "{UT_LBNAME}", owner: "{UT_USERNAME}") {{
-                availableBranchNames
+                branches {{
+                    branchName
+                    isLocal
+                    isRemote
+                    commitsBehind
+                    isActive
+                }}
             }}
         }}
         """
         r = client.execute(q)
         pprint.pprint(r)
         assert 'errors' not in r
-        assert r['data']['labbook']['availableBranchNames'] == bm.branches_local
+        assert r['data']['labbook']['branches']['branchName'] == bm.branches_local
 
     def test_query_mergeable_branches_from_main(self, mock_create_labbooks):
         lb, client = mock_create_labbooks[0], mock_create_labbooks[1]
