@@ -4,7 +4,6 @@ import tempfile
 import io
 import math
 
-from snapshottest import snapshot
 from lmsrvlabbook.tests.fixtures import fixture_working_dir_env_repo_scoped, fixture_working_dir
 
 from graphene.test import Client

@@ -184,4 +184,3 @@ class MergeFromBranch(graphene.relay.ClientIDMutation):
 
         return MergeFromBranch(Labbook(id="{}&{}".format(owner, labbook_name),
                                                name=labbook_name, owner=owner))
-
