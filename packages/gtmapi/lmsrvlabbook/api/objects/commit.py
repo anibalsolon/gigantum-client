@@ -119,6 +119,8 @@ class Branch(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepository
         lb = InventoryManager().load_labbook(get_logged_in_username(),
                                              self.owner,
                                              self.name)
+        if not lb.remote:
+            return 0
 
         # Extract valid Bearer token
         # TODO - This code is duplicated all over the place, must be refactored.
