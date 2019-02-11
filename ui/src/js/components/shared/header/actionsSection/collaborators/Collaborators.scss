@@ -45,27 +45,24 @@
   width: 100%;
   cursor: pointer;
   margin: 1.5px 0;
-  background-color: $white;
   border: 0px solid $white;
   text-align: left;
-  padding: 0px;
-  color: $romanSilver;
+  padding: 0px !important;
+  color: $jet;
   font-size: 15px;
 
   &:focus,
   &:disabled, {
     cursor: pointer;
-    background-color: $white;
     border: 0px solid $white;
     padding: 0px;
     color: $romanSilver;
   }
 
   &:hover {
-    background-color: $background-color;
     width: 100%;
     cursor: pointer;
-    color: $romanSilver;
+    color: $azure;
     border: 0px solid $white;
   }
 
@@ -73,7 +70,6 @@
   &.disabled:hover{
       width: 100%;
       margin: 1.5px 0;
-      background-color: $white;
       border: 0px solid $white;
       opacity: 0.3;
    }

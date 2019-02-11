@@ -1,0 +1,31 @@
+@import '~Styles/_imports.scss';
+
+
+.BranchMenu {
+  @include flex(flex-start, row);
+}
+
+.BranchMenu__dropdown {
+   position: relative;
+   overflow: visible;
+
+   &-btn {
+     height: 30px;
+     width: 200px;
+     border: 1px solid $azure;
+     cursor: pointer;
+
+     &:hover {
+       border-color: $turquise;
+     }
+   }
+
+   &-menu {
+     position: absolute;
+     background: $white;
+     top: 30px;
+     padding: 20px;
+     width: 200px;
+     @include boxShadow();
+   }
+}

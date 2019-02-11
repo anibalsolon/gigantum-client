@@ -251,6 +251,19 @@ export default class BranchCard extends Component {
     }
   }
 
+  /**
+  *  @param {string} modal
+  *  passes modal to toggleModal if container is not running
+  *  @return {}
+  */
+  _mountModal(ModalJSX) {
+    if (store.getState().containerStatus.status !== 'Running') {
+      this._toggleModal(modal);
+    } else {
+      setContainerMenuWarningMessage('Stop Project before deleting branches. \n Be sure to save your changes.');
+    }
+  }
+
   render() {
     const { owner, showLoader } = this.state,
       isCurrentBranch = (this.props.name === this.props.activeBranchName),

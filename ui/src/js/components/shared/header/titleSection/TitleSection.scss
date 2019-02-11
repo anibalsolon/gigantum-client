@@ -19,6 +19,7 @@
 .TitleSection__namespace{
    color: $jet;
    height: 40px;
+   min-height: 40px;
    font-size: 26px;
    @include flex(flex-start, row);
    align-items: center;

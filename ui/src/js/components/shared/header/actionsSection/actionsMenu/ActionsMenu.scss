@@ -1,6 +1,6 @@
 @import '~Styles/_imports.scss';
 
-.BranchMenu {
+.ActionsMenu {
   position: relative;
 
   overflow: visible;
@@ -8,15 +8,14 @@
 
   height: 30px;
   min-height: 30px;
-  margin: 0 0 0 20px; 
+  margin: 0 0 0 20px;
 
   @include flex(flex-end, row)
 }
 
-.BranchMenu__btn {
-  width: 110px;
+.ActionsMenu__btn {
+  width: 60px;
   height: 24px;
-  padding: 0 30px 0 10px;
 
 
   text-align: left;
@@ -24,7 +23,7 @@
   color: $romanSilver;
   border: 3px solid $grey-border;
   border-radius: 15px;
-  background: $white url('~Images/icons/ellipsis.svg') no-repeat no-repeat calc(100% - 10px) center !important;
+  background: $white url('~Images/icons/ellipsis.svg') no-repeat no-repeat center center !important;
   background-color: $white !important;
   background-size: 30px !important;
 
@@ -34,13 +33,13 @@
   &:hover {
     color: $romanSilver;
     border: 3px solid $romanSilver;
-    background: $white url('~Images/icons/ellipsis.svg') no-repeat no-repeat calc(100% - 10px) center !important;
+    background: $white url('~Images/icons/ellipsis.svg') no-repeat no-repeat center center !important;
     background-color: $white;
     background-size: 30px 30px !important;
   }
 
   &:focus{
-    background: $white url('~Images/icons/ellipsis.svg') no-repeat no-repeat calc(100% - 10px) center !important;
+    background: $white url('~Images/icons/ellipsis.svg') no-repeat no-repeat center center !important;
     background-color: $white !important;
     background-size: 30px !important;
   }
@@ -58,7 +57,7 @@
   }
 }
 
-.BranchMenu__button:hover {
+.ActionsMenu__button:hover {
   border: 3px solid $romanSilver;
   color: $romanSilver;
   background: $white url('~Images/icons/ellipsis.svg') no-repeat no-repeat calc(100% - 10px) center !important;
@@ -67,7 +66,7 @@
   background-color: $white;
 }
 
-.BranchMenu__menu {
+.ActionsMenu__menu {
   position: absolute;
   right: 0px;
   top: 37px;
@@ -90,13 +89,13 @@
   }
 }
 
-.BranchMenu__list{
+.ActionsMenu__list{
 
   margin-top: 0px;
 
 }
 
-.BranchMenu__item {
+.ActionsMenu__item {
   padding: 0 0 0 40px;
   line-height: 24px;
   cursor: pointer;
@@ -183,7 +182,7 @@
 
 }
 
-.BranchMenu__toggle {
+.ActionsMenu__toggle {
   z-index: index($elements, popup) + 1;
   position: absolute;
   top: 25px;
@@ -194,21 +193,21 @@
   @include triangle('up', 14px, $white);
 }
 
-.BranchMenu__sync,
-.BranchMenu__publish {
+.ActionsMenu__sync,
+.ActionsMenu__publish {
   position: relative;
   width: 100%;
   text-align: center;
 }
 
-.BranchMenu__btn{
+.ActionsMenu__btn{
   &:focus {
     color: $romanSilver;
   }
 }
 
 
-.BranchMenu__btn{
+.ActionsMenu__btn{
   &--flat{
     width: 100%;
     cursor: pointer;
@@ -263,14 +262,14 @@
 }
 
 
-.BranchMenu__copyRemote{
+.ActionsMenu__copyRemote{
   @include flex(flex-start, row);
   flex-wrap: nowrap;
   align-items: center;
   margin: 5px 0 0;
 }
 
-.BranchMenu__input[type="text"]{
+.ActionsMenu__input[type="text"]{
   width: 100px;
   padding: 0px 5px !important;
   border: 1px solid $romanSilver !important;
@@ -280,7 +279,7 @@
   font-size: 15px !important;
 }
 
-.BranchMenu__pointer{
+.ActionsMenu__pointer{
   top: 30px;
   right: 75px;
   position: absolute;
@@ -290,7 +289,7 @@
   @include triangle('up', 14px, $white);
 }
 
-.BranchMenu__message{
+.ActionsMenu__message{
   white-space: pre-line;
   font-size: 15px;
   top: 42px;

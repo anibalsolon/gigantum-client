@@ -3,6 +3,7 @@
 .Description {
     p {
       margin: 0;
+
       line-height: 24px;
     }
 
@@ -11,31 +12,37 @@
     }
 
     .empty {
-      color: $romanSilver;
       opacity: 0.5;
+      color: $romanSilver;
+
       font-style: oblique;
     }
 }
 
 .Description__container{
     position: relative;
-    color: $jet;
-    white-space: pre-line;
-    padding: 5px;
-    word-wrap: break-word;
-    justify-content: space-between;
+
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
     flex-wrap: nowrap;
+    justify-content: space-between;
+
     min-width: 300px;
     max-width: 500px;
-    cursor: pointer;
-    -webkit-line-clamp: 3;
-    display: -webkit-box;
     max-height: 80px;
-    -webkit-box-orient: vertical;
-    text-overflow: ellipsis;
-    overflow: hidden;
+    padding: 5px;
     padding: 2px;
+
+    cursor: pointer;
+    white-space: pre-line;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+
+    color: $jet;
         border: 1px solid transparent;
+
+    -webkit-line-clamp: 3;
     &--hovered {
         border: 1px solid $romanSilver;
     }
@@ -44,14 +51,17 @@
 .Description__input{
     width: 100%;
     min-height: 66px !important;
-    background: $white;
+    margin: -1px 30px 0 -1px;
+
     resize: none;
-    margin: 0 30px 0 0;
+
+    background: $white;
+
     line-height: 24px;
     &:focus {
       border: 2px solid #26a69a;
-      box-shadow: 0 1px 0 0 #26a69a;
       outline: none;
+      box-shadow: 0 1px 0 0 #26a69a;
     }
 }
 
@@ -73,9 +83,11 @@
     background: $white;
     @include flex(space-around, column);
     position: absolute;
-    top: 2px;
-    right: 3px;
-    border: 1px solid $romanSilver;
+    top: 1px;
+    right: 4px;
+    border-top: 1px solid $romanSilver;
+    border-right: 1px solid $romanSilver;
+    border-bottom: 1px solid $romanSilver;
     padding: 0 4px;
 }
 

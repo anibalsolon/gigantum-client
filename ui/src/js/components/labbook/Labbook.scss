@@ -1,7 +1,7 @@
 @import '~Styles/_imports.scss';
 
 .Labbook {
-  width: auto;
+  width: calc(100% - 40px);
   min-width: 820px;
   max-width: 1285px;
   height: auto;

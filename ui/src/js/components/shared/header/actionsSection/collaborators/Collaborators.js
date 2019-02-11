@@ -142,7 +142,7 @@ class CollaboratorButton extends Component {
 
                 const collaboratorButtonCSS = classNames({
                     disabled: !section.canManageCollaborators && this.state.sessionValid,
-                    'Collborators__btn Btn--flat Btn--no-underline': true,
+                    'Collaborators__btn Btn--flat Btn--no-underline': true,
                   }),
 
                   collaboratorCSS = classNames({
@@ -229,7 +229,7 @@ class CollaboratorButton extends Component {
                   <div className="Collaborators disabled">
                     <button
                       onClick={() => this.props.showLoginPrompt()}
-                      className="Collaborators__btn disabled">
+                      className="Collaborators__btn Btn--flat disabled">
                       Collaborators
                      </button>
                   </div>

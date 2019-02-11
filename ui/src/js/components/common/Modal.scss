@@ -7,6 +7,10 @@
   overflow: hidden;
 }
 
+.Modal__wrapper {
+  z-index: index($elements, modal);
+}
+
 .Modal__container{
   padding: 20px;
   height: calc(100% - 70px);

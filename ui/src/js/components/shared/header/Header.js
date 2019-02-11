@@ -18,7 +18,7 @@ import ToolTip from 'Components/common/ToolTip';
 import ErrorBoundary from 'Components/common/ErrorBoundary';
 import TitleSection from './titleSection/TitleSection';
 import ActionsSection from './actionsSection/ActionsSection';
-// import Branches from './branches/Branches';
+import BranchMenu from './branches/BranchMenu';
 // import Container from './container/Container';
 // import Navigation from './navigation/Navigation';
 // assets
@@ -207,10 +207,10 @@ class Header extends Component {
                 {...props}
               />
 
-              {/*}<ErrorBoundary
+              <ErrorBoundary
                 type={branchesErrorCSS}
                 key="branches">
-                <Branches
+                <BranchMenu
                   defaultRemote={labbook.defaultRemote}
                   branchesOpen={this.props.branchesOpen}
                   labbook={labbook}
@@ -220,7 +220,7 @@ class Header extends Component {
                   mergeFilter={this.props.mergeFilter}
                   setBuildingState={this.props.setBuildingState}
                 />
-              </ErrorBoundary>*/}
+              </ErrorBoundary>
 
             </div>
 

@@ -104,19 +104,18 @@ class ActionsMenu extends Component {
     closes menu
   */
   _closeMenu(evt) {
-    const isBranchMenu = (evt.target.className.indexOf('BranchMenu') > -1) || (evt.target.className.indexOf('CollaboratorsModal') > -1) || (evt.target.className.indexOf('BranchMenu__message') > -1) ||
+    const isActionsMenu = (evt.target.className.indexOf('ActionsMenu') > -1) || (evt.target.className.indexOf('CollaboratorsModal') > -1) || (evt.target.className.indexOf('ActionsMenu__message') > -1) ||
     (evt.target.className.indexOf('TrackingToggle') > -1);
 
-    if (!isBranchMenu && this.state.menuOpen) {
+    if (!isActionsMenu && this.state.menuOpen) {
       this.setState({ menuOpen: false, justOpened: true });
-      this.refs.collaborators.setState({ collaboratorModalVisible: false });
     }
 
-    if ((evt.target.className.indexOf('BranchMenu__btn--sync') === -1) && this.state.syncWarningVisible) {
+    if ((evt.target.className.indexOf('ActionsMenu__btn--sync') === -1) && this.state.syncWarningVisible) {
       this.setState({ syncWarningVisible: false });
     }
 
-    if ((evt.target.className.indexOf('BranchMenu__btn--remote') === -1) && this.state.publishWarningVisible) {
+    if ((evt.target.className.indexOf('ActionsMenu__btn--remote') === -1) && this.state.publishWarningVisible) {
       this.setState({ publishWarningVisible: false });
     }
   }
@@ -398,7 +397,7 @@ class ActionsMenu extends Component {
   *  @return {}
   */
   _copyRemote() {
-    const copyText = document.getElementById('BranchMenu-copy');
+    const copyText = document.getElementById('ActionsMenu-copy');
     copyText.select();
 
     document.execCommand('Copy');
@@ -596,19 +595,19 @@ class ActionsMenu extends Component {
   render() {
     const { labbookName, owner } = this.state;
     const branchMenuCSS = classNames({
-      'BranchMenu__menu--animation': this.state.justOpened, // this is needed to stop animation from breaking position flow when collaborators modal is open
+      'ActionsMenu__menu--animation': this.state.justOpened, // this is needed to stop animation from breaking position flow when collaborators modal is open
       hidden: !this.state.menuOpen,
-      'BranchMenu__menu box-shadow': true,
+      'ActionsMenu__menu box-shadow': true,
     });
 
     const branchMenuArrowCSS = classNames({
-      BranchMenu__toggle: true,
+      ActionsMenu__toggle: true,
       hidden: !this.state.menuOpen,
     });
     const deleteText = this.props.sectionType === 'labbook' ? 'Delete Project' : 'Delete Dataset';
 
     return (
-      <div className="BranchMenu flex flex--column'">
+      <div className="ActionsMenu flex flex--column'">
 
         {
           this.state.showLoginPrompt &&
@@ -710,43 +709,42 @@ class ActionsMenu extends Component {
 
         <button
           onClick={() => { this._toggleMenu(); }}
-          className="BranchMenu__btn">
-          Actions
+          className="ActionsMenu__btn">
         </button>
 
         <div className={branchMenuArrowCSS} />
 
         <div className={branchMenuCSS}>
 
-          <ul className="BranchMenu__list">
+          <ul className="ActionsMenu__list">
             {
               this.props.sectionType === 'labbook' &&
               <Fragment>
-                <li className="BranchMenu__item BranchMenu__item--new-branch">
+                <li className="ActionsMenu__item ActionsMenu__item--new-branch">
 
                 <button
                   onClick={() => { this._handleToggleModal('createBranchVisible'); }}
-                  className="BranchMenu__btn--flat">
+                  className="ActionsMenu__btn--flat">
                   New Branch
                 </button>
 
                 </li>
 
-                <li className="BranchMenu__item BranchMenu__item--switch">
+                <li className="ActionsMenu__item ActionsMenu__item--switch">
 
                 <button
                   onClick={() => this._switchBranch()}
-                  className="BranchMenu__btn--flat">
+                  className="ActionsMenu__btn--flat">
                   Switch Branch
                 </button>
 
                 </li>
 
-                <li className="BranchMenu__item BranchMenu__item--merge">
+                <li className="ActionsMenu__item ActionsMenu__item--merge">
 
                 <button
                   onClick={() => this._mergeFilter()}
-                  className="BranchMenu__btn--flat">
+                  className="ActionsMenu__btn--flat">
                   Merge Branch
                 </button>
 
@@ -754,12 +752,12 @@ class ActionsMenu extends Component {
               </Fragment>
             }
 
-            <li className="BranchMenu__item BranchMenu__item--export">
+            <li className="ActionsMenu__item ActionsMenu__item--export">
 
               <button
                 onClick={evt => this._exportLabbook(evt)}
                 disabled={this.state.exporting}
-                className="BranchMenu__btn--flat">
+                className="ActionsMenu__btn--flat">
                 Export
               </button>
 
@@ -768,22 +766,22 @@ class ActionsMenu extends Component {
             {
               this.props.defaultRemote &&
 
-              <li className={`BranchMenu__item BranchMenu__item--visibility-${this.props.visibility}`}>
+              <li className={`ActionsMenu__item ActionsMenu__item--visibility-${this.props.visibility}`}>
 
                 <button
                   onClick={evt => this._toggleModal('visibilityModalVisible')}
-                  className="BranchMenu__btn--flat">
+                  className="ActionsMenu__btn--flat">
                   Change Visibility
                 </button>
 
               </li>
             }
 
-            <li className="BranchMenu__item BranchMenu__item--delete">
+            <li className="ActionsMenu__item ActionsMenu__item--delete">
 
               <button
                 onClick={() => this._toggleDeleteModal()}
-                className="BranchMenu__btn--flat">
+                className="ActionsMenu__btn--flat">
                 {deleteText}
               </button>
 
@@ -791,14 +789,14 @@ class ActionsMenu extends Component {
 
           </ul>
 
-          <hr className="BranchMenu__line" />
+          <hr className="ActionsMenu__line" />
 
           {!this.props.defaultRemote &&
 
-            <div className="BranchMenu__publish">
+            <div className="ActionsMenu__publish">
 
               <button
-                className="BranchMenu__btn--remote"
+                className="ActionsMenu__btn--remote"
                 onClick={() => this._togglePublishModal(this.props.sectionType === 'labbook')}>
                 Publish
               </button>
@@ -808,9 +806,9 @@ class ActionsMenu extends Component {
 
                 <Fragment>
 
-                  <div className="BranchMenu__pointer" />
+                  <div className="ActionsMenu__pointer" />
 
-                  <div className="BranchMenu__message box-shadow">
+                  <div className="ActionsMenu__message box-shadow">
                     Publishing is disabled while Project is exporting.
                   </div>
 
@@ -822,10 +820,10 @@ class ActionsMenu extends Component {
 
           {this.props.defaultRemote &&
 
-            <div className="BranchMenu__sync">
+            <div className="ActionsMenu__sync">
 
               <button
-                className="BranchMenu__btn--sync"
+                className="ActionsMenu__btn--sync"
                 onClick={() => this._sync()}>
                 Sync Branch
               </button>
@@ -835,9 +833,9 @@ class ActionsMenu extends Component {
 
                 <Fragment>
 
-                  <div className="BranchMenu__pointer" />
+                  <div className="ActionsMenu__pointer" />
 
-                  <div className="BranchMenu__message box-shadow">
+                  <div className="ActionsMenu__message box-shadow">
                     Syncing is disabled while Project is exporting.
                   </div>
 
@@ -853,20 +851,20 @@ class ActionsMenu extends Component {
 
               <div>
 
-                <hr className="BranchMenu__line" />
+                <hr className="ActionsMenu__line" />
 
-                <div className="BranchMenu__copyRemote">
+                <div className="ActionsMenu__copyRemote">
 
                   <input
-                    id="BranchMenu-copy"
-                    className="BranchMenu__input"
+                    id="ActionsMenu-copy"
+                    className="ActionsMenu__input"
                     defaultValue={`gigantum.com/${this.state.owner}/${this.state.labbookName}`}
                     type="text"
                   />
 
                   <button
                     onClick={() => this._copyRemote()}
-                    className="BranchMenu__btn--copy fa fa-clone"
+                    className="ActionsMenu__btn--copy fa fa-clone"
                   />
 
                 </div>

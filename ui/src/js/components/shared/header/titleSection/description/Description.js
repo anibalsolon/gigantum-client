@@ -104,6 +104,7 @@ export default class Description extends Component {
           textareaStyle = {
             height: this.state.textareaHeight,
             width: this.state.textareaWidth,
+            maxWidth: '264px',
           };
 
     return (
