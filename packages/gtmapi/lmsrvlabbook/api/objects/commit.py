@@ -20,9 +20,11 @@
 # SOFTWARE.
 import graphene
 
+from gtmcore.workflows.gitlab import GitLabManager
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.inventory.branching import BranchManager
 
+from lmsrvcore.auth.identity import parse_token
 from lmsrvcore.auth.user import get_logged_in_username
 from lmsrvcore.api.interfaces import GitCommit, GitRepository
 
@@ -113,9 +115,36 @@ class Branch(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepository
         return mergeable
 
     def resolve_commits_behind(self, info):
+
         lb = InventoryManager().load_labbook(get_logged_in_username(),
                                              self.owner,
                                              self.name)
+
+        # Extract valid Bearer token
+        # TODO - This code is duplicated all over the place, must be refactored.
+        token = None
+        if hasattr(info.context.headers, 'environ'):
+            if "HTTP_AUTHORIZATION" in info.context.headers.environ:
+                token = parse_token(info.context.headers.environ["HTTP_AUTHORIZATION"])
+
+        if not token:
+            raise ValueError("Authorization header not provided. "
+                             "Must have a valid session to query for collaborators")
+
+        default_remote = lb.client_config.config['git']['default_remote']
+        admin_service = None
+        for remote in lb.client_config.config['git']['remotes']:
+            if default_remote == remote:
+                admin_service = lb.client_config.config['git']['remotes'][remote]['admin_service']
+                break
+
+        if not admin_service:
+            raise ValueError('admin_service could not be found')
+
+        # Configure git creds
+        mgr = GitLabManager(default_remote, admin_service, access_token=token)
+        mgr.configure_git_credentials(default_remote, get_logged_in_username())
+
         bm = BranchManager(lb)
         if bm.active_branch == self.branch_name:
             _, count = bm.get_commits_behind_remote()

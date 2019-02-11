@@ -17,7 +17,6 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-import base64
 import graphene
 import os
 
@@ -31,13 +30,10 @@ from gtmcore.files import FileOperations
 from gtmcore.environment.utils import get_package_manager
 
 from lmsrvcore.auth.user import get_logged_in_username, get_logged_in_author
-
-from lmsrvcore.api.connections import ListBasedConnection
 from lmsrvcore.api.interfaces import GitRepository
 from lmsrvcore.auth.identity import parse_token
 
 from lmsrvlabbook.api.objects.jobstatus import JobStatus
-from lmsrvlabbook.api.connections.ref import LabbookRefConnection
 from lmsrvlabbook.api.objects.environment import Environment
 from lmsrvlabbook.api.objects.commit import Branch
 from lmsrvlabbook.api.objects.overview import LabbookOverview
