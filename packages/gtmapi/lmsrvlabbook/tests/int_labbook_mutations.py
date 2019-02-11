@@ -24,7 +24,6 @@ import pytest
 import shutil
 import time
 
-import graphene
 from mock import patch
 import requests
 

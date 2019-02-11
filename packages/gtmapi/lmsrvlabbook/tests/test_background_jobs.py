@@ -22,7 +22,6 @@ import threading
 import pytest
 import time
 
-from snapshottest import snapshot
 from lmsrvlabbook.tests.fixtures import fixture_working_dir_env_repo_scoped
 from graphene.test import Client
 from mock import patch
@@ -73,7 +72,7 @@ def temporary_worker():
 
 
 class TestBackgroundJobs(object):
-    def test_get_background_jobs_basics(self, temporary_worker, fixture_working_dir_env_repo_scoped, snapshot):
+    def test_get_background_jobs_basics(self, temporary_worker, fixture_working_dir_env_repo_scoped):
 
         w, d = temporary_worker
         assert w.is_alive()
