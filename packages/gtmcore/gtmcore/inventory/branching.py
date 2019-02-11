@@ -272,6 +272,8 @@ class BranchManager(object):
             else:
                 logger.error(f"Could not find count in: {result_str}")
                 raise GigantumException("Unable to determine commit behind-count")
+        elif 'your branch' in result_str.lower() and 'have diverged' in result_str.lower():
+            return self.active_branch, 1
         else:
             # This branch is local-only
             return self.active_branch, 0
