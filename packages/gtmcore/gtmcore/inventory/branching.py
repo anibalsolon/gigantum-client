@@ -273,6 +273,10 @@ class BranchManager(object):
                 logger.error(f"Could not find count in: {result_str}")
                 raise GigantumException("Unable to determine commit behind-count")
         elif 'your branch' in result_str.lower() and 'have diverged' in result_str.lower():
+            # Note: In cases where there are divergent commits, it is too error-prone to
+            # precisely parse the output for specific number of commits. So we just say,
+            # technically, that we are behind by at least one commit. I.e., this is to
+            # say "there is a pull required"
             return self.active_branch, 1
         else:
             # This branch is local-only
