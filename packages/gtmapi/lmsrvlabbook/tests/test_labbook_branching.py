@@ -157,16 +157,25 @@ class TestWorkflowsBranching(object):
         q = f"""
         {{
             labbook(name: "{UT_LBNAME}", owner: "{UT_USERNAME}") {{
-                mergeableBranchNames
                 workspaceBranchName
+                branches {{
+                    branchName
+                    isMergeable
+                }}
             }}
         }}
         """
         r = client.execute(q)
         assert 'errors' not in r
-        assert len(r['data']['labbook']['mergeableBranchNames']) == 2
-        assert r['data']['labbook']['mergeableBranchNames'] == ['master', 'tester1']
         assert r['data']['labbook']['workspaceBranchName'] == bm.workspace_branch
+        branches = r['data']['labbook']['branches']
+        assert branches[0]['branchName'] == 'master'
+        assert branches[0]['isMergeable'] is True
+        assert branches[1]['branchName'] == 'tester1'
+        assert branches[1]['isMergeable'] is True
+        assert branches[2]['branchName'] == 'tester2'
+        assert branches[2]['isMergeable'] is False
+
 
     def test_create_feature_branch_bad_name_fail(self, mock_create_labbooks):
         lb, client = mock_create_labbooks[0], mock_create_labbooks[1]
@@ -232,9 +241,10 @@ class TestWorkflowsBranching(object):
             }}) {{
                 labbook{{
                     name
-                    description
-                    availableBranchNames
                     activeBranchName
+                    branches {{
+                        branchName
+                    }}
                 }}
             }}
         }}
@@ -243,7 +253,7 @@ class TestWorkflowsBranching(object):
         assert 'errors' not in r
         assert r['data']['createExperimentalBranch']['labbook']['activeBranchName'] \
             == 'valid-branch-name-working1'
-        assert set(r['data']['createExperimentalBranch']['labbook']['availableBranchNames']) \
+        assert set([n['branchName'] for n in r['data']['createExperimentalBranch']['labbook']['branches']]) \
             == set(['tester1', 'master', 'valid-branch-name-working1'])
 
         assert lb.active_branch == 'valid-branch-name-working1'
@@ -266,7 +276,9 @@ class TestWorkflowsBranching(object):
                 labbook{{
                     name
                     description
-                    availableBranchNames
+                    branches {{
+                        branchName
+                    }}
                     activeBranchName
                 }}
             }}
@@ -375,7 +387,9 @@ class TestWorkflowsBranching(object):
                 labbook{{
                     name
                     description
-                    availableBranchNames
+                    branches {{
+                        branchName
+                    }}
                     activeBranchName
                 }}
             }}
@@ -385,9 +399,9 @@ class TestWorkflowsBranching(object):
         assert 'errors' not in r
         assert r['data']['workonExperimentalBranch']['labbook']['activeBranchName'] \
                == 'tester1'
-        assert set(r['data']['workonExperimentalBranch']['labbook']['availableBranchNames']) \
+        ab = r['data']['workonExperimentalBranch']['labbook']['branches']
+        assert set([n['branchName'] for n in ab]) \
             == set(['master', 'tester1'])
-
         assert bm.active_branch == 'tester1'
         assert lb.is_repo_clean
 
@@ -416,7 +430,6 @@ class TestWorkflowsBranching(object):
                 labbook{{
                     name
                     description
-                    availableBranchNames
                     activeBranchName
                 }}
             }}
@@ -426,8 +439,6 @@ class TestWorkflowsBranching(object):
         assert 'errors' not in r
         assert r['data']['mergeFromBranch']['labbook']['activeBranchName'] \
                == 'master'
-        assert set(r['data']['mergeFromBranch']['labbook']['availableBranchNames']) \
-            == set(['master', 'test-branch'])
 
         assert lb.active_branch == bm.workspace_branch
         assert os.path.exists(os.path.join(lb.root_dir, 'code/sillydir1'))
@@ -461,7 +472,6 @@ class TestWorkflowsBranching(object):
                 labbook{{
                     name
                     description
-                    availableBranchNames
                     activeBranchName
                 }}
             }}
@@ -471,8 +481,6 @@ class TestWorkflowsBranching(object):
         assert 'errors' not in r
         assert r['data']['mergeFromBranch']['labbook']['activeBranchName'] == 'test-branch'
         assert r['data']['mergeFromBranch']['labbook']['name'] == 'unittest-workflow-branch-1'
-        assert 'master' in r['data']['mergeFromBranch']['labbook']['availableBranchNames']
-        assert 'test-branch' in r['data']['mergeFromBranch']['labbook']['availableBranchNames']
 
         assert lb.active_branch == b1
         assert os.path.exists(os.path.join(lb.root_dir, 'code/main-branch-dir1'))
@@ -505,14 +513,12 @@ class TestWorkflowsBranching(object):
                 labbook{{
                     name
                     description
-                    availableBranchNames
                     activeBranchName
                 }}
             }}
         }}
         """
         r = client.execute(merge_q)
-
         assert 'errors' in r
         assert 'Cannot merge' in r['errors'][0]['message']
 
@@ -579,7 +585,6 @@ class TestWorkflowsBranching(object):
                 labbook{{
                     name
                     description
-                    availableBranchNames
                     activeBranchName
                 }}
             }}
