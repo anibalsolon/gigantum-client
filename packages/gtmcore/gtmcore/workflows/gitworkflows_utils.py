@@ -139,7 +139,7 @@ def _set_upstream_branch(repository: Repository, branch_name: str, feedback_cb: 
 
 def _pull(repository: Repository, branch_name: str, override: str, feedback_cb: Callable) -> None:
     # TODO(billvb) Refactor to BranchManager
-    feedback_cb(f"Pulling from branch \"{branch_name}\" with \"override\" strategy")
+    feedback_cb(f"Pulling from remote branch \"{branch_name}\"...")
     cp = repository.git.commit_hash
     try:
         call_subprocess(f'git pull'.split(), cwd=repository.root_dir)
@@ -160,28 +160,26 @@ def _pull(repository: Repository, branch_name: str, override: str, feedback_cb: 
         else:
             raise
 
-def _sync_pull_push(repository: Repository, username: str, branch_name: str, override: str,
-                    feedback_cb: Callable):
-    bm = BranchManager(repository, username=username)
-    bm.fetch()
-    _pull(repository, branch_name, override, feedback_cb)
-    push_tokens = f'git push origin {branch_name}'.split()
-    if branch_name not in bm.branches_remote:
-        push_tokens.insert(2, "--set-upstream")
-    call_subprocess(push_tokens, cwd=repository.root_dir)
-
-
 def sync_branch(repository: Repository, username: str, override: str,
-                feedback_callback: Callable) -> int:
+                pull_only: bool, feedback_callback: Callable) -> int:
     """"""
     repository.sweep_uncommitted_changes()
     repository.git.fetch()
 
     bm = BranchManager(repository, username=username)
-    if bm.active_branch not in bm.branches_remote:
+    branch_name = bm.active_branch
+
+    if branch_name not in bm.branches_remote:
+        # Branch does not exist, so push it to remote.
         _set_upstream_branch(repository, bm.active_branch, feedback_callback)
         return 0
     else:
         _, pulled_updates_count = bm.get_commits_behind_remote()
-        _sync_pull_push(repository, username, bm.active_branch, override, feedback_callback)
+        _pull(repository, branch_name, override, feedback_callback)
+        if not pull_only:
+            # Skip pushing back up if set to pull_only
+            push_tokens = f'git push origin {branch_name}'.split()
+            if branch_name not in bm.branches_remote:
+                push_tokens.insert(2, "--set-upstream")
+            call_subprocess(push_tokens, cwd=repository.root_dir)
         return pulled_updates_count

@@ -211,7 +211,8 @@ export default class PublishDatasetsModal extends Component {
                                         SyncLabbookMutation(
                                           this.props.owner,
                                           this.props.labbookName,
-                                          false,
+                                          null,
+                                          this.props.pullOnly,
                                           successCall,
                                           failureCall,
                                           (error) => {

@@ -28,6 +28,7 @@ export default class ForceSync extends Component {
         owner,
         labbookName,
         method,
+        this.props.pullOnly,
         () => {},
         () => {},
         (error) => {

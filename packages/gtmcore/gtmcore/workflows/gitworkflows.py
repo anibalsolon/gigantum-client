@@ -105,7 +105,7 @@ class GitWorkflow(ABC):
             raise e
 
     def sync(self, username: str, remote: str = "origin", override: MergeOverride = MergeOverride.ABORT,
-             feedback_callback: Callable = lambda _ : None,
+             feedback_callback: Callable = lambda _ : None, pull_only: bool = False,
              access_token: Optional[str] = None, id_token: Optional[str] = None) -> int:
         """ Sync with remote GitLab repo (i.e., pull any upstream changes and push any new changes). Following
         a sync operation both the local repo and remote should be at the same revision.
@@ -114,13 +114,14 @@ class GitWorkflow(ABC):
             username: Subject user
             remote: Name of remote (usually only origin for now)
             override: In the event of conflict, select merge method (mine/theirs/abort)
+            pull_only: If true, do not push back after doing a pull.
             feedback_callback: Used to give periodic feedback
 
         Returns:
             Integer number of commits pulled down from remote.
         """
         updates_cnt = gitworkflows_utils.sync_branch(self.repository, username=username,
-                                                     override=override.value,
+                                                     override=override.value, pull_only=pull_only,
                                                      feedback_callback=feedback_callback)
         return updates_cnt
 
@@ -180,15 +181,15 @@ class DatasetWorkflow(GitWorkflow):
                 public: bool = False, feedback_callback: Callable = lambda _ : None,
                 id_token: Optional[str] = None):
         super().publish(username, access_token, remote, public, feedback_callback, id_token)
-        if isinstance(self.repository, Dataset):
-            self._push_dataset_objects(self.repository, username, feedback_callback,
-                                       access_token, id_token)
+        self._push_dataset_objects(self.dataset, username, feedback_callback,
+                                   access_token, id_token)
 
 
     def sync(self, username: str, remote: str = "origin", override: MergeOverride = MergeOverride.ABORT,
-             feedback_callback: Callable = lambda _ : None,
+             feedback_callback: Callable = lambda _ : None, pull_only: bool = False,
              access_token: Optional[str] = None, id_token: Optional[str] = None):
-        v = super().sync(username, remote, override, feedback_callback, access_token, id_token)
-        if isinstance(self.repository, Dataset):
-            self._push_dataset_objects(self.repository, username, feedback_callback, access_token, id_token)
+        v = super().sync(username, remote, override, feedback_callback, pull_only,
+                         access_token, id_token)
+        self._push_dataset_objects(self.dataset, username, feedback_callback,
+                                   access_token, id_token)
         return v

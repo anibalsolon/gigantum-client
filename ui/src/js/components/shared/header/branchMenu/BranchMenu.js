@@ -208,16 +208,16 @@ class BranchMenu extends Component {
   }
 
   /**
-  *  @param {}
+  *  @param {Boolean} pullOnly
   *  pushes code to remote
   *  @return {string}
   */
-  _sync() {
+  _sync(pullOnly) {
     if (this.props.isExporting) {
       this.setState({ syncWarningVisible: true });
     } else {
       const status = store.getState().containerStatus.status;
-
+      this.setState({ pullOnly })
       if (this.state.owner !== 'gigantum-examples') {
         this.setState({ menuOpen: false });
       }
@@ -268,6 +268,7 @@ class BranchMenu extends Component {
                         this.state.owner,
                         this.state.labbookName,
                         null,
+                        pullOnly,
                         successCall,
                         failureCall,
                         (error) => {
@@ -301,7 +302,7 @@ class BranchMenu extends Component {
                 this.props.auth.renewToken(true, () => {
                   self.setState({ showLoginPrompt: true });
                 }, () => {
-                  self._sync();
+                  self._sync(pullOnly);
                 });
               }
             }
@@ -634,6 +635,7 @@ class BranchMenu extends Component {
           <ForceSync
             toggleSyncModal={this._toggleSyncModal}
             sectionType={this.props.sectionType}
+            pullOnly={this.state.pullOnly}
           />
         }
         {
@@ -671,6 +673,7 @@ class BranchMenu extends Component {
             auth={this.props.auth}
             buttonText="Publish All"
             header={this.state.publishDatasetsModalAction}
+            pullOnly={this.state.pullOnly}
             modalStateValue="visibilityModalVisible"
             sectionType={this.props.sectionType}
             setPublishingState={this.props.setPublishingState}
@@ -843,7 +846,7 @@ class BranchMenu extends Component {
 
               <button
                 className="BranchMenu__btn--sync"
-                onClick={() => this._sync()}>
+                onClick={() => this._sync(false)}>
                 Sync Branch
               </button>
 
@@ -861,6 +864,12 @@ class BranchMenu extends Component {
                 </Fragment>
 
               }
+
+              <button
+                className="BranchMenu__btn--sync"
+                onClick={() => this._sync(true)}>
+                Pull-only
+              </button>
 
             </div>
             }
