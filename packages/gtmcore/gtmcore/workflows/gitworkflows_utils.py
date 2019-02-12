@@ -174,7 +174,7 @@ def sync_branch(repository: Repository, username: str, override: str,
         _set_upstream_branch(repository, bm.active_branch, feedback_callback)
         return 0
     else:
-        _, pulled_updates_count = bm.get_commits_behind_remote()
+        pulled_updates_count = bm.get_commits_behind()
         _pull(repository, branch_name, override, feedback_callback)
         if not pull_only:
             # Skip pushing back up if set to pull_only

@@ -94,9 +94,6 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
     # A boolean indicating if the current user can manage collaborators
     can_manage_collaborators = graphene.Boolean()
 
-    # How many commits the current active_branch is behind remote (0 if up-to-date or local-only).
-    updates_available_count = graphene.Int()
-
     # Whether repo state is clean
     is_repo_clean = graphene.Boolean()
 
@@ -182,16 +179,6 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         NOTE! This must be a string, as graphene can't quite handle big integers. """
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
             lambda labbook: str(FileOperations.content_size(labbook)))
-
-    def resolve_updates_available_count(self, info):
-        """Get number of commits the active_branch is behind its remote counterpart.
-        Returns 0 if up-to-date or if local only."""
-        # Note, by default using remote "origin"
-        def _gc(lb):
-            bm = BranchManager(lb, get_logged_in_username())
-            return bm.get_commits_behind_remote()[1]
-        return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
-            _gc)
 
     def resolve_active_branch_name(self, info):
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(

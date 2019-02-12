@@ -76,9 +76,11 @@ class Branch(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepository
     # Indicates whether this branch can be merged into the current active branch
     is_mergeable = graphene.Boolean()
 
-    # Count of commits behind remote - zero means up-to-date, positive is behind
-    # negative indicates local repo is ahead of remote (unpushed changes)
+    # Count of commits on remote not present in local branch
     commits_behind = graphene.Int()
+
+    # Count of commits on local branch not present in remote.
+    commits_ahead = graphene.Int
 
     @classmethod
     def get_node(cls, info, id):
@@ -112,16 +114,11 @@ class Branch(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepository
                                              self.name)
         mergeable = self.branch_name in BranchManager(lb).branches_local \
                     and self.branch_name != BranchManager(lb).active_branch
+
         return mergeable
 
-    def resolve_commits_behind(self, info):
-
-        lb = InventoryManager().load_labbook(get_logged_in_username(),
-                                             self.owner,
-                                             self.name)
-        if not lb.remote:
-            return 0
-
+    @classmethod
+    def _configure_git(cls, lb, info) -> GitLabManager:
         # Extract valid Bearer token
         # TODO - This code is duplicated all over the place, must be refactored.
         token = None
@@ -146,10 +143,21 @@ class Branch(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepository
         # Configure git creds
         mgr = GitLabManager(default_remote, admin_service, access_token=token)
         mgr.configure_git_credentials(default_remote, get_logged_in_username())
+        return mgr
 
+    def resolve_commits_ahead(self, info):
+        lb = InventoryManager().load_labbook(get_logged_in_username(),
+                                             self.owner,
+                                             self.name)
+        self._configure_git(lb, info)
         bm = BranchManager(lb)
-        if bm.active_branch == self.branch_name:
-            _, count = bm.get_commits_behind_remote()
-            return count
-        else:
-            return 0
+        return bm.get_commits_ahead()
+
+    def resolve_commits_behind(self, info):
+
+        lb = InventoryManager().load_labbook(get_logged_in_username(),
+                                             self.owner,
+                                             self.name)
+        self._configure_git(lb, info)
+        bm = BranchManager(lb)
+        return bm.get_commits_behind()
