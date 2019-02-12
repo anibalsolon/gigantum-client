@@ -151,7 +151,7 @@ class Branch(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepository
                                              self.name)
         self._configure_git(lb, info)
         bm = BranchManager(lb)
-        return bm.get_commits_ahead()
+        return bm.get_commits_ahead(branch_name=self.branch_name)
 
     def resolve_commits_behind(self, info):
 
@@ -160,4 +160,4 @@ class Branch(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepository
                                              self.name)
         self._configure_git(lb, info)
         bm = BranchManager(lb)
-        return bm.get_commits_behind()
+        return bm.get_commits_behind(branch_name=self.branch_name)
