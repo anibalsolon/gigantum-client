@@ -80,7 +80,7 @@ class Branch(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepository
     commits_behind = graphene.Int()
 
     # Count of commits on local branch not present in remote.
-    commits_ahead = graphene.Int
+    commits_ahead = graphene.Int()
 
     @classmethod
     def get_node(cls, info, id):
