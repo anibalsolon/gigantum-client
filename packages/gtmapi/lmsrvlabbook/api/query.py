@@ -20,7 +20,6 @@
 import base64
 from typing import List
 import graphene
-import json
 
 from gtmcore.logging import LMLogger
 from gtmcore.configuration import Configuration
