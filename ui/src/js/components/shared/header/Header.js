@@ -19,8 +19,8 @@ import ErrorBoundary from 'Components/common/ErrorBoundary';
 import TitleSection from './titleSection/TitleSection';
 import ActionsSection from './actionsSection/ActionsSection';
 import BranchMenu from './branches/BranchMenu';
-// import Container from './container/Container';
-// import Navigation from './navigation/Navigation';
+import Container from './container/Container';
+import Navigation from './navigation/Navigation';
 // assets
 import './Header.scss';
 
@@ -166,7 +166,7 @@ class Header extends Component {
   }
 
   render() {
-    console.log(this.props)
+
     const { props, state } = this,
           {
             labbookName,
@@ -199,53 +199,54 @@ class Header extends Component {
       <div className="Header__wrapper">
 
         <div className={headerCSS}>
+            <div className="Header__flex">
+              <div className="Header__columnContainer Header__columnContainer--flex-1">
 
-            <div className="Header__columnContainer Header__columnContainer--flex-1">
-
-              <TitleSection
-                self={this}
-                {...props}
-              />
-
-              <ErrorBoundary
-                type={branchesErrorCSS}
-                key="branches">
-                <BranchMenu
-                  defaultRemote={labbook.defaultRemote}
-                  branchesOpen={this.props.branchesOpen}
-                  labbook={labbook}
-                  labbookId={labbook.id}
-                  activeBranch={labbook.activeBranchName}
-                  toggleBranchesView={this.props.toggleBranchesView}
-                  mergeFilter={this.props.mergeFilter}
-                  setBuildingState={this.props.setBuildingState}
+                <TitleSection
+                  self={this}
+                  {...props}
                 />
-              </ErrorBoundary>
 
+                <ErrorBoundary
+                  type={branchesErrorCSS}
+                  key="branches">
+                  <BranchMenu
+                    defaultRemote={labbook.defaultRemote}
+                    branchesOpen={this.props.branchesOpen}
+                    labbook={labbook}
+                    labbookId={labbook.id}
+                    activeBranch={labbook.activeBranchName}
+                    toggleBranchesView={this.props.toggleBranchesView}
+                    mergeFilter={this.props.mergeFilter}
+                    setBuildingState={this.props.setBuildingState}
+                    isSticky={props.isSticky}
+                  />
+                </ErrorBoundary>
+
+              </div>
+
+              <div className="Header__columnContainer">
+                <ActionsSection
+                  visibility={visibility}
+                  description={description}
+                  collaborators={collaborators}
+                  defaultRemote={defaultRemote}
+                  labbookId={id}
+                  remoteUrl={defaultRemote}
+                  setSyncingState={this._setSyncingState}
+                  setPublishingState={this._setPublishingState}
+                  setExportingState={this._setExportingState}
+                  branchName={branchName}
+                  {...props}
+                />
+
+                <Container {...props} />
+              </div>
             </div>
 
-            <div className="Header__columnContainer">
-              <ActionsSection
-                visibility={visibility}
-                description={description}
-                collaborators={collaborators}
-                defaultRemote={defaultRemote}
-                labbookId={id}
-                remoteUrl={defaultRemote}
-                setSyncingState={this._setSyncingState}
-                setPublishingState={this._setPublishingState}
-                setExportingState={this._setExportingState}
-                branchName={branchName}
-                {...props}
-              />
-
-              {/* <Container /> */}
-            </div>
+            <Navigation {...props} />
 
           </div>
-
-          {/* <Navigation />*/}
-
       </div>
     );
   }

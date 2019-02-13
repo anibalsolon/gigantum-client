@@ -20,7 +20,6 @@ const LocalDatasets = {
     const fetchData = function () {
       fetchQuery(LinkedLocalDatasetsQuery(), variables).then((response, error) => {
         if (response) {
-            console.log(response);
           resolve(response);
         } else {
           reject(response);

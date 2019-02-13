@@ -4,6 +4,8 @@
 
   min-height: 30px;
 
+  height: auto;
+
   @include flex(space-between, row);
 }
 
@@ -18,7 +20,6 @@
 .Header {
   position: fixed;
   z-index: index($elements, labbookHeader);
-  @include flex(space-between, row);
 
   flex: 1 0 auto;
 
@@ -45,7 +46,7 @@
       height: 60px;
     }
 
-    .Header__navContainer{
+    .Navigation {
       position: absolute;
       margin: 0;
       bottom: 0;
@@ -149,6 +150,22 @@
 }
 
 .Header__columnContainer{
+  .TitleSection {
+    height: 70px;
+  }
+
+  .BranchMenu {
+    height: 50px;
+    align-items: center;
+  }
+
+}
+
+.Header__flex {
+  @include flex(space-between, row);
+}
+
+.Header__columnContainer{
   transition: height 0.5s;
 
   @include flex(space-between, column);
@@ -233,87 +250,6 @@
   color: $jet;
 
   font-size: 1.4vw;
-}
-
-.Header__navContainer {
-  position: relative;
-
-  transition: 0.5s all;
-}
-
-.Header__nav {
-  white-space: nowrap;
-  max-width: 1235px;
-  min-width: 820px;
-  border-bottom: 1px solid $grey;
-}
-
-.Header__navItem{
-  width: 137px;
-
-  text-align: center;
-
-  a {
-    display: inline-block;
-
-    margin: 0;
-    padding: .75rem 0;
-
-    text-decoration: none !important;
-
-    color: $jet;
-  }
-
-  a:hover {
-    color: $selected-blue;
-  }
-
-  &--selected a {
-    position: relative;
-    z-index: index($elements, button);
-    color: $selected-blue;
-  }
-}
-
-.Header__navSlider{
-  position: absolute;
-  bottom: 0;
-
-  width: 100px;
-  height: 3px;
-  margin: 0;
-
-  transition: .1s ease-in-out;
-  pointer-events: none;
-
-  border: none;
-  background: $turquise;
-}
-
-@for $i from 0 through 5 {
-
-  .Header__navItem--#{$i}:hover ~ hr,
-  .Header__navSlider--#{$i}{
-    @if $i == 0 {
-      margin-left: $i * 14% + 1%;
-    }
-    @if $i == 1 {
-      margin-left: 16%;
-    }
-    @if $i == 2 {
-      margin-left: $i * 14%;
-    }
-    @if $i == 3 {
-      margin-left: $i * 14% + 3%;
-    }
-    @if $i == 4 {
-      margin-left: $i * 14% + 1%;
-    }
-    @if $i == 5 {
-      margin-left: 71% ;
-    }
-    margin-left: 18.5px + ($i * 137px)
-  }
 }
 
 

@@ -100,12 +100,7 @@ export default class Description extends Component {
               'visibility-hidden': this.props.hovered,
           }),
           displayedText = this.state.descriptionText && this.state.descriptionText.length ? this.state.descriptionText : 'Add description...',
-          defaultText = this.state.descriptionText ? this.state.descriptionText : '',
-          textareaStyle = {
-            height: this.state.textareaHeight,
-            width: this.state.textareaWidth,
-            maxWidth: '264px',
-          };
+          defaultText = this.state.descriptionText ? this.state.descriptionText : '';
 
     return (
      <div className="Description">
@@ -122,7 +117,6 @@ export default class Description extends Component {
                         maxLength="260"
                         className="Description__input"
                         type="text"
-                        style={textareaStyle}
                         onChange={(evt) => { this.setState({ descriptionText: evt.target.value.replace(/\n/g, ' ') }); }}
                         onKeyDown={(evt) => {
                             if (evt.key === 'Enter') {

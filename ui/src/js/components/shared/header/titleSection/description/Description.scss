@@ -1,6 +1,7 @@
 @import '~Styles/_imports.scss';
 
 .Description {
+    z-index: index($elements, popup) + 1;
     p {
       margin: 0;
 
@@ -19,8 +20,16 @@
     }
 }
 
+.Description__text{
+  white-space: pre-line;
+  text-overflow: ellipsis;
+  word-wrap: break-word;
+  height: 24px;
+}
+
 .Description__container{
     position: relative;
+    z-index: index($elements, popup) + 1;
 
     display: -webkit-box;
     overflow: hidden;
@@ -28,11 +37,11 @@
     flex-wrap: nowrap;
     justify-content: space-between;
 
-    min-width: 300px;
+    min-width: 500px;
     max-width: 500px;
-    max-height: 80px;
-    padding: 5px;
-    padding: 2px;
+    max-height: 72px;
+
+
 
     cursor: pointer;
     white-space: pre-line;
@@ -40,18 +49,26 @@
     word-wrap: break-word;
 
     color: $jet;
-        border: 1px solid transparent;
 
     -webkit-line-clamp: 3;
     &--hovered {
+      @include boxShadow();
         border: 1px solid $romanSilver;
+        .Description__text{
+          padding: 2px 5px 2px 5px;
+          margin: 0 30px 0 0;
+          height: 70px;
+          background-color: $background-color;
+        }
     }
 }
 
 .Description__input{
-    width: 100%;
-    min-height: 66px !important;
-    margin: -1px 30px 0 -1px;
+    width: 470px;
+    min-height: 70px !important;
+    margin: 0 30px 0 0;
+    padding: 2px 5px;
+    z-index: index($elements, popup) + 1;
 
     resize: none;
 
@@ -79,12 +96,12 @@
 }
 
 .Description__input-buttons{
-    min-height: 66px !important;
+    min-height: 70px !important;
     background: $white;
     @include flex(space-around, column);
     position: absolute;
-    top: 1px;
-    right: 4px;
+    top: 0px;
+    right: 0px;
     border-top: 1px solid $romanSilver;
     border-right: 1px solid $romanSilver;
     border-bottom: 1px solid $romanSilver;

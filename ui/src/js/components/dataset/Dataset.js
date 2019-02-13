@@ -7,21 +7,21 @@ import HTML5Backend from 'react-dnd-html5-backend';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
 import Loadable from 'react-loadable';
-// components
-import DatasetHeader from '../shared/header/Header';
-import Login from 'Components/login/Login';
-import Loader from 'Components/common/Loader';
-import ErrorBoundary from 'Components/common/ErrorBoundary';
 // store
 import store from 'JS/redux/store';
 import { setStickyState } from 'JS/redux/reducers/dataset/dataset';
 import { setCallbackRoute } from 'JS/redux/reducers/routes';
+// config
+import Config from 'JS/config';
 // utils
 import { getFilesFromDragEvent } from 'JS/utils/html-dir-content';
+// components
+import Login from 'Components/login/Login';
+import Loader from 'Components/common/Loader';
+import ErrorBoundary from 'Components/common/ErrorBoundary';
+import DatasetHeader from '../shared/header/Header';
 // assets
 import './Dataset.scss';
-
-import Config from 'JS/config';
 
 const Loading = () => <Loader />;
 

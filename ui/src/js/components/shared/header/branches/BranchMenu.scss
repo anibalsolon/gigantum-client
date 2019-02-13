@@ -1,31 +1,73 @@
 @import '~Styles/_imports.scss';
 
-
+$dropBoxWidth: 240px;
 .BranchMenu {
   @include flex(flex-start, row);
+  z-index: index($elements, popup) - 1;
 }
 
 .BranchMenu__dropdown {
    position: relative;
    overflow: visible;
+   z-index: index($elements, popup) + 1;
 
    &-btn {
+     padding: 0 10px;
      height: 30px;
-     width: 200px;
+     width: $dropBoxWidth;
      border: 1px solid $azure;
      cursor: pointer;
 
      &:hover {
        border-color: $turquise;
      }
+
+     background: url('~Images/icons/down-arrow-azure.svg') no-repeat calc(100% - 10px) center;
+     background-size: 20px;
+   }
+
+   &-btn--open {
+     background: url('~Images/icons/up-arrow-azure.svg') no-repeat calc(100% - 10px) center;
+     background-size: 20px;
    }
 
    &-menu {
      position: absolute;
      background: $white;
      top: 30px;
-     padding: 20px;
-     width: 200px;
+     padding: 10px;
+     width: $dropBoxWidth + 50px;
      @include boxShadow();
    }
+
+   &-label {
+     color: $jet;
+     font-size: 10px;
+   }
+
+   &-text {
+     margin: 0 0 0 5px;
+     color: $azure;
+     font-size: 18px;
+   }
+}
+
+.BranchMenu__h5 {
+  margin: 0;
+  font-size: 16px;
+  border-bottom: 2px solid $romanSilver;
+}
+
+.BranchMenu__ul{
+  margin: 1px 0;
+}
+
+.BrancMenu__list-item {
+  padding: 5px 10px;
+  color: $jet;
+  cursor: pointer;
+  &:hover {
+    background-color: $azure;
+    color: $white;
+  }
 }

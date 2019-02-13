@@ -6,7 +6,7 @@ import {
 } from 'react-relay';
 // components
 import RemoteLabbookPanel from 'Components/dashboard/labbooks/remoteLabbooks/RemoteLabbookPanel';
-import DeleteLabbook from 'Components/shared/header/actionsSection/modals/DeleteLabbook';
+import DeleteLabbook from 'Components/shared/modals/DeleteLabbook';
 import LabbooksPaginationLoader from '../labbookLoaders/LabbookPaginationLoader';
 // queries
 import UserIdentity from 'JS/Auth/UserIdentity';

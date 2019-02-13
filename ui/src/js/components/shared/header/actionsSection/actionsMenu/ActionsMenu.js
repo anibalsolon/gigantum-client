@@ -10,7 +10,7 @@ import ExportLabbookMutation from 'Mutations/ExportLabbookMutation';
 import ExportDatasetMutation from 'Mutations/ExportDatasetMutation';
 import SyncLabbookMutation from 'Mutations/branches/SyncLabbookMutation';
 import SyncDatasetMutation from 'Mutations/branches/SyncDatasetMutation';
-import BuildImageMutation from 'Mutations/BuildImageMutation';
+import BuildImageMutation from 'Mutations/container/BuildImageMutation';
 // store
 import {
   setErrorMessage,
@@ -22,15 +22,13 @@ import store from 'JS/redux/store';
 import { setContainerMenuWarningMessage, setContainerMenuVisibility } from 'JS/redux/reducers/labbook/environment/environment';
 // queries
 import UserIdentity from 'JS/Auth/UserIdentity';
-import LinkedLocalDatasetsQuery from '../queries/LinkedLocalDatasetsQuery';
+import LinkedLocalDatasetsQuery from 'Components/shared/header/actionsSection/queries/LinkedLocalDatasetsQuery';
 // components
-import CreateBranch from 'Components/shared/header/branches/CreateBranch';
+import CreateBranch from 'Components/shared/modals/CreateBranch';
 import ToolTip from 'Components/common/ToolTip';
-import DeleteLabbook from '../modals/DeleteLabbook';
-import ForceSync from '../modals/ForceSync';
-import LoginPrompt from '../modals/LoginPrompt';
-import VisibilityModal from '../modals/VisibilityModal';
-import PublishDatasetsModal from '../modals/PublishDatasetsModal';
+import LoginPrompt from 'Components/shared/modals/LoginPrompt';
+import VisibilityModal from 'Components/shared/modals/VisibilityModal';
+import PublishDatasetsModal from 'Components/shared/modals/PublishDatasetsModal';
 // assets
 import './ActionsMenu.scss';
 
@@ -327,53 +325,6 @@ class ActionsMenu extends Component {
       setWarningMessage(`Only ${owner} can add and remove collaborators in this labbook.`);
     }
   }
-  /**
-  *  @param {}
-  *  sets state of Collaborators
-  *  @return {}
-  */
-  // _toggleCollaborators() {
-  //   const self = this;
-  //
-  //   this._checkSessionIsValid().then((response) => {
-  //     if (navigator.onLine) {
-  //       if (response.data) {
-  //         if (response.data.userIdentity.isSessionValid) {
-  //           if (this.state.canManageCollaborators) {
-  //             const self = this;
-  //
-  //             this.setState({ menuOpen: false });
-  //
-  //             this._checkSessionIsValid().then((response) => {
-  //               if (response.data) {
-  //                 if (response.data.userIdentity.isSessionValid) {
-  //                   this.setState({
-  //                     showCollaborators: !this.state.showCollaborators,
-  //                     newCollaborator: '',
-  //                   });
-  //
-  //                   this.refs.collaborators.inputTitle.value = '';
-  //                 } else {
-  //                   self.setState({ showLoginPrompt: true });
-  //                 }
-  //               }
-  //             });
-  //           } else {
-  //             this._showCollaboratorsWarning();
-  //           }
-  //         } else {
-  //           this.props.auth.renewToken(true, () => {
-  //             self.setState({ showLoginPrompt: true });
-  //           }, () => {
-  //             self._toggleCollaborators();
-  //           });
-  //         }
-  //       }
-  //     } else {
-  //       self.setState({ showLoginPrompt: true });
-  //     }
-  //   });
-  // }
 
   /**
   *  @param {}
@@ -717,40 +668,6 @@ class ActionsMenu extends Component {
         <div className={branchMenuCSS}>
 
           <ul className="ActionsMenu__list">
-            {
-              this.props.sectionType === 'labbook' &&
-              <Fragment>
-                <li className="ActionsMenu__item ActionsMenu__item--new-branch">
-
-                <button
-                  onClick={() => { this._handleToggleModal('createBranchVisible'); }}
-                  className="ActionsMenu__btn--flat">
-                  New Branch
-                </button>
-
-                </li>
-
-                <li className="ActionsMenu__item ActionsMenu__item--switch">
-
-                <button
-                  onClick={() => this._switchBranch()}
-                  className="ActionsMenu__btn--flat">
-                  Switch Branch
-                </button>
-
-                </li>
-
-                <li className="ActionsMenu__item ActionsMenu__item--merge">
-
-                <button
-                  onClick={() => this._mergeFilter()}
-                  className="ActionsMenu__btn--flat">
-                  Merge Branch
-                </button>
-
-                </li>
-              </Fragment>
-            }
 
             <li className="ActionsMenu__item ActionsMenu__item--export">
 

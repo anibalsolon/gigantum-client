@@ -1,0 +1,81 @@
+@import '~Styles/_imports.scss';
+
+.Navigation {
+  position: relative;
+  transition: 0.5s all;
+}
+
+.Navigation__ul {
+  white-space: nowrap;
+  max-width: 1235px;
+  min-width: 820px;
+  border-bottom: 1px solid $grey;
+}
+
+.Navigation__list-item {
+  width: 137px;
+
+  text-align: center;
+
+  a {
+    display: inline-block;
+
+    margin: 0;
+    padding: .75rem 0;
+
+    text-decoration: none !important;
+
+    color: $jet;
+  }
+
+  a:hover {
+    color: $selected-blue;
+  }
+
+  &--selected a {
+    position: relative;
+    z-index: index($elements, button);
+    color: $selected-blue;
+  }
+}
+
+.Navigation__slider {
+  position: absolute;
+  bottom: 0;
+
+  width: 100px;
+  height: 3px;
+  margin: 0;
+
+  transition: .1s ease-in-out;
+  pointer-events: none;
+
+  border: none;
+  background: $turquise;
+}
+
+@for $i from 0 through 5 {
+
+  .Navigation__list-item--#{$i}:hover ~ hr,
+  .Navigation__slider--#{$i}{
+    @if $i == 0 {
+      margin-left: $i * 14% + 1%;
+    }
+    @if $i == 1 {
+      margin-left: 16%;
+    }
+    @if $i == 2 {
+      margin-left: $i * 14%;
+    }
+    @if $i == 3 {
+      margin-left: $i * 14% + 3%;
+    }
+    @if $i == 4 {
+      margin-left: $i * 14% + 1%;
+    }
+    @if $i == 5 {
+      margin-left: 71% ;
+    }
+    margin-left: 18.5px + ($i * 137px)
+  }
+}

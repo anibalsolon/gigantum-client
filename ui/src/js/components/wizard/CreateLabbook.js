@@ -4,10 +4,10 @@ import uuidv4 from 'uuid/v4';
 // utilities
 import validation from 'JS/utils/Validation';
 // components
-import LoginPrompt from 'Components/shared/header/actionsSection/modals/LoginPrompt';
+import LoginPrompt from 'Components/shared/modals/LoginPrompt';
 // mutations
 import ImportRemoteLabbookMutation from 'Mutations/ImportRemoteLabbookMutation';
-import BuildImageMutation from 'Mutations/BuildImageMutation';
+import BuildImageMutation from 'Mutations/container/BuildImageMutation';
 // queries
 import UserIdentity from 'JS/Auth/UserIdentity';
 // store

@@ -35,9 +35,7 @@ const UserIdentity = {
     fetchData();
   }),
   removeUserIdentity: () => {
-    RemoveUserIdentityMutation(() => {
-      console.log('removed user');
-    });
+    RemoveUserIdentityMutation(() => {});
   },
 
 };

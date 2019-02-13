@@ -10,7 +10,7 @@ import ButtonLoader from 'Components/common/ButtonLoader';
 import Modal from 'Components/common/Modal';
 // utilities
 import validation from 'JS/utils/Validation';
-import BuildImageMutation from 'Mutations/BuildImageMutation';
+import BuildImageMutation from 'Mutations/container/BuildImageMutation';
 // store
 import { setErrorMessage } from 'JS/redux/reducers/footer';
 import store from 'JS/redux/store';

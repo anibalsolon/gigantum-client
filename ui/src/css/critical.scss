@@ -21,6 +21,7 @@
 @import 'atoms/table.scss';
 @import 'atoms/_radio-button.scss';
 @import 'atoms/card.scss';
+@import 'atoms/containerStatus.scss';
 
 //shared components
 @import 'components/shared/sideBar';
@@ -42,7 +43,6 @@
 @import 'components/home.scss';
 //labbook components
 @import 'components/labbook/dataBrowser.scss';
-@import 'components/labbook/containerStatus.scss';
 //wizard components
 @import 'components/wizard/wizardModal';
 @import 'components/wizard/selectBase';

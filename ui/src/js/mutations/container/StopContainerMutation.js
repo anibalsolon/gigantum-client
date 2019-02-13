@@ -15,9 +15,8 @@ const mutation = graphql`
 let tempID = 0;
 
 export default function StopContainerMutation(
-  labbookName,
   owner,
-  clientMutationId,
+  labbookName,
   callback,
 ) {
   const variables = {
@@ -27,7 +26,6 @@ export default function StopContainerMutation(
       clientMutationId: `${tempID++}`,
     },
   };
-  console.log(this, variables, environment)
   commitMutation(
     environment,
     {

@@ -6,14 +6,14 @@ import classNames from 'classnames';
 import Moment from 'moment';
 // muations
 import ImportRemoteLabbookMutation from 'Mutations/ImportRemoteLabbookMutation';
-import BuildImageMutation from 'Mutations/BuildImageMutation';
+import BuildImageMutation from 'Mutations/container/BuildImageMutation';
 // store
 import store from 'JS/redux/store';
 import { setWarningMessage, setMultiInfoMessage } from 'JS/redux/reducers/footer';
 // queries
 import UserIdentity from 'JS/Auth/UserIdentity';
 // components
-import LoginPrompt from 'Components/shared/header/actionsSection/modals/LoginPrompt';
+import LoginPrompt from 'Components/shared/modals/LoginPrompt';
 import Loader from 'Components/common/Loader';
 // assets
 import './RemoteLabbookPanel.scss';
@@ -177,7 +177,7 @@ export default class RemoteLabbookPanel extends Component {
      'RemoteLabbooks__row RemoteLabbooks__row--text': true,
      blur: this.state.isImporting,
    });
-   console.log('RemoteLabbooks__icon', localStorage, localStorage.getItem('username'), edge.node.owner)
+
    const deleteCSS = classNames({
      RemoteLabbooks__icon: true,
      'RemoteLabbooks__icon--delete': localStorage.getItem('username') === edge.node.owner,

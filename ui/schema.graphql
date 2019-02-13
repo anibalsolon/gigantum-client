@@ -1,5 +1,5 @@
 # source: http://localhost:10000/api/labbook/
-# timestamp: Mon Feb 04 2019 10:54:52 GMT-0500 (Eastern Standard Time)
+# timestamp: Mon Feb 11 2019 12:32:11 GMT-0500 (Eastern Standard Time)
 
 schema {
   query: LabbookQuery
@@ -251,6 +251,20 @@ type BaseComponentEdge {
   cursor: String!
 }
 
+"""Represents a branch in the repo """
+type Branch implements Node & GitRepository {
+  """The ID of the object."""
+  id: ID!
+  owner: String!
+  name: String!
+  branchName: String!
+  isActive: Boolean
+  isLocal: Boolean
+  isRemote: Boolean
+  isMergeable: Boolean
+  commitsBehind: Int
+}
+
 input BuildImageInput {
   owner: String!
   labbookName: String!
@@ -429,7 +443,7 @@ type DatasetFile implements Node & GitRepository {
   isDir: Boolean
   isFavorite: Boolean
   isLocal: Boolean
-  modifiedAt: Int
+  modifiedAt: Float
   size: String
 }
 
@@ -644,19 +658,6 @@ type FetchLabbookEdgePayload {
   clientMutationId: String
 }
 
-"""An interface for any object that is represented by a git commit"""
-interface GitCommit {
-  hash: String!
-  shortHash: String
-  committedOn: String
-}
-
-"""An interface for any git reference"""
-interface GitRef {
-  refName: String!
-  prefix: String
-}
-
 """
 An interface for Objects backended with git repositories (LabBook and Datasets)
 """
@@ -735,7 +736,7 @@ type JobStatus implements Node {
 }
 
 """
-A Connection for paging through all background jobs the system is aware of.
+A Connection for paging through all background jobs the system is aware of. 
 """
 type JobStatusConnection {
   pageInfo: PageInfo!
@@ -766,12 +767,7 @@ type Labbook implements Node & GitRepository {
   sizeBytes: String
   activeBranchName: String
   workspaceBranchName: String
-  availableBranchNames: [String]
-  localBranchNames: [String]
-  remoteBranchNames: [String]
-  mergeableBranchNames: [String]
-  activeBranch: LabbookRef @deprecated(reason: "Can use workspaceBranchName instead")
-  branches(before: String, after: String, first: Int, last: Int): LabbookRefConnection @deprecated(reason: "Can use availableBranchNames instead")
+  branches: [Branch]
   defaultRemote: String
   creationDateUtc: DateTime
   modifiedOnUtc: DateTime
@@ -791,17 +787,6 @@ type Labbook implements Node & GitRepository {
   packages(packageInput: [PackageComponentInput]): [PackageComponent]
   visibility: String
   linkedDatasets: [Dataset]
-}
-
-"""An object representing a commit to a LabBook"""
-type LabbookCommit implements Node & GitRepository & GitCommit {
-  """The ID of the object."""
-  id: ID!
-  owner: String!
-  name: String!
-  hash: String!
-  shortHash: String
-  committedOn: String
 }
 
 """A Connection for paging through labbooks that exist locally. """
@@ -860,7 +845,7 @@ type LabbookFile implements Node & GitRepository {
   key: String!
   isDir: Boolean
   isFavorite: Boolean
-  modifiedAt: Int
+  modifiedAt: Float
   size: String
 }
 
@@ -991,34 +976,9 @@ type LabbookQuery {
   userIdentity: UserIdentity
 }
 
-"""An object representing a git reference in a LabBook repository"""
-type LabbookRef implements Node & GitRepository & GitRef {
-  """The ID of the object."""
-  id: ID!
-  owner: String!
-  name: String!
-  refName: String!
-  prefix: String
-  commit: LabbookCommit
-}
-
-"""A Connection for paging through labbook git refs (branches)"""
-type LabbookRefConnection {
-  pageInfo: PageInfo!
-  edges: [LabbookRefEdge]!
-}
-
-type LabbookRefEdge {
-  """The item at the end of the edge"""
-  node: LabbookRef
-
-  """A cursor for use in pagination"""
-  cursor: String!
-}
-
 """
 A type representing a section within a LabBook (i.e., code, input, output)
-
+    
 """
 type LabbookSection implements Node & GitRepository {
   """The ID of the object."""
@@ -1068,7 +1028,7 @@ input MergeFromBranchInput {
 }
 
 """
-Merge from another branch into the current active branch. Force if necessary.
+Merge from another branch into the current active branch. Force if necessary. 
 """
 type MergeFromBranchPayload {
   labbook: Labbook
@@ -1320,7 +1280,7 @@ input ResetBranchToRemoteInput {
 """
 Undo all local history and then set current branch tip to match remote.
 
-Very useful when changes are made to master that cannot be pushed.
+Very useful when changes are made to master that cannot be pushed. 
 """
 type ResetBranchToRemotePayload {
   labbook: Labbook

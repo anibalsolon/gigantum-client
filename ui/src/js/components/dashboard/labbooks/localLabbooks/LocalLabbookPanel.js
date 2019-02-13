@@ -4,8 +4,8 @@ import Highlighter from 'react-highlight-words';
 import { Link } from 'react-router-dom';
 import Moment from 'moment';
 // muations
-import StartContainerMutation from 'Mutations/StartContainerMutation';
-import StopContainerMutation from 'Mutations/StopContainerMutation';
+import StartContainerMutation from 'Mutations/container/StartContainerMutation';
+import StopContainerMutation from 'Mutations/container/StopContainerMutation';
 // store
 import { setErrorMessage, setInfoMessage } from 'JS/redux/reducers/footer';
 import store from 'JS/redux/store';

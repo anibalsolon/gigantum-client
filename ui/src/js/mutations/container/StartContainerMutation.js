@@ -15,9 +15,8 @@ const mutation = graphql`
 let tempID = 0;
 
 export default function StartContainerMutation(
-  labbookName,
   owner,
-  clientMutationId,
+  labbookName,
   callback,
 ) {
   const variables = {

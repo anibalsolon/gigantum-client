@@ -7,7 +7,7 @@ import store from 'JS/redux/store';
 import config from 'JS/config';
 // Components
 import Loader from 'Components/common/Loader';
-import CreateBranch from 'Components/shared/header/branches/CreateBranch';
+import CreateBranch from 'Components/shared/modals/CreateBranch';
 import ErrorBoundary from 'Components/common/ErrorBoundary';
 import PaginationLoader from './loaders/PaginationLoader';
 import ClusterCardWrapper from './wrappers/ClusterCardWrapper';
@@ -72,7 +72,6 @@ class Activity extends Component {
   }
 
   UNSAFE_componentWillReceiveProps(nextProps) {
-    console.log('componentWillReceiveProps')
     const section = nextProps[nextProps.sectionType],
           activityRecords = nextProps[nextProps.sectionType].activityRecords,
           {
@@ -307,7 +306,6 @@ class Activity extends Component {
         if (error) {
           console.error(error);
         }
-        console.log(state)
         if ((activityRecords.pageInfo.hasNextPage) && (this._countUnexpandedRecords() < 7) && (this._countUnexpandedRecords() > 2)) {
           self._loadMore();
         } else {
@@ -428,7 +426,6 @@ class Activity extends Component {
         previousTimeHash = null,
         clusterIndex = 0;
 
-    console.time('_transformActivity')
     activityRecords.edges.forEach((edge, index) => {
       if (edge && edge.node) {
          const date = (edge.node && edge.node.timestamp) ? new Date(edge.node.timestamp) : new Date(),
@@ -489,9 +486,6 @@ class Activity extends Component {
       }
     });
 
-    console.timeEnd('_transformActivity')
-
-    console.log(activityTime)
     return activityTime;
   }
 
@@ -664,7 +658,6 @@ class Activity extends Component {
             'Activity__new-record box-shadow': true,
             'is-demo': window.location.hostname === config.demoHostName,
           });
-    console.log(section)
     if (section) {
       const recordDates = Object.keys(state.activityRecords),
             stickyDateCSS = classNames({

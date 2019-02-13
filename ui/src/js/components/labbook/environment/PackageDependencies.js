@@ -91,7 +91,6 @@ class PackageDependencies extends Component {
     const newPackages = this.props.environment.packageDependencies;
 
     if (newPackages.edges && newPackages.edges.length < 3 && newPackages.pageInfo.hasNextPage) {
-      console.log('component update load more');
       this._loadMore();
     }
 
@@ -138,7 +137,6 @@ class PackageDependencies extends Component {
   */
   componentDidMount() {
     if (this.props.environment.packageDependencies.pageInfo.hasNextPage) {
-      console.log('mount load more');
       this._loadMore(); // routes query only loads 2, call loadMore
     } else if (!store.getState().packageDependencies.latestFetched) {
       this.props.setLatestFetched(true);
@@ -695,6 +693,7 @@ class PackageDependencies extends Component {
             </div>
             <div className="PackageDependencies__addPackage">
               <button
+                data-container-popup={true}
                 onClick={() => this._toggleAddPackageMenu()}
                 className={addPackageCSS}
               >

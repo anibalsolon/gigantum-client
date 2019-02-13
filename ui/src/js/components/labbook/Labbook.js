@@ -18,13 +18,14 @@ import { setCallbackRoute } from 'JS/redux/reducers/routes';
 import { setLatestPackages } from 'JS/redux/reducers/labbook/environment/packageDependencies';
 // utils
 import { getFilesFromDragEvent } from 'JS/utils/html-dir-content';
+import FetchContainerStatus from './fetchContainerStatus';
 // config
 import Config from 'JS/config';
 // components
 import Login from 'Components/login/Login';
 import Loader from 'Components/common/Loader';
 import ErrorBoundary from 'Components/common/ErrorBoundary';
-import LabbookHeader from '../shared/header/Header';
+import Header from '../shared/header/Header';
 // import Activity from './activity/LabbookActivityContainer';
 // assets
 import './Labbook.scss';
@@ -65,12 +66,17 @@ class Labbook extends Component {
   constructor(props) {
   	super(props);
     localStorage.setItem('owner', store.getState().routes.owner);
-    this.state = {};
     // bind functions here
     this._setBuildingState = this._setBuildingState.bind(this);
     this._toggleBranchesView = this._toggleBranchesView.bind(this);
     this._branchViewClickedOff = this._branchViewClickedOff.bind(this);
     setCallbackRoute(props.location.pathname);
+  }
+
+  state = {
+    containerStatus: this.props.labbook.environment.containerStatus,
+    imageStatus: this.props.labbook.environment.imageStatus,
+    isBuilding: false,
   }
 
   UNSAFE_componentWillMount() {
@@ -99,6 +105,7 @@ class Labbook extends Component {
       }
     });
     this._setStickHeader();
+    this._fetchStatus();
 
     window.addEventListener('scroll', this._setStickHeader);
     window.addEventListener('click', this._branchViewClickedOff);
@@ -114,6 +121,43 @@ class Labbook extends Component {
     window.removeEventListener('scroll', this._setStickHeader);
 
     window.removeEventListener('click', this._branchViewClickedOff);
+  }
+
+  /**
+  *  @param {}
+  *  fetches status of labbook container and image
+  *  sets state of labbook using redux and containerStatus using setState
+  *  @return {}
+  */
+  _fetchStatus() {
+    const { props, state } = this,
+          { owner, name } = props.labbook,
+          self = this,
+          { isBuilding } = props;
+
+      FetchContainerStatus.getContainerStatus(owner, name).then((response, error) => {
+        if (response && response.labbook) {
+          const { environment } = response.labbook;
+          // reset build flags
+          if ((environment.imageStatus !== 'BUILD_IN_PROGRESS') && isBuilding) {
+            self.setState({
+              isBuilding: false,
+            });
+            this.props.setBuildingState(false);
+          }
+          // only updates state if container or imageStatus has changed
+          if ((state.containerStatus !== environment.containerStatus) || (state.imageStatus !== environment.imageStatus)) {
+            self.setState({
+              imageStatus: environment.imageStatus,
+              containerStatus: environment.containerStatus,
+            });
+          }
+        }
+        // refetches status after a 3 second timeout
+        setTimeout(() => {
+          self._fetchStatus();
+        }, 3 * 1000);
+      });
   }
 
   /**
@@ -203,13 +247,15 @@ class Labbook extends Component {
 
           <div className="Labbook__spacer flex flex--column">
 
-            <LabbookHeader
+            <Header
+              {...props}
               description={labbook.description}
               setBuildingState={this._setBuildingState}
               toggleBranchesView={this._toggleBranchesView}
               branchName={branchName}
               sectionType={'labbook'}
-              {...this.props}
+              containerStatus={state.containerStatus}
+              imageStatus={state.imageStatus}
             />
 
             <div className="Labbook__routes flex flex-1-0-auto">
@@ -220,7 +266,6 @@ class Labbook extends Component {
                   path={`${props.match.path}`}
                   render={() => (
                     <ErrorBoundary type="labbookSectionError">
-
                       <Overview
                         key={`${props.labbookName}_overview`}
                         labbook={labbook}
@@ -231,7 +276,6 @@ class Labbook extends Component {
                         isPublishing={props.isPublishing}
                         scrollToTop={this._scrollToTop}
                       />
-
                     </ErrorBoundary>
                         )}
                 />
@@ -246,9 +290,7 @@ class Labbook extends Component {
 
                         <ErrorBoundary
                           type="labbookSectionError"
-                          key="overview"
-                        >
-
+                          key="overview">
                           <Overview
                                key={`${props.labbookName}_overview`}
                                labbook={labbook}
@@ -260,7 +302,6 @@ class Labbook extends Component {
                                isPublishing={props.isPublishing}
                                scrollToTop={this._scrollToTop}
                              />
-
                         </ErrorBoundary>
                             )}
                     />
@@ -271,7 +312,6 @@ class Labbook extends Component {
                         <ErrorBoundary
                           type="labbookSectionError"
                           key="activity">
-
                           <Activity
                                key={`${props.labbookName}_activity`}
                                labbook={labbook}
@@ -283,9 +323,8 @@ class Labbook extends Component {
                                isMainWorkspace={branchName === 'workspace'}
                                setBuildingState={this._setBuildingState}
                                sectionType={'labbook'}
-                               {...this.props}
+                               {...props}
                              />
-
                         </ErrorBoundary>
                           )}
                     />
@@ -296,7 +335,6 @@ class Labbook extends Component {
                         <ErrorBoundary
                           type="labbookSectionError"
                           key="environment">
-
                           <Environment
                                key={`${props.labbookName}_environment`}
                                labbook={labbook}
@@ -305,9 +343,8 @@ class Labbook extends Component {
                                containerStatus={this.refs.ContainerStatus}
                                overview={labbook.overview}
                                isLocked={isLockedEnvironment}
-                               {...this.props}
+                               {...props}
                              />
-
                         </ErrorBoundary>)}
                     />
 
@@ -316,9 +353,7 @@ class Labbook extends Component {
                       render={() => (
                         <ErrorBoundary
                           type="labbookSectionError"
-                          key="code"
-                        >
-
+                          key="code">
                           <Code
                                labbook={labbook}
                                labbookId={labbook.id}
@@ -335,16 +370,13 @@ class Labbook extends Component {
                       render={() => (
                         <ErrorBoundary
                           type="labbookSectionError"
-                          key="input"
-                        >
-
+                          key="input">
                           <InputData
                                labbook={labbook}
                                labbookId={labbook.id}
                                isLocked={isLockedBrowser}
                                section={'input'}
                              />
-
                         </ErrorBoundary>)}
                     />
 
@@ -353,16 +385,13 @@ class Labbook extends Component {
                       render={() => (
                         <ErrorBoundary
                           type="labbookSectionError"
-                          key="output"
-                        >
-
+                          key="output">
                           <OutputData
                                labbook={labbook}
                                labbookId={labbook.id}
                                isLocked={isLockedBrowser}
                                section={'output'}
                              />
-
                         </ErrorBoundary>)}
                     />
 
@@ -375,7 +404,6 @@ class Labbook extends Component {
             </div>
 
           </div>
-
           <div className="Labbook__veil" />
 
         </div>);
@@ -427,12 +455,16 @@ const LabbookFragmentContainer = createFragmentContainer(
             numPipPackages
           }
 
-          availableBranchNames
-          localBranchNames
-          remoteBranchNames
-          mergeableBranchNames
-          workspaceBranchName
-          activeBranchName
+         branches {
+           owner
+           name
+           branchName
+           isActive
+           isLocal
+           isRemote
+           isMergeable
+           commitsBehind
+         }
 
           ...Environment_labbook
           ...Overview_labbook

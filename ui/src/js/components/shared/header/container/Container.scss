@@ -1,0 +1,6 @@
+@import '~Styles/_imports.scss';
+
+
+.Container {
+  @include flex(flex-end, row);
+}

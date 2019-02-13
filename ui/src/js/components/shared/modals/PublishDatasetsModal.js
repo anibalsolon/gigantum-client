@@ -7,7 +7,7 @@ import PublishLabbookMutation from 'Mutations/branches/PublishLabbookMutation';
 import PublishDatasetMutation from 'Mutations/branches/PublishDatasetMutation';
 import SyncLabbookMutation from 'Mutations/branches/SyncLabbookMutation';
 import ModifyDatasetLinkMutation from 'Mutations/ModifyDatasetLinkMutation';
-import BuildImageMutation from 'Mutations/BuildImageMutation';
+import BuildImageMutation from 'Mutations/container/BuildImageMutation';
 // component
 import Modal from 'Components/common/Modal';
 // store
@@ -17,7 +17,7 @@ import store from 'JS/redux/store';
 // assets
 import './PublishDatasetsModal.scss';
 // query
-import LocalDatasetsQuery from '../queries/LocalDatasetsQuery';
+import LocalDatasetsQuery from 'Components/shared/header/actionsSection/queries/LocalDatasetsQuery';
 
 export default class PublishDatasetsModal extends Component {
   constructor(props) {
