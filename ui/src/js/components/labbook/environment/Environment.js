@@ -45,17 +45,16 @@ class Environment extends Component {
     this.props.setBuildingState(true);
     if (store.getState().containerStatus.status === 'Running') {
       StopContainerMutation(
-        labbookName,
         owner,
-        'clientMutationId',
+        labbookName,
         (response, error) => {
           if (error) {
             console.log(error);
             setErrorMessage(`Problem stopping ${labbookName}`, error);
           } else {
             BuildImageMutation(
-              labbookName,
               owner,
+              labbookName,
               false,
               (response, error) => {
                 if (error) {
@@ -74,8 +73,8 @@ class Environment extends Component {
       );
     } else {
       BuildImageMutation(
-        labbookName,
         owner,
+        labbookName,
         false,
         (response, error) => {
           if (error) {

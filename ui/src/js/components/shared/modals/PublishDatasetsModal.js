@@ -132,8 +132,8 @@ export default class PublishDatasetsModal extends Component {
                   self.props.setRemoteSession();
                 } else {
                   BuildImageMutation(
-                    this.props.labbookName,
                     this.props.owner,
+                    this.props.labbookName,
                     false,
                     (response, error) => {
                       if (error) {

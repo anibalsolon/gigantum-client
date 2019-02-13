@@ -286,8 +286,8 @@ export default class WizardModal extends React.Component {
   */
   _buildImage(name, owner) {
     BuildImageMutation(
-      name,
       owner,
+      name,
       false,
       (response, error) => {
         if (error) {

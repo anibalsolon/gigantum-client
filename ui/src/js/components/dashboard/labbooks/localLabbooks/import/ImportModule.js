@@ -613,11 +613,11 @@ export default class ImportModule extends Component {
 
   /**
   *  @param {String, String, String}
-  *  trigers BuildImageMutation
+  *  trigers §
   *  @return {}
   */
   _buildImage(labbookName, owner, id) {
-    BuildImageMutation(labbookName, owner, false, (response, error) => {
+    BuildImageMutation(owner, labbookName, false, (response, error) => {
       if (error) {
         console.error(error);
 

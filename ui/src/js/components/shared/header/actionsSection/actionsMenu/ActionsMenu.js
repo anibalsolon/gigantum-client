@@ -237,8 +237,8 @@ class ActionsMenu extends Component {
                   this.props.setSyncingState(false);
                   if (this.props.sectionType === 'labbook') {
                     BuildImageMutation(
-                      this.state.labbookName,
                       this.state.owner,
+                      this.state.labbookName,
                       false,
                       (response, error) => {
                         if (error) {

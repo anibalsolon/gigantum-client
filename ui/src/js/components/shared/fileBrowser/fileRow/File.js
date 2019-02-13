@@ -110,9 +110,8 @@ class File extends Component {
       });
       setMergeMode(false, false);
       StartContainerMutation(
-        labbookName,
         owner,
-        'clientMutationId',
+        labbookName,
         (response, error) => {
           if (error) {
             setErrorMessage(`There was a problem starting ${labbookName} container`, error);

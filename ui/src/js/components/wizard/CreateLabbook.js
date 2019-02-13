@@ -71,8 +71,8 @@ export default class CreateLabbook extends React.Component {
                     setMultiInfoMessage(id, `Successfully imported remote Project ${labbookName}`, true, false);
 
                     BuildImageMutation(
-                      labbookName,
                       owner,
+                      labbookName,
                       false,
                       (response, error) => {
                         if (error) {
@@ -84,8 +84,8 @@ export default class CreateLabbook extends React.Component {
                     self.props.history.replace(`/projects/${owner}/${labbookName}`);
                   } else {
                     BuildImageMutation(
-                      labbookName,
                       localStorage.getItem('username'),
+                      labbookName,
                       false,
                       (response, error) => {
                         if (error) {

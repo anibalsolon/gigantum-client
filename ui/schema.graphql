@@ -1,5 +1,5 @@
 # source: http://localhost:10000/api/labbook/
-# timestamp: Mon Feb 11 2019 12:32:11 GMT-0500 (Eastern Standard Time)
+# timestamp: Wed Feb 13 2019 15:08:32 GMT-0500 (Eastern Standard Time)
 
 schema {
   query: LabbookQuery
@@ -773,7 +773,6 @@ type Labbook implements Node & GitRepository {
   modifiedOnUtc: DateTime
   collaborators: [String]
   canManageCollaborators: Boolean
-  updatesAvailableCount: Int
   isRepoClean: Boolean
   environment: Environment
   overview: LabbookOverview
@@ -1375,6 +1374,7 @@ type SyncDatasetPayload {
 input SyncLabbookInput {
   owner: String!
   labbookName: String!
+  pullOnly: Boolean
   overrideMethod: String
   clientMutationId: String
 }

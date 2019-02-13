@@ -99,9 +99,8 @@ export default class LocalLabbookPanel extends Component {
     this.setState({ status: 'Starting', textStatus: 'Starting' });
 
     StartContainerMutation(
-      labbookName,
       owner,
-      'clientMutationId',
+      labbookName,
       (response, error) => {
         if (error) {
           setErrorMessage(`There was a problem starting ${this.state.labbookName}, go to Project and try again`, error);
@@ -124,9 +123,8 @@ export default class LocalLabbookPanel extends Component {
     this.setState({ status: 'Stopping', textStatus: 'Stopping' });
 
     StopContainerMutation(
-      labbookName,
       owner,
-      'clientMutationId',
+      labbookName,
       (response, error) => {
         if (error) {
           console.log(error);

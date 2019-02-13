@@ -173,8 +173,8 @@ export default class CreateBranchModal extends Component {
           if (props.selected) {
             props.setBuildingState(true);
             BuildImageMutation(
-              labbookName,
               owner,
+              labbookName,
               false,
               (response, error) => {
                 if (error) {
