@@ -289,14 +289,13 @@ class TestBranching(object):
         # When the branch is up to date, ensure it doesn't report being behind.
         lb = mock_labbook_lfs_disabled[2]
         bm = BranchManager(lb, username='test')
-        bm.create_branch("testing-branch")
         lb.add_remote("origin", remote_labbook_repo)
+        bm.workon_branch('testing-branch')
 
         bm.fetch()
         behind = bm.get_commits_behind()
         ahead = bm.get_commits_ahead()
-        # NOTE: Ahead is 1 because the create_branch calls sweep which makes activity record
-        assert ahead == 1
+        assert ahead == 0
         assert behind == 0
 
     def test_count_commits_behind_for_local_branch(self, mock_config_file, remote_labbook_repo,
