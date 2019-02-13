@@ -183,6 +183,7 @@ class Header extends Component {
             id,
           } = labbook || dataset,
           selectedIndex = this._getSelectedIndex(),
+          isLabbookSection = props.sectionType === 'labbook',
           headerCSS = classNames({
             Header: true,
             'Header--sticky': this.props.isSticky,
@@ -206,8 +207,8 @@ class Header extends Component {
                   self={this}
                   {...props}
                 />
-
-                <ErrorBoundary
+                { isLabbookSection
+                 && <ErrorBoundary
                   type={branchesErrorCSS}
                   key="branches">
                   <BranchMenu
@@ -222,6 +223,7 @@ class Header extends Component {
                     isSticky={props.isSticky}
                   />
                 </ErrorBoundary>
+                }
 
               </div>
 
@@ -239,8 +241,7 @@ class Header extends Component {
                   branchName={branchName}
                   {...props}
                 />
-
-                <Container {...props} />
+                { isLabbookSection && <Container {...props} /> }
               </div>
             </div>
 

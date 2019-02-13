@@ -50,7 +50,7 @@ class Navigation extends Component {
 
   render() {
     const { props, state } = this,
-          { visibility } = props.labbook,
+          { visibility } = props[props.sectionType],
           selectedIndex = this._getSelectedIndex(),
           labbookLockCSS = classNames({
             [`Header__${visibility}`]: true,
