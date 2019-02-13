@@ -75,7 +75,7 @@ def publish_repository(repository: Repository, username: str, access_token: str,
 
 def sync_repository(repository: Repository, username: str, override: MergeOverride,
                     remote: str = "origin", access_token: str = None,
-                    id_token: str = None) -> int:
+                    pull_only: bool = False, id_token: str = None) -> int:
     p = os.getpid()
     logger = LMLogger.get_logger()
     logger.info(f"(Job {p}) Starting sync_repository({str(repository)})")
@@ -98,7 +98,7 @@ def sync_repository(repository: Repository, username: str, override: MergeOverri
                 wf = DatasetWorkflow(repository) # type: ignore
             cnt = wf.sync(username=username, remote=remote, override=override,
                           feedback_callback=update_meta, access_token=access_token,
-                          id_token=id_token)
+                          id_token=id_token, pull_only=pull_only)
         logger.info(f"(Job {p} Completed sync_repository with cnt={cnt}")
         return cnt
     except Exception as e:

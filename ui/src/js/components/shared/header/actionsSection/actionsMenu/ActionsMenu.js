@@ -203,16 +203,16 @@ class ActionsMenu extends Component {
   }
 
   /**
-  *  @param {}
+  *  @param {Boolean} pullOnly
   *  pushes code to remote
   *  @return {string}
   */
-  _sync() {
+  _sync(pullOnly) {
     if (this.props.isExporting) {
       this.setState({ syncWarningVisible: true });
     } else {
       const status = store.getState().containerStatus.status;
-
+      this.setState({ pullOnly })
       if (this.state.owner !== 'gigantum-examples') {
         this.setState({ menuOpen: false });
       }
@@ -263,6 +263,7 @@ class ActionsMenu extends Component {
                         this.state.owner,
                         this.state.labbookName,
                         null,
+                        pullOnly,
                         successCall,
                         failureCall,
                         (error) => {
@@ -296,7 +297,7 @@ class ActionsMenu extends Component {
                 this.props.auth.renewToken(true, () => {
                   self.setState({ showLoginPrompt: true });
                 }, () => {
-                  self._sync();
+                  self._sync(pullOnly);
                 });
               }
             }
@@ -582,6 +583,7 @@ class ActionsMenu extends Component {
           <ForceSync
             toggleSyncModal={this._toggleSyncModal}
             sectionType={this.props.sectionType}
+            pullOnly={this.state.pullOnly}
           />
         }
         {
@@ -618,6 +620,7 @@ class ActionsMenu extends Component {
             auth={this.props.auth}
             buttonText="Publish All"
             header={this.state.publishDatasetsModalAction}
+            pullOnly={this.state.pullOnly}
             modalStateValue="visibilityModalVisible"
             sectionType={this.props.sectionType}
             setPublishingState={this.props.setPublishingState}
@@ -740,8 +743,8 @@ class ActionsMenu extends Component {
             <div className="ActionsMenu__sync">
 
               <button
-                className="ActionsMenu__btn--sync"
-                onClick={() => this._sync()}>
+                className="BranchMenu__btn--sync"
+                onClick={() => this._sync(false)}>
                 Sync Branch
               </button>
 
@@ -759,6 +762,12 @@ class ActionsMenu extends Component {
                 </Fragment>
 
               }
+
+              <button
+                className="BranchMenu__btn--sync"
+                onClick={() => this._sync(true)}>
+                Pull-only
+              </button>
 
             </div>
             }

@@ -76,13 +76,14 @@ class SyncLabbook(graphene.relay.ClientIDMutation):
     class Input:
         owner = graphene.String(required=True)
         labbook_name = graphene.String(required=True)
+        pull_only = graphene.Boolean(required=False, default=False)
         override_method = graphene.String(default="abort")
 
     job_key = graphene.String()
 
     @classmethod
     @logged_mutation
-    def mutate_and_get_payload(cls, root, info, owner, labbook_name,
+    def mutate_and_get_payload(cls, root, info, owner, labbook_name, pull_only=False,
                                override_method="abort", client_mutation_id=None):
         # Load LabBook
         username = get_logged_in_username()
@@ -118,6 +119,7 @@ class SyncLabbook(graphene.relay.ClientIDMutation):
         job_metadata = {'method': 'sync_labbook',
                         'labbook': lb.key}
         job_kwargs = {'repository': lb,
+                      'pull_only': pull_only,
                       'username': username,
                       'override': override}
         dispatcher = Dispatcher()

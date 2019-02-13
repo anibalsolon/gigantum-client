@@ -21,6 +21,7 @@ export default function SyncLabbookMutation(
   owner,
   labbookName,
   overrideMethod,
+  pullOnly,
   successCall,
   failureCall,
   callback,
@@ -29,6 +30,7 @@ export default function SyncLabbookMutation(
     input: {
       owner,
       labbookName,
+      pullOnly,
       clientMutationId: tempID++,
     },
     first: 10,

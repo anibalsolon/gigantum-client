@@ -257,10 +257,10 @@ class TestBranching(object):
         FileOperations.makedir(lb, 'code/rand_dir', create_activity_record=True)
         FileOperations.delete_files(lb, 'code', ['rand_dir'])
 
-        # Assert local branch is AHEAD of remote
-        r = bm.get_commits_behind_remote("origin")
-        assert 'testing-branch' == r[0]
-        assert -4 == r[1]
+        behind = bm.get_commits_behind()
+        ahead = bm.get_commits_ahead()
+        assert ahead == 4
+        assert behind == 0
 
     def test_get_commits_with_remote_changes(self, mock_config_file,
                                              remote_labbook_repo,
@@ -277,23 +277,26 @@ class TestBranching(object):
         remote_bm.workon_branch("testing-branch")
         FileOperations.makedir(remote_lb, 'code/xyzdir', create_activity_record=True)
 
-        # Assert local branch is AHEAD of remote
-        r = bm.get_commits_behind_remote("origin")
-        assert 'testing-branch' == r[0]
-        assert 2 == r[1]
+
+        bm.fetch()
+        behind = bm.get_commits_behind()
+        ahead = bm.get_commits_ahead()
+        assert ahead == 0
+        assert behind == 2
 
     def test_count_commits_behind_remote_when_no_change(self, mock_config_file, remote_labbook_repo,
                                                         mock_labbook_lfs_disabled):
         # When the branch is up to date, ensure it doesn't report being behind.
         lb = mock_labbook_lfs_disabled[2]
         bm = BranchManager(lb, username='test')
-        bm.create_branch("testing-branch")
         lb.add_remote("origin", remote_labbook_repo)
+        bm.workon_branch('testing-branch')
 
-        r = bm.get_commits_behind_remote("origin")
-        assert r[0] == 'testing-branch'
-        # Should be up-to-date.
-        assert r[1] == 0
+        bm.fetch()
+        behind = bm.get_commits_behind()
+        ahead = bm.get_commits_ahead()
+        assert ahead == 0
+        assert behind == 0
 
     def test_count_commits_behind_for_local_branch(self, mock_config_file, remote_labbook_repo,
                                                    mock_labbook_lfs_disabled):
@@ -303,7 +306,10 @@ class TestBranching(object):
         lb.add_remote("origin", remote_labbook_repo)
         bm.create_branch("super-local-branch")
 
-        r = bm.get_commits_behind_remote("origin")
-        assert r[0] == 'super-local-branch'
+        bm.fetch()
+        behind = bm.get_commits_behind()
+        ahead = bm.get_commits_ahead()
+
         # Should be up-to-date.
-        assert r[1] == 0
+        assert ahead == 0
+        assert behind == 0
