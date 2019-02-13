@@ -1,5 +1,5 @@
 # source: http://localhost:10000/api/labbook/
-# timestamp: Wed Feb 13 2019 15:08:32 GMT-0500 (Eastern Standard Time)
+# timestamp: Wed Feb 13 2019 16:31:24 GMT-0500 (Eastern Standard Time)
 
 schema {
   query: LabbookQuery
@@ -263,6 +263,7 @@ type Branch implements Node & GitRepository {
   isRemote: Boolean
   isMergeable: Boolean
   commitsBehind: Int
+  commitsAhead: Int
 }
 
 input BuildImageInput {

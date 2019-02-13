@@ -119,6 +119,7 @@ class BranchMenu extends Component {
                   <div className={branchNameCSS}>
                     <span className="BranchMenu__dropdown-label">Branch:</span>
                     <span className="BranchMenu__dropdown-text">{activeBranch.branchName}</span>
+                    <span>{`${activeBranch.commitsBehind} / ${activeBranch.commitsAhead}`}</span>
                   </div>
 
                   <div className={branchSwitchingNameCSS}>
@@ -136,6 +137,8 @@ class BranchMenu extends Component {
                           onClick={ () => this._switchBranch(branch) }
                           className="BrancMenu__list-item">
                             {branch.branchName}
+
+                            <span>{`${branch.commitsBehind} / ${branch.commitsAhead}`}</span>
                         </li>)
                     }
                   </ul>
