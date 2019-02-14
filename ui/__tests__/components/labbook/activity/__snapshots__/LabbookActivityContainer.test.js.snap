@@ -11,6 +11,781 @@ exports[`LabbookActivityContainer Renders a snapshot 1`] = `
       className="Activity__sizer flex-1-0-auto"
     >
       <div
+        className="Activity__date-section Activity__date-section--0"
+      >
+        <div
+          className="Activity__date-tab note"
+        >
+          <div
+            className="Activity__date-day"
+          >
+            18
+          </div>
+          <div
+            className="Activity__date-sub"
+          >
+            <div
+              className="Activity__date-month"
+            >
+              Jan
+            </div>
+            <div
+              className="Activity__date-year"
+            >
+              2019
+            </div>
+          </div>
+        </div>
+        <div
+          className="UserNote__container"
+        >
+          <div
+            className="hidden userNote"
+          >
+            <div
+              className="ToolTip__toggle userNote"
+              onClick={[Function]}
+            >
+              <div
+                className="ToolTip__glow-container"
+              >
+                <div
+                  className="ToolTip__glow-ring-outer"
+                >
+                  <div
+                    className="ToolTip__glow-ring-inner"
+                  />
+                </div>
+              </div>
+            </div>
+            <div
+              className="hidden userNote"
+            />
+            <div
+              className="hidden userNote"
+            >
+              This menu can be used to create a note. A note is added to the current point in the Activity Feed and can be viewed by collaborators when synced. 
+ The note editor supports markdown.
+            </div>
+          </div>
+          <div
+            className="UserNote__button"
+            onClick={[Function]}
+          >
+            <div
+              className="UserNote__add-icon"
+            />
+            <div
+              className="UserNote__text"
+            >
+              Add Note
+            </div>
+          </div>
+          <div
+            className="UserNote__add UserNote__card column-1-span-10 hidden"
+          >
+            <div
+              className="UserNote flex flex--column"
+            >
+              <input
+                className="UserNote__title"
+                onKeyUp={[Function]}
+                placeholder="Add a summary title"
+                type="text"
+              />
+              <textarea
+                className="UserNote__summary"
+                id="markDown"
+              />
+              <div
+                className="ReactTags__tags react-tags-wrapper"
+              >
+                <div
+                  className="ReactTags__selected"
+                >
+                  <div
+                    className="ReactTags__tagInput"
+                  >
+                    <input
+                      aria-label="Add new tag"
+                      className="ReactTags__tagInputField"
+                      id="TagsInput"
+                      onBlur={[Function]}
+                      onChange={[Function]}
+                      onFocus={[Function]}
+                      onKeyDown={[Function]}
+                      onPaste={[Function]}
+                      placeholder="Add new tag"
+                      type="text"
+                    />
+                  </div>
+                </div>
+              </div>
+              <button
+                className="UserNote__add-note"
+                disabled={true}
+                onClick={[Function]}
+                type="submit"
+              >
+                Add Note
+              </button>
+            </div>
+          </div>
+        </div>
+        <div
+          className="Activity__card-container Activity__card-container--last"
+        >
+          <div
+            className="CardWrapper"
+          >
+            <div
+              className="ActivityCard__container column-1-span-10"
+            >
+              <div
+                className="ActivityCard ActivityCard--collapsed card"
+                style={Object {}}
+              >
+                <div
+                  className="ActivityCard__badge ActivityCard__badge--environment"
+                  title="environment"
+                />
+                <div
+                  className="ActivityCard__content"
+                >
+                  <div
+                    className="ActivityCard__title flex flex--row justify--space-between closed"
+                    onClick={[Function]}
+                  >
+                    <div
+                      className="ActivityCard__stack"
+                    >
+                      <p
+                        className="ActivityCard__time"
+                      >
+                        2:59pm
+                      </p>
+                      <div
+                        className="ActivityCard__user"
+                      />
+                    </div>
+                    <h6
+                      className="ActivityCard__commit-message"
+                    >
+                      <b>
+                        uitest - 
+                      </b>
+                      Added 1 conda2 package(s). 
+                    </h6>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            className="CardWrapper CardWrapper--rollback"
+          >
+            <div
+              className="Rollback"
+            >
+              <div
+                className="hidden activitySubmenu"
+              >
+                <div
+                  className="ToolTip__toggle activitySubmenu"
+                  onClick={[Function]}
+                >
+                  <div
+                    className="ToolTip__glow-container"
+                  >
+                    <div
+                      className="ToolTip__glow-ring-outer"
+                    >
+                      <div
+                        className="ToolTip__glow-ring-inner"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="hidden activitySubmenu"
+                />
+                <div
+                  className="hidden activitySubmenu"
+                >
+                  A dot between two activity records indicates the availability of the rollback menu. 
+ This menu will allow you to rollback to a previous state, including code, data, and environment configuration. 
+ When choosing to rollback a new branch is created at the specified point.
+                </div>
+              </div>
+              <div
+                className="Rollback__button"
+                onClick={[Function]}
+              >
+                Rollback
+              </div>
+            </div>
+            <div
+              className="ActivityCard__container column-1-span-10"
+            >
+              <div
+                className="ActivityCard ActivityCard--collapsed card"
+                style={Object {}}
+              >
+                <div
+                  className="ActivityCard__badge ActivityCard__badge--environment"
+                  title="environment"
+                />
+                <div
+                  className="ActivityCard__content"
+                >
+                  <div
+                    className="ActivityCard__title flex flex--row justify--space-between closed"
+                    onClick={[Function]}
+                  >
+                    <div
+                      className="ActivityCard__stack"
+                    >
+                      <p
+                        className="ActivityCard__time"
+                      >
+                        2:57pm
+                      </p>
+                      <div
+                        className="ActivityCard__user"
+                      />
+                    </div>
+                    <h6
+                      className="ActivityCard__commit-message"
+                    >
+                      <b>
+                        uitest - 
+                      </b>
+                      Added 1 pip package(s). 
+                    </h6>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            className="CardWrapper CardWrapper--rollback"
+          >
+            <div
+              className="Rollback"
+            >
+              <div
+                className="hidden activitySubmenu"
+              >
+                <div
+                  className="ToolTip__toggle activitySubmenu"
+                  onClick={[Function]}
+                >
+                  <div
+                    className="ToolTip__glow-container"
+                  >
+                    <div
+                      className="ToolTip__glow-ring-outer"
+                    >
+                      <div
+                        className="ToolTip__glow-ring-inner"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="hidden activitySubmenu"
+                />
+                <div
+                  className="hidden activitySubmenu"
+                >
+                  A dot between two activity records indicates the availability of the rollback menu. 
+ This menu will allow you to rollback to a previous state, including code, data, and environment configuration. 
+ When choosing to rollback a new branch is created at the specified point.
+                </div>
+              </div>
+              <div
+                className="Rollback__button"
+                onClick={[Function]}
+              >
+                Rollback
+              </div>
+            </div>
+            <div
+              className="ActivityCard__container column-1-span-10"
+            >
+              <div
+                className="ActivityCard ActivityCard--collapsed card"
+                style={Object {}}
+              >
+                <div
+                  className="ActivityCard__badge ActivityCard__badge--input_data"
+                  title="input_data"
+                />
+                <div
+                  className="ActivityCard__content"
+                >
+                  <div
+                    className="ActivityCard__title flex flex--row justify--space-between closed"
+                    onClick={[Function]}
+                  >
+                    <div
+                      className="ActivityCard__stack"
+                    >
+                      <p
+                        className="ActivityCard__time"
+                      >
+                        2:56pm
+                      </p>
+                      <div
+                        className="ActivityCard__user"
+                      />
+                    </div>
+                    <h6
+                      className="ActivityCard__commit-message"
+                    >
+                      <b>
+                        uitest - 
+                      </b>
+                      Uploaded 3 new file(s). 
+                    </h6>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            className="CardWrapper CardWrapper--rollback"
+          >
+            <div
+              className="Rollback"
+            >
+              <div
+                className="hidden activitySubmenu"
+              >
+                <div
+                  className="ToolTip__toggle activitySubmenu"
+                  onClick={[Function]}
+                >
+                  <div
+                    className="ToolTip__glow-container"
+                  >
+                    <div
+                      className="ToolTip__glow-ring-outer"
+                    >
+                      <div
+                        className="ToolTip__glow-ring-inner"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="hidden activitySubmenu"
+                />
+                <div
+                  className="hidden activitySubmenu"
+                >
+                  A dot between two activity records indicates the availability of the rollback menu. 
+ This menu will allow you to rollback to a previous state, including code, data, and environment configuration. 
+ When choosing to rollback a new branch is created at the specified point.
+                </div>
+              </div>
+              <div
+                className="Rollback__button"
+                onClick={[Function]}
+              >
+                Rollback
+              </div>
+            </div>
+            <div
+              className="ActivityCard__container column-1-span-10"
+            >
+              <div
+                className="ActivityCard ActivityCard--collapsed card"
+                style={Object {}}
+              >
+                <div
+                  className="ActivityCard__badge ActivityCard__badge--code"
+                  title="code"
+                />
+                <div
+                  className="ActivityCard__content"
+                >
+                  <div
+                    className="ActivityCard__title flex flex--row justify--space-between closed"
+                    onClick={[Function]}
+                  >
+                    <div
+                      className="ActivityCard__stack"
+                    >
+                      <p
+                        className="ActivityCard__time"
+                      >
+                        2:55pm
+                      </p>
+                      <div
+                        className="ActivityCard__user"
+                      />
+                    </div>
+                    <h6
+                      className="ActivityCard__commit-message"
+                    >
+                      <b>
+                        uitest - 
+                      </b>
+                      Uploaded 3 new file(s). 
+                    </h6>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            className="CardWrapper CardWrapper--rollback"
+          >
+            <div
+              className="Rollback"
+            >
+              <div
+                className="hidden activitySubmenu"
+              >
+                <div
+                  className="ToolTip__toggle activitySubmenu"
+                  onClick={[Function]}
+                >
+                  <div
+                    className="ToolTip__glow-container"
+                  >
+                    <div
+                      className="ToolTip__glow-ring-outer"
+                    >
+                      <div
+                        className="ToolTip__glow-ring-inner"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="hidden activitySubmenu"
+                />
+                <div
+                  className="hidden activitySubmenu"
+                >
+                  A dot between two activity records indicates the availability of the rollback menu. 
+ This menu will allow you to rollback to a previous state, including code, data, and environment configuration. 
+ When choosing to rollback a new branch is created at the specified point.
+                </div>
+              </div>
+              <div
+                className="Rollback__button"
+                onClick={[Function]}
+              >
+                Rollback
+              </div>
+            </div>
+            <div
+              className="ActivityCard__container column-1-span-10"
+            >
+              <div
+                className="ActivityCard ActivityCard--collapsed card"
+                style={Object {}}
+              >
+                <div
+                  className="ActivityCard__badge ActivityCard__badge--code"
+                  title="code"
+                />
+                <div
+                  className="ActivityCard__content"
+                >
+                  <div
+                    className="ActivityCard__title flex flex--row justify--space-between closed"
+                    onClick={[Function]}
+                  >
+                    <div
+                      className="ActivityCard__stack"
+                    >
+                      <p
+                        className="ActivityCard__time"
+                      >
+                        2:54pm
+                      </p>
+                      <div
+                        className="ActivityCard__user"
+                      />
+                    </div>
+                    <h6
+                      className="ActivityCard__commit-message"
+                    >
+                      <b>
+                        uitest - 
+                      </b>
+                      Created new Code directory \`code/folder2\`
+                    </h6>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            className="CardWrapper CardWrapper--rollback"
+          >
+            <div
+              className="Rollback"
+            >
+              <div
+                className="hidden activitySubmenu"
+              >
+                <div
+                  className="ToolTip__toggle activitySubmenu"
+                  onClick={[Function]}
+                >
+                  <div
+                    className="ToolTip__glow-container"
+                  >
+                    <div
+                      className="ToolTip__glow-ring-outer"
+                    >
+                      <div
+                        className="ToolTip__glow-ring-inner"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="hidden activitySubmenu"
+                />
+                <div
+                  className="hidden activitySubmenu"
+                >
+                  A dot between two activity records indicates the availability of the rollback menu. 
+ This menu will allow you to rollback to a previous state, including code, data, and environment configuration. 
+ When choosing to rollback a new branch is created at the specified point.
+                </div>
+              </div>
+              <div
+                className="Rollback__button"
+                onClick={[Function]}
+              >
+                Rollback
+              </div>
+            </div>
+            <div
+              className="ActivityCard__container column-1-span-10"
+            >
+              <div
+                className="ActivityCard ActivityCard--collapsed card"
+                style={Object {}}
+              >
+                <div
+                  className="ActivityCard__badge ActivityCard__badge--code"
+                  title="code"
+                />
+                <div
+                  className="ActivityCard__content"
+                >
+                  <div
+                    className="ActivityCard__title flex flex--row justify--space-between closed"
+                    onClick={[Function]}
+                  >
+                    <div
+                      className="ActivityCard__stack"
+                    >
+                      <p
+                        className="ActivityCard__time"
+                      >
+                        2:54pm
+                      </p>
+                      <div
+                        className="ActivityCard__user"
+                      />
+                    </div>
+                    <h6
+                      className="ActivityCard__commit-message"
+                    >
+                      <b>
+                        uitest - 
+                      </b>
+                      Created new Code directory \`code/folder\`
+                    </h6>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            className="CardWrapper CardWrapper--rollback"
+          >
+            <div
+              className="Rollback"
+            >
+              <div
+                className="hidden activitySubmenu"
+              >
+                <div
+                  className="ToolTip__toggle activitySubmenu"
+                  onClick={[Function]}
+                >
+                  <div
+                    className="ToolTip__glow-container"
+                  >
+                    <div
+                      className="ToolTip__glow-ring-outer"
+                    >
+                      <div
+                        className="ToolTip__glow-ring-inner"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="hidden activitySubmenu"
+                />
+                <div
+                  className="hidden activitySubmenu"
+                >
+                  A dot between two activity records indicates the availability of the rollback menu. 
+ This menu will allow you to rollback to a previous state, including code, data, and environment configuration. 
+ When choosing to rollback a new branch is created at the specified point.
+                </div>
+              </div>
+              <div
+                className="Rollback__button"
+                onClick={[Function]}
+              >
+                Rollback
+              </div>
+            </div>
+            <div
+              className="ActivityCard__container column-1-span-10"
+            >
+              <div
+                className="ActivityCard ActivityCard--collapsed card"
+                style={Object {}}
+              >
+                <div
+                  className="ActivityCard__badge ActivityCard__badge--environment"
+                  title="environment"
+                />
+                <div
+                  className="ActivityCard__content"
+                >
+                  <div
+                    className="ActivityCard__title flex flex--row justify--space-between closed"
+                    onClick={[Function]}
+                  >
+                    <div
+                      className="ActivityCard__stack"
+                    >
+                      <p
+                        className="ActivityCard__time"
+                      >
+                        2:54pm
+                      </p>
+                      <div
+                        className="ActivityCard__user"
+                      />
+                    </div>
+                    <h6
+                      className="ActivityCard__commit-message"
+                    >
+                      <b>
+                        uitest - 
+                      </b>
+                      Added base: python2-minimal
+                    </h6>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            className="CardWrapper CardWrapper--rollback"
+          >
+            <div
+              className="Rollback"
+            >
+              <div
+                className="hidden activitySubmenu"
+              >
+                <div
+                  className="ToolTip__toggle activitySubmenu"
+                  onClick={[Function]}
+                >
+                  <div
+                    className="ToolTip__glow-container"
+                  >
+                    <div
+                      className="ToolTip__glow-ring-outer"
+                    >
+                      <div
+                        className="ToolTip__glow-ring-inner"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="hidden activitySubmenu"
+                />
+                <div
+                  className="hidden activitySubmenu"
+                >
+                  A dot between two activity records indicates the availability of the rollback menu. 
+ This menu will allow you to rollback to a previous state, including code, data, and environment configuration. 
+ When choosing to rollback a new branch is created at the specified point.
+                </div>
+              </div>
+              <div
+                className="Rollback__button"
+                onClick={[Function]}
+              >
+                Rollback
+              </div>
+            </div>
+            <div
+              className="ActivityCard__container column-1-span-10"
+            >
+              <div
+                className="ActivityCard ActivityCard--collapsed card"
+                style={Object {}}
+              >
+                <div
+                  className="ActivityCard__badge ActivityCard__badge--labbook"
+                  title="labbook"
+                />
+                <div
+                  className="ActivityCard__content"
+                >
+                  <div
+                    className="ActivityCard__title flex flex--row justify--space-between closed"
+                    onClick={[Function]}
+                  >
+                    <div
+                      className="ActivityCard__stack"
+                    >
+                      <p
+                        className="ActivityCard__time"
+                      >
+                        2:54pm
+                      </p>
+                      <div
+                        className="ActivityCard__user"
+                      />
+                    </div>
+                    <h6
+                      className="ActivityCard__commit-message"
+                    >
+                      <b>
+                        uitest - 
+                      </b>
+                      Created new LabBook: uitest/ui-test-project
+                    </h6>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
         className="ActivityCard ActivityCard__loader-hidden column-1-span-10"
       />
       <div
