@@ -143,7 +143,7 @@ export default class PublishModal extends Component {
                   self.props.setPublishingState(false);
                   setContainerMenuVisibility(false);
                   self.props.resetPublishState(false);
-                  self.props.remountCollab();
+                  // self.props.remountCollab();
 
                   setMultiInfoMessage(id, `Added remote https://gigantum.com/${self.props.owner}/${self.props.labbookName}`, true, false);
 

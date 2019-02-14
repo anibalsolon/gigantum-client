@@ -63,8 +63,16 @@ window.Worker = Worker;
 
 var document = window.document;
 
-var newDiv = document.createElement('div');
-newDiv.setAttribute('id', 'root');
+var rootDiv = document.createElement('div');
+rootDiv.setAttribute('id', 'root');
+var modalDiv = document.createElement('div');
+modalDiv.setAttribute('id', 'modal');
+var sidePanelDiv = document.createElement('div');
+sidePanelDiv.setAttribute('id', 'side_panel');
+var modalCoverDiv = document.createElement('div');
+modalCoverDiv.setAttribute('id', 'modal__cover');
+var lightBoxDiv = document.createElement('div');
+lightBoxDiv.setAttribute('id', 'lightbox');
 // set for proxy
 process.env.GIGANTUM_API = process.env.USE_PROXY ? ':10010/api/labbook/' : ':10000/api/labbook/';
 
