@@ -78,7 +78,7 @@ exports[`Project File component File Snapshot 1`] = `
       >
         <div
           className="ActionsMenu__item ActionsMenu__item--AddSubfolder visibility-hidden"
-          name="Add Folder"
+          name="Add Subfolder"
           onClick={[Function]}
         />
         <div

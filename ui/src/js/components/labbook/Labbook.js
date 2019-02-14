@@ -464,6 +464,7 @@ const LabbookFragmentContainer = createFragmentContainer(
            isRemote
            isMergeable
            commitsBehind
+           commitsAhead
          }
 
           ...Environment_labbook

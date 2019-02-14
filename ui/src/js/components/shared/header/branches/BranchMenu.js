@@ -119,6 +119,7 @@ class BranchMenu extends Component {
                   <div className={branchNameCSS}>
                     <div className="BranchMenu__dropdown-label">Branch:</div>
                     <div className="BranchMenu__dropdown-text">{activeBranch.branchName}</div>
+                    <span>{`${activeBranch.commitsBehind} / ${activeBranch.commitsAhead}`}</span>
                   </div>
 
                   <div className={branchSwitchingNameCSS}>
@@ -137,6 +138,8 @@ class BranchMenu extends Component {
                           key={branch.branchName}
                           className="BrancMenu__list-item">
                             {branch.branchName}
+
+                            <span>{`${branch.commitsBehind} / ${branch.commitsAhead}`}</span>
                         </li>)
                     }
                   </ul>

@@ -6,7 +6,7 @@ exports[`ActionsMenu Component Renders a snapshot 1`] = `
 >
   <div
     className="ActionsMenu__item ActionsMenu__item--AddSubfolder visibility-hidden"
-    name="Add Folder"
+    name="Add Subfolder"
     onClick={[Function]}
   />
   <div

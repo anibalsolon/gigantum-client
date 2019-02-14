@@ -79,7 +79,7 @@ exports[`File component File Snapshot 1`] = `
       >
         <div
           className="ActionsMenu__item ActionsMenu__item--AddSubfolder"
-          name="Add Folder"
+          name="Add Subfolder"
           onClick={[Function]}
         />
         <div

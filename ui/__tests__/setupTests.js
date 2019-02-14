@@ -6,6 +6,11 @@ require('raf/polyfill');
 var { configure } = require('enzyme');
 var Adapter = require('enzyme-adapter-react-16');
 var uuid = require('uuid/v4');
+// var ReactDOM = require('react-dom');
+//
+// ReactDOM.createPortal = (element, node) => {
+//   return element;
+// };
 
 process.env.TZ = 'Europe/London';
 
@@ -63,8 +68,25 @@ window.Worker = Worker;
 
 var document = window.document;
 
-var newDiv = document.createElement('div');
-newDiv.setAttribute('id', 'root');
+// var rootDiv = document.createElement('div');
+// rootDiv.setAttribute('id', 'root');
+// document.body.appendChild(rootDiv);
+
+var modalDiv = document.createElement('div');
+modalDiv.setAttribute('id', 'modal');
+document.body.appendChild(modalDiv);
+
+var sidePanelDiv = document.createElement('div');
+sidePanelDiv.setAttribute('id', 'side_panel');
+document.body.appendChild(sidePanelDiv);
+
+var modalCoverDiv = document.createElement('div');
+modalCoverDiv.setAttribute('id', 'modal__cover');
+document.body.appendChild(modalCoverDiv);
+
+var lightBoxDiv = document.createElement('div');
+lightBoxDiv.setAttribute('id', 'lightbox');
+document.body.appendChild(lightBoxDiv);
 // set for proxy
 process.env.GIGANTUM_API = process.env.USE_PROXY ? ':10010/api/labbook/' : ':10000/api/labbook/';
 

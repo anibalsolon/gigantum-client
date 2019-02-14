@@ -101,6 +101,7 @@ class TestWorkflowsBranching(object):
                     branchName
                     isLocal
                     isRemote
+                    commitsAhead
                     commitsBehind
                     isActive
                 }}
