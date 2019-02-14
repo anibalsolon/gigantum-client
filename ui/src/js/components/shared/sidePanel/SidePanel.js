@@ -47,7 +47,7 @@ class SidePanel extends Component {
             <div className="SidePanel__header">
               <div
               onClick={() => props.toggleSidePanel(false)}
-              className="SidePanel__btn SidePanel__btn--close">X</div>
+              className="SidePanel__btn SidePanel__btn--close" />
             </div>
             <div className="SidePanel__body">
               { props.renderContent() }

@@ -117,8 +117,8 @@ class BranchMenu extends Component {
                 onClick={() => this._toggleBranchSwitch() }
                 className={drodownButtonCSS}>
                   <div className={branchNameCSS}>
-                    <span className="BranchMenu__dropdown-label">Branch:</span>
-                    <span className="BranchMenu__dropdown-text">{activeBranch.branchName}</span>
+                    <div className="BranchMenu__dropdown-label">Branch:</div>
+                    <div className="BranchMenu__dropdown-text">{activeBranch.branchName}</div>
                   </div>
 
                   <div className={branchSwitchingNameCSS}>
@@ -134,6 +134,7 @@ class BranchMenu extends Component {
                     {
                       filteredBranches.map(branch => <li
                           onClick={ () => this._switchBranch(branch) }
+                          key={branch.branchName}
                           className="BrancMenu__list-item">
                             {branch.branchName}
                         </li>)
@@ -170,7 +171,10 @@ class BranchMenu extends Component {
           <Branches
             sidePanelVisible={state.sidePanelVisible}
             toggleSidePanel={this._toggleSidePanel}
-            {...props}
+            branches={props.labbook.branches}
+            activeBranch={activeBranch}
+            toggleModal={this._setModalState}
+            isSticky={props.isSticky}
           />
       </div>
     );

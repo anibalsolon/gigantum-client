@@ -4,14 +4,21 @@
   position: fixed;
   z-index: index($elements, modal) - 1;
   background-color: $white;
-  width: 270px;
+  @include spanColumns(3);
+  margin: 0;
   right: 0px;
-  top: 185px;
+  top: 187px;
   bottom: 0px;
 
-  
+
 
   &--sticky{
     top: 110px;
+  }
+}
+
+.SidePanel__btn {
+  &--close {
+    @include close();
   }
 }

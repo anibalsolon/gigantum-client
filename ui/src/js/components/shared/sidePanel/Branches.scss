@@ -1,0 +1,43 @@
+@import '~Styles/_imports.scss';
+
+.Branches {
+    padding: 40px 20px;
+}
+.Branches__header {
+    @include flex(space-between, row);
+}
+
+.Branches__branch {
+    cursor: pointer;
+    border: 1px solid $romanSilver;
+    padding: 10px;
+    &--current {
+        cursor: auto;
+        padding: 5px 10px;
+        border: 2px solid $azure;
+        margin: 10px 0 20px 0;
+
+        .Branches__branchname {
+            font-size: 20px;
+        }
+    }
+}
+
+.Branches__title{
+    font-size: 18px;
+}
+
+.Branches__label{
+    font-size: 12px;
+}
+
+.Branches__btn{
+    border: 1px solid $white;
+    margin-right: 2px;
+    background: $grey;
+    &--create {
+        margin: 0;
+        background: $grey url('~Images/icons/add-azure.svg') no-repeat center center;
+        background-size: 15px;
+    }
+}
