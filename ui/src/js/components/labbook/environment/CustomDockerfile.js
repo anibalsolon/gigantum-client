@@ -40,10 +40,17 @@ export default class CustomDockerfile extends Component {
     return state;
   }
 
+  /**
+  *  @param {}
+  *  updates docker file
+  *  @return {}
+  */
   _saveDockerfile() {
-    const { status } = store.getState().containerStatus;
-    const canEditEnvironment = config.containerStatus.canEditEnvironment(status) && !this.props.isLocked;
-    const { owner, labbookName } = store.getState().routes;
+    const { props, state } = this,
+          { status } = store.getState().containerStatus,
+          canEditEnvironment = config.containerStatus.canEditEnvironment(status) && !props.isLocked,
+          { owner, labbookName } = store.getState().routes;
+
     if (navigator.onLine) {
       if (canEditEnvironment) {
         const validDictionary = new Set(['LABEL', 'RUN', 'ENV', '#']);
@@ -77,7 +84,7 @@ export default class CustomDockerfile extends Component {
                 setErrorMessage('Dockerfile was not set: ', error);
                 this.setState({ savingDockerfile: false });
               } else {
-                this.props.buildCallback();
+                props.buildCallback();
                 this.setState({ editingDockerfile: false, lastSavedDockerfileContent: this.state.dockerfileContent, savingDockerfile: false });
               }
             },
@@ -93,6 +100,11 @@ export default class CustomDockerfile extends Component {
     }
   }
 
+  /**
+  *  @param {}
+  *  sets constainer to edit mode if user can edit environment.
+  *  @return {}
+  */
   _editDockerfile() {
     const { status } = store.getState().containerStatus;
     const canEditEnvironment = config.containerStatus.canEditEnvironment(status) && !this.props.isLocked;
@@ -105,23 +117,27 @@ export default class CustomDockerfile extends Component {
 
 
   render() {
-    const dockerfileCSS = classNames({
-      'column-1-span-11': true,
-      empty: !this.state.dockerfileContent,
-    });
-
-    const renderedContent = this.state.dockerfileContent ? `\`\`\`\n${this.state.dockerfileContent}\n\`\`\`` : 'No commands provided.';
+    const { props, state } = this,
+          dockerfileCSS = classNames({
+            'column-1-span-11': true,
+            empty: !this.state.dockerfileContent,
+          }),
+          dockerSnippetsCSS = classNames({
+            CustomDockerfile__header: true,
+            'ToolTip--data--right': props.isLocked,
+          }),
+          renderedContent = state.dockerfileContent ? `\`\`\`\n${state.dockerfileContent}\n\`\`\`` : 'No commands provided.';
 
     return (
       <div className="CustomDockerfile">
 
         <div className="Environment__headerContainer">
 
-          <h5 className="CustomDockerfile__header">
+          <h5 className={dockerSnippetsCSS} data-tooltip="Container must be turned off to edit docker snippets">
             Custom Docker Instructions
             <ToolTip section="dockerInstructionsEnvironment" />
             {
-              !this.state.editingDockerfile &&
+              !state.editingDockerfile &&
               <button
                 onClick={() => this._editDockerfile()}
                 className="CustomDockerfile__btn--edit"
@@ -153,7 +169,7 @@ export default class CustomDockerfile extends Component {
                   type="text"
                   onChange={(evt) => { this.setState({ dockerfileContent: evt.target.value }); }}
                   placeholder="Enter dockerfile commands here"
-                  defaultValue={this.state.dockerfileContent ? this.state.dockerfileContent : ''}
+                  defaultValue={state.dockerfileContent ? state.dockerfileContent : ''}
                 />
 
                 <div className="CustomDockerfile__buttonContainer">
@@ -161,17 +177,16 @@ export default class CustomDockerfile extends Component {
                   <div className="column-1-span-2">
 
                     <button
-                      onClick={() => this.setState({ editingDockerfile: false, dockerfileContent: this.state.lastSavedDockerfileContent })}
+                      onClick={() => this.setState({ editingDockerfile: false, dockerfileContent: state.lastSavedDockerfileContent })}
                       className="CustomDockerfile__content-cancel-button button--flat"
                     >
                     Cancel
                     </button>
 
                     <button
-                      disabled={this.state.savingDockerfile}
+                      disabled={state.savingDockerfile}
                       onClick={() => this._saveDockerfile()}
-                      className="CustomDockerfile__content-save-button"
-                    >
+                      className="CustomDockerfile__content-save-button">
                     Save
                     </button>
 

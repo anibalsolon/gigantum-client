@@ -315,6 +315,7 @@ class PackageDependencies extends Component {
       this._addStatePackage(evt);
     }
   }
+
   /**
   *  @param {evt}
   *  updates package version in components state
