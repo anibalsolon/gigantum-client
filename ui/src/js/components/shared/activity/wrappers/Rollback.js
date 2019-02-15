@@ -8,7 +8,6 @@ import WarningToolTip from 'Components/common/WarningToolTip';
 import './Rollback.scss';
 
 export default class Rollback extends Component {
-
   state = {
     isOver: false,
   }
@@ -28,6 +27,7 @@ export default class Rollback extends Component {
           showTooltip = state.isOver && props.isLocked,
           rollbackCSS = classNames({
             Rollback: true,
+            'Rollback--locked': props.isLocked,
             'Tooltip--data--right': props.isLocked,
           });
 

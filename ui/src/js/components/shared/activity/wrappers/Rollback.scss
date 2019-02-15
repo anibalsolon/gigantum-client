@@ -6,6 +6,12 @@
   max-width: 200px;
   position: relative;
   z-index: index($elements, popup);
+
+  &--locked {
+    height: 10px;
+    width: 40px;
+    margin: 0 0 20px;
+  }
 }
 
 

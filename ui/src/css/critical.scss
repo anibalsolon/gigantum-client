@@ -147,11 +147,10 @@ code {
   &:hover::before{
     content: "";
     @include triangle('up', 7px, $jet);
-    border: solid transparent;
     border-width: 10px;
     position: absolute;
     left: calc(50% - 5px);
-    top: calc(100% - 10px);
+    top: calc(100% - 0px);
   }
 
   &:hover::after{
@@ -180,7 +179,7 @@ code {
   &--right:hover::before {
     border: solid transparent;
     @include triangle('left', 7px, $jet);
-    top: calc(50%);
+    top: calc(50% - 7px);
     left: calc(100% + 2px);
     content: "";
 
@@ -207,8 +206,8 @@ code {
     color: $white;
     padding: 5px;
     border-radius: 5px;
-    left: calc(100% + 10px);
-    top: calc(50%);
+    left: calc(100% + 20px);
+    top: calc(50% - 10px);
     z-index: 1;
     font-size: .7em;
   }
