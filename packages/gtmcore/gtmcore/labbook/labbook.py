@@ -182,6 +182,10 @@ class LabBook(Repository):
         if not self.root_dir:
             raise ValueError("No root directory assigned to lab book. Failed to get root directory.")
 
+        untracked_dir = os.path.join(self.root_dir, 'output', 'untracked')
+        if not os.path.exists(untracked_dir):
+            os.mkdir(untracked_dir, exist_ok=True)
+
         with open(os.path.join(self.root_dir, ".gigantum", "labbook.yaml"), 'rt') as lbfile:
             self._data = yaml.safe_load(lbfile)
 

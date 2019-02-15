@@ -2,6 +2,8 @@
 **/.DS_Store
 /**/.DS_Store
 
+# Make a directory for intermediary files that should NOT ever be tracked
+output/untracked
 
 # Ignore the checkout context file, because it should always get recreated when a repo moves or is checked out
 .gigantum/.checkout
