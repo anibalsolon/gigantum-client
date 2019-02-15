@@ -118,7 +118,8 @@ export default class CustomDockerfile extends Component {
         <div className="Environment__headerContainer">
 
           <h5 className="CustomDockerfile__header">
-            Custom Docker Instructions <ToolTip section="dockerInstructionsEnvironment" />
+            Custom Docker Instructions
+            <ToolTip section="dockerInstructionsEnvironment" />
             {
               !this.state.editingDockerfile &&
               <button
@@ -187,11 +188,7 @@ export default class CustomDockerfile extends Component {
                 <div className={dockerfileCSS}>
 
                   <ReactMarkdown
-                    renderers={{
-code: props =>
-  <CodeBlock {...props} language="dockerfile" />,
-}
-                      }
+                    renderers={{ code: props => <CodeBlock {...props} language="dockerfile" /> }}
                     className="ReactMarkdown"
                     source={renderedContent}
                   />

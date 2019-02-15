@@ -140,35 +140,75 @@ code {
   transform: translate(-50%, -50%);
 }
 
-.Tooltip{
+.Tooltip--data {
   position: relative;
   font-weight: bolder;
   cursor: pointer;
   &:hover::before{
     content: "";
+    @include triangle('up', 7px, $jet);
     border: solid transparent;
-    border-bottom-color: $white;
     border-width: 10px;
     position: absolute;
-    right: 5px;
-    bottom: 0;
+    left: calc(50% - 5px);
+    top: calc(100% - 10px);
   }
 
   &:hover::after{
     content: attr(data-tooltip);
     @extend .box-shadow;
     position: absolute;
+    word-break: break-word;
     min-width: 100px;
     font-weight: 100;
     line-height: 1.3em;
     font-size: 16px;
+    text-align: center;
+    word-wrap: normal;
     margin: 0;
-    background: $azure;
+    background: $jet;
+    width: 140px;
     color: $white;
     padding: 5px;
     border-radius: 5px;
-    right: 40px;
-    bottom: 10px;
+    left: calc(50% - 70px);
+    top: calc(100% + 10px);
+    z-index: 1;
+    font-size: .7em;
+  }
+
+  &--right:hover::before {
+    border: solid transparent;
+    @include triangle('left', 7px, $jet);
+    top: calc(50%);
+    left: calc(100% + 2px);
+    content: "";
+
+    border-width: 10px;
+    position: absolute;
+  }
+
+
+  &--right:hover::after {
+    content: attr(data-tooltip);
+    @extend .box-shadow;
+    position: absolute;
+    word-break: break-word;
+    min-width: 100px;
+    width: 100px;
+    font-weight: 100;
+    line-height: 1.3em;
+    font-size: 16px;
+    text-align: center;
+    word-wrap: normal;
+    margin: 0;
+    background: $jet;
+    width: 140px;
+    color: $white;
+    padding: 5px;
+    border-radius: 5px;
+    left: calc(100% + 10px);
+    top: calc(50%);
     z-index: 1;
     font-size: .7em;
   }
