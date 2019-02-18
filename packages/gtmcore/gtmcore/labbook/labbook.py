@@ -184,7 +184,7 @@ class LabBook(Repository):
 
         untracked_dir = os.path.join(self.root_dir, 'output', 'untracked')
         if not os.path.exists(untracked_dir):
-            os.mkdir(untracked_dir, exist_ok=True)
+            os.makedirs(untracked_dir, exist_ok=True)
 
         with open(os.path.join(self.root_dir, ".gigantum", "labbook.yaml"), 'rt') as lbfile:
             self._data = yaml.safe_load(lbfile)

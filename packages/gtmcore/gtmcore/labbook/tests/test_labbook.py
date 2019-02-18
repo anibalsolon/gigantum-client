@@ -281,3 +281,24 @@ class TestLabBook(object):
 
         assert (datetime.datetime.now(datetime.timezone.utc) - modified_1).total_seconds() < 10
         assert (datetime.datetime.now(datetime.timezone.utc) - modified_2).total_seconds() < 10
+
+    def test_untracked_output_dir(self, mock_config_file):
+        """Test that contents of the untracked directory (in output) truly is untracked. """
+        im = InventoryManager(mock_config_file[0])
+        lb = im.create_labbook('test', 'test', 'labbook1', description="my first labbook",
+                               author=GitAuthor(name="test", email="test@test.com"))
+
+        assert os.path.isdir(os.path.join(lb.root_dir, 'output', 'untracked'))
+        altered_file = os.path.join(lb.root_dir, 'output', 'untracked', 'samplefiles')
+        with open(altered_file, 'w') as f:
+            f.write('Initial Content')
+        lb.sweep_uncommitted_changes()
+        c1 = lb.git.commit_hash
+
+        with open(altered_file, 'w') as f:
+            f.write('Changed Content')
+        lb.sweep_uncommitted_changes()
+        c2 = lb.git.commit_hash
+
+        # Assert that Git detects no changes
+        assert c1 == c2
