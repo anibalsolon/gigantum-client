@@ -7,7 +7,7 @@ import { connect } from 'react-redux';
 import WizardModal from 'Components/wizard/WizardModal';
 import Loader from 'Components/common/Loader';
 import LocalDatasetsContainer, { LocalDatasets } from 'Components/dashboard/datasets/localDatasets/LocalDatasets';
-// import RemoteDatasets from 'Components/dashboard/datasets/remoteDatasets/RemoteDatasets';
+import RemoteDatasets from 'Components/dashboard/datasets/remoteDatasets/RemoteDatasets';
 import LoginPrompt from 'Components/shared/modals/LoginPrompt';
 import ToolTip from 'Components/common/ToolTip';
 import DatasetFilterBy from './filters/DatasetFilterBy';
@@ -258,7 +258,7 @@ class Datasets extends Component {
     if (isLoading) {
       return [];
     }
-    const datasets = datasetList.localDatasets.edges;
+    const datasets = this.state.selectedSection === 'local' ? datasetList.localDatasets.edges : datasetList.remoteDatasets.edges;
     const username = localStorage.getItem('username');
     let self = this,
       filteredDatasets = [];
@@ -486,7 +486,21 @@ class Datasets extends Component {
                 {...props}
               />
             :
-            <div/>
+            <RemoteDatasets
+              datasetListId={props.datasetList.datasetList.id}
+              remoteDatasets={props.datasetList.datasetList}
+              showModal={this._showModal}
+              goToLabbook={this._goToLabbook}
+              filterDatasets={this._filterDatasets}
+              filterState={this.state.filter}
+              setFilterValue={this._setFilterValue}
+              forceLocalView={() => {
+                this.setState({ selectedSection: 'local' });
+                this.setState({ showLoginPrompt: true });
+              }}
+              changeRefetchState={bool => this.setState({ refetchLoading: bool })}
+              {...props}
+            />
           }
           {
             this.state.showLoginPrompt &&

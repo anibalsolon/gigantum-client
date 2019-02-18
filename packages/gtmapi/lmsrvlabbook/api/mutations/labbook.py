@@ -758,7 +758,7 @@ class DeleteLabbookCollaborator(graphene.relay.ClientIDMutation):
         return DeleteLabbookCollaborator(updated_labbook=Labbook(**create_data))
 
 
-class WriteReadme(graphene.relay.ClientIDMutation):
+class WriteLabbookReadme(graphene.relay.ClientIDMutation):
     class Input:
         owner = graphene.String(required=True)
         labbook_name = graphene.String(required=True)
@@ -776,7 +776,7 @@ class WriteReadme(graphene.relay.ClientIDMutation):
         with lb.lock():
             lb.write_readme(content)
 
-        return WriteReadme(updated_labbook=Labbook(owner=owner, name=labbook_name))
+        return WriteLabbookReadme(updated_labbook=Labbook(owner=owner, name=labbook_name))
 
 
 class FetchLabbookEdge(graphene.relay.ClientIDMutation):

@@ -165,31 +165,29 @@ class LabbookList(graphene.ObjectType, interfaces=(graphene.relay.Node,)):
             raise ValueError('index_service could not be found')
 
         # Prep arguments
-        if "before" in kwargs:
-            before = base64.b64decode(kwargs['before']).decode('utf-8')
-            page = max(1, int(before) - 1)
-        elif "after" in kwargs:
-            if kwargs.get("after"):
-                after = base64.b64decode(kwargs['after']).decode('utf-8')
-                page = int(after) + 1
-            else:
-                page = 1
-        else:
-            page = 1
-
         if "first" in kwargs:
             per_page = int(kwargs['first'])
         elif "last" in kwargs:
-            per_page = int(kwargs['last'])
+            raise ValueError("Cannot page in reverse direction, must provide first/after parameters instead")
         else:
             per_page = 20
 
-        url = f"https://{index_service}/projects?per_page={per_page}&page={page}"
+        # use version=2 to page through both projects and datasets returned by gitlab but only return projects.
+        # omitting the version parameter will return projects and datasets together, but avoids breaking functionality
+        # in any gigantum instances not using the latest client code
+        url = f"https://{index_service}/projects?version=2&first={per_page}"
+
+        # Add optional arguments
+        if kwargs.get("after"):
+            url = f"{url}&after={kwargs.get('after')}"
+        elif kwargs.get("before"):
+            raise ValueError("Cannot page in reverse direction, must provide first/after parameters instead")
 
         if order_by is not None:
             if order_by not in ['name', 'created_on', 'modified_on']:
                 raise ValueError(f"Unsupported order_by: {order_by}. Use `name`, `created_on`, `modified_on`")
             url = f"{url}&order_by={order_by}"
+
         if sort is not None:
             if sort not in ['desc', 'asc']:
                 raise ValueError(f"Unsupported sort: {sort}. Use `desc`, `asc`")
@@ -204,7 +202,6 @@ class LabbookList(graphene.ObjectType, interfaces=(graphene.relay.Node,)):
         if response.status_code != 200:
             raise IOError("Failed to retrieve Project listing from remote server")
         edges = response.json()
-        cursor = base64.b64encode("{}".format(page).encode("UTF-8")).decode("UTF-8")
 
         # Get Labbook instances
         edge_objs = []
@@ -218,13 +215,14 @@ class LabbookList(graphene.ObjectType, interfaces=(graphene.relay.Node,)):
                            "visibility": "public" if edge.get("visibility") == "public_project" else "private"}
 
             edge_objs.append(RemoteLabbookConnection.Edge(node=RemoteLabbook(**create_data),
-                                                          cursor=cursor))
+                                                          cursor=edge['cursor']))
 
         # Create Page Info instance
-        has_previous_page = True if page > 1 else False
-        has_next_page = len(edges) != 0
+        has_previous_page = True if kwargs.get("after") else False
+        has_next_page = len(edges) == per_page
 
         page_info = graphene.relay.PageInfo(has_next_page=has_next_page, has_previous_page=has_previous_page,
-                                            start_cursor=cursor, end_cursor=cursor)
+                                            start_cursor=edges[0]['cursor'] if edges else None,
+                                            end_cursor=edges[-1]['cursor'] if edges else None)
 
         return RemoteLabbookConnection(edges=edge_objs, page_info=page_info)

@@ -129,9 +129,11 @@
 .SideBar__icon--labbooks-selected:before,{
     content: "";
     position: absolute;
-    @include triangle('left', 14px, $background-color);
+    background: $turquise;
+    width: 5px;
+    height: 55px;
     right: -40px;
-    margin-top: 15px;
+    margin-top: 7px;
 }
 
 

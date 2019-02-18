@@ -28,8 +28,8 @@ from rq import get_current_job
 from gtmcore.activity.monitors.devenv import DevEnvMonitorManager
 from gtmcore.labbook import LabBook
 
-from gtmcore.inventory.inventory  import InventoryManager
-from gtmcore.inventory  import Repository
+from gtmcore.inventory.inventory import InventoryManager
+from gtmcore.inventory import Repository
 
 from gtmcore.logging import LMLogger
 from gtmcore.workflows import ZipExporter, LabbookWorkflow, DatasetWorkflow, MergeOverride
@@ -68,6 +68,7 @@ def publish_repository(repository: Repository, username: str, access_token: str,
                 wf = DatasetWorkflow(repository) # type: ignore
             wf.publish(username=username, access_token=access_token, remote=remote or "origin",
                        public=public, feedback_callback=update_meta, id_token=id_token)
+
     except Exception as e:
         logger.exception(f"(Job {p}) Error on publish_repository: {e}")
         raise

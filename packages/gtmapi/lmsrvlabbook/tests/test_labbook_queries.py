@@ -418,10 +418,7 @@ class TestLabBookServiceQueries(object):
             sizeBytes
             description
             creationDateUtc
-            activeBranch {
-                refName
-                prefix
-            }
+            activeBranchName
           }
         }
         """
@@ -430,8 +427,7 @@ class TestLabBookServiceQueries(object):
         assert r['data']['labbook']['schemaVersion'] == 1
         assert int(r['data']['labbook']['sizeBytes']) > 10000
         assert int(r['data']['labbook']['sizeBytes']) < 40000
-        assert r['data']['labbook']['activeBranch']['refName'] == 'master'
-        assert r['data']['labbook']['activeBranch']['prefix'] is None
+        assert r['data']['labbook']['activeBranchName'] == 'master'
         assert r['data']['labbook']['name'] == 'labbook1'
         d = r['data']['labbook']['creationDateUtc']
         n = aniso8601.parse_datetime(d)
@@ -766,20 +762,6 @@ class TestLabBookServiceQueries(object):
                 }
                 """
         snapshot.assert_match(fixture_working_dir[2].execute(query))
-
-    def test_check_updates_available_from_remote(self, remote_labbook_repo, fixture_working_dir):
-        im = InventoryManager(fixture_working_dir[0])
-        lb = im.create_labbook('default', 'default', 'labbook1', description="my first labbook1")
-
-        query = f"""
-        {{
-            labbook(name: "labbook1", owner: "default") {{
-                updatesAvailableCount
-            }}
-        }}
-        """
-        r = fixture_working_dir[2].execute(query)
-        assert r['data']['labbook']['updatesAvailableCount'] == 0
 
     def test_list_favorites(self, fixture_working_dir, snapshot):
         """Test listing labbook favorites"""
@@ -1681,27 +1663,6 @@ class TestLabBookServiceQueries(object):
           }}
         }}
         """.format(",".join(f'"{k}"' for k in keys))
-        snapshot.assert_match(fixture_working_dir[2].execute(query))
-
-    def test_get_labbook_readme(self, fixture_working_dir, snapshot):
-        """Test getting a labbook's readme document"""
-        # Create labbooks
-        im = InventoryManager(fixture_working_dir[0])
-        lb = im.create_labbook('default', 'default', 'labbook1', description="my test description")
-
-        query = """
-        {
-          labbook(name: "labbook1", owner: "default") {
-            name
-            description
-            readme
-          }
-        }
-        """
-        snapshot.assert_match(fixture_working_dir[2].execute(query))
-
-        lb.write_readme("##Summary\nThis is my readme!!")
-
         snapshot.assert_match(fixture_working_dir[2].execute(query))
 
     def test_get_labbook_create_date(self, fixture_working_dir, snapshot):

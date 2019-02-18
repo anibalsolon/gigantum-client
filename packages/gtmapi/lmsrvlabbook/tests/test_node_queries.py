@@ -17,9 +17,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-import pytest
 import os
-from snapshottest import snapshot
 from lmsrvlabbook.tests.fixtures import fixture_working_dir, fixture_test_file
 
 from graphene.test import Client
@@ -28,14 +26,13 @@ from mock import patch
 
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.files import FileOperations
-from gtmcore.configuration import Configuration
 
 from ..api import LabbookMutations, LabbookQuery
 
 
 class TestNodeQueries(object):
 
-    def test_node_labbook_from_object(self, fixture_working_dir, snapshot):
+    def test_node_labbook_from_object(self, fixture_working_dir):
         im = InventoryManager(fixture_working_dir[0])
         lb = im.create_labbook("default", "default", "cat-lab-book1", description="Test cat labbook from obj")
 
@@ -45,18 +42,20 @@ class TestNodeQueries(object):
                         ... on Labbook {
                             name
                             description
-                            activeBranch {
-                                refName
-                            }
+                            activeBranchName
                         }
                         id
                     }
                 }
                 """
 
-        snapshot.assert_match(fixture_working_dir[2].execute(query))
+        r = fixture_working_dir[2].execute(query)
+        assert r['data']['node']['description'] == 'Test cat labbook from obj'
+        assert r['data']['node']['id'] == 'TGFiYm9vazpkZWZhdWx0JmNhdC1sYWItYm9vazE='
+        assert r['data']['node']['name'] == 'cat-lab-book1'
+        assert r['data']['node']['activeBranchName'] == 'master'
 
-    def test_node_package(self, fixture_working_dir, snapshot):
+    def test_node_package(self, fixture_working_dir):
         im = InventoryManager(fixture_working_dir[0])
         lb = im.create_labbook("default", "default", "node-env-test-lb", description="Example labbook by mutation.")
 
@@ -74,13 +73,13 @@ class TestNodeQueries(object):
         }
         """
         results = fixture_working_dir[2].execute(env_query)
-        results['data']['node']['manager'] == 'pip'
-        results['data']['node']['package'] == 'numpy'
-        results['data']['node']['version'] == '1.12'
+        assert results['data']['node']['manager'] == 'pip'
+        assert results['data']['node']['package'] == 'numpy'
+        assert results['data']['node']['version'] == '1.12'
         # NOTE - The following will return None because there is no data loader available.
         #results['data']['node']['latestVersion'] == '1.14.2'
 
-    def test_node_environment(self, fixture_working_dir, snapshot):
+    def test_node_environment(self, fixture_working_dir):
         im = InventoryManager(fixture_working_dir[0])
         lb = im.create_labbook("default", "default", "node-env-test-lb",
                                description="Example labbook by mutation.")
@@ -101,10 +100,13 @@ class TestNodeQueries(object):
             }
         }
         """
-        results = fixture_working_dir[2].execute(env_query)
-        snapshot.assert_match(results)
+        r = fixture_working_dir[2].execute(env_query)
+        assert r['data']['node']['description'] ==  'Example labbook by mutation.'
+        assert r['data']['node']['environment']['containerStatus'] == 'NOT_RUNNING'
+        assert r['data']['node']['environment']['imageStatus'] == 'DOES_NOT_EXIST'
+        assert r['data']['node']['name'] == 'node-env-test-lb'
 
-        env_id = results['data']['node']['environment']['id']
+        env_id = r['data']['node']['environment']['id']
 
         env_node_query = """
         {
@@ -117,9 +119,12 @@ class TestNodeQueries(object):
             }
         }
         """ % env_id
-        snapshot.assert_match(fixture_working_dir[2].execute(env_node_query))
+        r2 = fixture_working_dir[2].execute(env_node_query)
+        assert r2['data']['node']['containerStatus'] == 'NOT_RUNNING'
+        assert r2['data']['node']['imageStatus'] == 'DOES_NOT_EXIST'
 
-    def test_favorites_node(self, fixture_working_dir, snapshot):
+
+    def test_favorites_node(self, fixture_working_dir):
         """Test listing labbook favorites"""
 
         im = InventoryManager(fixture_working_dir[0])
@@ -147,7 +152,17 @@ class TestNodeQueries(object):
                         }
                     }
                     """
-        snapshot.assert_match(fixture_working_dir[2].execute(query))
+        r = fixture_working_dir[2].execute(query)
+        # Assert that there ARE INDEED errors
+        assert 'errors' in r
+        # These are the fields with error and are therefore None
+        assert r['data']['node']['description'] is None
+        assert r['data']['node']['index'] is None
+        assert r['data']['node']['isDir'] is None
+
+        # The one field that is NOT in error
+        assert r['data']['node']['key'] == 'test333.txt'
+
 
         # Get the actual item
         query = """
@@ -163,9 +178,14 @@ class TestNodeQueries(object):
                         }
                     }
                     """
-        snapshot.assert_match(fixture_working_dir[2].execute(query))
+        r2 = fixture_working_dir[2].execute(query)
+        assert 'errors' not in r2
+        assert r2['data']['node']['description'] == 'My file with stuff 1'
+        assert r2['data']['node']['index'] == 0
+        assert r2['data']['node']['isDir'] == False
+        assert r2['data']['node']['key'] == 'test1.txt'
 
-    def test_file_node(self, fixture_working_dir, snapshot):
+    def test_file_node(self, fixture_working_dir):
         """Test listing labbook favorites"""
         im = InventoryManager(fixture_working_dir[0])
         lb = im.create_labbook("default", "default", "labbook1",
@@ -190,9 +210,14 @@ class TestNodeQueries(object):
                         }
                     }
                     """
-        snapshot.assert_match(fixture_working_dir[2].execute(query))
 
-    def test_activity_record_node(self, fixture_working_dir, snapshot, fixture_test_file):
+        r = fixture_working_dir[2].execute(query)
+        assert 'errors' not in r
+        assert r['data']['node']['isDir'] is False
+        assert r['data']['node']['key'] == 'test1.txt'
+        assert r['data']['node']['size'] == '5'
+
+    def test_activity_record_node(self, fixture_working_dir, fixture_test_file):
         """Test getting an activity record by node ID"""
         im = InventoryManager(fixture_working_dir[0])
         lb = im.create_labbook("default", "default", "labbook1",
@@ -230,6 +255,7 @@ class TestNodeQueries(object):
         }
         """
         result1 = fixture_working_dir[2].execute(query)
+        assert 'errors' not in result1
 
         query = """
                     {{
@@ -257,9 +283,10 @@ class TestNodeQueries(object):
                     }}
                     """.format(result1['data']['labbook']['activityRecords']['edges'][0]['node']['id'])
         result2 = fixture_working_dir[2].execute(query)
+        assert 'errors' not in result2
         assert result2['data']['node'] == result1['data']['labbook']['activityRecords']['edges'][0]['node']
 
-    def test_detail_record_node(self, fixture_working_dir, snapshot, fixture_test_file):
+    def test_detail_record_node(self, fixture_working_dir, fixture_test_file):
         """Test getting an detail record by node ID"""
         im = InventoryManager(fixture_working_dir[0])
         lb = im.create_labbook("default", "default", "labbook1",
@@ -297,6 +324,7 @@ class TestNodeQueries(object):
         }
         """
         result1 = fixture_working_dir[2].execute(query)
+        assert 'errors' not in result1
 
         query = """
             {{
@@ -314,4 +342,5 @@ class TestNodeQueries(object):
             }}
             """.format(result1['data']['labbook']['activityRecords']['edges'][0]['node']['detailObjects'][0]['id'])
         result2 = fixture_working_dir[2].execute(query)
+        assert 'errors' not in result2
         assert result2['data']['node'] == result1['data']['labbook']['activityRecords']['edges'][0]['node']['detailObjects'][0]

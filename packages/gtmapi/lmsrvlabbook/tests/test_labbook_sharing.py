@@ -98,13 +98,9 @@ class TestLabbookSharing(object):
         list_all_branches_q = f"""
         {{
             labbook(name: "sample-repo-lb", owner: "{new_owner}") {{
+                activeBranchName
                 branches {{
-                    edges {{
-                        node {{
-                            prefix
-                            refName
-                        }}
-                    }}
+                    branchName
                 }}
             }}
         }}
@@ -112,22 +108,15 @@ class TestLabbookSharing(object):
         r = fixture_working_dir[2].execute(list_all_branches_q, context_value=req)
         pprint.pprint(r)
         assert 'errors' not in r
-
-        nodes = r['data']['labbook']['branches']['edges']
-        for n in [x['node'] for x in nodes]:
+        assert r['data']['labbook']['activeBranchName'] == 'master'
+        nodes = r['data']['labbook']['branches']
+        for n in [x['branchName'] for x in nodes]:
             # Make sure that the user's local branch was created
-            if n['prefix'] is None and n['refName'] == f'master':
+            if n == f'master':
                 break
         else:
             assert False, f"Branch master should exist but does not"
 
-        for n in [x['node'] for x in nodes]:
-            # Make sure that origin/master is in list of branches. This means it tracks.
-            if n['refName'] == 'master':
-                break
-        else:
-            pprint.pprint(nodes)
-            assert False, "master should be in list of branches"
 
         # Make sure the labbook cloned into the correct directory
         assert os.path.exists(os.path.join(fixture_working_dir[1], 'default', new_owner, 'labbooks', 'sample-repo-lb'))

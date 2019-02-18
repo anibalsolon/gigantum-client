@@ -6,7 +6,7 @@ import {
 } from 'react-relay';
 // components
 import LocalDatasetPanel from 'Components/dashboard/datasets/localDatasets/LocalDatasetsPanel';
-import DatasetsPaginationLoader from './datasetsLoaders/datasetsPaginationLoader';
+import DatasetsPaginationLoader from '../datasetsLoaders/datasetsPaginationLoader';
 import ImportModule from './import/ImportModule';
 // helpers
 import DatasetVisibilityLookup from './lookups/DatasetVisibilityLookup';

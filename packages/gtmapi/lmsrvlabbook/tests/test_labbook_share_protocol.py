@@ -162,12 +162,7 @@ class TestLabbookShareProtocol(object):
                 owner: "default"
             }}) {{
                 labbook {{
-                    activeBranch {{
-                        name
-                        commit {{
-                            shortHash
-                        }}
-                    }}
+                    activeBranchName
                 }}
             }}
         }}
@@ -175,6 +170,7 @@ class TestLabbookShareProtocol(object):
 
         r = mock_create_labbooks_no_lfs[2].execute(publish_query, context_value=req)
         assert 'errors' not in r
-        hash_after_reset = r['data']['resetBranchToRemote']['labbook']['activeBranch']['commit']['shortHash']
-        assert hash_after_reset not in hash_before_reset
-        assert hash_after_reset in hash_original
+        assert wf.labbook.git.commit_hash == hash_original
+        #hash_after_reset = r['data']['resetBranchToRemote']['labbook']['activeBranch']['commit']['shortHash']
+        #assert hash_after_reset not in hash_before_reset
+        #assert hash_after_reset in hash_original
