@@ -140,76 +140,61 @@ code {
   transform: translate(-50%, -50%);
 }
 
-.Tooltip--data {
+.Tooltip-data {
+
   position: relative;
-  font-weight: bolder;
+
   cursor: pointer;
+
+  font-weight: bolder;
   &:hover::before{
-    content: "";
-    @include triangle('up', 7px, $jet);
-    border-width: 10px;
     position: absolute;
-    left: calc(50% - 5px);
     top: calc(100% - 0px);
+    left: calc(50% - 5px);
+
+    content: "";
+
+    border-width: 10px;
+
+    @include triangle('up', 7px, $slateBlue);
   }
 
   &:hover::after{
-    content: attr(data-tooltip);
-    @extend .box-shadow;
+    font-family: 'NunitoSans';
     position: absolute;
-    word-break: break-word;
-    min-width: 100px;
-    font-weight: 100;
-    line-height: 1.3em;
-    font-size: 16px;
-    text-align: center;
-    word-wrap: normal;
-    margin: 0;
-    background: $jet;
-    width: 140px;
-    color: $white;
-    padding: 5px;
-    border-radius: 5px;
+    top: calc(100% + 7px);
     left: calc(50% - 70px);
-    top: calc(100% + 10px);
-    z-index: 1;
-    font-size: .7em;
+
+    width: 140px;
+    min-width: 100px;
+    margin: 0;
+    padding: 10px;
+
+    content: attr(data-tooltip);
+    word-wrap: normal;
+    word-break: break-word;
+    line-height: 18px;
+
+    color: $white;
+    background: $slateBlue;
+
+    font-size: 14px !important;
+    font-weight: 100 !important;
+
+    @extend .box-shadow;
   }
 
   &--right:hover::before {
-    border: solid transparent;
-    @include triangle('left', 7px, $jet);
     top: calc(50% - 7px);
     left: calc(100% + 2px);
-    content: "";
 
-    border-width: 10px;
-    position: absolute;
+    @include triangle('left', 7px, $slateBlue);
   }
 
 
   &--right:hover::after {
-    content: attr(data-tooltip);
-    @extend .box-shadow;
-    position: absolute;
-    word-break: break-word;
-    min-width: 100px;
-    width: 100px;
-    font-weight: 100;
-    line-height: 1.3em;
-    font-size: 16px;
-    text-align: center;
-    word-wrap: normal;
-    margin: 0;
-    background: $jet;
-    width: 140px;
-    color: $white;
-    padding: 5px;
-    border-radius: 5px;
-    left: calc(100% + 20px);
     top: calc(50% - 10px);
-    z-index: 1;
-    font-size: .7em;
+    left: calc(100% + 16px);
   }
 }
 

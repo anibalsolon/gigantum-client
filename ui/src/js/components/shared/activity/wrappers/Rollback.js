@@ -3,7 +3,6 @@ import React, { Component, Fragment } from 'react';
 import classNames from 'classnames';
 // components
 import ToolTip from 'Components/common/ToolTip';
-import WarningToolTip from 'Components/common/WarningToolTip';
 // assets
 import './Rollback.scss';
 
@@ -28,7 +27,7 @@ export default class Rollback extends Component {
           rollbackCSS = classNames({
             Rollback: true,
             'Rollback--locked': props.isLocked,
-            'Tooltip--data--right': props.isLocked,
+            'Tooltip-data Tooltip-data--right': props.isLocked,
           });
 
     return (

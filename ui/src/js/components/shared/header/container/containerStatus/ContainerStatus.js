@@ -2,6 +2,7 @@
 import React, { Component, Fragment } from 'react';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
+import { boundMethod } from 'autobind-decorator';
 // store
 import store from 'JS/redux/store';
 import { setContainerState } from 'JS/redux/reducers/labbook/overview/overview';
@@ -32,6 +33,7 @@ class ContainerStatus extends Component {
       rebuildAttempts: 0,
       showDevList: false,
       showInitialMessage: false,
+      previousContainerStatus: props.containerStatus,
     };
 
     this._getContainerStatusText = this._getContainerStatusText.bind(this);
@@ -41,12 +43,11 @@ class ContainerStatus extends Component {
   }
 
   static getDerivedStateFromProps(nextProps, state) {
-    let status = ((state.status === 'Stopping') && (nextProps.containerStatus === 'NOT_RUNNING')) ? '' : state.status;
-    status = ((state.status === 'Starting') && (nextProps.containerStatus === 'RUNNING')) ? '' : state.status;
-    console.log(nextProps.containerStatus, state.status, status);
+    // const status = (state.previousContainerStatus === nextProps.containerStatus) ? nextProps.status : '';
     return ({
       ...state,
-      status,
+      status: nextProps.stateStatus,
+      previousContainerStatus: nextProps.containerStatus,
     });
   }
 
@@ -65,7 +66,8 @@ class ContainerStatus extends Component {
   *  @return {string}
   */
   componentDidMount() {
-    this.props.auth.isAuthenticated().then((response) => {
+    const { props } = this;
+    props.auth.isAuthenticated().then((response) => {
       const containerMessageShown = localStorage.getItem('containerMessageShown');
       if (!containerMessageShown && response) {
         this.setState({ showInitialMessage: true });
@@ -100,21 +102,6 @@ class ContainerStatus extends Component {
   _closePopupMenus(evt) {
     // TODO fix this implementation, this is not sustainable.
     const containerMenuClicked = evt.target.getAttribute('data-container-popup') === 'true';
-      // evt.target.className.indexOf('ContainerStatus__container-state') > -1) ||
-      // (evt.target.className.indexOf('BranchMenu') > -1) ||
-      // (evt.target.className.indexOf('BranchMenu__sync-button') > -1) ||
-      // (evt.target.className.indexOf('BranchMenu__remote-button') > -1) ||
-      // (evt.target.className.indexOf('CustomDockerfile__content-edit-button') > -1) ||
-      // (evt.target.className.indexOf('CustomDockerfile__content-save-button') > -1) ||
-      // (evt.target.className.indexOf('Labbook__name') > -1) ||
-      // (evt.target.className.indexOf('Labbook__branch-toggle') > -1) ||
-      // (evt.target.className.indexOf('Acitivty__rollback-button') > -1) ||
-      // (evt.target.className.indexOf('Activity__add-branch-button') > -1) ||
-      // (evt.target.className.indexOf('PackageDependencies__remove-button--full') > -1) ||
-      // (evt.target.className.indexOf('PackageDependencies__remove-button--half') > -1) ||
-      // (evt.target.className.indexOf('PackageDependencies__update-button') > -1) ||
-      // (evt.target.className.indexOf('BranchCard__delete-labbook') > -1) ||
-      // (evt.target.className.indexOf('Rollback') > -1);
 
     if (!containerMenuClicked &&
     this.props.containerMenuOpen) {
@@ -252,17 +239,14 @@ class ContainerStatus extends Component {
     const { props, state } = this;
     if (!store.getState().labbook.isBuilding && !props.isLookingUpPackages) {
       if (status === 'Stop') {
-        this.setState({
-          status: 'Stopping',
-          contanerMenuRunning: false,
-        });
+        props.updateStatus('Stopping');
 
+        this.setState({ contanerMenuRunning: false });
         this._stopContainerMutation();
       } else if (status === 'Run') {
-        this.setState({
-          status: 'Starting',
-          contanerMenuRunning: false,
-        });
+        props.updateStatus('Starting');
+
+        this.setState({ contanerMenuRunning: false });
 
         props.setMergeMode(false, false);
         this._startContainerMutation();
@@ -369,7 +353,7 @@ class ContainerStatus extends Component {
       'ContainerStatus__container-state--expanded': state.isMouseOver && notExcluded && !props.isBuilding && !(state.imageStatus === 'BUILD_IN_PROGRESS'),
       'ContainerStatus__container-remove-pointer': !notExcluded || props.isBuilding || (props.imageStatus === 'BUILD_IN_PROGRESS') || props.isSyncing || props.isPublishing,
     });
-    console.log(notExcluded, props.isBuilding, (state.imageStatus === 'BUILD_IN_PROGRESS'), props.isSyncing, props.isPublishing)
+
     return (
       <div className="ContainerStatus flex flex--row">
 

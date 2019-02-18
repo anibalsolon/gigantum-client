@@ -124,7 +124,7 @@ export default class CustomDockerfile extends Component {
           }),
           dockerSnippetsCSS = classNames({
             CustomDockerfile__header: true,
-            'ToolTip--data--right': props.isLocked,
+            'Tooltip-data Tooltip-data--right': props.isLocked,
           }),
           renderedContent = state.dockerfileContent ? `\`\`\`\n${state.dockerfileContent}\n\`\`\`` : 'No commands provided.';
 
@@ -133,7 +133,9 @@ export default class CustomDockerfile extends Component {
 
         <div className="Environment__headerContainer">
 
-          <h5 className={dockerSnippetsCSS} data-tooltip="Container must be turned off to edit docker snippets">
+          <h5
+            className={dockerSnippetsCSS}
+            data-tooltip="Container must be turned off to edit docker snippets">
             Custom Docker Instructions
             <ToolTip section="dockerInstructionsEnvironment" />
             {

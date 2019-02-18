@@ -27,7 +27,6 @@ import config from 'JS/config';
 // components
 import ButtonLoader from 'Components/common/ButtonLoader';
 import Loader from 'Components/common/Loader';
-import WarningToolTip from 'Components/common/WarningToolTip';
 // helpers
 import PackageLookup from './PackageLookup';
 // assets
@@ -666,11 +665,11 @@ class PackageDependencies extends Component {
 
       const addPackageContainer = classNames({
         PackageDependencies__addPackage: true,
-        'Tooltip--data': props.isLocked,
+        'Tooltip-data': props.isLocked,
       });
 
       const tooltipCSS = classNames({
-        'Tooltip--data': props.isLocked,
+        'Tooltip-data': props.isLocked,
       });
 
       const disableInstall = state.disableInstall || ((state.packages.length === 0) || (packagesProcessing.length > 0));

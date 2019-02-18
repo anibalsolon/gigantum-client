@@ -234,7 +234,6 @@ class Labbook extends Component {
       isSyncing: props.isSyncing,
     };
     const isLocked = props.isBuilding || props.isSyncing || props.isPublishing || state.isLocked;
-    console.log('isLocked', isLocked, props.isBuilding, props.isSyncing, props.isPublishing, state.isLocked)
     if (props.labbook) {
       const { labbook, branchesOpen } = props;
       const branchName = props.labbook.activeBranchName;
