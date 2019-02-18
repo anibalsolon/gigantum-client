@@ -715,7 +715,9 @@ class TestLabBookServiceQueries(object):
                       }
                     }
                     """
-        snapshot.assert_match(fixture_working_dir[2].execute(query))
+        r = fixture_working_dir[2].execute(query)
+        pprint.pprint(r)
+        snapshot.assert_match(r)
 
         # Just get the files in the sub-directory "js"
         query = """
@@ -761,7 +763,9 @@ class TestLabBookServiceQueries(object):
                   }
                 }
                 """
-        snapshot.assert_match(fixture_working_dir[2].execute(query))
+        r = fixture_working_dir[2].execute(query)
+        pprint.pprint(r)
+        snapshot.assert_match(r)
 
     def test_list_favorites(self, fixture_working_dir, snapshot):
         """Test listing labbook favorites"""
@@ -1131,7 +1135,9 @@ class TestLabBookServiceQueries(object):
                       }
                     }
                     """
-        snapshot.assert_match(fixture_working_dir[2].execute(query))
+        r = fixture_working_dir[2].execute(query)
+        pprint.pprint(r)
+        snapshot.assert_match(r)
 
     def test_get_activity_records_next_page(self, fixture_working_dir_env_repo_scoped, snapshot, fixture_test_file):
         """Test next page logic, which requires a labbook to be created properly with an activity"""

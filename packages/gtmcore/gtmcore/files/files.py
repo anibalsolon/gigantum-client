@@ -100,11 +100,6 @@ class FileOperations(object):
             raise FileOperationsException(f'Section {section} not found '
                                           f'in {str(labbook)}')
 
-        filelist = os.listdir(section_path)
-        if not(len(filelist) == 1 and filelist[0] == '.gitkeep'):
-            raise FileOperationsException(f'Files already exist in '
-                                          f'{str(labbook)} section {section}')
-
         append_lines = [f'# Ignore files for section {section} - '
                         f'fix to improve Git performance with large files',
                         f'{section}/*', f'!{section}/.gitkeep']
