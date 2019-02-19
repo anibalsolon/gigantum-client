@@ -62,50 +62,6 @@ class TestFileOps(object):
         for key in s.keys():
             assert not s[key]
 
-    def test_make_sure_cannot_set_when_files_already_exist_in_section(self, mock_labbook):
-        x, y, lb = mock_labbook
-
-        # 2 - Add a file to the input directory using the old-fashioned add file op.
-        with open('/tmp/unittestfile', 'wb') as f:
-            f.write("xxxxxxxxxxxxxxxč".encode('utf-8'))
-        r = FileOperations.put_file(lb, section="input", src_file=f.name, dst_path='')
-        assert os.path.isfile(os.path.join(lb.root_dir, 'input', 'unittestfile'))
-
-        with pytest.raises(FileOperationsException):
-            FileOperations.set_untracked(labbook=lb, section='input')
-
-        assert FileOperations.is_set_untracked(labbook=lb, section='input') is False
-
-    def test_make_sure_cannot_set_untracked_twice(self, mock_labbook):
-        x, y, lb = mock_labbook
-
-        hash_0 = lb.git.commit_hash
-        FileOperations.set_untracked(labbook=lb, section='input')
-
-        # 1 - Ensure there are no untracked changes after the set operation
-        s = lb.git.status()
-
-        for key in s.keys():
-            assert not s[key]
-
-        # 2 - Add a file to the input directory using the old-fashioned add file op.
-        hash_1 = lb.git.commit_hash
-        with open('/tmp/unittestfile', 'w') as f:
-            f.write('------------------------\n')
-        r = FileOperations.put_file(lb, section="input", src_file=f.name, dst_path='')
-        hash_2 = lb.git.commit_hash
-        assert os.path.isfile(os.path.join(lb.root_dir, 'input', 'unittestfile'))
-
-        # Cannot set this field twice.
-        with pytest.raises(FileOperationsException):
-            FileOperations.set_untracked(labbook=lb, section='input')
-        hash_3 = lb.git.commit_hash
-
-        assert hash_0 != hash_1
-        assert hash_1 == hash_2
-        assert hash_2 == hash_3
-        assert FileOperations.is_set_untracked(labbook=lb, section='input') is True
-
     def test_with_the_whole_suite_of_file_operations_on_an_UNTRACKED_labbook(self, mock_labbook):
         x, y, lb = mock_labbook
 

@@ -83,6 +83,8 @@ class FileOperations(object):
         indexes for the files. Note that this must be set before uploading
         files to the given `section`.
 
+        Must be called at project creation!
+
         Args:
             labbook: Subject labbook
             section: Section to set untracked - one of code, input, or output.
@@ -105,8 +107,7 @@ class FileOperations(object):
                         f'{section}/*', f'!{section}/.gitkeep']
 
         if cls.is_set_untracked(labbook, section):
-            raise FileOperationsException(f'Section {section} already '
-                                          f'untracked in {str(labbook)}')
+            return
 
         with open(os.path.join(labbook.root_dir, '.gitignore'), 'a') as gi_file:
             gi_file.write('\n'.join([''] + append_lines + ['']))
