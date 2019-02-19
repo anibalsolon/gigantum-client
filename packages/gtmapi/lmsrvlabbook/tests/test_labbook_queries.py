@@ -17,8 +17,6 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-import pytest
-
 import os
 import time
 from snapshottest import snapshot
@@ -29,7 +27,6 @@ from gtmcore.fixtures import ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TE
 import datetime
 import pprint
 import aniso8601
-import graphene
 
 import gtmcore
 
@@ -716,7 +713,6 @@ class TestLabBookServiceQueries(object):
                     }
                     """
         r = fixture_working_dir[2].execute(query)
-        pprint.pprint(r)
         snapshot.assert_match(r)
 
         # Just get the files in the sub-directory "js"
@@ -764,7 +760,6 @@ class TestLabBookServiceQueries(object):
                 }
                 """
         r = fixture_working_dir[2].execute(query)
-        pprint.pprint(r)
         snapshot.assert_match(r)
 
     def test_list_favorites(self, fixture_working_dir, snapshot):
@@ -1136,7 +1131,6 @@ class TestLabBookServiceQueries(object):
                     }
                     """
         r = fixture_working_dir[2].execute(query)
-        pprint.pprint(r)
         snapshot.assert_match(r)
 
     def test_get_activity_records_next_page(self, fixture_working_dir_env_repo_scoped, snapshot, fixture_test_file):
@@ -1401,7 +1395,6 @@ class TestLabBookServiceQueries(object):
         """
         # Uses an invalid string
         r = fixture_working_dir[2].execute(query)
-        pprint.pprint(r)
         assert 'errors' in r
         snapshot.assert_match(r)
 

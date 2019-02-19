@@ -227,7 +227,6 @@ class TestLabBookServiceMutations(object):
                      "component_id": ENV_UNIT_TEST_BASE, "repository": ENV_UNIT_TEST_REPO,
                      "revision": ENV_UNIT_TEST_REV}
         r = fixture_working_dir_env_repo_scoped[2].execute(query, variable_values=variables)
-        pprint.pprint(r)
         assert 'errors' not in r
         assert r['data']['createLabbook']['labbook']['input']['isUntracked'] is True
         assert r['data']['createLabbook']['labbook']['output']['isUntracked'] is True
