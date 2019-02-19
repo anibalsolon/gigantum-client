@@ -107,7 +107,7 @@ class FileOperations(object):
                         f'{section}/*', f'!{section}/.gitkeep']
 
         if cls.is_set_untracked(labbook, section):
-            return
+            return labbook
 
         with open(os.path.join(labbook.root_dir, '.gitignore'), 'a') as gi_file:
             gi_file.write('\n'.join([''] + append_lines + ['']))
