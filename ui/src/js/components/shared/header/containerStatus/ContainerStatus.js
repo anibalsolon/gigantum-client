@@ -28,7 +28,7 @@ function Bounce(w) {
 class ContainerStatus extends Component {
   constructor(props) {
     super(props);
-    const devTools = this.props.base.developmentTools.slice();
+    const devTools = (this.props.base && this.props.base.developmentTools) ? this.props.base.developmentTools.slice() : [];
 
     const selectedDevTool = devTools[0] === 'jupyterlab' ? 'JupyterLab' : devTools[0] === 'notebook' ? 'Notebook' : devTools[0] === 'rstudio' ? 'RStudio' : devTools[0];
     const { owner, labbookName } = store.getState().routes;

@@ -51,11 +51,13 @@ export default class UserNoteWrapper extends Component {
           <div className="UserNote__text">Add Note</div>
         </div>
         <div className={userNoteCardCSS}>
-          <UserNote
-            toggleUserNote={this._toggleUserNote}
-            key="UserNote"
-            {...props}
-          />
+          { state.userNoteVisible
+            && <UserNote
+                toggleUserNote={this._toggleUserNote}
+                key="UserNote"
+                {...props}
+              />
+          }
         </div>
       </div>
     );
