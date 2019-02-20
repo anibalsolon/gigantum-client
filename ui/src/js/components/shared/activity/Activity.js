@@ -485,8 +485,6 @@ class Activity extends Component {
         }
       }
     });
-
-    console.log(activityRecords, activityTime)
     return activityTime;
   }
 

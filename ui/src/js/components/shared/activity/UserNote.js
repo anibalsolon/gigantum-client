@@ -62,13 +62,6 @@ export default class UserNote extends Component {
 
     this.setState({ addNoteDisabled: true });
 
-    console.log(props.sectionType,
-        labbookName,
-        state.userSummaryText,
-        simple.value(),
-        owner,
-        [],
-        tags)
     CreateUserNoteMutation(
       props.sectionType,
       labbookName,

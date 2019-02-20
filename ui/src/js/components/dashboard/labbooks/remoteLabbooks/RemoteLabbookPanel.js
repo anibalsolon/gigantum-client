@@ -179,7 +179,6 @@ export default class RemoteLabbookPanel extends Component {
      'RemoteLabbooks__row RemoteLabbooks__row--text': true,
      blur: this.state.isImporting,
    });
-   console.log('RemoteLabbooks__icon', localStorage, localStorage.getItem('username'), edge.node.owner)
    const deleteCSS = classNames({
      RemoteLabbooks__icon: true,
      'RemoteLabbooks__icon--delete': localStorage.getItem('username') === edge.node.owner,
