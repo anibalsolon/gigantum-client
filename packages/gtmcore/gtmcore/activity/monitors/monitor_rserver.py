@@ -4,14 +4,12 @@ from gtmcore.mitmproxy.mitmproxy import CURRENT_MITMPROXY_TAG
 from typing import (Dict, List, Optional)
 import time
 import re
-import io
 import json
 import pandas
 
 from mitmproxy import io as mitmio
 from mitmproxy.exceptions import FlowReadException
 
-from PIL import Image
 import zlib
 import base64
 
@@ -31,6 +29,45 @@ from gtmcore.dispatcher import Dispatcher, jobs
 from gtmcore.logging import LMLogger
 
 logger = LMLogger.get_logger()
+
+
+def format_output(output: Dict):
+    """Produce suitable JSON output for storing an R data frame in an Activity Record
+
+    Args:
+        output: the representation of a dataframe returned by
+    """
+    om = output.get('output_metadata')
+    if om:
+        omc = om.get('classes')
+        # We currently don't deal with any complex outputs apart from data.frame
+        # We'll log other metadata types below
+        if omc and 'data.frame' in omc:
+            try:
+                column_names = [x['label'][0] for x in output['output_val']['columns']]
+                df = pandas.DataFrame.from_dict(output['output_val']['data'])
+                df.columns = column_names
+                if df.shape[0] <= 50:
+                    return {'data': {'text/plain': str(df)},
+                            'tags': 'data.frame'}
+                else:
+                    output_text = str(df.head(20)) + \
+                                  f"\n.....,..and {df.shape[0] - 20} more rows"
+                    return {'data': {'text/plain': output_text},
+                            'tags': 'data.frame'}
+
+            # This bare except is left in-place because there are number of ways the above could fail,
+            # but it's hard to imagine any big surprises, and this default behavior is completely reasonable.
+            except:
+                return {'data': {'text/plain': json.dumps(output['output_val'])},
+                        'tags': 'data.frame'}
+        else:
+            logger.error(f"monitor_rserver: RStudio output with unknown metadata: {om}")
+            # TODO DC Probably we can return a better JSON object
+            return None
+    else:
+        logger.error(f"monitor_rserver: No metadata for chunk_output: {output}")
+        return None
 
 
 class RServerMonitor(DevEnvMonitor):
@@ -88,12 +125,15 @@ class RServerMonitor(DevEnvMonitor):
                     retlist.append(logfid)
         # decode throws error on unset values.  not sure how to check RB
         except Exception as e:
-            pass
+            logger.error(f'Unhandled exception in get_activity_monitors: {e}')
+            raise
         return retlist
 
     def run(self, key: str, database=1) -> None:
         """Method called in a periodically scheduled async worker that should check the dev env and manage Activity
-        Monitor Instances as needed Args:
+        Monitor Instances as needed
+
+        Args:
             key(str): The unique string used as the key in redis to track this DevEnvMonitor instance
         """
         redis_conn = redis.Redis(db=database)
@@ -218,6 +258,7 @@ class RStudioServerMonitor(ActivityMonitor):
         redis_conn = redis.Redis(db=database)
 
         # TODO DC: Dean asks why we need to use a regex here.
+        # This will get hoisted by https://github.com/gigantum/gigantum-client/issues/453
         m = re.match(r".*:activity_monitor:(\w+)$", self.monitor_key)
         if m is not None:
             filename = f"/mnt/share/mitmproxy/{m.group(1)}.rserver.dump"
@@ -234,24 +275,29 @@ class RStudioServerMonitor(ActivityMonitor):
 
         try:
             while True:
-                # TODO DC Loop until idle, then aggregate activity records
-                # https://github.com/gigantum/gigantum-client/issues/434
-
                 still_running = redis_conn.hget(self.monitor_key, "run")
                 # Check if you should exit
-                #  sometimes this runs after key has been deleted.  None is shutdown too.
+                # sometimes this runs after key has been deleted.  None is shutdown too.
                 if not still_running or still_running.decode() == "False":
                     logger.info(f"Received Activity Monitor Shutdown Message for {self.monitor_key}")
                     break
 
-                # Read activity and return an aggregated activity record
+                previous_cells = len(self.cell_data)
+
+                # Read activity and update aggregated "cell" data
                 self.process_activity(mitmlog)
 
-                # aggregate four second of records together
-                time.sleep(4)
+                # We are processing every second, then aggregating activity records when idle
+                if previous_cells == len(self.cell_data) and self.current_cell.is_empty():
+                    # there are no new cells in the last second, and no cells are in-process
+                    self.store_record()
+
+                # Check for new records every second
+                time.sleep(1)
 
         except Exception as e:
-            logger.error(f"Error in RStudio Server Activity Monitor: {e}")
+            logger.error(f"Fatal error in RStudio Server Activity Monitor: {e}")
+            raise
         finally:
             # Delete the kernel monitor key so the dev env monitor will spin up a new process
             # You may lose some activity if this happens, but the next action will sweep up changes
@@ -259,11 +305,12 @@ class RStudioServerMonitor(ActivityMonitor):
             redis_conn.delete(self.monitor_key)
 
     def store_record(self) -> None:
-        """Store R input/output/code to ActivityRecord
+        """Store R input/output/code to ActivityRecord / git commit
+
+        store_record() should be called after moving any data in self.current_cell to
+        self.cell_data. Any data remaining in self.current_cell will be removed.
 
         Args:
-            None
-        Returns:
             None
         """
         if len(self.cell_data) > 0:
@@ -292,153 +339,93 @@ class RStudioServerMonitor(ActivityMonitor):
         self.is_notebook = False
         self.is_console = False
 
-    def parse_record(self, jdict: Dict) -> None:
+    def _parse_json_record(self, json_record: Dict) -> None:
         """Extract code and data from the record.
 
-        Args:
-            record: dictionary parsed from mitmlog
+        When context switches between console <-> notebook, we store a record for
+        the previous execution and start a new record.
 
-        Returns:
-            None
+        Args:
+            json_record: dictionary parsed from mitmlog
         """
-        try:
-            # No result ignore
-            if jdict['result'] == []:
-                return
-        except KeyError:
+        result = json_record.get('result')
+        # No result ignore
+        if not result:
             return
 
-        try:
-            # execution of new notebook cell
-            if jdict['result'][0]['type'] == 'chunk_exec_state_changed':
+        # execution of new notebook cell
+        if result[0]['type'] == 'chunk_exec_state_changed':
+            if self.is_console:
                 # switch from console to notebook. store record
-                if self.is_console:
-                    if not self.current_cell.code == []:
-                        self.cell_data.append(self.current_cell)
-                        self.store_record()
-                elif self.is_notebook and not self.current_cell.code == []:
+                if self.current_cell.code:
                     self.cell_data.append(self.current_cell)
+                    self.store_record()
+            elif self.is_notebook and self.current_cell.code:
+                self.cell_data.append(self.current_cell)
+                self.current_cell = ExecutionData()
+                self.chunk_id = None
+
+            self.is_notebook = True
+            self.is_console = False
+            # Reset current_cell attribute for next execution
+            self.current_cell.tags.append('notebook')
+
+        # execution of console code.  you get a message for every line.
+        if result[0]['type'] == 'console_write_prompt':
+            if self.is_notebook:
+                # switch to console. store record
+                if self.current_cell.code:
+                    self.cell_data.append(self.current_cell)
+                    self.store_record()
+                self.current_cell.tags.append('console')
+
+            # add a tag is this is first line of console code
+            elif not self.is_console:
+                self.current_cell.tags.append('console')
+
+            self.is_console = True
+            self.is_notebook = False
+
+        # parse the entries in this message
+        for edata, etype in [(entry.get('data'), entry.get('type')) for entry in result]:
+            if etype == 'chunk_output':
+                outputs = edata.get('chunk_outputs')
+                if outputs:
+                    for oput in outputs:
+                        result = format_output(oput)
+                        if result:
+                            self.current_cell.result.append(result)
+
+                oput = edata.get('chunk_output')
+                if oput:
+                    result = format_output(oput)
+                    if result:
+                        self.current_cell.result.append(result)
+
+            # get notebook code
+            if self.is_notebook and etype == 'notebook_range_executed':
+
+                # new cell advance cell
+                if self.chunk_id is None or self.chunk_id != edata['chunk_id']:
+                    if self.current_cell.code:
+                        self.cell_data.append(self.current_cell)
                     self.current_cell = ExecutionData()
-                    self.chunk_id = None
+                    self.chunk_id = edata['chunk_id']
+                    self.current_cell.tags.append('notebook')
 
-                self.is_notebook = True
-                self.is_console = False
-                # Reset current_cell attribute for next execution
-                self.current_cell.tags.append('notebook')
-        except:
-            pass
+                # take code in current cell
+                self.current_cell.code.append({'code': edata['code']})
 
-        # if console input
-        try:
-            # execution of console code.  you get this every line.
-            if jdict['result'][0]['type'] == 'console_write_prompt':
-                try:
-                    # switch to console. store record
-                    if self.is_notebook:
-                        if not self.current_cell.code == []:
-                            self.cell_data.append(self.current_cell)
-                            self.store_record()
-                        self.current_cell.tags.append('console')
+            # console code
+            if self.is_console and etype == 'console_write_input':
+                # remove trailing whitespace -- specificially \n
+                if edata['text'] != "\n" or self.current_cell.code != []:
+                    self.current_cell.code.append({'code': edata['text'].rstrip()})
 
-                    # add a tag is this is first line of console code
-                    elif not self.is_console:
-                        self.current_cell.tags.append('console')
-
-                except Exception as e:
-                    logger.info(f"Error {e}")
-                    pass
-
-                self.is_console = True
-                self.is_notebook = False
-        except:
-            pass
-
-        try:
-            # parse the entries in this message
-            for entry in jdict['result']:
-                if entry['type'] == 'chunk_output':
-                    for ekey in entry['data'].keys():
-                        if ekey == 'chunk_outputs':
-                            for oput in entry['data']['chunk_outputs']:
-                                if oput['output_metadata']:
-                                    if oput['output_metadata']['classes'] == 'data.frame':
-                                        try:
-                                            column_names = [x['label'][0] for x in oput['output_val']['columns']]
-                                            df = pandas.DataFrame.from_dict(oput['output_val']['data'])
-                                            df.columns = column_names
-                                            if df.shape[0] <= 50:
-                                                self.current_cell.result.append({'data': {'text/plain': str(df)},
-                                                                                 'tags': 'data.frame'})
-                                            else:
-                                                output_text = str(df.head(20)) + \
-                                                              f"\n.....,..and {df.shape[0] - 20} more rows"
-                                                logger.info(output_text)
-                                                self.current_cell.result.append({'data': {'text/plain': output_text},
-                                                                                 'tags': 'data.frame'})
-                                        except:
-                                            self.current_cell.result.append(
-                                                {'data': {'text/plain': json.dumps(oput['output_val'])},
-                                                 'tags': 'data.frame'})
-
-                        if ekey == 'chunk_output':
-                            oput = entry['data']['chunk_output']
-                            om = oput.get('output_metadata')
-                            if om:
-                                omc = om.get('classes')
-                                if omc and 'data.frame' in omc:
-                                    # take a stab at parsing the data frame
-                                    try:
-                                        column_names = [x['label'][0] for x in oput['output_val']['columns']]
-                                        df = pandas.DataFrame.from_dict(oput['output_val']['data'])
-                                        df.columns = column_names
-                                        if df.shape[0] <= 50:
-                                            self.current_cell.result.append({'data': {'text/plain': str(df)},
-                                                                             'tags': 'data.frame'})
-                                        else:
-                                            output_text = str(df.head(20)) + \
-                                                          f"\n.....,..and {df.shape[0] - 20} more rows"
-                                            logger.info(output_text)
-                                            self.current_cell.result.append({'data': {'text/plain': output_text},
-                                                                             'tags': 'data.frame'})
-                                    # can't parse. output something
-                                    except:
-                                        self.current_cell.result.append(
-                                            {'data': {'text/plain': json.dumps(oput['output_val'])},
-                                             'tags': 'data.frame'})
-                                else:
-                                    logger.error(f"XXX RB output no matching metadata")
-                            else:
-                                logger.error("XXX RBERROR unknown chunk_output")
-
-                # get notebook code
-                if self.is_notebook and entry['type'] == 'notebook_range_executed':
-
-                    # new cell advance cell
-                    if self.chunk_id == None or self.chunk_id != entry['data']['chunk_id']:
-                        if self.current_cell.code != []:
-                            self.cell_data.append(self.current_cell)
-                        self.current_cell = ExecutionData()
-                        self.chunk_id = entry['data']['chunk_id']
-                        self.current_cell.tags.append('notebook')
-
-                    # take code in current cell
-                    self.current_cell.code.append({'code': entry['data']['code']})
-
-                # console code
-                if self.is_console and entry['type'] == 'console_write_input':
-                    # remove trailing whitespace -- specificially \n
-                    if entry['data']['text'] != "\n" or self.current_cell.code != []:
-                        self.current_cell.code.append({'code': entry['data']['text'].rstrip()})
-
-                # this happens in both notebooks and console
-                #   ignore if no context (that's the R origination message
-                if entry['type'] == 'console_output' and (self.is_console or self.is_notebook):
-                    self.current_cell.result.append({'data': {'text/plain': entry['data']['text']}})
-
-        except KeyError as ke:
-            logger.error(f"Key error in parse_record {ke}")
-        except Exception as e:
-            logger.error(f"Unknown exception in parse_record {e}")
+            # this happens in both notebooks and console
+            #   ignore if no context (that's the R origination message
+            if etype == 'console_output' and (self.is_console or self.is_notebook):
+                self.current_cell.result.append({'data': {'text/plain': edata['text']}})
 
     def _is_error(self, result: Dict) -> bool:
         """Check if there's an error in the message"""
@@ -447,6 +434,67 @@ class RStudioServerMonitor(ActivityMonitor):
                 return True
         else:
             return False
+
+    def _parse_image(self, st: Dict):
+        # These are from notebooks
+        m = re.match(r"/chunk_output/(([\w]+)/)+([\w]+.png)", st['request']['path'].decode())
+        if m:
+            img_data = zlib.decompress(st['response']['content'], 16 + zlib.MAX_WBITS)
+            # if we actually wanted to work with the image, could do so like this:
+            # img = Image.open(io.BytesIO(img_data))
+            eimg_data = base64.b64encode(img_data)
+            self.current_cell.result.append({'data': {'image/png': eimg_data}})
+
+        # These are from scripts.
+        m = re.match(r"/graphics/(?:[^[\\/:\"*?<>|]+])*([\w-]+).png",
+                     st['request']['path'].decode())
+        if m:
+            img_data = zlib.decompress(st['response']['content'], 16 + zlib.MAX_WBITS)
+            eimg_data = base64.b64encode(img_data)
+            self.current_cell.result.append({'data': {'image/png': eimg_data}})
+
+    def _parse_json(self, st: Dict, is_gzip: bool):
+        # get the filename
+        m = re.match(r"/rpc/refresh_chunk_output.*", st['request']['path'].decode())
+        if m:
+            # A new chunk, so potentially a new notebook.
+            if self.current_cell.code:
+                self.cell_data.append(self.current_cell)
+                # RB was always storing a record here
+                # with new logic, running cells in two notebooks within a second seems unlikely
+                # self.store_record()
+
+            # strict=False allows control codes, as used in tidyverse output
+            jdata = json.loads(st['request']['content'], strict=False)
+            fullname = jdata['params'][0]
+
+            # pull out the name relative to the "code" directory
+            m1 = re.match(r".*/code/(.*)$", fullname)
+            if m1:
+                self.nbname = m1.group(1)
+            else:
+                m2 = re.match(r"/mnt/labbook/(.*)$", fullname)
+                if m2:
+                    self.nbname = m2.group(1)
+                else:
+                    self.nbname = fullname
+
+        # code or output event
+        m = re.match(r"/events/get_events", st['request']['path'].decode())
+        if m:
+            if is_gzip:
+                jdata = zlib.decompress(st['response']['content'], 16 + zlib.MAX_WBITS)
+            else:
+                jdata = st['response']['content']
+            # get text/code fields out of dictionary
+            try:
+                # strict=False allows control codes, as used in tidyverse output
+                self._parse_json_record(json.loads(jdata, strict=False))
+            except json.JSONDecodeError as je:
+                logger.info(f"Ignoring JSON Decoder Error in process_activity {je}.")
+                return False
+
+        return True
 
     def process_activity(self, mitmlog):
         """Collect tail of the activity log and turn into an activity record.
@@ -464,113 +512,55 @@ class RStudioServerMonitor(ActivityMonitor):
         self.is_console = False
         self.is_notebook = False
 
-        try:
-            while True:
+        while True:
+            try:
+                f = next(fstream)
+            except StopIteration:
+                break
+            except FlowReadException as e:
+                logger.info("MITM Flow file corrupted: {}. Exiting.".format(e))
+                break
 
-                try:
-                    f = next(fstream)
-                except StopIteration:
-                    break
-                except FlowReadException as e:
-                    logger.info("MITM Flow file corrupted: {}. Exiting.".format(e))
-                    break
+            st: Dict = f.get_state()
 
-                try:
-                    st = f.get_state()
+            is_png = False
+            is_gzip = False
+            is_json = False
 
-                    is_png = False
-                    is_gzip = False
-                    is_json = False
+            # Check response types for images and json
+            for header in st['response']['headers']:
 
-                    # Check response types for images and json
-                    for h in st['response']['headers']:
+                # png images
+                if header[0] == b'Content-Type':
+                    if header[1] == b'image/png':
+                        is_png = True
 
-                        # png images
-                        if h[0] == b'Content-Type':
-                            if h[1] == b'image/png':
-                                is_png = True
+                # json
+                if header[0] == b'Content-Type':
+                    if header[1] == b'application/json':
+                        is_json = True
 
-                        # json
-                        if h[0] == b'Content-Type':
-                            if h[1] == b'application/json':
-                                is_json = True
+                if header[0] == b'Content-Encoding':
+                    if header[1] == b'gzip':
+                        is_gzip = True
+                    else:
+                        # Not currently used, but useful for debugging and potentially in future
+                        encoding = header[1]
 
-                        if h[0] == b'Content-Encoding':
-                            if h[1] == b'gzip':
-                                is_gzip = True
-                            else:
-                                encoding = h[1]
+            # process images
+            if is_png:
+                if is_gzip:
+                    self._parse_image(st)
+                else:
+                    logger.error(f"RSERVER Found image/png that was not gzip encoded.")
 
-                    # process images
-                    if is_png:
-                        if is_gzip:
-                            # These are from notebooks
-                            m = re.match(r"/chunk_output/(([\w]+)/)+([\w]+.png)", st['request']['path'].decode())
-                            if m:
-                                img_data = zlib.decompress(st['response']['content'], 16 + zlib.MAX_WBITS)
-                                img = Image.open(io.BytesIO(img_data))
-                                eimg_data = base64.b64encode(img_data)
-                                self.current_cell.result.append({'data': {'image/png': eimg_data}})
+            if is_json:
+                self._parse_json(st, is_gzip)
 
-                            # These are from scripts.
-                            m = re.match(r"/graphics/(?:[^[\\/:\"*?<>|]+])*([\w-]+).png",
-                                         st['request']['path'].decode())
-                            if m:
-                                img_data = zlib.decompress(st['response']['content'], 16 + zlib.MAX_WBITS)
-                                img = Image.open(io.BytesIO(img_data))
-                                eimg_data = base64.b64encode(img_data)
-                                self.current_cell.result.append({'data': {'image/png': eimg_data}})
-                        else:
-                            logger.error(f"RSERVER Found image/png that was not gzip encoded.")
-
-                    if is_json:
-                        # get the filename
-                        m = re.match(r"/rpc/refresh_chunk_output.*", st['request']['path'].decode())
-                        if m:
-                            # potentially a new notebook. store data
-                            if not self.current_cell.code == []:
-                                self.cell_data.append(self.current_cell)
-                                self.store_record()
-
-                            # strict=False allows control codes, as used in tidyverse output
-                            # TODO DC: Check that removal of .decode() doesn't cause trouble
-                            jdata = json.loads(st['request']['content'], strict=False)
-                            fullname = jdata['params'][0]
-
-                            # pull out the name relative to the "code" directory
-                            m1 = re.match(r".*/code/(.*)$", fullname)
-                            if m1:
-                                self.nbname = m1.group(1)
-                            else:
-                                m2 = re.match(r"/mnt/labbook/(.*)$", fullname)
-                                if m2:
-                                    self.nbname = m2.group(1)
-                                else:
-                                    self.nbname = fullname
-
-                        # code or output event
-                        m = re.match(r"/events/get_events", st['request']['path'].decode())
-                        if m:
-                            if is_gzip:
-                                jdata = zlib.decompress(st['response']['content'], 16 + zlib.MAX_WBITS)
-                            else:
-                                jdata = st['response']['content']
-                            # get text/code fields out of dictionary
-                            # strict=False allows control codes, as used in tidyverse output
-                            self.parse_record(json.loads(jdata, strict=False))
-
-                except json.JSONDecodeError as je:
-                    logger.info(f"Ignoring JSON Decoder Error in process_activity {je}.")
-                    continue
-                except Exception as e:
-                    logger.info(f"Ignoring unknown error in process_activity {e}.")
-                    continue
-
-        finally:
-            # Flush cell data IFF anything happened
-            if self.current_cell.code != []:
-                self.cell_data.append(self.current_cell)
-            self.store_record()
-            self.current_cell = ExecutionData()
-            self.cell_data = list()
-            self.chunk_id = None
+        # Flush cell data IFF anything happened
+        if self.current_cell.code:
+            self.cell_data.append(self.current_cell)
+        self.store_record()
+        self.current_cell = ExecutionData()
+        self.cell_data = list()
+        self.chunk_id = None

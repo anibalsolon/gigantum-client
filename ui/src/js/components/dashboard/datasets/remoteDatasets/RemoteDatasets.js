@@ -6,7 +6,7 @@ import {
 } from 'react-relay';
 // components
 import RemoteDatasetPanel from 'Components/dashboard/datasets/remoteDatasets/RemoteDatasetsPanel';
-// import DeleteDataset from 'Components/shared/header/branchMenu/modals/DeleteDataset';
+import DeleteDataset from 'Components/shared/header/branchMenu/modals/DeleteDataset';
 import DatasetsPaginationLoader from '../datasetsLoaders/datasetsPaginationLoader';
 // queries
 import UserIdentity from 'JS/Auth/UserIdentity';
@@ -159,6 +159,22 @@ class RemoteDatasets extends Component {
               ))
           }
           </div>
+          {
+            this.state.deleteModalVisible &&
+            <DeleteDataset
+              sectionType={'dataset'}
+              handleClose={() => { this._toggleDeleteModal(); }}
+              datasetListId={this.props.datasetListId}
+              remoteId={this.state.deleteData.remoteId}
+              remoteConnection="RemoteDatasets_remoteDatasets"
+              toggleModal={this._toggleDeleteModal}
+              remoteOwner={this.state.deleteData.remoteOwner}
+              remoteDatasetName={this.state.deleteData.remoteDatasetName}
+              existsLocally={this.state.deleteData.existsLocally}
+              remoteDelete
+              history={this.props.history}
+            />
+          }
         </div>
       );
     }

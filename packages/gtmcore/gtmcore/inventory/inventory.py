@@ -549,6 +549,12 @@ class InventoryManager(object):
 
         """
         ds = self.load_dataset(username, owner, dataset_name)
+
+        # Delete dataset contents from file cache
+        m = Manifest(ds, username)
+        shutil.rmtree(m.cache_mgr.cache_root, ignore_errors=True)
+
+        # Delete dataset repository from working dir
         shutil.rmtree(ds.root_dir, ignore_errors=True)
 
     def put_dataset(self, path: str, username: str, owner: str) -> Dataset:

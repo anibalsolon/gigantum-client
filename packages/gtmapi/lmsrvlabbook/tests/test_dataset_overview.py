@@ -112,6 +112,7 @@ class TestDatasetOverviewQueries(object):
                     """
         result = fixture_single_dataset[2].execute(query)
         assert 'errors' not in result
+        assert len(result['data']['dataset']['overview']['fileTypeDistribution']) == 1
         assert result['data']['dataset']['overview']['fileTypeDistribution'] == ['1.00|.txt']
 
         # Delete all files
@@ -124,9 +125,9 @@ class TestDatasetOverviewQueries(object):
 
         result = fixture_single_dataset[2].execute(query)
         assert 'errors' not in result
-        assert result['data']['dataset']['overview']['fileTypeDistribution'][0] == '0.56|.txt'
-        assert result['data']['dataset']['overview']['fileTypeDistribution'][1] == '0.22|.csv'
-        assert result['data']['dataset']['overview']['fileTypeDistribution'][2] == '0.11|.hidden'
+        assert len(result['data']['dataset']['overview']['fileTypeDistribution']) == 2
+        assert result['data']['dataset']['overview']['fileTypeDistribution'][0] == '0.71|.txt'
+        assert result['data']['dataset']['overview']['fileTypeDistribution'][1] == '0.29|.csv'
 
     def test_file_info_combined(self, fixture_single_dataset):
         """Test getting the a Dataset's file info"""
@@ -166,6 +167,43 @@ class TestDatasetOverviewQueries(object):
         assert result['data']['dataset']['overview']['fileTypeDistribution'] == []
         assert result['data']['dataset']['overview']['localBytes'] == '0'
         assert result['data']['dataset']['overview']['totalBytes'] == '0'
+
+    def test_file_distribution_hidden(self, fixture_single_dataset):
+        """"""
+        ds = fixture_single_dataset[3]
+        query = """
+                    {
+                      dataset(owner: "default", name: "test-dataset") {
+                        overview {
+                          fileTypeDistribution
+                        }
+                      }
+                    }
+                    """
+        result = fixture_single_dataset[2].execute(query)
+        assert 'errors' not in result
+        assert result['data']['dataset']['overview']['fileTypeDistribution'] == ['1.00|.txt']
+
+        # Delete all files
+        m = Manifest(ds, 'default')
+        os.makedirs(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, ".hiddendir"))
+        os.makedirs(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, ".hiddendir", "subdir"))
+        helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, "test55.csv", "22222")
+        helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, "df.csv", "11")
+        helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, ".hidden", "343")
+        helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, "noextension", "6t4")
+        helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, ".hiddendir/tester.png", "8544")
+        helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, ".hiddendir/subdir/blah.jpeg", "8544")
+        helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, ".hiddendir/subdir/.hiddenfile", "jhg")
+        m.update()
+
+        result = fixture_single_dataset[2].execute(query)
+        assert 'errors' not in result
+        assert len(result['data']['dataset']['overview']['fileTypeDistribution']) == 4
+        assert result['data']['dataset']['overview']['fileTypeDistribution'][0] == '0.56|.txt'
+        assert result['data']['dataset']['overview']['fileTypeDistribution'][1] == '0.22|.csv'
+        assert result['data']['dataset']['overview']['fileTypeDistribution'][2] == '0.11|.jpeg'
+        assert result['data']['dataset']['overview']['fileTypeDistribution'][3] == '0.11|.png'
 
     def test_readme(self, fixture_single_dataset):
         """Test getting a datasets's readme document"""

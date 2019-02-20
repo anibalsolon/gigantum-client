@@ -20,6 +20,7 @@ import store from 'JS/redux/store';
 import { setContainerMenuWarningMessage, setContainerMenuVisibility } from 'JS/redux/reducers/labbook/environment/environment';
 // components
 import DeleteLabbook from './modals/DeleteLabbook';
+import DeleteDataset from './modals/DeleteDataset';
 import ForceSync from './modals/ForceSync';
 import LoginPrompt from './modals/LoginPrompt';
 import VisibilityModal from './modals/VisibilityModal';
@@ -623,12 +624,18 @@ class BranchMenu extends Component {
 
         {
           this.state.deleteModalVisible &&
-
+          (this.props.sectionType === 'labbook' ?
           <DeleteLabbook
             handleClose={() => this._toggleDeleteModal()}
             remoteAdded={this.props.defaultRemote}
             history={this.props.history}
           />
+          :
+          <DeleteDataset
+            handleClose={() => this._toggleDeleteModal()}
+            remoteAdded={this.props.defaultRemote}
+            history={this.props.history}
+          />)
         }
 
         {

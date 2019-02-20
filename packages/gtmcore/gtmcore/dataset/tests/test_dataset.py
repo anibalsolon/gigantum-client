@@ -20,6 +20,15 @@ def helper_modify_dataset(dataset: Dataset):
 
 
 class TestDataset(object):
+    def test_is_dataset_is_managed(self, mock_config_file):
+        """Test getting the create date, both when stored in the buildinfo file and when using git fallback"""
+        im = InventoryManager(mock_config_file[0])
+        ds = im.create_dataset("test", "test", "dataset1", "gigantum_object_v1",
+                               description="my first dataset",
+                               author=GitAuthor(name="test", email="test@test.com"))
+
+        assert ds.is_managed() is True
+
     def test_is_dataset_create_date(self, mock_config_file):
         """Test getting the create date, both when stored in the buildinfo file and when using git fallback"""
         im = InventoryManager(mock_config_file[0])

@@ -322,44 +322,44 @@ class GitLabManager(object):
             # Don't let quota service errors stop you from continuing
             logger.error(f"Failed to configure quota webhook: {err}")
 
-    def remove_labbook(self, namespace: str, labbook_name: str) -> None:
+    def remove_repository(self, namespace: str, repository_name: str) -> None:
         """Method to remove the remote repository
 
         Args:
             namespace(str): Namespace in gitlab, currently the "owner"
-            labbook_name(str): LabBook name (i.e. project name in gitlab)
+            repository_name(str): LabBook name (i.e. project name in gitlab)
 
         Returns:
             None
         """
-        if not self.repository_exists(namespace, labbook_name):
+        if not self.repository_exists(namespace, repository_name):
             raise ValueError("Cannot remove remote repository that does not exist")
 
         # Remove project from quota service
         try:
-            response = requests.delete(f"https://{self.admin_service}/webhook/{namespace}/{labbook_name}",
+            response = requests.delete(f"https://{self.admin_service}/webhook/{namespace}/{repository_name}",
                                        headers={"Authorization": f"Bearer {self.access_token}"}, timeout=20)
             if response.status_code != 204:
                 logger.error(f"Failed to remove quota webhook: {response.status_code}")
                 logger.error(response.json)
             else:
-                logger.info(f"Removed webhook for {namespace}/{labbook_name}")
+                logger.info(f"Removed webhook for {namespace}/{repository_name}")
 
         except Exception as err:
             # Don't let quota service errors stop you from continuing
             logger.error(f"Failed to remove quota webhook: {err}")
 
         # Call API to remove project
-        repo_id = self.get_repository_id(namespace, labbook_name)
+        repo_id = self.get_repository_id(namespace, repository_name)
         response = requests.delete(f"https://{self.remote_host}/api/v4/projects/{repo_id}",
                                    headers={"PRIVATE-TOKEN": self.user_token}, timeout=10)
 
         if response.status_code != 202:
             logger.error(f"Failed to remove remote repository. Status Code: {response.status_code}")
             logger.error(response.json())
-            raise ValueError("Failed to create remote repository")
+            raise ValueError("Failed to remove remote repository")
         else:
-            logger.info(f"Deleted remote repository {namespace}/{labbook_name}")
+            logger.info(f"Deleted remote repository {namespace}/{repository_name}")
 
     def get_collaborators(self, namespace: str, repository_name: str) -> Optional[List[Tuple[int, str, bool]]]:
         """Method to get usernames and IDs of collaborators that have access to the repo

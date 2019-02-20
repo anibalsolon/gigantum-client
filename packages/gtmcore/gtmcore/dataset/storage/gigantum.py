@@ -2,6 +2,7 @@ import asyncio
 import aiohttp
 import aiofiles
 import copy
+import requests
 
 from gtmcore.dataset import Dataset
 from gtmcore.dataset.storage.backend import StorageBackend
@@ -607,3 +608,22 @@ to Gigantum Cloud will count towards your storage quota and include all versions
 
         return PullResult(success=successes, failure=failures, message=message)
 
+    def delete_contents(self, dataset) -> None:
+        """Method to remove the contents of a dataset from the storage backend, should only work if managed
+
+        Args:
+            dataset: Dataset object
+
+        Returns:
+            None
+        """
+        url = f"{self._object_service_endpoint(dataset)}/{dataset.namespace}/{dataset.name}"
+        response = requests.delete(url, headers=self._object_service_headers(), timeout=10)
+
+        if response.status_code != 200:
+            logger.error(f"Failed to remove {dataset.namespace}/{dataset.name} from cloud index. "
+                         f"Status Code: {response.status_code}")
+            logger.error(response.json())
+            raise IOError("Failed to invoke dataset delete in the dataset backend service.")
+        else:
+            logger.info(f"Deleted remote repository {dataset.namespace}/{dataset.name} from cloud index")

@@ -215,10 +215,19 @@ class DatasetOverview(graphene.ObjectType, interfaces=(graphene.relay.Node, GitR
                 # Skip directories
                 continue
 
+            filename = os.path.basename(key)
+            if filename[0] == '.':
+                # Skip hidden files
+                continue
+
+            if '.' not in filename:
+                # Skip files without an extension
+                continue
+
             # Count file type distribution
-            parts = key.rsplit('.', 1)
-            if len(parts) == 2:
-                file_type = f".{parts[1]}"
+            _, ext = os.path.splitext(filename)
+            if ext:
+                file_type = ext
                 if file_type in file_type_distribution:
                     file_type_distribution[file_type] += 1
                 else:

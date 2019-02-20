@@ -139,3 +139,14 @@ class StorageBackend(metaclass=abc.ABCMeta):
 
     def finalize_pull(self, dataset, status_update_fn: Callable) -> None:
         raise NotImplemented
+
+    def delete_contents(self, dataset) -> None:
+        """Method to remove the contents of a dataset from the storage backend, should only work if managed
+
+        Args:
+            dataset: Dataset object
+
+        Returns:
+            None
+        """
+        raise NotImplemented
