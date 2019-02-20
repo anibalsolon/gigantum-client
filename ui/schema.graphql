@@ -1,5 +1,5 @@
 # source: http://localhost:10000/api/labbook/
-# timestamp: Tue Feb 12 2019 17:34:56 GMT-0500 (Eastern Standard Time)
+# timestamp: Mon Feb 18 2019 14:51:16 GMT-0500 (Eastern Standard Time)
 
 schema {
   query: LabbookQuery
@@ -526,6 +526,21 @@ type DeleteDatasetFilesPayload {
   clientMutationId: String
 }
 
+input DeleteDatasetInput {
+  owner: String!
+  datasetName: String!
+  local: Boolean
+  remote: Boolean
+  clientMutationId: String
+}
+
+"""Delete a dataset."""
+type DeleteDatasetPayload {
+  localDeleted: Boolean
+  remoteDeleted: Boolean
+  clientMutationId: String
+}
+
 input DeleteExperimentalBranchInput {
   owner: String!
   labbookName: String!
@@ -956,6 +971,7 @@ type LabbookMutations {
   setVisibility(input: SetVisibilityInput!): SetVisibilityPayload
   fetchLabbookEdge(input: FetchLabbookEdgeInput!): FetchLabbookEdgePayload
   createDataset(input: CreateDatasetInput!): CreateDatasetPayload
+  deleteDataset(input: DeleteDatasetInput!): DeleteDatasetPayload
   addDatasetFile(input: AddDatasetFileInput!): AddDatasetFilePayload
   completeDatasetUploadTransaction(input: CompleteDatasetUploadTransactionInput!): CompleteDatasetUploadTransactionPayload
   fetchDatasetEdge(input: FetchDatasetEdgeInput!): FetchDatasetEdgePayload
@@ -1236,8 +1252,6 @@ RemoteDatasets are uniquely identified by both the "owner" and the "name" of the
 
 NOTE: RemoteDatasets require all fields to be explicitly set as there is no current way to asynchronously retrieve
       the data
-
-NOTE: Currently all description fields will return empty strings
 """
 type RemoteDataset implements Node & GitRepository {
   """The ID of the object."""
@@ -1256,9 +1270,6 @@ A Connection for paging through remote datasets.
 
 This is a remote call, so should be fetched on its own and only when needed. The user must have a valid
 session for data to be returned.
-
-It is recommended to use large page size (e.g. 50-100). This is due to how the remote server returns all the
-available data at once, so it is more efficient to load a lot of records at a time.
 
 Supported sorting modes:
     - az: naturally sort
@@ -1285,8 +1296,6 @@ RemoteLabbooks are uniquely identified by both the "owner" and the "name" of the
 
 NOTE: RemoteLabbooks require all fields to be explicitly set as there is no current way to asynchronously retrieve
       the data
-
-NOTE: Currently all description fields will return empty strings
 """
 type RemoteLabbook implements Node & GitRepository {
   """The ID of the object."""
@@ -1305,9 +1314,6 @@ A Connection for paging through remote labbooks.
 
 This is a remote call, so should be fetched on its own and only when needed. The user must have a valid
 session for data to be returned.
-
-It is recommended to use large page size (e.g. 50-100). This is due to how the remote server returns all the
-available data at once, so it is more efficient to load a lot of records at a time.
 
 Supported sorting modes:
     - az: naturally sort

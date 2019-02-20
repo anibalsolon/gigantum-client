@@ -1,5 +1,7 @@
 import pytest
 import os
+import responses
+import flask
 
 from snapshottest import snapshot
 from lmsrvlabbook.tests.fixtures import fixture_working_dir_env_repo_scoped, fixture_working_dir
@@ -368,3 +370,160 @@ class TestDatasetMutations(object):
         assert "errors" not in result
         assert result['data']['dataset']['overview']['readme'] == "##My readme\nthis thing"
         assert result['data']['dataset']['name'] == "test-dataset-35"
+
+    def test_delete_local_dataset(self, fixture_working_dir):
+        im = InventoryManager(fixture_working_dir[0])
+        ds = im.create_dataset('default', 'default', "dataset100", storage_type="gigantum_object_v1", description="100")
+        dataset_dir = ds.root_dir
+        assert os.path.exists(dataset_dir) is True
+
+        query = """
+                mutation myMutation($owner: String!, $datasetName: String!) {
+                  deleteDataset(input: {owner: $owner, datasetName: $datasetName, local: true, remote: false}) {
+                      localDeleted
+                      remoteDeleted
+                  }
+                }
+                """
+        variables = {"datasetName": "dataset100", "owner": "default"}
+        result = fixture_working_dir[2].execute(query, variable_values=variables)
+        assert "errors" not in result
+        assert result['data']['deleteDataset']['localDeleted'] is True
+        assert result['data']['deleteDataset']['remoteDeleted'] is False
+
+        assert os.path.exists(dataset_dir) is False
+
+    @responses.activate
+    def test_delete_remote_dataset(self, fixture_working_dir):
+        responses.add(responses.GET, 'https://usersrv.gigantum.io/key',
+                      json={'key': 'afaketoken'}, status=200)
+        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Fdataset100',
+                      json=[{
+                              "id": 27,
+                              "description": "",
+                            }],
+                      status=200)
+        responses.add(responses.DELETE, 'https://repo.gigantum.io/api/v4/projects/default%2Fdataset100',
+                      json={
+                                "message": "202 Accepted"
+                            },
+                      status=202)
+        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Fdataset100',
+                      json=[{
+                                "message": "404 Project Not Found"
+                            }],
+                      status=404)
+        responses.add(responses.DELETE, 'https://api.gigantum.com/read/index/default%2Fdataset100',
+                      json=[{
+                                "message": "success"
+                            }],
+                      status=204)
+        responses.add(responses.DELETE, 'https://api.gigantum.com/object-v1/default/dataset100',
+                      json=[{'status': 'queueing for delete'}],
+                      status=200)
+
+        flask.g.access_token = "asdfasdfasdfasdf"
+        flask.g.id_token = "ghjfghjfghjfghj"
+
+        im = InventoryManager(fixture_working_dir[0])
+        ds = im.create_dataset('default', 'default', "dataset100", storage_type="gigantum_object_v1", description="100")
+        dataset_dir = ds.root_dir
+        assert os.path.exists(dataset_dir) is True
+
+        query = """
+                mutation myMutation($owner: String!, $datasetName: String!) {
+                  deleteDataset(input: {owner: $owner, datasetName: $datasetName, local: false, remote: true}) {
+                      localDeleted
+                      remoteDeleted
+                  }
+                }
+                """
+        variables = {"datasetName": "dataset100", "owner": "default"}
+        result = fixture_working_dir[2].execute(query, variable_values=variables)
+        assert "errors" not in result
+        assert result['data']['deleteDataset']['localDeleted'] is False
+        assert result['data']['deleteDataset']['remoteDeleted'] is True
+
+        assert os.path.exists(dataset_dir) is True
+
+    @responses.activate
+    def test_delete_remote_dataset_not_local(self, fixture_working_dir):
+        flask.g.access_token = "asdfasdfasdfasdf"
+        flask.g.id_token = "ghjfghjfghjfghj"
+
+        query = """
+                mutation myMutation($owner: String!, $datasetName: String!) {
+                  deleteDataset(input: {owner: $owner, datasetName: $datasetName, local: false, remote: true}) {
+                      localDeleted
+                      remoteDeleted
+                  }
+                }
+                """
+        variables = {"datasetName": "dataset100", "owner": "default"}
+        result = fixture_working_dir[2].execute(query, variable_values=variables)
+        assert "errors" in result
+        assert result['errors'][0]['message'] == "A dataset must exist locally to delete it in the remote."
+
+    @responses.activate
+    def test_delete_remote_dataset_no_session(self, fixture_working_dir):
+        im = InventoryManager(fixture_working_dir[0])
+        ds = im.create_dataset('default', 'default', "dataset100", storage_type="gigantum_object_v1", description="100")
+        dataset_dir = ds.root_dir
+        assert os.path.exists(dataset_dir) is True
+
+        query = """
+                mutation myMutation($owner: String!, $datasetName: String!) {
+                  deleteDataset(input: {owner: $owner, datasetName: $datasetName, local: false, remote: true}) {
+                      localDeleted
+                      remoteDeleted
+                  }
+                }
+                """
+        variables = {"datasetName": "dataset100", "owner": "default"}
+        result = fixture_working_dir[2].execute(query, variable_values=variables)
+        assert "errors" in result
+        assert result['errors'][0]['message'] == "Deleting a remote Dataset requires a valid session."
+
+    @responses.activate
+    def test_delete_remote_dataset_gitlab_error(self, fixture_working_dir):
+        responses.add(responses.GET, 'https://usersrv.gigantum.io/key',
+                      json={'key': 'afaketoken'}, status=200)
+        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Fdataset100',
+                      json=[{
+                              "id": 27,
+                              "description": "",
+                            }],
+                      status=200)
+
+        responses.add(responses.DELETE, 'https://api.gigantum.com/object-v1/default/dataset100',
+                      json=[{'status': 'queueing for delete'}],
+                      status=200)
+
+        responses.add(responses.DELETE, 'https://repo.gigantum.io/api/v4/projects/default%2Fdataset100',
+                      json={
+                                "message": "fail"
+                            },
+                      status=400)
+
+        flask.g.access_token = "asdfasdfasdfasdf"
+        flask.g.id_token = "ghjfghjfghjfghj"
+
+        im = InventoryManager(fixture_working_dir[0])
+        ds = im.create_dataset('default', 'default', "dataset100", storage_type="gigantum_object_v1", description="100")
+        dataset_dir = ds.root_dir
+        assert os.path.exists(dataset_dir) is True
+
+        query = """
+                mutation myMutation($owner: String!, $datasetName: String!) {
+                  deleteDataset(input: {owner: $owner, datasetName: $datasetName, local: false, remote: true}) {
+                      localDeleted
+                      remoteDeleted
+                  }
+                }
+                """
+        variables = {"datasetName": "dataset100", "owner": "default"}
+        result = fixture_working_dir[2].execute(query, variable_values=variables)
+        assert "errors" in result
+        assert result['errors'][0]['message'] == "Failed to remove remote repository"
+
+        assert os.path.exists(dataset_dir) is True

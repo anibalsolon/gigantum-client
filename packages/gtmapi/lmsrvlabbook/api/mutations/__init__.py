@@ -19,7 +19,7 @@ from lmsrvlabbook.api.mutations.user import RemoveUserIdentity
 from lmsrvlabbook.api.mutations.labbooksharing import SyncLabbook, PublishLabbook, SetVisibility
 
 # Dataset Mutations
-from lmsrvlabbook.api.mutations.dataset import (CreateDataset, FetchDatasetEdge, ModifyDatasetLink,
+from lmsrvlabbook.api.mutations.dataset import (CreateDataset, DeleteDataset, FetchDatasetEdge, ModifyDatasetLink,
                                                 SetDatasetDescription, WriteDatasetReadme)
 from lmsrvlabbook.api.mutations.datasetfiles import (AddDatasetFile, CompleteDatasetUploadTransaction,
                                                      DownloadDatasetFiles, DeleteDatasetFiles, MoveDatasetFile,

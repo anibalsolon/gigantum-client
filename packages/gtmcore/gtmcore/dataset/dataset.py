@@ -146,6 +146,11 @@ class Dataset(Repository):
 
         self._save_gigantum_data()
 
+    def is_managed(self) -> bool:
+        """Property to check if the dataset is managed"""
+        is_managed = self.backend.metadata.get("is_managed")
+        return is_managed if is_managed is not None else False
+
     @property
     def backend(self) -> StorageBackend:
         """Property to access the storage backend for this dataset"""

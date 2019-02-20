@@ -407,9 +407,9 @@ class TestGitLabManager(object):
 
         assert gitlab_mngr_fixture.repository_exists("testuser", "new-labbook") is True
 
-        gitlab_mngr_fixture.remove_labbook("testuser", "new-labbook")
+        gitlab_mngr_fixture.remove_repository("testuser", "new-labbook")
 
         assert gitlab_mngr_fixture.repository_exists("testuser", "new-labbook") is False
 
         with pytest.raises(ValueError):
-            gitlab_mngr_fixture.remove_labbook("testuser", "new-labbook")
+            gitlab_mngr_fixture.remove_repository("testuser", "new-labbook")

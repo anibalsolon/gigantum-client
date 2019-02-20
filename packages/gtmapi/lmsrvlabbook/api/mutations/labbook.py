@@ -192,7 +192,7 @@ class DeleteRemoteLabbook(graphene.ClientIDMutation):
 
             # Perform delete operation
             mgr = GitLabManager(default_remote, admin_service, access_token=token)
-            mgr.remove_labbook(owner, labbook_name)
+            mgr.remove_repository(owner, labbook_name)
             logger.info(f"Deleted {owner}/{labbook_name} from the remote repository {default_remote}")
 
             # Call Index service to remove project from cloud index and search
@@ -212,7 +212,6 @@ class DeleteRemoteLabbook(graphene.ClientIDMutation):
                 logger.error(response.json())
             else:
                 logger.info(f"Deleted remote repository {owner}/{labbook_name} from cloud index")
-
 
             # Remove locally any references to that cloud repo that's just been deleted.
             try:

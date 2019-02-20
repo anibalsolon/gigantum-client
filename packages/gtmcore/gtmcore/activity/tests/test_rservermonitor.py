@@ -90,22 +90,3 @@ class TestRStudioServerMonitor(object):
         # if the cells were divided, there will be two records
         assert(cell_1['text/plain'][55:58] == 'pop')
         assert(cell_2['text/plain'][200:204] == 'stan')
-
-# TODO RB we can't ignore errors as they are often interspersed with good data.
-# Question: does fixing JSON parsing to accept control characters fix these random errors?
-#    def test_error_and_empty(self, redis_client, mock_labbook):
-#        """Test reading a log and storing a record"""
-#    
-#        # create a server monitor 
-#        server_monitor = RStudioServerMonitor("test", "test", mock_labbook[2].name,
-#                                            "foo:activity_monitor:26e2e85c", config_file=mock_labbook[0])
-#
-#        mitmlog = open(f"{os.path.dirname(os.path.realpath(__file__))}/26e2e85c.rserver.dump", "rb")
-#        # Read activity and return an aggregated activity record
-#        server_monitor.process_activity(mitmlog)
-#
-#        a_store = ActivityStore(mock_labbook[2])
-#        ars = a_store.get_activity_records()
-#        
-#        # details objects are 3rd in tuple. get the data
-#        detail_str = a_store.get_detail_record(ars[0]._detail_objects[0][3].key).data

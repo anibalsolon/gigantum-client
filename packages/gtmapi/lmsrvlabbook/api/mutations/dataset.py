@@ -20,10 +20,14 @@
 import graphene
 import base64
 import os
+import flask
+import requests
 
-from gtmcore.inventory.inventory import InventoryManager
+from gtmcore.configuration import Configuration
+from gtmcore.inventory.inventory import InventoryManager, InventoryException
 from gtmcore.logging import LMLogger
 from gtmcore.gitlib.gitlab import GitLabManager
+from gtmcore.exceptions import GigantumException
 
 from lmsrvcore.auth.user import get_logged_in_username, get_logged_in_author
 from lmsrvcore.auth.identity import parse_token
@@ -163,6 +167,84 @@ class ModifyDatasetLink(graphene.relay.ClientIDMutation):
                                           cursor=base64.b64encode(f"{0}".encode('utf-8')))
 
         return ModifyDatasetLink(new_labbook_edge=edge)
+
+
+class DeleteDataset(graphene.ClientIDMutation):
+    """Delete a dataset."""
+    class Input:
+        owner = graphene.String(required=True)
+        dataset_name = graphene.String(required=True)
+        local = graphene.Boolean()
+        remote = graphene.Boolean()
+
+    local_deleted = graphene.Boolean()
+    remote_deleted = graphene.Boolean()
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, owner, dataset_name, local=False, remote=False,
+                               client_mutation_id=None):
+        logged_in_user = get_logged_in_username()
+        local_deleted = False
+        remote_deleted = False
+        if remote:
+            logger.info(f"Deleting remote Dataset {owner}/{dataset_name}")
+
+            # Extract valid Bearer token
+            access_token = flask.g.get('access_token', None)
+            id_token = flask.g.get('id_token', None)
+            if not access_token or not id_token:
+                raise ValueError("Deleting a remote Dataset requires a valid session.")
+
+            try:
+                ds = InventoryManager().load_dataset(logged_in_user, owner, dataset_name,
+                                                     author=get_logged_in_author())
+            except InventoryException:
+                raise ValueError("A dataset must exist locally to delete it in the remote.")
+
+            # Delete the dataset's files if supported
+            if ds.is_managed():
+                ds.backend.set_default_configuration(logged_in_user, access_token, id_token)
+                ds.backend.delete_contents(ds)
+
+            # Get remote server configuration
+            config = Configuration()
+            remote_config = config.get_remote_configuration()
+
+            # Delete the repository
+            mgr = GitLabManager(remote_config['git_remote'], remote_config['admin_service'], access_token=access_token)
+            mgr.remove_repository(owner, dataset_name)
+            logger.info(f"Deleted {owner}/{dataset_name} repository from the"
+                        f" remote repository {remote_config['git_remote']}")
+
+            # Call Index service to remove project from cloud index and search
+            # Don't raise an exception if the index delete fails, since this can be handled relatively gracefully
+            repo_id = mgr.get_repository_id(owner, dataset_name)
+            response = requests.delete(f"https://{remote_config['index_service']}/index/{repo_id}",
+                                       headers={"Authorization": f"Bearer {access_token}",
+                                                "Identity": id_token}, timeout=10)
+
+            if response.status_code != 204:
+                # Soft failure, still continue
+                logger.error(f"Failed to remove {owner}/{dataset_name} from cloud index. "
+                             f"Status Code: {response.status_code}")
+                logger.error(response.json())
+            else:
+                logger.info(f"Deleted remote repository {owner}/{dataset_name} from cloud index")
+
+            # Remove locally any references to that cloud repo that's just been deleted.
+            try:
+                ds.remove_remote()
+            except GigantumException as e:
+                logger.warning(e)
+
+            remote_deleted = True
+
+        if local:
+            logger.info(f"Deleting local Dataset {owner}/{dataset_name}")
+            InventoryManager().delete_dataset(logged_in_user, owner, dataset_name)
+            local_deleted = True
+
+        return DeleteDataset(local_deleted=local_deleted, remote_deleted=remote_deleted)
 
 
 class SetDatasetDescription(graphene.relay.ClientIDMutation):

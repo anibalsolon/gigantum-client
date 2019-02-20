@@ -8,11 +8,13 @@ import tempfile
 import time
 
 from gtmcore.dataset.dataset import Dataset
+from gtmcore.dataset.manifest import Manifest
 from gtmcore.inventory.inventory import InventoryManager, InventoryException
 from gtmcore.gitlib.git import GitAuthor
 
 from gtmcore.fixtures import mock_config_file, mock_labbook, _MOCK_create_remote_repo2
 
+from gtmcore.fixtures.datasets import helper_append_file
 
 @pytest.fixture
 def create_datasets_to_list(mock_config_file):
@@ -90,15 +92,26 @@ class TestInventoryDatasets(object):
 
     def test_delete_dataset(self, mock_config_file):
         inv_manager = InventoryManager(mock_config_file[0])
-        auth = GitAuthor(name="username", email="user1@test.com")
+        auth = GitAuthor(name="test", email="user1@test.com")
         ds = inv_manager.create_dataset("test", "test", "dataset1", "gigantum_object_v1",
                                         description="my first dataset",
                                         author=auth)
         root_dir = ds.root_dir
         assert os.path.exists(root_dir) is True
 
+        m = Manifest(ds, 'test')
+        helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, "test1.txt", "asdfasdf")
+        helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, "test2.txt", "dfg")
+
+        assert os.path.exists(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, "test1.txt")) is True
+        assert os.path.exists(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, "test2.txt")) is True
+
         inv_manager.delete_dataset("test", "test", "dataset1")
         assert os.path.exists(root_dir) is False
+        assert os.path.exists(m.cache_mgr.cache_root) is False
+
+        cache_base, _ = m.cache_mgr.cache_root.rsplit(os.path.sep, 1)
+        assert os.path.exists(cache_base) is True
 
     def test_change_dataset_name(self, mock_config_file):
         inv_manager = InventoryManager(mock_config_file[0])

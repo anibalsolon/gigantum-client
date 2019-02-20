@@ -1,27 +1,7 @@
-# Copyright (c) 2017 FlashX, LLC
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-
 import os
 import yaml
 
-from typing import (Any, Dict, Optional)
+from typing import (Any, Dict, Optional, Tuple)
 from pkg_resources import resource_filename
 
 from gtmcore.logging import LMLogger
@@ -142,3 +122,27 @@ class Configuration(object):
         logger.info("Writing config file to {}".format(self.config_file))
         with open(config_file, "wt") as cf:
             cf.write(yaml.safe_dump(self.config, default_flow_style=False))
+
+    def get_remote_configuration(self, remote_name: Optional[str] = None) -> Dict[str, str]:
+        """Method to load the configuration for a remote server
+
+        Args:
+            remote_name: Name of the remote to lookup, if omitted uses the default remote
+
+        Returns:
+
+        """
+        if not remote_name:
+            remote_name = self.config['git']['default_remote']
+
+        result = None
+        for remote in self.config['git']['remotes']:
+            if remote_name == remote:
+                result = self.config['git']['remotes'][remote]
+                result['git_remote'] = remote
+                break
+
+        if not result:
+            raise ValueError(f'Configuration for {remote_name} could not be found')
+
+        return result

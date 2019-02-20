@@ -6,9 +6,8 @@ import environment from 'JS/createRelayEnvironment';
 import RelayRuntime from 'relay-runtime';
 
 const mutation = graphql`
-  mutation DeleteRemoteLabbookMutation($input: DeleteRemoteLabbookInput!){
-    deleteRemoteLabbook(input: $input){
-      success
+  mutation DeleteDatasetMutation($input: DeleteDatasetInput!){
+    deleteDataset(input: $input){
       clientMutationId
     }
   }
@@ -16,10 +15,10 @@ const mutation = graphql`
 let tempID = 0;
 
 function sharedUpdater(store, parentId, deletedId, connectionKey) {
-  const labbookProxy = store.get(parentId);
-  if (labbookProxy) {
+  const datasetProxy = store.get(parentId);
+  if (datasetProxy) {
     const conn = RelayRuntime.ConnectionHandler.getConnection(
-      labbookProxy,
+      datasetProxy,
       connectionKey,
     );
     if (conn) {
@@ -33,8 +32,8 @@ function sharedUpdater(store, parentId, deletedId, connectionKey) {
 }
 
 
-export default function DeleteRemoteLabbookMutation(
-  labbookName,
+export default function DeleteRemoteDatasetMutation(
+  datasetName,
   owner,
   nodeID,
   parentID,
@@ -45,7 +44,7 @@ export default function DeleteRemoteLabbookMutation(
 ) {
   const variables = {
     input: {
-      labbookName,
+      datasetName,
       owner,
       local,
       remote,
@@ -65,9 +64,7 @@ export default function DeleteRemoteLabbookMutation(
         callback(response, error);
       },
       updater: (store, response) => {
-        if (parentId) {
-          sharedUpdater(store, parentID, nodeID, connection);
-        }
+        sharedUpdater(store, parentID, nodeID, connection);
       },
     },
   );

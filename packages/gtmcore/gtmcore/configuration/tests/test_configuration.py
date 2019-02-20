@@ -160,3 +160,26 @@ class TestConfiguration(object):
                 conf2 = Configuration(mock_config_file[0])
                 assert conf2.config['container']['memory'] is None
                 assert len(conf2.user_config.keys()) == 0
+
+    def test_get_remote_configuration(self):
+        """Test get_remote_configuration"""
+        configuration = Configuration()
+        remote = configuration.get_remote_configuration()
+        assert remote['git_remote'] == 'repo.gigantum.io'
+        assert remote['remote_type'] == 'gitlab'
+        assert remote['admin_service'] == 'usersrv.gigantum.io'
+        assert remote['index_service'] == 'api.gigantum.com/read'
+        assert remote['object_service'] == 'api.gigantum.com/object-v1'
+
+        remote = configuration.get_remote_configuration("repo.gigantum.io")
+        assert remote['git_remote'] == 'repo.gigantum.io'
+        assert remote['remote_type'] == 'gitlab'
+        assert remote['admin_service'] == 'usersrv.gigantum.io'
+        assert remote['index_service'] == 'api.gigantum.com/read'
+        assert remote['object_service'] == 'api.gigantum.com/object-v1'
+
+    def test_get_remote_configuration_not_found(self):
+        """Test get_remote_configuration"""
+        configuration = Configuration()
+        with pytest.raises(ValueError):
+            configuration.get_remote_configuration("asdfasdf.asdfasdf.com")

@@ -33,7 +33,7 @@ from lmsrvlabbook.api.mutations import (CreateLabbook, BuildImage, StartContaine
                                         MergeFromBranch, WorkonBranch, WriteLabbookReadme, AddCustomDocker,
                                         RemoveCustomDocker, DeleteRemoteLabbook,
                                         CompleteBatchUploadTransaction, SetVisibility, FetchLabbookEdge,
-                                        CreateDataset, AddDatasetFile, CompleteDatasetUploadTransaction,
+                                        CreateDataset, DeleteDataset, AddDatasetFile, CompleteDatasetUploadTransaction,
                                         DeleteDatasetFiles, MoveDatasetFile, MakeDatasetDirectory,
                                         FetchDatasetEdge, SetDatasetVisibility, SyncDataset,
                                         AddDatasetCollaborator, DeleteDatasetCollaborator, DownloadDatasetFiles,
@@ -173,6 +173,9 @@ class LabbookMutations(graphene.ObjectType):
 
     # Create a new dataset on the file system.
     create_dataset = CreateDataset.Field()
+
+    # Delete a dataset
+    delete_dataset = DeleteDataset.Field()
 
     # Add a file to a dataset
     add_dataset_file = AddDatasetFile.Field()
