@@ -2,6 +2,8 @@
 import React, { Component, Fragment } from 'react';
 import classNames from 'classnames';
 import { setContainerMenuWarningMessage } from 'JS/redux/reducers/labbook/environment/environment';
+import { boundMethod } from 'autobind-decorator';
+// store
 import store from 'JS/redux/store';
 // config
 import config from 'JS/config';
@@ -22,7 +24,6 @@ import './Activity.scss';
 let pagination = false;
 
 let counter = 5;
-let isMounted = false;
 
 export const getGlobals = () => ({ counter, pagination });
 
@@ -48,27 +49,6 @@ class Activity extends Component {
       compressedElements: new Set(),
     };
     this.dates = [];
-
-    // bind functions here
-    this._loadMore = this._loadMore.bind(this);
-    this._toggleActivity = this._toggleActivity.bind(this);
-    this._hideAddActivity = this._hideAddActivity.bind(this);
-    this._handleScroll = this._handleScroll.bind(this);
-    this._refetch = this._refetch.bind(this);
-    this._startRefetch = this._startRefetch.bind(this);
-    this._scrollTo = this._scrollTo.bind(this);
-    this._stopRefetch = this._stopRefetch.bind(this);
-    this._toggleCreateModal = this._toggleCreateModal.bind(this);
-    this._toggleRollbackMenu = this._toggleRollbackMenu.bind(this);
-    this._getNewActivities = this._getNewActivities.bind(this);
-    this._changeFullscreenState = this._changeFullscreenState.bind(this);
-    this._handleVisibilityChange = this._handleVisibilityChange.bind(this);
-    this._transformActivity = this._transformActivity.bind(this);
-    this._countUnexpandedRecords = this._countUnexpandedRecords.bind(this);
-    this._addCluster = this._addCluster.bind(this);
-    this._expandCluster = this._expandCluster.bind(this);
-    this._compressExpanded = this._compressExpanded.bind(this);
-    this._setStickyDate = this._setStickyDate.bind(this);
   }
 
   UNSAFE_componentWillReceiveProps(nextProps) {
@@ -104,7 +84,7 @@ class Activity extends Component {
   *   add interval to poll for new activityRecords
   */
   componentDidMount() {
-    isMounted = true;
+    this._isMounted = true;
     const { props } = this,
           section = props[props.sectionType],
           activityRecords = section.activityRecords;
@@ -130,7 +110,7 @@ class Activity extends Component {
     clearInterval(this.interval);
     clearTimeout(this.refetchTimeout);
     clearTimeout(this.newActivityTimeout);
-    isMounted = false;
+    this._isMounted = false;
 
     window.removeEventListener('visibilitychange', this._handleVisibilityChange);
     window.removeEventListener('scroll', this._handleScroll);
@@ -145,6 +125,7 @@ class Activity extends Component {
    * removes scroll listener
    * @return {}
    */
+  @boundMethod
   _scrollTo(evt) {
     if (document.documentElement.scrollTop === 0) {
       const { props } = this,
@@ -169,6 +150,7 @@ class Activity extends Component {
    * handles refiring new activity query if visibility changes back to visible
    * @return {}
    */
+  @boundMethod
   _handleVisibilityChange() {
     const { state } = this;
     if (state.newActivityForcePaused) {
@@ -186,6 +168,7 @@ class Activity extends Component {
    * kicks off scroll to top
    * @return {}
    */
+  @boundMethod
   _getNewActivities() {
     window.addEventListener('scroll', this._scrollTo);
 
@@ -200,9 +183,12 @@ class Activity extends Component {
    * restarts refetch
    * @return {}
    */
+  @boundMethod
   _startRefetch() {
     const { state } = this;
+
     if (state.newActivityPolling) {
+
       this.setState({
         refetchEnabled: true,
         newActivityPolling: false,
@@ -218,10 +204,10 @@ class Activity extends Component {
    * stops refetch from firing
    * @return {}
    */
+   @boundMethod
   _stopRefetch() {
     const self = this,
-          { state } = this;
-
+          { state, props } = this;
     if (!state.newActivityPolling) {
       this.setState({
         refetchEnabled: false,
@@ -233,15 +219,15 @@ class Activity extends Component {
 
       const getNewActivity = () => {
         NewActivity.getNewActivity(labbookName, owner).then((response) => {
-          const firstRecordCommitId = self.props.labbook.activityRecords.edges[0].node.commit;
+          const firstRecordCommitId = props.labbook.activityRecords.edges[0].node.commit;
           const newRecordCommitId = response.data.labbook.activityRecords.edges[0].node.commit;
 
           if (firstRecordCommitId === newRecordCommitId) {
             self.newActivityTimeout = setTimeout(() => {
-              if (isMounted && (document.visibilityState === 'visible') && !state.refetchEnabled) {
+              if (self._isMounted && self.state.newActivityPolling) {
                 getNewActivity();
-              } else if (isMounted && (document.visibilityState !== 'visible') && !state.refetchEnabled) {
-                this.setState({ newActivityForcePaused: true, newActivityPolling: false });
+              } else if (!self._isMounted && !self.state.refetchEnabled) {
+                self.setState({ newActivityForcePaused: true, newActivityPolling: false });
               }
             }, 3000);
           } else {
@@ -259,6 +245,7 @@ class Activity extends Component {
   * refetches component looking for new edges to insert at the top of the activity feed
   * @return {}
   */
+  @boundMethod
   _refetch() {
     const self = this,
           { props } = this,
@@ -271,9 +258,9 @@ class Activity extends Component {
       counter,
       (response, error) => {
         self.refetchTimeout = setTimeout(() => {
-          if (self.state.refetchEnabled && isMounted && (document.visibilityState === 'visible')) {
+          if (self.state.refetchEnabled && self._isMounted && (document.visibilityState === 'visible')) {
             self._refetch();
-          } else if (self.state.refetchEnabled && isMounted && (document.visibilityState !== 'visible')) {
+          } else if (self.state.refetchEnabled && self.isMounted && (document.visibilityState !== 'visible')) {
             self.setState({ refetchForcePaused: true });
           }
         }, 5000);
@@ -288,6 +275,7 @@ class Activity extends Component {
   *  @param {}
   *  pagination container loads more items
   */
+  @boundMethod
   _loadMore() {
     const self = this,
           { props } = this,
@@ -327,6 +315,7 @@ class Activity extends Component {
   *  @param {}
   *  counts visible non clustered activity records
   */
+  @boundMethod
   _countUnexpandedRecords() {
     const { props } = this,
           section = props[props.sectionType];
@@ -359,6 +348,7 @@ class Activity extends Component {
     *   determines value of stickyDate by checking vertical offset and assigning it to the state
     *
   */
+  @boundMethod
   _setStickyDate() {
     let isDemo = window.location.hostname === config.demoHostName,
       upperBound = isDemo ? 170 : 120,
@@ -393,7 +383,7 @@ class Activity extends Component {
   *   handles scolls and passes off loading to pagination container
   *
   */
-
+  @boundMethod
   _handleScroll(evt) {
     this._setStickyDate();
     const { props, state } = this,
@@ -407,7 +397,6 @@ class Activity extends Component {
     if ((distanceY > expandOn) && !isPaginating && activityRecords.pageInfo.hasNextPage) {
       this._loadMore(evt);
     }
-
     if ((distanceY > 3000)) {
       this._stopRefetch();
     } else {
@@ -420,6 +409,7 @@ class Activity extends Component {
   *   loops through activityRecords array and sorts into days
   *   @return {Object}
   */
+  @boundMethod
   _transformActivity(activityRecords) {
     const { state } = this;
     let activityTime = {},
@@ -493,6 +483,7 @@ class Activity extends Component {
   *   toggles activity visibility
   *   @return {}
   */
+  @boundMethod
   _toggleActivity() {
     const { modalVisible } = this.state;
     this.setState({
@@ -505,6 +496,7 @@ class Activity extends Component {
   *   hides add activity
   *   @return {}
   */
+  @boundMethod
   _hideAddActivity() {
     this.setState({
       modalVisible: false,
@@ -516,6 +508,7 @@ class Activity extends Component {
   *   hides add activity
   *   @return {}
   */
+  @boundMethod
   _toggleRollbackMenu(node) {
     const { status } = store.getState().containerStatus;
     const { props } = this;
@@ -537,6 +530,7 @@ class Activity extends Component {
   *   toggle create branch modal visibility
   *   @return {}
   */
+  @boundMethod
   _toggleCreateModal() {
     const { createBranchVisible } = this.state;
     this.setState({ createBranchVisible: !createBranchVisible });
@@ -547,6 +541,7 @@ class Activity extends Component {
   *   opens create branch modal and also sets selectedNode to null
   *   @return {}
   */
+  @boundMethod
   _createBranch() {
     const { status } = store.getState().containerStatus;
     const canEditEnvironment = config.containerStatus.canEditEnvironment(status);
@@ -562,7 +557,7 @@ class Activity extends Component {
   *   Changes editorFullscreen in state to true if isFullscreen is true, else it swaps existing state
   *   @return {}
   */
-
+  @boundMethod
   _changeFullscreenState(isFullscreen) {
     if (isFullscreen) {
       this.setState({ editorFullscreen: isFullscreen });
@@ -577,6 +572,7 @@ class Activity extends Component {
   *   modifies expandedClusterObject from state
   *   @return {}
   */
+  @boundMethod
   _expandCluster(indexItem) {
     const { props, state } = this;
     let activityRecords = state.activityRecords;
@@ -590,6 +586,7 @@ class Activity extends Component {
     *   modifies expandedClusterObject from state
     *   @return {}
   */
+  @boundMethod
   _addCluster(clusterElements) {
     const { props, state } = this,
           section = props[props.sectionType],
@@ -613,6 +610,7 @@ class Activity extends Component {
   *   adds or removes elements to cluster on expand and collapse
   *   @return {}
   */
+  @boundMethod
   _compressExpanded(clusterElements, remove) {
     const { compressedElements } = this.state,
           newCompressedElements = new Set(compressedElements);
@@ -634,6 +632,7 @@ class Activity extends Component {
   *   assigns open-menu class to parent element and ActivityExtended to previous element
   *   @return {}
   */
+  @boundMethod
   _toggleSubmenu(evt) {
     const submenu = evt.target.parentElement,
           wrapper = submenu && submenu.parentElement;
@@ -664,6 +663,7 @@ class Activity extends Component {
               fixed: state.stickyDate,
               'is-demo': window.location.hostname === config.demoHostName,
             });
+
       return (
         <div
           key={props.sectionType}
