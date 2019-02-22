@@ -5,7 +5,7 @@ from typing import Optional, List, Dict, Callable, Tuple
 import base64
 
 from gtmcore.dataset.io import PushResult, PushObject, PullObject, PullResult
-from gtmcore.dataset.manifest import Manifest, StatusResult
+from gtmcore.dataset.manifest.manifest import Manifest, StatusResult
 
 
 class StorageBackend(metaclass=abc.ABCMeta):
