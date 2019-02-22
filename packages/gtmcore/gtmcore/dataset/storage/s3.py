@@ -9,7 +9,7 @@ import tempfile
 import requests
 
 from gtmcore.dataset import Dataset
-from gtmcore.dataset.storage.backend import ManagedStorageBackend
+from gtmcore.dataset.storage.backend import StorageBackend
 from typing import Optional, List, Dict, Callable, Tuple
 import os
 
@@ -20,195 +20,7 @@ from gtmcore.dataset.manifest.eventloop import get_event_loop
 logger = LMLogger.get_logger()
 
 
-class PresignedS3Upload(object):
-    def __init__(self, object_service_root: str, object_service_headers: dict, upload_chunk_size: int,
-                 object_details: PushObject) -> None:
-        self.service_root = object_service_root
-        self.object_service_headers = object_service_headers
-        self.upload_chunk_size = upload_chunk_size
-
-        self.object_details = object_details
-        self.skip_object = False
-
-        self.presigned_s3_url = ""
-        self.s3_headers: Dict = dict()
-
-    @property
-    def is_presigned(self) -> bool:
-        """Method to check if this upload request has successfully been presigned
-
-        Returns:
-            bool
-        """
-        return self.presigned_s3_url != ""
-
-    def set_s3_headers(self, encryption_key_id: str) -> None:
-        """Method to set the header property for S3
-
-        Args:
-            encryption_key_id: The encryption key id returned from the object service. This is required so the request
-                               made to s3 is consistent with what was signed
-
-        Returns:
-            None
-        """
-        self.s3_headers = {'x-amz-server-side-encryption': 'aws:kms',
-                           'x-amz-server-side-encryption-aws-kms-key-id': encryption_key_id}
-
-    async def get_presigned_s3_url(self, session: aiohttp.ClientSession) -> None:
-        """Method to make a request to the object service and pre-sign an S3 PUT
-
-        Args:
-            session: The current aiohttp session
-
-        Returns:
-            None
-        """
-        # Get the object id from the object path
-        _, obj_id = self.object_details.object_path.rsplit('/', 1)
-
-        async with session.put(f"{self.service_root}/{obj_id}", headers=self.object_service_headers) as response:
-            if response.status == 200:
-                # Successfully signed the request
-                response_data = await response.json()
-                self.presigned_s3_url = response_data.get("presigned_url")
-                self.set_s3_headers(response_data.get("key_id"))
-            elif response.status == 403:
-                # Forbidden indicates Object already exists, don't need to re-push since we deduplicate so mark it skip
-                self.skip_object = True
-            else:
-                # Something when wrong while trying to pre-sign the URL.
-                body = await response.json()
-                raise IOError(f"Failed to get pre-signed URL for PUT at {self.object_details.dataset_path}:{obj_id}."
-                              f" Status: {response.status}. Response: {body}")
-
-    async def _file_loader(self, filename: str):
-        """Method to provide non-blocking chunked reads of files, useful if large.
-
-        Args:
-            filename: absolute path to the file to upload
-        """
-        async with aiofiles.open(filename, 'rb') as f:
-            chunk = await f.read(self.upload_chunk_size)
-            while chunk:
-                yield chunk
-                chunk = await f.read(self.upload_chunk_size)
-
-    async def put_object(self, session: aiohttp.ClientSession) -> None:
-        """Method to put the object in S3 after the pre-signed URL has been obtained
-
-        Args:
-            session: The current aiohttp session
-
-        Returns:
-            None
-        """
-        # Set the Content-Length of the PUT explicitly since it won't happen automatically due to streaming IO
-        headers = copy.deepcopy(self.s3_headers)
-
-        # Detect file type if possible
-        _, object_id = self.object_details.object_path.rsplit("/", 1)
-        temp_compressed_path = os.path.join(tempfile.gettempdir(), object_id)
-
-        # gzip object before upload
-        try:
-            with open(self.object_details.object_path, "rb") as src_file:
-                with open(temp_compressed_path, "wb") as compressed_file:
-                    snappy.stream_compress(src_file, compressed_file)
-
-            headers['Content-Length'] = str(os.path.getsize(temp_compressed_path))
-
-            # Stream the file up to S3
-            async with session.put(self.presigned_s3_url, headers=headers,
-                                   data=self._file_loader(filename=temp_compressed_path)) as response:
-                if response.status != 200:
-                    # An error occurred
-                    body = await response.text()
-                    raise IOError(f"Failed to push {self.object_details.dataset_path} to storage backend."
-                                  f" Status: {response.status}. Response: {body}")
-
-        finally:
-            try:
-                os.remove(temp_compressed_path)
-            except FileNotFoundError:
-                # Temp file never got created
-                pass
-
-
-class PresignedS3Download(object):
-    def __init__(self, object_service_root: str, object_service_headers: dict, download_chunk_size: int,
-                 object_details: PullObject) -> None:
-        self.service_root = object_service_root
-        self.object_service_headers = object_service_headers
-        self.download_chunk_size = download_chunk_size
-
-        self.object_details = object_details
-
-        self.presigned_s3_url = ""
-
-    @property
-    def is_presigned(self) -> bool:
-        """Method to check if this upload request has successfully been presigned
-
-        Returns:
-            bool
-        """
-        return self.presigned_s3_url != ""
-
-    async def get_presigned_s3_url(self, session: aiohttp.ClientSession) -> None:
-        """Method to make a request to the object service and pre-sign an S3 GET
-
-        Args:
-            session: The current aiohttp session
-
-        Returns:
-            None
-        """
-        # Get the object id from the object path
-        _, obj_id = self.object_details.object_path.rsplit('/', 1)
-
-        async with session.get(f"{self.service_root}/{obj_id}", headers=self.object_service_headers) as response:
-            if response.status == 200:
-                # Successfully signed the request
-                response_data = await response.json()
-                self.presigned_s3_url = response_data.get("presigned_url")
-            else:
-                # Something when wrong while trying to pre-sign the URL.
-                body = await response.json()
-                raise IOError(f"Failed to get pre-signed URL for GET at {self.object_details.dataset_path}:{obj_id}."
-                              f" Status: {response.status}. Response: {body}")
-
-    async def get_object(self, session: aiohttp.ClientSession) -> None:
-        """Method to get the object from S3 after the pre-signed URL has been obtained
-
-        Args:
-            session: The current aiohttp session
-
-        Returns:
-            None
-        """
-        try:
-            decompressor = snappy.StreamDecompressor()
-            async with session.get(self.presigned_s3_url) as response:
-                if response.status != 200:
-                    # An error occurred
-                    body = await response.text()
-                    raise IOError(f"Failed to get {self.object_details.dataset_path} to storage backend."
-                                  f" Status: {response.status}. Response: {body}")
-
-                async with aiofiles.open(self.object_details.object_path, 'wb') as fd:
-                    while True:
-                        chunk = await response.content.read(self.download_chunk_size)
-                        if not chunk:
-                            fd.write(decompressor.flush())
-                            break
-                        await fd.write(decompressor.decompress(chunk))
-        except Exception as err:
-            logger.exception(err)
-            raise IOError(f"Failed to get {self.object_details.dataset_path} to storage backend. {err}")
-
-
-class GigantumObjectStore(ManagedStorageBackend):
+class GigantumObjectStore(StorageBackend):
 
     def __init__(self) -> None:
         # Additional attributes to track processed requests
@@ -232,6 +44,8 @@ class GigantumObjectStore(ManagedStorageBackend):
                 "tags": ["gigantum"],
                 "icon": "gigantum_object_storage.png",
                 "url": "https://docs.gigantum.com",
+                "is_managed": True,
+                "client_should_dedup_on_push": True,
                 "readme": """Gigantum Cloud Datasets are backed by a scalable object storage service that is linked to
 your Gigantum account and credentials. It provides efficient storage at the file level and works seamlessly with the
 Client.
@@ -239,10 +53,6 @@ Client.
 This dataset type is fully managed. That means as you modify data, each version will be tracked independently. Syncing
 to Gigantum Cloud will count towards your storage quota and include all versions of files.
 """}
-
-    @property
-    def client_should_dedup_on_push(self) -> bool:
-        return True
 
     def _required_configuration(self) -> Dict[str, str]:
         """A private method to return a list of keys that must be set for a backend to be fully configured
@@ -263,17 +73,9 @@ to Gigantum Cloud will count towards your storage quota and include all versions
         Returns:
 
         """
-        # No additional config required beyond defaults
-        return dict()
-
-    def confirm_configuration(self, dataset, status_update_fn: Callable) -> Optional[str]:
-        """Method to verify a configuration and optionally allow the user to confirm before proceeding
-
-        Should return the desired confirmation message if there is one. If no confirmation is required/possible,
-        return None
-
-        """
-        return None
+        return {"Bucket": "The bucket name",
+                "Prefix": "The prefix"
+                }
 
     @staticmethod
     def _object_service_endpoint(dataset: Dataset) -> str:
