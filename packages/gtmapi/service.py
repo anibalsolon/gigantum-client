@@ -223,7 +223,7 @@ if config.config["lock"]["reset_on_start"]:
     reset_all_locks(config.config['lock'])
 
 # Create local data (for local dataset types) dir if it doesn't exist
-local_data_dir = os.path.join(app.config["LABMGR_CONFIG"].config['git']['working_dir'], 'local_data')
+local_data_dir = os.path.join(app.config["LABMGR_CONFIG"].config['git']['working_directory'], 'local_data')
 if os.path.isdir(local_data_dir) is False:
     os.makedirs(local_data_dir, exist_ok=True)
 

@@ -527,3 +527,36 @@ class TestDatasetMutations(object):
         assert result['errors'][0]['message'] == "Failed to remove remote repository"
 
         assert os.path.exists(dataset_dir) is True
+
+    def test_configure_local(self, fixture_working_dir, snapshot):
+        im = InventoryManager(fixture_working_dir[0])
+        ds = im.create_dataset('default', 'default', "adataset", storage_type="local_filesystem", description="100")
+        dataset_dir = ds.root_dir
+        assert os.path.exists(dataset_dir) is True
+
+        query = """
+                   {
+                      dataset(owner: "default", name: "adataset"){
+                        backendIsConfigured
+                        backendConfiguration
+                      }
+                   }
+                """
+        result = fixture_working_dir[2].execute(query)
+        assert "errors" not in result
+        snapshot.assert_equals(result)
+
+        # TODO ::: PICK UP HERE
+
+        query = """
+                    mutation myMutation{
+                      configureDataset(input: {datasetOwner: "default", datasetName: "adataset", 
+                        parameters: [{parameter: "test", parameterType: "str", value: "test"}, 
+                          {parameter: "test", parameterType: "str", value: "test"}]}) {
+                                isConfigured
+                      }
+                    }
+                """
+        result = fixture_working_dir[2].execute(query)
+        assert "errors" not in result
+        snapshot.assert_equals(result)

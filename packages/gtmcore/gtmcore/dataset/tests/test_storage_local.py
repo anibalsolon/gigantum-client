@@ -73,6 +73,26 @@ class TestStorageBackendLocalFilesystem(object):
         assert ds.backend.is_configured is True
         assert len(ds.backend.missing_configuration) == 0
 
+    def test_backend_current_config(self, mock_dataset_with_cache_dir_local):
+        ds = mock_dataset_with_cache_dir_local[0]
+        assert isinstance(ds.backend, LocalFilesystem)
+
+        assert ds.backend.is_configured is False
+
+        current_config = ds.backend.safe_current_configuration
+        assert len(current_config) == 1
+        assert current_config[0]['value'] is None
+        assert current_config[0]['parameter'] == "Data Directory"
+
+        current_config = ds.backend_config
+        current_config['Data Directory'] = "test_dir"
+        ds.backend_config = current_config
+
+        current_config = ds.backend.safe_current_configuration
+        assert len(current_config) == 1
+        assert current_config[0]['value'] == "test_dir"
+        assert current_config[0]['parameter'] == "Data Directory"
+
     def test_confirm_configuration(self, mock_dataset_with_cache_dir_local):
         ds = mock_dataset_with_cache_dir_local[0]
 

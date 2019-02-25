@@ -38,6 +38,7 @@ from gtmcore.activity import ActivityStore, ActivityType, ActivityAction, Activi
 from lmsrvlabbook.api.objects.dataset import Dataset
 from gtmcore.dataset.manifest import Manifest
 from lmsrvlabbook.api.connections.dataset import DatasetConnection
+from lmsrvlabbook.api.objects.dataset import DatasetConfigurationParameterInput
 from lmsrvlabbook.api.connections.datasetfile import DatasetFile, DatasetFileConnection
 from lmsrvlabbook.api.connections.labbook import Labbook, LabbookConnection
 
@@ -70,6 +71,82 @@ class CreateDataset(graphene.relay.ClientIDMutation):
 
         return CreateDataset(dataset=Dataset(id="{}&{}".format(username, name),
                                              name=name, owner=username))
+
+
+class ConfigureDataset(graphene.relay.ClientIDMutation):
+    """Mutation to configure a dataset backend if needed.
+
+    Workflow to configure a dataset:
+    - TODO
+
+    """
+
+    class Input:
+        dataset_owner = graphene.String(required=True, description="Owner of the dataset to configure")
+        dataset_name = graphene.String(required=True, description="Name of the dataset to configure")
+        parameters = graphene.List(DatasetConfigurationParameterInput)
+        confirm = graphene.Boolean(description="Set to true so confirm the configuration and continue. "
+                                               "False will clear the configuration to start over")
+
+    dataset = graphene.Field(Dataset)
+    is_configured = graphene.Boolean(description="If true, all parameters a set and OK to continue")
+    should_confirm = graphene.Boolean(description="If true, should confirm configuration with the user "
+                                                  "and resubmit with confirm=True to finalize")
+    error_message = graphene.String(description="Configuration error message to display to the user")
+    confirm_message = graphene.String(description="Confirmation message to display to the user")
+    has_background_job = graphene.Boolean(description="If true, this backend type requires background work"
+                                                      " after confirmation. Check complete_background_key for key to "
+                                                      "provide user feedback.")
+    background_job_key = graphene.String(description="Background job key to query on for feedback if needed")
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, dataset_owner, dataset_name, parameters=None, confirm=None,
+                               client_mutation_id=None):
+        username = get_logged_in_username()
+        im = InventoryManager()
+        ds = im.load_dataset(username, dataset_owner, dataset_name, get_logged_in_author())
+
+        should_confirm = False
+        error_message = None
+        confirm_message = None
+        background_job_key = None
+
+        if confirm is None:
+            if parameters:
+                # Update the configuration
+                current_config = ds.backend_config
+                for param in parameters:
+                    current_config[param.parameter] = param.value
+                ds.backend_config = current_config
+
+            # Validate the configuration
+            try:
+                confirm_message = ds.backend.confirm_configuration(ds, logger.info)
+                if confirm_message is not None:
+                    should_confirm = True
+            except ValueError as err:
+                error_message = f"{err}"
+        else:
+            if confirm is False:
+                # Clear configuration
+                current_config = ds.backend_config
+                for param in parameters:
+                    current_config[param.parameter] = None
+                ds.backend_config = current_config
+
+            else:
+                if ds.backend.can_update_from_remote:
+                    # TODO: Schedule background job to populate dataset!
+                    pass
+
+        return ConfigureDataset(dataset=Dataset(id="{}&{}".format(dataset_owner, dataset_name),
+                                                name=dataset_name, owner=dataset_owner),
+                                is_configured=ds.backend.is_configured,
+                                should_confirm=should_confirm,
+                                confirm_message=confirm_message,
+                                error_message=error_message,
+                                has_background_job=ds.backend.can_update_from_remote,
+                                background_job_key=background_job_key)
 
 
 class FetchDatasetEdge(graphene.relay.ClientIDMutation):

@@ -11,12 +11,30 @@ from lmsrvcore.api.connections import ListBasedConnection
 from gtmcore.dataset.manifest import Manifest
 from gtmcore.gitlib.gitlab import GitLabManager
 from gtmcore.inventory.inventory import InventoryManager
+from gtmcore.logging import LMLogger
 
 from lmsrvlabbook.api.objects.datasettype import DatasetType
 from lmsrvlabbook.api.connections.activity import ActivityConnection
 from lmsrvlabbook.api.objects.activity import ActivityDetailObject, ActivityRecordObject
 from lmsrvlabbook.api.connections.datasetfile import DatasetFileConnection, DatasetFile
 from lmsrvlabbook.api.objects.overview import DatasetOverview
+
+
+logger = LMLogger.get_logger()
+
+
+class DatasetConfigurationParameter(graphene.ObjectType):
+    """A simple type that represents a Dataset configuration parameter from a storage backend class"""
+    parameter = graphene.String()
+    description = graphene.String()
+    parameter_type = graphene.String()
+    value = graphene.String()
+
+
+class DatasetConfigurationParameterInput(graphene.InputObjectType):
+    parameter = graphene.String(required=True)
+    parameter_type = graphene.String(required=True)
+    value = graphene.String(required=True)
 
 
 class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepository)):
@@ -67,6 +85,18 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
 
     # Overview Information
     overview = graphene.Field(DatasetOverview)
+
+    # Boolean indicating if dataset backend is fully configured
+    backend_is_configured = graphene.Boolean()
+
+    # List of DatasetConfigurationParameter objects with the current configuration (excluding default config)
+    backend_configuration = graphene.List(DatasetConfigurationParameter)
+
+    # List of file keys for files that don't match hash values.
+    # Managed datasets should always return 0 files.
+    # Unmanaged datasets may return files, which indicates they most likely changed in the backend and the dataset
+    # must be "updated" to include the new hashes as a new version
+    content_hash_mismatches = graphene.List(graphene.String)
 
     @classmethod
     def get_node(cls, info, id):
@@ -419,3 +449,28 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         """
         return info.context.dataset_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
             lambda dataset: self.helper_resolve_default_remote(dataset))
+
+    def resolve_backend_is_configured(self, info):
+        """Field to check if a dataset backend is fully configured"""
+        return info.context.dataset_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
+            lambda dataset: dataset.backend.is_configured)
+
+    @staticmethod
+    def helper_resolve_backend_configuration(dataset):
+        """Helper populate backend configuration fields"""
+        missing_config = list()
+        for item in dataset.backend.safe_current_configuration:
+            missing_config.append(DatasetConfigurationParameter(parameter=item['parameter'],
+                                                                description=item['description'],
+                                                                parameter_type=item['type']))
+        return missing_config
+
+    def resolve_backend_configuration(self, info):
+        """Field to get current configuration. If values are None, still needs to be set."""
+        return info.context.dataset_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
+            lambda dataset: self.helper_resolve_backend_configuration(dataset))
+
+    def resolve_content_hash_mismatches(self, info):
+        """Field to look up any content hash mismatches. Note this can be slow for big datasets!"""
+        return info.context.dataset_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
+            lambda dataset: dataset.backend.verify_contents(dataset, logger.info))

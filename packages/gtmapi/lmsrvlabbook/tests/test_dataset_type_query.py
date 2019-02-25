@@ -30,6 +30,7 @@ class TestDatasetTypesQueries(object):
                         name
                         description
                         isManaged
+                        canUpdateUnmanagedFromRemote
                         storageType
                         readme
                         tags

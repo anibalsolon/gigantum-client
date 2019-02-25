@@ -149,6 +149,18 @@ class StorageBackend(metaclass=abc.ABCMeta):
 
         return missing_params
 
+    @property
+    def safe_current_configuration(self) -> List[Dict[str, str]]:
+        """Property returning the current configuration, excluding the default parameters which include secrets"""
+        current_params = list()
+        for param in self._required_configuration_params:
+            if param['parameter'] in ['username', 'gigantum_bearer_token', 'gigantum_id_token']:
+                continue
+            param['value'] = self.configuration.get(param['parameter'])
+            current_params.append(param)
+
+        return current_params
+
     def prepare_pull(self, dataset, objects: List[PullObject], status_update_fn: Callable) -> None:
         """Method to prepare a backend for pulling objects locally
 
@@ -186,6 +198,46 @@ class StorageBackend(metaclass=abc.ABCMeta):
 
         """
         raise NotImplemented
+
+    def verify_contents(self, dataset, status_update_fn: Callable) -> List[str]:
+        """Method to verify the hashes of all local files and indicate if they have changed
+
+        Args:
+            dataset: Dataset object
+            status_update_fn: A callable, accepting a string for logging/providing status to the UI
+
+        Returns:
+            list
+        """
+        if 'username' not in self.configuration:
+            raise ValueError("Dataset storage backend requires current logged in username to verify contents")
+
+        m = Manifest(dataset, self.configuration.get('username'))
+        keys_to_verify = list()
+        for item in m.manifest:
+            if os.path.isfile(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, item)):
+                # File exists locally
+                keys_to_verify.append(item)
+
+        # re-hash files
+        status_update_fn(f"Validating contents of {len(keys_to_verify)} files. Please wait.")
+
+        loop = get_event_loop()
+        hash_task = asyncio.ensure_future(m.hasher.hash(keys_to_verify))
+        loop.run_until_complete(asyncio.gather(hash_task))
+        updated_hashes = hash_task.result()
+
+        modified_items = list()
+        for key, new_hash in zip(keys_to_verify, updated_hashes):
+            item = m.manifest.get(key)
+            if item:
+                if new_hash != item.get('h'):
+                    modified_items.append(key)
+
+        if modified_items:
+            status_update_fn(f"{len(modified_items)} files have been modified.")
+
+        return modified_items
 
 
 class ManagedStorageBackend(StorageBackend):
@@ -255,46 +307,6 @@ class ManagedStorageBackend(StorageBackend):
 
 class UnmanagedStorageBackend(StorageBackend):
     """Parent class for Unmanaged Dataset storage backends"""
-
-    def verify_contents(self, dataset, status_update_fn: Callable) -> List[str]:
-        """Method to verify the hashes of all local files and indicate if they have changed
-
-        Args:
-            dataset: Dataset object
-            status_update_fn: A callable, accepting a string for logging/providing status to the UI
-
-        Returns:
-            list
-        """
-        if 'username' not in self.configuration:
-            raise ValueError("Dataset storage backend requires current logged in username to verify contents")
-
-        m = Manifest(dataset, self.configuration.get('username'))
-        keys_to_verify = list()
-        for item in m.manifest:
-            if os.path.isfile(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, item)):
-                # File exists locally
-                keys_to_verify.append(item)
-
-        # re-hash files
-        status_update_fn(f"Validating contents of {len(keys_to_verify)} files. Please wait.")
-
-        loop = get_event_loop()
-        hash_task = asyncio.ensure_future(m.hasher.hash(keys_to_verify))
-        loop.run_until_complete(asyncio.gather(hash_task))
-        updated_hashes = hash_task.result()
-
-        modified_items = list()
-        for key, new_hash in zip(keys_to_verify, updated_hashes):
-            item = m.manifest.get(key)
-            if item:
-                if new_hash != item.get('h'):
-                    modified_items.append(key)
-
-        if modified_items:
-            status_update_fn(f"{len(modified_items)} files have been modified.")
-
-        return modified_items
 
     def update_from_local(self, dataset, status_update_fn: Callable,
                           update_keys: Optional[List[str]] = None,
