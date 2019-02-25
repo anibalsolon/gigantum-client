@@ -306,7 +306,8 @@ class TestWorkflowsBranching(object):
             deleteExperimentalBranch(input: {{
                 owner: "{UT_USERNAME}",
                 labbookName: "{UT_LBNAME}",
-                branchName: "{b1}"
+                branchName: "{b1}",
+                deleteLocal: true
             }}) {{
                 success
             }}
@@ -330,7 +331,8 @@ class TestWorkflowsBranching(object):
             deleteExperimentalBranch(input: {{
                 owner: "{UT_USERNAME}",
                 labbookName: "{UT_LBNAME}",
-                branchName: "{b1}"
+                branchName: "{b1}",
+                deleteLocal: true
             }}) {{
                 success
             }}

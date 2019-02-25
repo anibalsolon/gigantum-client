@@ -90,18 +90,23 @@ class DeleteExperimentalBranch(graphene.relay.ClientIDMutation):
         owner = graphene.String(required=True)
         labbook_name = graphene.String(required=True)
         branch_name = graphene.String(required=True)
+        delete_local = graphene.Boolean(required=False, default=False)
+        delete_remote = graphene.Boolean(required=False, default=False)
 
     success = graphene.Boolean()
 
     @classmethod
-    def mutate_and_get_payload(cls, root, info, owner, labbook_name, branch_name, client_mutation_id=None):
+    def mutate_and_get_payload(cls, root, info, owner, labbook_name, branch_name, delete_local=False,
+                               delete_remote=False, client_mutation_id=None):
         username = get_logged_in_username()
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
         with lb.lock():
             bm = BranchManager(lb, username=username)
-            bm.remove_branch(target_branch=branch_name)
-        logger.info(f'Removed experimental branch {branch_name} from {str(lb)}')
+            if delete_local:
+                bm.remove_branch(target_branch=branch_name)
+            if delete_remote:
+                bm.remove_remote_branch(target_branch=branch_name)
         return DeleteExperimentalBranch(success=True)
 
 

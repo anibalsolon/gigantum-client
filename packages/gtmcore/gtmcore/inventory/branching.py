@@ -162,6 +162,10 @@ class BranchManager(object):
             raise BranchWorkflowViolation(f'Removal of branch `{target_branch}` in {str(self.repository)} failed.')
 
     def remove_remote_branch(self, target_branch) -> None:
+        # If no remote, do nothing.
+        if not self.repository.has_remote:
+            return
+
         if target_branch not in self.branches_remote:
             raise InvalidBranchName(f'Cannot delete `{target_branch}`; does not exist')
 
