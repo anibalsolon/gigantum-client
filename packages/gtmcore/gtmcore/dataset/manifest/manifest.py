@@ -1,4 +1,4 @@
-from typing import Callable, List, Dict, Any, Tuple, Optional
+from typing import Callable, List, Dict, Any, Tuple, Optional, TYPE_CHECKING
 import pickle
 import os
 from enum import Enum
@@ -11,11 +11,13 @@ from pathlib import Path
 
 from gtmcore.activity import ActivityStore, ActivityRecord, ActivityDetailType, ActivityType,\
     ActivityAction, ActivityDetailRecord
-from gtmcore.dataset.dataset import Dataset
 from gtmcore.dataset.manifest.hash import SmartHash
 from gtmcore.dataset.cache import get_cache_manager_class, CacheManager
 from gtmcore.dataset.manifest.eventloop import get_event_loop
 from gtmcore.logging import LMLogger
+
+if TYPE_CHECKING:
+    from gtmcore.dataset import Dataset
 
 logger = LMLogger.get_logger()
 

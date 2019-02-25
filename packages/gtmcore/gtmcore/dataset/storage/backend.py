@@ -3,9 +3,11 @@ import os
 from pkg_resources import resource_filename
 from typing import Optional, List, Dict, Callable, Tuple
 import base64
+import asyncio
 
 from gtmcore.dataset.io import PushResult, PushObject, PullObject, PullResult
 from gtmcore.dataset.manifest.manifest import Manifest, StatusResult
+from gtmcore.dataset.manifest.eventloop import get_event_loop
 
 
 class StorageBackend(metaclass=abc.ABCMeta):
@@ -275,17 +277,23 @@ class UnmanagedStorageBackend(StorageBackend):
 
         # re-hash files
         status_update_fn(f"Validating contents of {len(keys_to_verify)} files. Please wait.")
-        updated_hashes = m.hasher.hash(keys_to_verify)
 
-        failed_items = list()
+        loop = get_event_loop()
+        hash_task = asyncio.ensure_future(m.hasher.hash(keys_to_verify))
+        loop.run_until_complete(asyncio.gather(hash_task))
+        updated_hashes = hash_task.result()
+
+        modified_items = list()
         for key, new_hash in zip(keys_to_verify, updated_hashes):
-            if new_hash != m.manifest.get(key).get('h'):
-                failed_items.append(key)
+            item = m.manifest.get(key)
+            if item:
+                if new_hash != item.get('h'):
+                    modified_items.append(key)
 
-        if failed_items:
-            status_update_fn(f"{len(failed_items)} files have been modified.")
+        if modified_items:
+            status_update_fn(f"{len(modified_items)} files have been modified.")
 
-        return failed_items
+        return modified_items
 
     def update_from_local(self, dataset, status_update_fn: Callable,
                           update_keys: Optional[List[str]] = None) -> None:

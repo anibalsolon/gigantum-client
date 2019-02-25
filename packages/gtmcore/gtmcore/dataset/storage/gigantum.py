@@ -244,7 +244,7 @@ to Gigantum Cloud will count towards your storage quota and include all versions
     def client_should_dedup_on_push(self) -> bool:
         return True
 
-    def _required_configuration(self) -> Dict[str, str]:
+    def _required_configuration(self) -> List[Dict[str, str]]:
         """A private method to return a list of keys that must be set for a backend to be fully configured
 
         The format is a dict of keys and descriptions. E.g.
@@ -264,7 +264,7 @@ to Gigantum Cloud will count towards your storage quota and include all versions
 
         """
         # No additional config required beyond defaults
-        return dict()
+        return list()
 
     def confirm_configuration(self, dataset, status_update_fn: Callable) -> Optional[str]:
         """Method to verify a configuration and optionally allow the user to confirm before proceeding

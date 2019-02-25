@@ -34,26 +34,35 @@ can be specified as the dataset root folder. This means you either need to place
 more, check out the docs here: [https://docs.gigantum.com](https://docs.gigantum.com)
 """}
 
-    def _required_configuration(self) -> Dict[str, str]:
-        """A private method to return a list of keys that must be set for a backend to be fully configured
+    def _required_configuration(self) -> List[Dict[str, str]]:
+        """A private method to return a list of parameters that must be set for a backend to be fully configured
 
-        The format is a dict of keys and descriptions. E.g.
+        The format is a list of dictionaries, e.g.:
 
-        {
-          "server": "The host name for the remote server",
-          "username": "The current logged in username"
+        [
+          {
+            "parameter": "server",
+            "description": "URL of the remote server",
+            "type": "str"
+          },
+          {
+            "parameter": "username",
+            "description": "The current logged in username",
+            "type": "str"
+          }
+        ]
 
-        }
+        "type" must be either `str` or `bool`
 
-        There are 3 keys that are always automatically populated:
+        There are 3 parameters that are always automatically populated:
            - username: the gigantum username for the logged in user
            - gigantum_bearer_token: the gigantum bearer token for the current session
            - gigantum_id_token: the gigantum id token for the current session
-
-        Returns:
-
         """
-        return {"Data Root": "A folder in <gigantum_working_dir>/local_data/ to use as the dataset source"}
+        return [{'parameter': "Data Root",
+                 'description': "A folder in <gigantum_working_dir>/local_data/ to use as the dataset source",
+                 'type': "str"
+                 }]
 
     def _get_local_data_dir(self) -> str:
         """Method to get the local data directory inside the current container
