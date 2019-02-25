@@ -24,6 +24,8 @@ import responses
 import time
 import mock
 from typing import Optional
+import jose
+import json
 
 from gtmcore.configuration import Configuration
 from gtmcore.fixtures import mock_config_file_with_auth, mock_config_file_with_auth_first_login, cleanup_auto_import
@@ -56,6 +58,17 @@ def mock_import(archive_path: str, username: str, owner: str,
     return FakeLB()
 
 
+def mock_jwt_claims(data):
+    return json.loads(data)
+
+
+def mock_jwt_validate(self, token, client_id, limited_validation):
+    return {"email": "test@gigantum.com",
+            "nickname": "testuser",
+            "given_name": "test",
+            "family_name": "user"}
+
+
 def clean_local_cache(mgr):
     """Simple helper to cleanup the local cached id since reusing the working dir to reduce API calls to Auth0"""
     id_file = os.path.join(mgr.auth_dir, 'cached_id_jwt')
@@ -85,7 +98,7 @@ class TestIdentityLocal(object):
 
         # Save User
         assert os.path.exists(os.path.join(mgr.auth_dir, 'cached_id_jwt')) is False
-        mgr._save_user(mock_config_file_with_auth[1]['id_token'])
+        mgr._safe_cached_id_access(mock_config_file_with_auth[1]['id_token'])
         assert os.path.exists(os.path.join(mgr.auth_dir, 'cached_id_jwt')) is True
 
         # Load User
@@ -99,6 +112,81 @@ class TestIdentityLocal(object):
 
         clean_local_cache(mgr)
 
+    def test_load_user_refresh(self, mock_config_file_with_auth):
+        """handling a new token for the same user"""
+        config = Configuration(mock_config_file_with_auth[0])
+
+        with mock.patch.object(jose.jwt, 'get_unverified_claims', lambda x: mock_jwt_claims(x)):
+            with mock.patch.object(LocalIdentityManager, 'validate_jwt_token', mock_jwt_validate):
+
+                mgr = get_identity_manager(config)
+                assert type(mgr) == LocalIdentityManager
+
+                # Save User
+                assert os.path.exists(os.path.join(mgr.auth_dir, 'cached_id_jwt')) is False
+                mgr._safe_cached_id_access(json.dumps({'nickname': 'testuser', 'dummy': '1'}))
+                assert os.path.exists(os.path.join(mgr.auth_dir, 'cached_id_jwt')) is True
+
+                with open(os.path.join(mgr.auth_dir, 'cached_id_jwt'), 'rt') as cf:
+                    data = json.loads(json.load(cf))
+                assert data['dummy'] == '1'
+
+                # Load User
+                u2 = mgr._load_user(json.dumps({'nickname': 'testuser', 'dummy': '2'}))
+                assert type(u2) == User
+
+                assert "testuser" == u2.username
+                assert "test@gigantum.com" == u2.email
+                assert "test" == u2.given_name
+                assert "user" == u2.family_name
+
+                with open(os.path.join(mgr.auth_dir, 'cached_id_jwt'), 'rt') as cf:
+                    data = json.loads(json.load(cf))
+                assert data['dummy'] == '2'
+
+                clean_local_cache(mgr)
+
+    def test_load_user_mismatch(self, mock_config_file_with_auth):
+        """handling a new token for the same user"""
+        config = Configuration(mock_config_file_with_auth[0])
+
+        with mock.patch.object(jose.jwt, 'get_unverified_claims', lambda x: mock_jwt_claims(x)):
+            with mock.patch.object(LocalIdentityManager, 'validate_jwt_token', mock_jwt_validate):
+
+                mgr = get_identity_manager(config)
+                assert type(mgr) == LocalIdentityManager
+
+                # Save User
+                assert os.path.exists(os.path.join(mgr.auth_dir, 'cached_id_jwt')) is False
+                mgr._safe_cached_id_access(json.dumps({'nickname': 'olduser', 'dummy': '1'}))
+                assert os.path.exists(os.path.join(mgr.auth_dir, 'cached_id_jwt')) is True
+
+                # Load User
+                u2 = mgr._load_user(json.dumps({'nickname': 'testuser', 'dummy': '1'}))
+                assert os.path.exists(os.path.join(mgr.auth_dir, 'cached_id_jwt')) is False
+
+        clean_local_cache(mgr)
+
+    def test_load_corrupt(self, mock_config_file_with_auth):
+        """handling a corrupted cached id token"""
+        config = Configuration(mock_config_file_with_auth[0])
+        mgr = get_identity_manager(config)
+        assert type(mgr) == LocalIdentityManager
+
+        os.makedirs(mgr.auth_dir, exist_ok=True)
+        with open(os.path.join(mgr.auth_dir, 'cached_id_jwt'), 'wt') as cf:
+            cf.write('"sdfsd"df"')
+
+        assert os.path.exists(os.path.join(mgr.auth_dir, 'cached_id_jwt')) is True
+
+        # Load User
+        with pytest.raises(json.decoder.JSONDecodeError):
+            mgr._load_user(None)
+
+        assert os.path.exists(os.path.join(mgr.auth_dir, 'cached_id_jwt')) is False
+
+        clean_local_cache(mgr)
+
     def test_logout_user(self, mock_config_file_with_auth):
         """test getting an identity manager"""
         config = Configuration(mock_config_file_with_auth[0])
@@ -107,7 +195,7 @@ class TestIdentityLocal(object):
 
         # Save User
         assert os.path.exists(os.path.join(mgr.auth_dir, 'cached_id_jwt')) is False
-        mgr._save_user(mock_config_file_with_auth[1]['id_token'])
+        mgr._safe_cached_id_access(mock_config_file_with_auth[1]['id_token'])
         assert os.path.exists(os.path.join(mgr.auth_dir, 'cached_id_jwt')) is True
         assert os.path.exists(os.path.join(mgr.auth_dir, 'jwks.json')) is True
 
@@ -129,7 +217,7 @@ class TestIdentityLocal(object):
 
         # Save User
         assert os.path.exists(os.path.join(mgr.auth_dir, 'cached_id_jwt')) is False
-        mgr._save_user(mock_config_file_with_auth[1]['id_token'])
+        mgr._safe_cached_id_access(mock_config_file_with_auth[1]['id_token'])
         assert os.path.exists(os.path.join(mgr.auth_dir, 'cached_id_jwt')) is True
 
         # Load User
@@ -151,7 +239,7 @@ class TestIdentityLocal(object):
 
         # Save User
         assert os.path.exists(os.path.join(mgr.auth_dir, 'cached_id_jwt')) is False
-        mgr._save_user(mock_config_file_with_auth[1]['id_token'])
+        mgr._safe_cached_id_access(mock_config_file_with_auth[1]['id_token'])
         assert os.path.exists(os.path.join(mgr.auth_dir, 'cached_id_jwt')) is True
 
         # Load User
