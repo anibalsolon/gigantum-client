@@ -36,7 +36,7 @@ StatusResult = namedtuple('StatusResult', ['created', 'modified', 'deleted'])
 class Manifest(object):
     """Class to handle file file manifest"""
 
-    def __init__(self, dataset: Dataset, logged_in_username: Optional[str] = None) -> None:
+    def __init__(self, dataset: 'Dataset', logged_in_username: Optional[str] = None) -> None:
         self.dataset = dataset
 
         cache_mgr_class = get_cache_manager_class(self.dataset.client_config)
@@ -576,12 +576,13 @@ class Manifest(object):
         self.hasher.fast_hash_data = dict()
         self.hasher.fast_hash(list(self.manifest.keys()))
 
-    def sweep_all_changes(self, upload: bool = False, extra_msg: str = None) -> None:
+    def create_update_activity_record(self, status: StatusResult, upload: bool = False, extra_msg: str = None) -> None:
         """
 
         Args:
-            upload:
-            extra_msg:
+            status: a StatusResult object after updating the manifest
+            upload: flag indicating if this is a record for an upload
+            extra_msg: any extra string to add to the activity record
 
         Returns:
 
@@ -591,11 +592,6 @@ class Manifest(object):
                 return 'directory'
             else:
                 return 'file'
-
-        previous_revision = self.dataset_revision
-
-        # Update manifest
-        status = self.update()
 
         if len(status.deleted) > 0 or len(status.created) > 0 or len(status.modified) > 0:
             # commit changed manifest file
@@ -608,8 +604,6 @@ class Manifest(object):
                                 importance=255,
                                 linked_commit=self.dataset.git.commit_hash,
                                 tags=[])
-            if upload:
-                ar.tags.append('upload')
 
             for cnt, f in enumerate(status.created):
                 adr = ActivityDetailRecord(ActivityDetailType.DATASET, show=False, importance=max(255 - cnt, 0),
@@ -640,11 +634,26 @@ class Manifest(object):
             dmsg = f"{len(status.deleted)} deleted file(s). " if len(status.deleted) > 0 else ""
 
             ar.message = f"{extra_msg if extra_msg else ''}" \
-                         f"{'Uploaded ' if upload else ''}" \
                          f"{nmsg}{mmsg}{dmsg}"
 
             ars = ActivityStore(self.dataset)
             ars.create_activity_record(ar)
+
+    def sweep_all_changes(self, upload: bool = False, extra_msg: str = None) -> None:
+        """
+
+        Args:
+            upload:
+            extra_msg:
+
+        Returns:
+
+        """
+        previous_revision = self.dataset_revision
+
+        # Update manifest
+        status = self.update()
+        self.create_update_activity_record(status, upload=upload, extra_msg=extra_msg)
 
         # Re-link new revision, unlink old revision
         self.link_revision()

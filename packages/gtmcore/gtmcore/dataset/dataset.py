@@ -158,7 +158,7 @@ class Dataset(Repository):
     def backend_config(self, data: dict) -> None:
         """Save storage config data"""
         if self._backend:
-            self._backend.configuration = data
+            self._backend.configuration = {**self._backend.configuration, **data}
 
         # Remove defaults set at runtime that shouldn't be persisted
         if "username" in data:

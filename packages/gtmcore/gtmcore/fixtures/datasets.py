@@ -27,6 +27,20 @@ def mock_dataset_with_cache_dir():
 
 
 @pytest.fixture()
+def mock_dataset_with_cache_dir_local():
+    """A pytest fixture that creates a dataset in a temp working dir. Deletes directory after test"""
+    conf_file, working_dir = _create_temp_work_dir()
+    with patch.object(Configuration, 'find_default_config', lambda self: conf_file):
+        im = InventoryManager(conf_file)
+        ds = im.create_dataset(USERNAME, USERNAME, 'dataset-1', description="my dataset 1",
+                               storage_type="local_filesystem")
+
+        yield ds, working_dir, ds.git.repo.head.commit.hexsha
+
+        shutil.rmtree(working_dir)
+
+
+@pytest.fixture()
 def mock_dataset_with_manifest(mock_dataset_with_cache_dir):
     """A pytest fixture that creates a dataset in a temp working dir and provides a cache manager"""
     m = Manifest(mock_dataset_with_cache_dir[0], USERNAME)

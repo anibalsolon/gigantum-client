@@ -14,7 +14,7 @@ class CacheManager(metaclass=abc.ABCMeta):
 
     """
 
-    def __init__(self, dataset: Dataset, username: Optional[str]) -> None:
+    def __init__(self, dataset: 'Dataset', username: Optional[str]) -> None:
         """
 
         Args:

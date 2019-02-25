@@ -9,7 +9,7 @@ class TestStorageBackendParent(object):
     def test_get_storage_backend_descriptions(self):
         metadata = get_storage_backend_descriptions()
 
-        assert len(metadata) == 1
+        assert len(metadata) == 2
         assert metadata[0].get("name") == "Gigantum Cloud"
         assert metadata[0].get("tags") == ['gigantum']
         assert metadata[0].get("storage_type") == 'gigantum_object_v1'

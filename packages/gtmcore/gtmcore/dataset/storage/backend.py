@@ -4,6 +4,7 @@ from pkg_resources import resource_filename
 from typing import Optional, List, Dict, Callable, Tuple
 import base64
 import asyncio
+import shutil
 
 from gtmcore.dataset.io import PushResult, PushObject, PullObject, PullResult
 from gtmcore.dataset.manifest.manifest import Manifest, StatusResult
@@ -34,7 +35,7 @@ class StorageBackend(metaclass=abc.ABCMeta):
                                                 }]
         if self._required_configuration():
             # If additional config required, append
-            self._required_configuration_params.append(self._required_configuration())
+            self._required_configuration_params.extend(self._required_configuration())
 
     def _backend_metadata(self) -> dict:
         """Method to specify Storage Backend metadata for each implementation. This is used to render the UI
@@ -296,13 +297,15 @@ class UnmanagedStorageBackend(StorageBackend):
         return modified_items
 
     def update_from_local(self, dataset, status_update_fn: Callable,
-                          update_keys: Optional[List[str]] = None) -> None:
+                          update_keys: Optional[List[str]] = None,
+                          status_result: Optional[StatusResult] = None) -> None:
         """Method to update the dataset manifest for changed files that exists locally
 
         Args:
             dataset: Dataset object
             status_update_fn: A callable, accepting a string for logging/providing status to the UI
             update_keys: list of tuples to update (key, current_hash). Otherwise verify_contents() is called
+            status_result: Optional StatusResult object to include in the update (typically from update_from_remote())
 
         Returns:
             None
@@ -315,10 +318,24 @@ class UnmanagedStorageBackend(StorageBackend):
             update_keys = self.verify_contents(dataset, status_update_fn)
 
         # Create StatusResult to force modifications
-        status = StatusResult(created=[], modified=update_keys, deleted=[])
+        if status_result:
+            # Combine a previous StatusResult object (typically from "update_from_remote")
+            merged_modified = status_result.modified.extend(update_keys)
+            status = StatusResult(created=status_result.created,
+                                  modified=list() if merged_modified is None else merged_modified,
+                                  deleted=status_result.deleted)
+        else:
+            status = StatusResult(created=[], modified=update_keys, deleted=[])
 
         # Update the manifest
+        previous_revision = m.dataset_revision
         m.update(status)
+        m.create_update_activity_record(status)
+
+        # Link the revision dir
+        m.link_revision()
+        if os.path.isdir(os.path.join(m.cache_mgr.cache_root, previous_revision)):
+            shutil.rmtree(os.path.join(m.cache_mgr.cache_root, previous_revision))
 
     @property
     def can_update_from_remote(self) -> bool:
