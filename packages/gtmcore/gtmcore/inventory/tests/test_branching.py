@@ -1,3 +1,4 @@
+import tempfile
 import pytest
 import os
 
@@ -132,6 +133,34 @@ class TestBranching(object):
         assert not os.path.isdir(os.path.join(lb.root_dir, 'output/otherdir'))
         assert lb.is_repo_clean
 
+    def test_remove_remote_branch(self, mock_labbook_lfs_disabled):
+        lb = mock_labbook_lfs_disabled[2]
+
+        with tempfile.TemporaryDirectory() as tempdir:
+            call_subprocess('git init .'.split(), tempdir)
+            call_subprocess('touch FILE_A'.split(), tempdir)
+            call_subprocess('git add FILE_A'.split(), tempdir)
+            call_subprocess('git commit -am "message"'.split(), tempdir)
+            call_subprocess('git checkout -b remote-branch'.split(), cwd=tempdir)
+            call_subprocess('git checkout master'.split(), cwd=tempdir)
+            lb.git.add_remote('origin', tempdir)
+            bm = BranchManager(lb)
+            bm.fetch()
+            assert 'remote-branch' in bm.branches_remote
+
+            # Get this remote branch locally, but go back to master
+            bm.workon_branch('remote-branch')
+            bm.workon_branch('master')
+
+            bm.remove_remote_branch('remote-branch')
+
+            bm.fetch()
+
+            # Confirm branch exists locally, but is gone on remote.
+            assert 'remote-branch' in bm.branches_local
+            assert 'remote-branch' not in bm.branches_remote
+
+
     def test_merge_conflict_basic(self, mock_labbook_lfs_disabled):
         """ Test a basic merge-conflict scenario with a conflict on one file.
             First, assert that a MergeConflict is raised when the conflict is detected
@@ -157,8 +186,6 @@ class TestBranching(object):
         with open('/tmp/s1.txt', 'w') as s1:
             s1.write('upstream-changes-from-workspace')
         FileOperations.insert_file(lb, section='code', src_file=s1.name, dst_path='')
-
-
 
         # Switch back to feature branch -- make sure that failed merges rollback to state before merge.
         bm.workon_branch(feature_name)
