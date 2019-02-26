@@ -150,8 +150,7 @@ class TestBranching(object):
 
             # Get this remote branch locally, but go back to master
             bm.workon_branch('remote-branch')
-            bm.workon_branch('master')
-
+            call_subprocess('git checkout master'.split(), cwd=bm.repository.root_dir)
             bm.remove_remote_branch('remote-branch')
 
             bm.fetch()
