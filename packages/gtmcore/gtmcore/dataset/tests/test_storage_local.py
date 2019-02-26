@@ -2,13 +2,12 @@ import pytest
 import shutil
 
 import os
-import uuid
 
 from gtmcore.dataset.storage import get_storage_backend
 from gtmcore.dataset.storage.local import LocalFilesystem
 from gtmcore.dataset.manifest.manifest import Manifest
 from gtmcore.fixtures.datasets import helper_compress_file, mock_dataset_with_cache_dir_local, USERNAME
-from gtmcore.dataset.io import PushResult, PushObject, PullResult, PullObject
+from gtmcore.dataset.io import PullObject
 
 
 def helper_write_object(directory, object_id, contents):
