@@ -59,6 +59,7 @@ if os.path.exists(user_conf_path):
 else:
     logger.info("No custom user configuration found")
 
+
 random_bytes = os.urandom(32)
 app.config["SECRET_KEY"] = base64.b64encode(random_bytes).decode('utf-8')
 app.config["LABMGR_CONFIG"] = config = Configuration()

@@ -49,7 +49,7 @@ class CreateExperimentalBranch(graphene.relay.ClientIDMutation):
     def _update_branch_description(cls, lb: Labbook, description: str):
         # Update the description on branch creation
         lb.description = description
-        lb.git.add(os.path.join(lb.root_dir, '.gigantum/labbook.yaml'))
+        lb.git.add(lb.config_path)
         commit = lb.git.commit('Updating description')
 
         adr = ActivityDetailRecord(ActivityDetailType.LABBOOK, show=False)
@@ -189,3 +189,4 @@ class MergeFromBranch(graphene.relay.ClientIDMutation):
 
         return MergeFromBranch(Labbook(id="{}&{}".format(owner, labbook_name),
                                                name=labbook_name, owner=owner))
+

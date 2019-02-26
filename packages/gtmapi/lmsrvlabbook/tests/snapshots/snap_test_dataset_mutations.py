@@ -19,7 +19,7 @@ snapshots['TestDatasetMutations.test_create_dataset 1'] = {
                 'description': 'my test dataset',
                 'id': 'RGF0YXNldDpkZWZhdWx0JnRlc3QtZGF0YXNldC0x',
                 'name': 'test-dataset-1',
-                'schemaVersion': 1
+                'schemaVersion': 2
             }
         }
     }
@@ -36,7 +36,7 @@ snapshots['TestDatasetMutations.test_create_dataset 2'] = {
             'description': 'my test dataset',
             'id': 'RGF0YXNldDpkZWZhdWx0JnRlc3QtZGF0YXNldC0x',
             'name': 'test-dataset-1',
-            'schemaVersion': 1
+            'schemaVersion': 2
         }
     }
 }

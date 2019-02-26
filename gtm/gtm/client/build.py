@@ -214,9 +214,9 @@ class ClientBuilder(object):
                 base_data[key].update(overwrite_data[key])
 
         # Add Build Info
-        base_data['build_info'] = {'application': "LabManager",
-                                   'built_on': str(datetime.datetime.utcnow()),
-                                   'revision': get_current_commit_hash()}
+        build_date = datetime.datetime.utcnow().strftime('%Y-%m-%d')
+        short_hash = get_current_commit_hash()[:8]
+        base_data['build_info'] = f"Gigantum Client :: {build_date} :: {short_hash}"
 
         # Write out updated config file
         with open(os.path.join(client_root_dir, final_config_file), "wt") as cf:

@@ -295,15 +295,16 @@ class InventoryManager(object):
         labbook = LabBook(config_file=self.config_file, author=author)
 
         # Build data file contents
+        buildinfo = Configuration(self.config_file).config['build_info']
         labbook._data = {
-            "labbook": {"id": uuid.uuid4().hex,
-                        "name": name,
-                        "description": description or ''},
-            "owner": owner,
-            "schema": LABBOOK_CURRENT_SCHEMA
+            "schema": LABBOOK_CURRENT_SCHEMA,
+            "id": uuid.uuid4().hex,
+            "name": name,
+            "description": description or '',
+            "build_info": buildinfo,
+            "created_on": str(datetime.datetime.utcnow().isoformat())
         }
 
-        # Validate data
         labbook._validate_gigantum_data()
 
         logger.info("Creating new labbook on disk for {}/{}/{} ...".format(username, owner, name))
@@ -352,7 +353,7 @@ class InventoryManager(object):
 
             # Create Directory Structure
             dirs = [
-                'code', 'input', 'output', '.gigantum',
+                'code', 'input', 'output', 'output/untracked', '.gigantum',
                 os.path.join('.gigantum', 'env'),
                 os.path.join('.gigantum', 'env', 'base'),
                 os.path.join('.gigantum', 'env', 'custom'),
@@ -370,24 +371,7 @@ class InventoryManager(object):
                     gk.write("This file is necessary to keep this directory tracked by Git"
                              " and archivable by compression tools. Do not delete or modify!")
 
-            # Create labbook.yaml file
             labbook._save_gigantum_data()
-
-            # Save build info
-            try:
-                buildinfo = Configuration(self.config_file).config['build_info']
-            except KeyError:
-                logger.warning("Could not obtain build_info from config")
-                buildinfo = None
-            buildinfo = {
-                'creation_utc': datetime.datetime.utcnow().isoformat(),
-                'build_info': buildinfo
-            }
-
-            buildinfo_path = os.path.join(labbook.root_dir, '.gigantum', 'buildinfo')
-            with open(buildinfo_path, 'w') as f:
-                json.dump(buildinfo, f)
-
             # Create .gitignore default file
             shutil.copyfile(os.path.join(resource_filename('gtmcore', 'labbook'), 'gitignore.default'),
                             os.path.join(labbook.root_dir, ".gitignore"))
@@ -487,7 +471,6 @@ class InventoryManager(object):
                     gk.write("This file is necessary to keep this directory tracked by Git"
                              " and archivable by compression tools. Do not delete or modify!")
 
-            # Create labbook.yaml file
             dataset._save_gigantum_data()
 
             # Create an empty storage.json file

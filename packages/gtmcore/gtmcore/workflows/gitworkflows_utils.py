@@ -23,9 +23,14 @@ import os
 from typing import Optional, Callable
 
 from gtmcore.workflows.gitlab import GitLabManager
+from gtmcore.activity import ActivityStore, ActivityType, ActivityRecord, \
+                             ActivityDetailType, ActivityDetailRecord, \
+                             ActivityAction
+from gtmcore.labbook import LabBook
+from gtmcore.labbook.schemas import migrate_schema_to_current, \
+                                    CURRENT_SCHEMA as CURRENT_LABBOOK_SCHEMA
 from gtmcore.inventory import Repository
 from gtmcore.inventory.inventory import InventoryManager
-
 from gtmcore.logging import LMLogger
 from gtmcore.configuration.utils import call_subprocess
 from gtmcore.inventory.branching import BranchManager, MergeConflict
@@ -183,3 +188,62 @@ def sync_branch(repository: Repository, username: str, override: str,
                 push_tokens.insert(2, "--set-upstream")
             call_subprocess(push_tokens, cwd=repository.root_dir)
         return pulled_updates_count
+
+
+def migrate_labbook_schema(labbook: LabBook) -> None:
+    # Fallback point in case of a problem
+    initial_commit = labbook.git.commit_hash
+
+    try:
+        migrate_schema_to_current(labbook.root_dir)
+    except Exception as e:
+        logger.exception(e)
+        call_subprocess(f'git reset --hard {initial_commit}'.split(), cwd=labbook.root_dir)
+        raise
+
+    msg = f"Migrate schema to {CURRENT_LABBOOK_SCHEMA}"
+    labbook.git.add(labbook.config_path)
+    cmt = labbook.git.commit(msg, author=labbook.author, committer=labbook.author)
+    adr = ActivityDetailRecord(ActivityDetailType.LABBOOK, show=True,
+                               importance=100,
+                               action=ActivityAction.EDIT)
+
+    adr.add_value('text/plain', msg)
+    ar = ActivityRecord(ActivityType.LABBOOK, message=msg, show=True,
+                        importance=255, linked_commit=cmt.hexsha,
+                        tags=['schema', 'update', 'migration'])
+    ar.add_detail_object(adr)
+    ars = ActivityStore(labbook)
+    ars.create_activity_record(ar)
+
+
+def migrate_labbook_untracked_space(labbook: LabBook) -> None:
+
+    gitignore_path = os.path.join(labbook.root_dir, '.gitignore')
+    gitignored_lines = open(gitignore_path).readlines()
+    has_untracked_dir = any(['output/untracked' in l.strip() for l in gitignored_lines])
+    if not has_untracked_dir:
+        with open(gitignore_path, 'a') as gi_file:
+            gi_file.write('\n\n# Migrated - allow untracked area\n'
+                          'output/untracked\n')
+        labbook.sweep_uncommitted_changes(extra_msg="Added untracked area")
+
+    # Make the untracked directory -- makedirs is no-op if already exists
+    untracked_path = os.path.join(labbook.root_dir, 'output/untracked')
+    if not os.path.exists(untracked_path):
+        os.makedirs(untracked_path, exist_ok=True)
+
+def migrate_labbook_branches(labbook: LabBook) -> None:
+    bm = BranchManager(labbook)
+    if 'gm.workspace-' not in bm.active_branch:
+        raise ValueError('Can only migrate branches if active branch is '
+                         'gm.workspace-username')
+
+    master_branch = 'master'
+    if master_branch in bm.branches_remote:
+        raise ValueError('Cannot migrate when remote master branch already exists')
+
+    if master_branch in bm.branches_local:
+        bm.remove_branch(master_branch)
+
+    bm.create_branch(master_branch)

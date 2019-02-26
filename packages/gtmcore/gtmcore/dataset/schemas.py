@@ -18,20 +18,30 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 from typing import Any, Dict, Optional
-from schema import (Schema, SchemaError)
+from schema import (Schema, SchemaError, Or as SchemaOr, Optional as SchemaOptional)
 
 from gtmcore.logging import LMLogger
 
 logger = LMLogger.get_logger()
 
 # The current Dataset schema version
-CURRENT_SCHEMA = 1
+CURRENT_SCHEMA = 2
 
 DATASET_SCHEMA_VERSIONS = {
     # Note: Each time a new schema version is needed, add it into this dictionary
     # with its version number as its key.
     #
     # These are all the supported schemas
+    2: {
+        'schema': int,
+        'id': str,
+        'name': str,
+        'description': str,
+        'created_on': str,
+        'storage_type': str,
+        'build_info': str,
+        SchemaOptional('migrated'): bool
+    },
     1: {
         'schema': int,
         'id': str,
@@ -39,11 +49,11 @@ DATASET_SCHEMA_VERSIONS = {
         'description': str,
         'created_on': str,
         'storage_type': str,
-        'build_info': {
+        'build_info': SchemaOr({
             'application': str,
             'built_on': str,
             'revision': str,
-        }
+        }, str)
     }
 }
 

@@ -359,7 +359,7 @@ class SetLabbookDescription(graphene.relay.ClientIDMutation):
                                              author=get_logged_in_author())
         lb.description = description_content
         with lb.lock():
-            lb.git.add(os.path.join(lb.root_dir, '.gigantum/labbook.yaml'))
+            lb.git.add(os.path.join(lb.config_path))
             commit = lb.git.commit('Updating description')
 
             adr = ActivityDetailRecord(ActivityDetailType.LABBOOK, show=False)

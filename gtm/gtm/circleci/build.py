@@ -68,9 +68,9 @@ class CircleCIImageBuilder(object):
             base_data = yaml.load(cf)
 
         # Add Build Info
-        base_data['build_info'] = {'application': "LabManager",
-                                   'built_on': str(datetime.utcnow()),
-                                   'revision': self._get_current_commit_hash()}
+        built_on = str(datetime.utcnow())
+        revision = self._get_current_commit_hash()[:8]
+        base_data['build_info'] = f'Gigantum Client :: {built_on} :: {revision}'
 
         # Write out updated config file
         with open(os.path.join(output_dir, 'labmanager.yaml'), "wt") as cf:

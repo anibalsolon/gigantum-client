@@ -103,7 +103,6 @@ class TestBackgroundJobs(object):
             assert w.is_alive()
             time1 = time.time()
             result = fixture_working_dir_env_repo_scoped[2].execute(query)
-            #import pprint; print('----'); pprint.pprint(result); print('-<<<')
             time2 = time.time()
             tdiff = time2 - time1
             assert tdiff < 0.5, "Query should not take more than a few millis (took {}s)".format(tdiff)

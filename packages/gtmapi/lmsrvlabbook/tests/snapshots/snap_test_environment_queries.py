@@ -137,7 +137,6 @@ snapshots['TestEnvironmentServiceQueries.test_get_package_manager 2'] = {
                                 'id': 'UGFja2FnZUNvbXBvbmVudDphcHQmZG9ja2VyJmxhdGVzdA==',
                                 'manager': 'apt',
                                 'package': 'docker',
-                                'schema': 1,
                                 'version': 'latest'
                             }
                         },
@@ -148,7 +147,6 @@ snapshots['TestEnvironmentServiceQueries.test_get_package_manager 2'] = {
                                 'id': 'UGFja2FnZUNvbXBvbmVudDphcHQmbHhtbCYzLjQ=',
                                 'manager': 'apt',
                                 'package': 'lxml',
-                                'schema': 1,
                                 'version': '3.4'
                             }
                         },
@@ -159,7 +157,6 @@ snapshots['TestEnvironmentServiceQueries.test_get_package_manager 2'] = {
                                 'id': 'UGFja2FnZUNvbXBvbmVudDpwaXAmbnVtcHkmMS4xMg==',
                                 'manager': 'pip',
                                 'package': 'numpy',
-                                'schema': 1,
                                 'version': '1.12'
                             }
                         },
@@ -170,7 +167,6 @@ snapshots['TestEnvironmentServiceQueries.test_get_package_manager 2'] = {
                                 'id': 'UGFja2FnZUNvbXBvbmVudDpwaXAmcmVxdWVzdHMmMS4z',
                                 'manager': 'pip',
                                 'package': 'requests',
-                                'schema': 1,
                                 'version': '1.3'
                             }
                         }

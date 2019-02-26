@@ -24,6 +24,7 @@ from gtmcore.logging import LMLogger
 from gtmcore.dispatcher import Dispatcher
 from gtmcore.inventory.branching import BranchManager
 from gtmcore.inventory.inventory import InventoryManager, InventoryException
+from gtmcore.labbook.schemas import CURRENT_SCHEMA
 from gtmcore.activity import ActivityStore
 from gtmcore.workflows.gitlab import GitLabManager, ProjectPermissions
 from gtmcore.files import FileOperations
@@ -63,6 +64,9 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
     # Data schema version of this labbook. It may be behind the most recent version and need
     # to be upgraded.
     schema_version = graphene.Int()
+
+    # Indicates whether the current schema is behind.
+    is_deprecated = graphene.Boolean()
 
     # Size on disk of LabBook in bytes
     # NOTE: This is a string since graphene can't represent ints bigger than 2**32
@@ -163,6 +167,11 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         Returns 0 if up-to-date or if local only."""
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
             lambda labbook: labbook.schema)
+
+    def resolve_is_deprecated(self, info):
+        """ Returns True if the project schema lags the current schema and should be migrated """
+        return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
+            lambda labbook: labbook.schema != CURRENT_SCHEMA)
 
     def resolve_size_bytes(self, info):
         """Return the size of the labbook on disk (in bytes).

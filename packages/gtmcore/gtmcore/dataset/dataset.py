@@ -108,11 +108,8 @@ class Dataset(Repository):
             raise ValueError("No creation date set.")
 
     @property
-    def build_details(self) -> Optional[Dict[str, str]]:
-        if self._data:
-            return self._data.get("build_info")
-        else:
-            return None
+    def build_details(self) -> str:
+        return self._data["build_info"]
 
     @property
     def description(self) -> str:

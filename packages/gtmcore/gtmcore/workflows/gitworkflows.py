@@ -24,6 +24,7 @@ from typing import Optional, Callable, cast
 from gtmcore.configuration.utils import call_subprocess
 from gtmcore.logging import LMLogger
 from gtmcore.labbook import LabBook
+from gtmcore.labbook.schemas import CURRENT_SCHEMA as CURRENT_LABBOOK_SCHEMA
 from gtmcore.workflows import gitworkflows_utils, loaders
 from gtmcore.exceptions import GigantumException
 from gtmcore.inventory import Repository
@@ -152,6 +153,31 @@ class LabbookWorkflow(GitWorkflow):
                                   put_repository=inv_manager.put_labbook)
         return cls(repo)
 
+    def migrate(self) -> bool:
+        """ Migrate the given LabBook to the most recent schema AND branch version.
+
+        Returns:
+            Boolean indicating whether a migration was performed (False if already up-to-date)
+        """
+
+        if self.repository.schema == CURRENT_LABBOOK_SCHEMA:
+            logger.info(f"{str(self.labbook)} already migrated.")
+            return False
+
+        if not 'gm.workspace-' in BranchManager(self.labbook).active_branch:
+            raise GitWorkflowException('Must be on gm.workspace-<username> branch to migrate')
+
+        im = InventoryManager(self.labbook.client_config.config_file)
+        gitworkflows_utils.migrate_labbook_branches(self.labbook)
+        self.repository = im.load_labbook_from_directory(self.labbook.root_dir)
+
+        gitworkflows_utils.migrate_labbook_schema(self.labbook)
+        self.repository = im.load_labbook_from_directory(self.labbook.root_dir)
+
+        gitworkflows_utils.migrate_labbook_untracked_space(self.labbook)
+        self.repository = im.load_labbook_from_directory(self.labbook.root_dir)
+
+        return True
 
 class DatasetWorkflow(GitWorkflow):
     @property

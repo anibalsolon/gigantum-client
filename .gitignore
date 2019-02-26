@@ -105,3 +105,5 @@ gtm-env/
 .DS_Store
 build/
 /node_modules
+
+cached_id_jwt

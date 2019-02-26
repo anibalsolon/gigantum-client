@@ -31,4 +31,4 @@ class TestLabManagerQueries(object):
         """
         r = fixture_working_dir[2].execute(query)
         assert 'errors' not in r
-        assert '-' in r['data']['buildInfo']
+        assert 'Gigantum Client :: ' in r['data']['buildInfo']

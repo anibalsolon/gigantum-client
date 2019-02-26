@@ -18,10 +18,13 @@
 # OUT OF OR IN CO
 import pytest
 import mock
-import time
+import tempfile
 import os
+from pkg_resources import resource_filename
+
 
 from gtmcore.configuration.utils import call_subprocess
+from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.workflows import GitWorkflowException, LabbookWorkflow, DatasetWorkflow, MergeError, MergeOverride
 from gtmcore.fixtures import (_MOCK_create_remote_repo2 as _MOCK_create_remote_repo, mock_labbook_lfs_disabled,
                               mock_config_file)
@@ -308,4 +311,45 @@ class TestGitWorkflowsMethods(object):
         assert not os.path.exists(untracked_file)
         remote_hash = call_subprocess('git log -n 1 --oneline'.split(), cwd=wf.remote).split()[0]
         assert remote_hash in lb.git.commit_hash
+
+    def test_migrate_old_schema_1_project(self, mock_config_file):
+        """ Test migrating a very old schema 1/gm.workspace LabBook """
+        p = resource_filename('gtmcore', 'workflows')
+        p2 = os.path.join(p, 'tests', 'snappy.zip')
+
+        with tempfile.TemporaryDirectory() as td:
+            call_subprocess(f"unzip {p2} -d {td}".split(), cwd=td)
+            temp_lb_path = os.path.join(td, 'snappy')
+
+            # Tests backwards compatibility (test.zip is a very old schema 1 LabBook)
+            lb = InventoryManager(mock_config_file[0]).load_labbook_from_directory(temp_lb_path)
+            wf = LabbookWorkflow(lb)
+
+            wf.migrate()
+
+            # Test that current branch is as appropriate
+            assert wf.labbook.active_branch == 'master'
+
+            # Test that there is an activity record indicate migration
+            assert any(['Migrate schema to 2' in c['message'] for c in wf.labbook.git.log()[:5]])
+
+            # Test schema has successfully rolled to 2
+            assert wf.labbook.schema == 2
+
+            # Test that untracked space exists (if we add something to untracked space)
+            assert wf.labbook.is_repo_clean
+            with open(os.path.join(lb.root_dir, 'output/untracked', 'untracked-file'), 'wb') as fb:
+                fb.write(b'cat' * 100)
+            assert wf.labbook.is_repo_clean
+
+    def test_migrate_no_op_on_new_labbook(self, mock_labbook_lfs_disabled):
+        username = 'test'
+        lb = mock_labbook_lfs_disabled[2]
+        wf = LabbookWorkflow(lb)
+
+        h1 = wf.labbook.git.commit_hash
+        wf.migrate()
+
+        # No change of git status after no-op migration
+        assert h1 == wf.labbook.git.commit_hash
 

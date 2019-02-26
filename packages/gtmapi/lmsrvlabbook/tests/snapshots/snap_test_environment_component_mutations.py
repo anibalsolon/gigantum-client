@@ -19,7 +19,6 @@ snapshots['TestAddComponentMutations.test_add_package 1'] = {
                         'id': 'UGFja2FnZUNvbXBvbmVudDpjb25kYTMmcHl0aG9uLWNvdmVyYWxscyYyLjkuMQ==',
                         'manager': 'conda3',
                         'package': 'python-coveralls',
-                        'schema': 1,
                         'version': '2.9.1'
                     }
                 }
@@ -40,7 +39,6 @@ snapshots['TestAddComponentMutations.test_add_multiple_packages 1'] = {
                         'id': 'UGFja2FnZUNvbXBvbmVudDpwaXAzJmd0bXVuaXQxJjAuMTIuNA==',
                         'manager': 'pip3',
                         'package': 'gtmunit1',
-                        'schema': 1,
                         'version': '0.12.4'
                     }
                 },
@@ -51,7 +49,6 @@ snapshots['TestAddComponentMutations.test_add_multiple_packages 1'] = {
                         'id': 'UGFja2FnZUNvbXBvbmVudDpwaXAzJmd0bXVuaXQyJjEuMTQuMQ==',
                         'manager': 'pip3',
                         'package': 'gtmunit2',
-                        'schema': 1,
                         'version': '1.14.1'
                     }
                 }

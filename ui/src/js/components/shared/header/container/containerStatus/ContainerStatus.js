@@ -164,7 +164,7 @@ class ContainerStatus extends Component {
     if ((status === 'Stopped') && state.attemptingRebuild) {
       this.setState({ attemptingRebuild: false });
       this._startContainerMutation(false);
-    } else if (status === 'Rebuild') {
+    } else if (status === 'Rebuild' && state.attemptingRebuild) {
       this.setState({ attemptingRebuild: false });
     }
 

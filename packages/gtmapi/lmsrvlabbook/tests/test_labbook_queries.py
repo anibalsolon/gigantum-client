@@ -398,7 +398,7 @@ class TestLabBookServiceQueries(object):
         """
         r = fixture_working_dir[2].execute(query)
         assert 'errors' not in r
-        assert r['data']['currentLabbookSchemaVersion'] == 1
+        assert r['data']['currentLabbookSchemaVersion'] == 2
 
     def test_get_labbook(self, fixture_working_dir):
         """Test listing labbooks"""
@@ -410,6 +410,7 @@ class TestLabBookServiceQueries(object):
         query = """
         {
           labbook(name: "labbook1", owner: "default") {
+            isDeprecated
             schemaVersion
             name
             sizeBytes
@@ -421,7 +422,8 @@ class TestLabBookServiceQueries(object):
         """
         r = fixture_working_dir[2].execute(query)
         assert 'errors' not in r
-        assert r['data']['labbook']['schemaVersion'] == 1
+        assert r['data']['labbook']['schemaVersion'] == 2
+        assert r['data']['labbook']['isDeprecated'] == False
         assert int(r['data']['labbook']['sizeBytes']) > 10000
         assert int(r['data']['labbook']['sizeBytes']) < 40000
         assert r['data']['labbook']['activeBranchName'] == 'master'
@@ -1688,7 +1690,6 @@ class TestLabBookServiceQueries(object):
         # wait, add another commit, and remove the buildinfo file to test the fallback method for getting create date
         time.sleep(4)
         lb.write_readme("##Summary\nThis is my readme!!")
-        os.remove(os.path.join(lb.root_dir, '.gigantum', 'buildinfo'))
 
         r = fixture_working_dir[2].execute(query)
         assert 'errors' not in r

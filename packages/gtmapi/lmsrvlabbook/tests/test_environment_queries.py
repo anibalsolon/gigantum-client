@@ -115,7 +115,6 @@ class TestEnvironmentServiceQueries(object):
                             edges {
                               node {
                                 id
-                                schema
                                 manager
                                 package
                                 version

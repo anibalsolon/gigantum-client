@@ -209,10 +209,7 @@ class Repository(object):
 
     @property
     def schema(self) -> int:
-        if self._data:
-            return self._data["schema"]
-        else:
-            raise ValueError("No schema stored in repository data.")
+        return self._data["schema"]
 
     @property
     def id(self) -> str:
@@ -330,7 +327,7 @@ class Repository(object):
         return self.git.log(max_count=1)[0]['committed_on'].replace(tzinfo=datetime.timezone.utc)
 
     @property
-    def build_details(self) -> Optional[Dict[str, str]]:
+    def build_details(self) -> str:
         """Return the build info for the application that created the repository"""
         raise NotImplemented
 

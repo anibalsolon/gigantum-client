@@ -148,9 +148,6 @@ class BranchManager(object):
         if target_branch not in self.branches_local:
             raise InvalidBranchName(f'Cannot delete `{target_branch}`; does not exist')
 
-        if target_branch == self.workspace_branch:
-            raise BranchWorkflowViolation(f'Cannot delete workspace branch `{target_branch}` in {str(self.repository)}')
-
         if target_branch == self.active_branch:
             raise BranchWorkflowViolation(f'Cannot delete current active branch `{target_branch}`')
 
@@ -279,56 +276,3 @@ class BranchManager(object):
             return int(result)
         else:
             raise BranchException(f"Unclear commits_behind result: {result}")
-
-    # def get_commits_behind_remote(self, remote_name: str = "origin") -> Tuple[str, int]:
-    #     """Return the number of commits local branch is behind remote. Note, only works with
-    #     currently checked-out branch. If the local branch is AHEAD of the remote, returns a negative
-    #     value.
-    #
-    #     Args:
-    #         remote_name: Name of remote, e.g., "origin"
-    #
-    #     Returns:
-    #         tuple containing branch name, and number of commits behind (zero implies up-to-date,
-    #             negative implies local branch is ahead.)
-    #     """
-    #     # TODO(billvb/dmk/?) - This can be one-lined using some versions of GitPython
-    #     # https://stackoverflow.com/questions/17224134/check-status-of-local-python-relative-to-remote-with-gitpython/21431791
-    #     # However, it's not clear we will continue to use GitPython going forward or that this implementation
-    #     # needs to change right now.
-    #     try:
-    #         if self.repository.has_remote:
-    #             self.repository.git.fetch(remote=remote_name)
-    #         result_str = self.repository.git.repo.git.status().replace('\n', ' ')
-    #     except Exception as e:
-    #         logger.exception(e)
-    #         raise GigantumException(e)
-    #
-    #     if 'branch is up-to-date' in result_str:
-    #         return self.active_branch, 0
-    #     elif 'branch is behind' in result_str:
-    #         m = re.search(' by ([\d]+) commit', result_str)
-    #         if m:
-    #             assert int(m.groups()[0]) > 0
-    #             return self.active_branch, int(m.groups()[0])
-    #         else:
-    #             logger.error(f"Could not find count in: {result_str}")
-    #             raise GigantumException("Unable to determine commit behind-count")
-    #     elif 'branch is ahead of' in result_str:
-    #         # Return NEGATIVE if your branch is ahead of remote
-    #         m = re.search(' by ([\d]+) commit', result_str)
-    #         if m:
-    #             assert int(m.groups()[0]) > 0
-    #             return self.active_branch, -1 * int(m.groups()[0])
-    #         else:
-    #             logger.error(f"Could not find count in: {result_str}")
-    #             raise GigantumException("Unable to determine commit behind-count")
-    #     elif 'your branch' in result_str.lower() and 'have diverged' in result_str.lower():
-    #         # Note: In cases where there are divergent commits, it is too error-prone to
-    #         # precisely parse the output for specific number of commits. So we just say,
-    #         # technically, that we are behind by at least one commit. I.e., this is to
-    #         # say "there is a pull required"
-    #         return self.active_branch, 1
-    #     else:
-    #         # This branch is local-only
-    #         return self.active_branch, 0

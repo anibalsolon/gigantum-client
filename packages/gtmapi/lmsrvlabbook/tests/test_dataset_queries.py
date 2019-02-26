@@ -54,7 +54,7 @@ class TestDatasetQueries(object):
         assert r['data']['dataset']['datasetType']['description'] == "Dataset storage provided by your Gigantum account supporting files up to 5GB in size"
         assert r['data']['dataset']['datasetType']['name'] == 'Gigantum Cloud'
         assert r['data']['dataset']['name'] == 'dataset8'
-        assert r['data']['dataset']['schemaVersion'] == 1
+        assert r['data']['dataset']['schemaVersion'] == 2
         assert r['data']['dataset']['visibility'] == "local"
         assert r['data']['dataset']['defaultRemote'] is None
 

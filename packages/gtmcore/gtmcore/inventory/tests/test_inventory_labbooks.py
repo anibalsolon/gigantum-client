@@ -94,9 +94,6 @@ class TestInventory(object):
         assert labbooks[1].name == 'asdf'
         assert labbooks[2].name == 'labbook1'
 
-        os.remove(os.path.join(lb1.root_dir, '.gigantum', 'buildinfo'))
-        os.remove(os.path.join(lb3.root_dir, '.gigantum', 'buildinfo'))
-
         labbooks2 = inv_manager.list_labbooks(username="user1", sort_mode="created_on")
 
         assert len(labbooks2) == 3
@@ -104,7 +101,7 @@ class TestInventory(object):
         assert labbooks2[1].name == 'asdf'
         assert labbooks2[2].name == 'labbook1'
 
-        os.remove(os.path.join(lb2.root_dir, '.gigantum', 'labbook.yaml'))
+        os.remove(os.path.join(lb2.root_dir, '.gigantum', 'project.yaml'))
         labbooks3 = inv_manager.list_labbooks(username="user1", sort_mode='modified_on')
         assert len(labbooks3) == 2
 
@@ -164,13 +161,12 @@ class TestInventory(object):
         assert os.path.isdir(os.path.join(labbook_dir, ".gigantum", "activity", "index")) is True
 
         # Validate labbook data file
-        with open(os.path.join(labbook_dir, ".gigantum", "labbook.yaml"), "rt") as data_file:
+        with open(os.path.join(labbook_dir, ".gigantum", "project.yaml"), "rt") as data_file:
             data = yaml.safe_load(data_file)
 
-        assert data["labbook"]["name"] == "labbook1"
-        assert data["labbook"]["description"] == "my first labbook"
-        assert "id" in data["labbook"]
-        assert data["owner"]["username"] == "test"
+        assert data["name"] == "labbook1"
+        assert data["description"] == "my first labbook"
+        assert "id" in data
 
         lb_loaded = InventoryManager(mock_config_file[0]).load_labbook_from_directory(labbook_dir)
 
@@ -203,13 +199,12 @@ class TestInventory(object):
         assert os.path.isdir(os.path.join(labbook_dir, ".gigantum", "activity", "index")) is True
 
         # Validate labbook data file
-        with open(os.path.join(labbook_dir, ".gigantum", "labbook.yaml"), "rt") as data_file:
+        with open(os.path.join(labbook_dir, ".gigantum", "project.yaml"), "rt") as data_file:
             data = yaml.safe_load(data_file)
 
-        assert data["labbook"]["name"] == "labbook1"
-        assert data["labbook"]["description"] == "my first labbook"
-        assert "id" in data["labbook"]
-        assert data["owner"]["username"] == "test"
+        assert data["name"] == "labbook1"
+        assert data["description"] == "my first labbook"
+        assert "id" in data
 
         lb_loaded = inv_manager.load_labbook("test", "test", "labbook1")
 
@@ -251,29 +246,6 @@ class TestCreateLabbooks(object):
                                                  description="my first labbook",
                                                  author=auth)
         labbook_dir = lb.root_dir
-
-        assert labbook_dir == os.path.join(mock_config_file[1], "test", "test", "labbooks", "labbook1")
-        assert type(lb) == LabBook
-
-        # Validate directory structure
-        assert os.path.isdir(os.path.join(labbook_dir, "code")) is True
-        assert os.path.isdir(os.path.join(labbook_dir, "input")) is True
-        assert os.path.isdir(os.path.join(labbook_dir, "output")) is True
-        assert os.path.isdir(os.path.join(labbook_dir, ".gigantum")) is True
-        assert os.path.isdir(os.path.join(labbook_dir, ".gigantum", "env")) is True
-        assert os.path.isdir(os.path.join(labbook_dir, ".gigantum", "activity")) is True
-        assert os.path.isdir(os.path.join(labbook_dir, ".gigantum", "activity", "log")) is True
-        assert os.path.isdir(os.path.join(labbook_dir, ".gigantum", "activity", "index")) is True
-
-        # Validate labbook data file
-        with open(os.path.join(labbook_dir, ".gigantum", "labbook.yaml"), "rt") as data_file:
-            data = yaml.safe_load(data_file)
-
-        assert data["labbook"]["name"] == "labbook1"
-        assert data["labbook"]["description"] == "my first labbook"
-        assert "id" in data["labbook"]
-        assert data["owner"]["username"] == "test"
-
         log_data = lb.git.log()
         assert log_data[0]['author']['name'] == "username"
         assert log_data[0]['author']['email'] == "user1@test.com"
@@ -299,49 +271,18 @@ class TestCreateLabbooks(object):
         assert os.path.isdir(os.path.join(labbook_dir, ".gigantum", "activity")) is True
         assert os.path.isdir(os.path.join(labbook_dir, ".gigantum", "activity", "log")) is True
         assert os.path.isdir(os.path.join(labbook_dir, ".gigantum", "activity", "index")) is True
-        assert os.path.isfile(os.path.join(labbook_dir, ".gigantum", "buildinfo")) is True
 
         # Validate labbook data file
-        with open(os.path.join(labbook_dir, ".gigantum", "labbook.yaml"), "rt") as data_file:
+        with open(os.path.join(labbook_dir, ".gigantum", "project.yaml"), "rt") as data_file:
             data = yaml.safe_load(data_file)
 
-        assert data["labbook"]["name"] == "labbook1"
-        assert data["labbook"]["description"] == "my first labbook"
-        assert "id" in data["labbook"]
-        assert data["owner"]["username"] == "test"
+        assert data["name"] == "labbook1"
+        assert data["description"] == "my first labbook"
+        assert "id" in data
 
         assert lb.build_details is not None
         assert lb.creation_date is not None
-
-    def test_create_labbook_no_username(self, mock_config_file):
-        """Test creating an empty labbook"""
-        inv_manager = InventoryManager(mock_config_file[0])
-
-        lb = inv_manager.create_labbook("test", "test", "labbook1",
-                                                 description="my first labbook")
-        labbook_dir = lb.root_dir
-
-        assert labbook_dir == os.path.join(mock_config_file[1], "test", "test", "labbooks", "labbook1")
-        assert type(lb) == LabBook
-
-        # Validate directory structure
-        assert os.path.isdir(os.path.join(labbook_dir, "code")) is True
-        assert os.path.isdir(os.path.join(labbook_dir, "input")) is True
-        assert os.path.isdir(os.path.join(labbook_dir, "output")) is True
-        assert os.path.isdir(os.path.join(labbook_dir, ".gigantum")) is True
-        assert os.path.isdir(os.path.join(labbook_dir, ".gigantum", "env")) is True
-        assert os.path.isdir(os.path.join(labbook_dir, ".gigantum", "activity")) is True
-        assert os.path.isdir(os.path.join(labbook_dir, ".gigantum", "activity", "log")) is True
-        assert os.path.isdir(os.path.join(labbook_dir, ".gigantum", "activity", "index")) is True
-
-        # Validate labbook data file
-        with open(os.path.join(labbook_dir, ".gigantum", "labbook.yaml"), "rt") as data_file:
-            data = yaml.safe_load(data_file)
-
-        assert data["labbook"]["name"] == "labbook1"
-        assert data["labbook"]["description"] == "my first labbook"
-        assert "id" in data["labbook"]
-        assert data["owner"]["username"] == "test"
+        lb._validate_gigantum_data()
 
     def test_create_labbook_that_exists(self, mock_config_file):
         """Test trying to create a labbook with a name that already exists locally"""

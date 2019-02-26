@@ -29,8 +29,8 @@ from lmsrvlabbook.api.mutations import (CreateLabbook, BuildImage, StartContaine
                                         DeleteLabbookCollaborator, SyncLabbook, PublishLabbook, PublishDataset,
                                         RemovePackageComponents,
                                         StartDevTool, SetLabbookDescription, CreateExperimentalBranch,
-                                        DeleteExperimentalBranch,
-                                        MergeFromBranch, WorkonBranch, WriteLabbookReadme, AddCustomDocker,
+                                        DeleteExperimentalBranch, MigrateLabbookSchema,
+                                        MergeFromBranch, WorkonBranch, WriteLabbookReadme, AddCustomDocker, 
                                         RemoveCustomDocker, DeleteRemoteLabbook,
                                         CompleteBatchUploadTransaction, SetVisibility, FetchLabbookEdge,
                                         CreateDataset, DeleteDataset, AddDatasetFile, CompleteDatasetUploadTransaction,
@@ -42,7 +42,24 @@ from lmsrvlabbook.api.mutations import (CreateLabbook, BuildImage, StartContaine
 from lmsrvlabbook.api.mutations import (ImportDataset, ExportDataset)
 
 
-class LabbookMutations(graphene.ObjectType):
+class BranchMutations(object):
+
+    migrate_labbook_schema = MigrateLabbookSchema.Field()
+
+    # Create a Rollback or Feature branch
+    create_experimental_branch = CreateExperimentalBranch.Field()
+
+    # Delete a Rollback or Feature branch
+    delete_experimental_branch = DeleteExperimentalBranch.Field()
+
+    # Merge from a given branch into the current checked-out branch
+    merge_from_branch = MergeFromBranch.Field()
+
+    # Work on a given feature branch (perform a git checkout).
+    workon_experimental_branch = WorkonBranch.Field()
+
+
+class LabbookMutations(BranchMutations, graphene.ObjectType):
     """Entry point for all graphql mutations"""
 
     # Import a labbook from an uploaded file (Archive as zip).
@@ -155,18 +172,6 @@ class LabbookMutations(graphene.ObjectType):
 
     # Write a readme to a LabBook
     write_labbook_readme = WriteLabbookReadme.Field()
-
-    # Create a Rollback or Feature branch
-    create_experimental_branch = CreateExperimentalBranch.Field()
-
-    # Delete a Rollback or Feature branch
-    delete_experimental_branch = DeleteExperimentalBranch.Field()
-
-    # Merge from a given branch into the current checked-out branch
-    merge_from_branch = MergeFromBranch.Field()
-
-    # Work on a given feature branch (perform a git checkout).
-    workon_experimental_branch = WorkonBranch.Field()
 
     # Set a remote project visibility
     set_visibility = SetVisibility.Field()

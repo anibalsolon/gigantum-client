@@ -49,7 +49,6 @@ class TestAddComponentMutations(object):
             newPackageComponentEdges {
                 node{
                   id
-                  schema
                   manager
                   package
                   version
@@ -83,7 +82,6 @@ class TestAddComponentMutations(object):
             newPackageComponentEdges {
                 node{
                   id
-                  schema
                   manager
                   package
                   version
@@ -107,7 +105,6 @@ class TestAddComponentMutations(object):
             assert package_info_dict['package'] == 'gtmunit1'
             assert package_info_dict['manager'] == 'pip3'
             assert package_info_dict['version'] == '0.12.4'
-            assert package_info_dict['schema'] == 1
             assert package_info_dict['from_base'] is False
 
         with open(os.path.join(labbook_dir, '.gigantum', 'env', 'package_manager', 'pip3_gtmunit2.yaml')) as pkg_yaml:
@@ -115,7 +112,6 @@ class TestAddComponentMutations(object):
             assert package_info_dict['package'] == 'gtmunit2'
             assert package_info_dict['manager'] == 'pip3'
             assert package_info_dict['version'] == '1.14.1'
-            assert package_info_dict['schema'] == 1
             assert package_info_dict['from_base'] is False
 
     def test_add_packages_multiple_mgr_error(self, fixture_working_dir_env_repo_scoped, snapshot):
@@ -138,7 +134,6 @@ class TestAddComponentMutations(object):
             newPackageComponentEdges {
                 node{
                   id
-                  schema
                   manager
                   package
                   version
@@ -172,7 +167,6 @@ class TestAddComponentMutations(object):
             newPackageComponentEdges {
                 node{
                   id
-                  schema
                   manager
                   package
                   version
