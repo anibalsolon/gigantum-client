@@ -129,3 +129,32 @@ snapshots['TestDatasetMutations.test_modify_dataset_link_errors 1'] = {
         }
     ]
 }
+
+snapshots['TestDatasetMutations.test_configure_local 1'] = {
+    'data': {
+        'dataset': {
+            'backendConfiguration': [
+                {
+                    'description': 'A directory in <gigantum_working_dir>/local_data/ to use as the dataset source',
+                    'parameter': 'Data Directory',
+                    'parameterType': 'str',
+                    'value': None
+                }
+            ],
+            'backendIsConfigured': False
+        }
+    }
+}
+
+snapshots['TestDatasetMutations.test_configure_local 2'] = {
+    'data': {
+        'configureDataset': {
+            'backgroundJobKey': None,
+            'confirmMessage': None,
+            'errorMessage': 'Data Directory does not exist.',
+            'hasBackgroundJob': True,
+            'isConfigured': False,
+            'shouldConfirm': False
+        }
+    }
+}

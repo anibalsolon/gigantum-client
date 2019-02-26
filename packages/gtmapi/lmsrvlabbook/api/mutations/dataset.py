@@ -105,11 +105,13 @@ class ConfigureDataset(graphene.relay.ClientIDMutation):
         username = get_logged_in_username()
         im = InventoryManager()
         ds = im.load_dataset(username, dataset_owner, dataset_name, get_logged_in_author())
+        ds.backend.set_default_configuration(username, bearer_token=flask.g.access_token, id_token=flask.g.id_token)
 
         should_confirm = False
         error_message = None
         confirm_message = None
         background_job_key = None
+        is_configured = None
 
         if confirm is None:
             if parameters:
@@ -126,6 +128,7 @@ class ConfigureDataset(graphene.relay.ClientIDMutation):
                     should_confirm = True
             except ValueError as err:
                 error_message = f"{err}"
+                is_configured = False
         else:
             if confirm is False:
                 # Clear configuration
@@ -139,9 +142,12 @@ class ConfigureDataset(graphene.relay.ClientIDMutation):
                     # TODO: Schedule background job to populate dataset!
                     pass
 
+        if is_configured is None:
+            is_configured = ds.backend.is_configured
+
         return ConfigureDataset(dataset=Dataset(id="{}&{}".format(dataset_owner, dataset_name),
                                                 name=dataset_name, owner=dataset_owner),
-                                is_configured=ds.backend.is_configured,
+                                is_configured=is_configured,
                                 should_confirm=should_confirm,
                                 confirm_message=confirm_message,
                                 error_message=error_message,

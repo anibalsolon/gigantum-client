@@ -533,30 +533,59 @@ class TestDatasetMutations(object):
         ds = im.create_dataset('default', 'default', "adataset", storage_type="local_filesystem", description="100")
         dataset_dir = ds.root_dir
         assert os.path.exists(dataset_dir) is True
+        flask.g.access_token = "asdf"
+        flask.g.id_token = "1234"
 
         query = """
                    {
                       dataset(owner: "default", name: "adataset"){
                         backendIsConfigured
-                        backendConfiguration
+                        backendConfiguration{
+                          parameter
+                          description
+                          parameterType
+                          value
+                        }
                       }
                    }
                 """
         result = fixture_working_dir[2].execute(query)
         assert "errors" not in result
-        snapshot.assert_equals(result)
-
-        # TODO ::: PICK UP HERE
+        snapshot.assert_match(result)
 
         query = """
                     mutation myMutation{
                       configureDataset(input: {datasetOwner: "default", datasetName: "adataset", 
-                        parameters: [{parameter: "test", parameterType: "str", value: "test"}, 
-                          {parameter: "test", parameterType: "str", value: "test"}]}) {
-                                isConfigured
+                        parameters: [{parameter: "Data Directory", parameterType: "str", value: "doesnotexist"}]}) {
+                          isConfigured
+                          shouldConfirm
+                          errorMessage
+                          confirmMessage
+                          hasBackgroundJob
+                          backgroundJobKey
                       }
                     }
                 """
         result = fixture_working_dir[2].execute(query)
         assert "errors" not in result
-        snapshot.assert_equals(result)
+        snapshot.assert_match(result)
+
+        # Create dir to fix validation issue
+        os.makedirs(os.path.join(fixture_working_dir[1], 'local_data', 'test_local_dir'))
+
+        query = """
+                    mutation myMutation{
+                      configureDataset(input: {datasetOwner: "default", datasetName: "adataset", 
+                        parameters: [{parameter: "Data Directory", parameterType: "str", value: "test_local_dir"}]}) {
+                          isConfigured
+                          shouldConfirm
+                          errorMessage
+                          confirmMessage
+                          hasBackgroundJob
+                          backgroundJobKey
+                      }
+                    }
+                """
+        result = fixture_working_dir[2].execute(query)
+        assert "errors" not in result
+        snapshot.assert_match(result)
