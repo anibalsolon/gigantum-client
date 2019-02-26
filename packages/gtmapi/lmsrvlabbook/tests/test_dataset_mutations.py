@@ -589,3 +589,20 @@ class TestDatasetMutations(object):
         result = fixture_working_dir[2].execute(query)
         assert "errors" not in result
         snapshot.assert_match(result)
+
+        query = """
+                    mutation myMutation{
+                      configureDataset(input: {datasetOwner: "default", datasetName: "adataset", confirm: true}) {
+                          isConfigured
+                          shouldConfirm
+                          errorMessage
+                          confirmMessage
+                          hasBackgroundJob       
+                          backgroundJobKey                   
+                      }
+                    }
+                """
+        result = fixture_working_dir[2].execute(query)
+        assert "errors" not in result
+        assert "rq:job" in result['data']['configureDataset']['backgroundJobKey']
+        assert result['data']['configureDataset']['isConfigured'] is True

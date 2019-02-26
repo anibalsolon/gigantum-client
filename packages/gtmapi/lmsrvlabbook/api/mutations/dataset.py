@@ -31,15 +31,16 @@ from gtmcore.exceptions import GigantumException
 
 from lmsrvcore.auth.user import get_logged_in_username, get_logged_in_author
 from lmsrvcore.auth.identity import parse_token
-from gtmcore.activity import ActivityStore, ActivityType, ActivityAction, ActivityDetailType, ActivityRecord, \
+from gtmcore.activity import ActivityStore, ActivityType, ActivityDetailType, ActivityRecord, \
     ActivityDetailRecord
 
 
 from lmsrvlabbook.api.objects.dataset import Dataset
 from gtmcore.dataset.manifest import Manifest
+from gtmcore.dispatcher import Dispatcher, jobs
+
 from lmsrvlabbook.api.connections.dataset import DatasetConnection
 from lmsrvlabbook.api.objects.dataset import DatasetConfigurationParameterInput
-from lmsrvlabbook.api.connections.datasetfile import DatasetFile, DatasetFileConnection
 from lmsrvlabbook.api.connections.labbook import Labbook, LabbookConnection
 
 
@@ -102,10 +103,12 @@ class ConfigureDataset(graphene.relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, dataset_owner, dataset_name, parameters=None, confirm=None,
                                client_mutation_id=None):
-        username = get_logged_in_username()
+        logged_in_username = get_logged_in_username()
         im = InventoryManager()
-        ds = im.load_dataset(username, dataset_owner, dataset_name, get_logged_in_author())
-        ds.backend.set_default_configuration(username, bearer_token=flask.g.access_token, id_token=flask.g.id_token)
+        ds = im.load_dataset(logged_in_username, dataset_owner, dataset_name, get_logged_in_author())
+        ds.backend.set_default_configuration(logged_in_username,
+                                             bearer_token=flask.g.access_token,
+                                             id_token=flask.g.id_token)
 
         should_confirm = False
         error_message = None
@@ -139,8 +142,22 @@ class ConfigureDataset(graphene.relay.ClientIDMutation):
 
             else:
                 if ds.backend.can_update_from_remote:
-                    # TODO: Schedule background job to populate dataset!
-                    pass
+                    d = Dispatcher()
+                    kwargs = {
+                        'logged_in_username': logged_in_username,
+                        'access_token': flask.g.access_token,
+                        'id_token': flask.g.id_token,
+                        'dataset_owner': dataset_owner,
+                        'dataset_name': dataset_name,
+                    }
+
+                    # Gen unique keys for tracking jobs
+                    metadata = {'dataset': f"{logged_in_username}|{dataset_owner}|{dataset_name}",
+                                'method': 'update_unmanaged_dataset_from_remote'}
+
+                    job_response = d.dispatch_task(jobs.update_unmanaged_dataset_from_remote,
+                                                   kwargs=kwargs, metadata=metadata)
+                    background_job_key = job_response.key_str
 
         if is_configured is None:
             is_configured = ds.backend.is_configured

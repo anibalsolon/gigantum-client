@@ -158,3 +158,16 @@ snapshots['TestDatasetMutations.test_configure_local 2'] = {
         }
     }
 }
+
+snapshots['TestDatasetMutations.test_configure_local 3'] = {
+    'data': {
+        'configureDataset': {
+            'backgroundJobKey': None,
+            'confirmMessage': None,
+            'errorMessage': None,
+            'hasBackgroundJob': True,
+            'isConfigured': True,
+            'shouldConfirm': False
+        }
+    }
+}

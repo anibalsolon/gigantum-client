@@ -11,7 +11,8 @@ from gtmcore.dataset.io.manager import IOManager
 from gtmcore.dataset.manifest import Manifest
 from gtmcore.dispatcher import jobs
 from gtmcore.fixtures import mock_config_file
-from gtmcore.fixtures.datasets import helper_append_file, helper_compress_file
+from gtmcore.fixtures.datasets import helper_append_file, helper_compress_file, mock_dataset_with_cache_dir_local
+from gtmcore.dataset.tests.test_storage_local import mock_dataset_with_local_dir
 
 from gtmcore.inventory.inventory import InventoryManager
 
@@ -313,3 +314,26 @@ class TestDatasetBackgroundJobs(object):
                 assert os.path.isfile(obj2_target) is False
                 assert os.path.isfile(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, 'test1.txt')) is True
                 assert os.path.isfile(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, 'test2.txt')) is False
+
+    def test_update_from_remote(self, mock_dataset_with_local_dir):
+        ds = mock_dataset_with_local_dir[0]
+        m = Manifest(ds, 'tester')
+
+        assert len(m.manifest.keys()) == 0
+
+        kwargs = {
+            'logged_in_username': "tester",
+            'access_token': "asdf",
+            'id_token': "1234",
+            'dataset_owner': "tester",
+            'dataset_name': 'dataset-1'
+        }
+
+        jobs.update_unmanaged_dataset_from_remote(**kwargs)
+
+        m = Manifest(ds, 'tester')
+        assert len(m.manifest.keys()) == 4
+        assert os.path.isfile(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, 'test1.txt'))
+        assert os.path.isfile(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, 'test2.txt'))
+        assert os.path.isfile(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, 'subdir', 'test3.txt'))
+
