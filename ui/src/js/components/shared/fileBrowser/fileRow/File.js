@@ -387,6 +387,9 @@ class File extends Component {
                       mutationData={this.props.mutationData}
                       mutations={this.props.mutations}
                       renameEditMode={ this._renameEditMode }
+                      isDownloading={this.props.isDownloading}
+                      parentDownloading={this.props.parentDownloading}
+                      setFolderIsDownloading={this.props.setFolderIsDownloading}
                     />
                   }
                 </div>

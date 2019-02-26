@@ -37,6 +37,8 @@ class FileBrowserMutations {
        datasetName,
        labbookName,
        labbookOwner,
+       successCall,
+       failureCall,
      } = data;
 
     DownloadDatasetFilesMutation(
@@ -44,6 +46,8 @@ class FileBrowserMutations {
       datasetName,
       labbookName,
       labbookOwner,
+      successCall,
+      failureCall,
       keys,
       allKeys,
       callback,

@@ -90,7 +90,7 @@ class TestConda3PackageManager(object):
 
         # python-coveralls is a non-installed package
         result = mrg.latest_version("cdutil", lb, username)
-        assert result == '8.0'
+        assert result == '8.1'
 
     def test_latest_versions(self, build_lb_image_for_env_conda):
         """Test latest_version command"""
@@ -100,7 +100,7 @@ class TestConda3PackageManager(object):
         pkgs = ["cdutil", "python-coveralls", "nltk"]
         result = mrg.latest_versions(pkgs, lb, username)
 
-        assert result[0] == '8.0'  # cdutil
+        assert result[0] == '8.1'  # cdutil
         assert result[1] == '2.9.1'  # python-coveralls
         assert result[2] == '3.2.5'  # nltk
 
@@ -219,7 +219,7 @@ class TestConda3PackageManager(object):
         assert result[0].error is False
 
         assert result[1].package == "cdutil"
-        assert result[1].version == "8.0"
+        assert result[1].version == "8.1"
         assert result[1].error is False
 
 
@@ -279,5 +279,5 @@ class TestConda2PackageManager(object):
         assert result[0].error is False
 
         assert result[1].package == "cdutil"
-        assert result[1].version == "8.0"
+        assert result[1].version == "8.1"
         assert result[1].error is False

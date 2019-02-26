@@ -56,6 +56,29 @@ class TestNodeQueries(object):
 
         snapshot.assert_match(fixture_working_dir[2].execute(query))
 
+    def test_nodes(self, fixture_working_dir, snapshot):
+        im = InventoryManager(fixture_working_dir[0])
+        im.create_labbook("default", "default", "cat-lab-book1", description="Test cat labbook from obj")
+        im.create_labbook("default", "default", "pupper-lab-book1", description="Test pupper labbook from obj")
+
+        query = """
+                {
+                    nodes(ids: ["TGFiYm9vazpkZWZhdWx0JmNhdC1sYWItYm9vazE=", 
+                    "TGFiYm9vazpkZWZhdWx0JnB1cHBlci1sYWItYm9vazE="]) {
+                        ... on Labbook {
+                            name
+                            description
+                            activeBranch {
+                                refName
+                            }
+                        }
+                        id
+                    }
+                }
+                """
+
+        snapshot.assert_match(fixture_working_dir[2].execute(query))
+
     def test_node_package(self, fixture_working_dir, snapshot):
         im = InventoryManager(fixture_working_dir[0])
         lb = im.create_labbook("default", "default", "node-env-test-lb", description="Example labbook by mutation.")

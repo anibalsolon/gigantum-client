@@ -21,6 +21,7 @@ import base64
 from typing import List
 import graphene
 import json
+import os
 
 from gtmcore.logging import LMLogger
 from gtmcore.configuration import Configuration
@@ -52,13 +53,11 @@ logger = LMLogger.get_logger()
 
 class LabbookQuery(graphene.ObjectType):
     """Entry point for all LabBook queryable fields"""
-
-    # TODO - Put all these fields in alphabetical order?
-
-    # Create instance of the LabBook dataloader for use across all objects within this query instance
-
     # Node Fields for Relay
     node = graphene.relay.Node.Field()
+
+    # Retrieve multiple nodes for Relay
+    nodes = graphene.List(graphene.relay.Node, ids=graphene.List(graphene.String))
 
     # Return app build date and hash
     build_info = graphene.String()
@@ -108,6 +107,9 @@ class LabbookQuery(graphene.ObjectType):
     # Get the current logged in user identity, primarily used when running offline
     user_identity = graphene.Field(UserIdentity)
 
+    def resolve_nodes(self, info, ids):
+        return [graphene.relay.Node.get_node_from_global_id(info, x) for x in ids]
+
     def resolve_build_info(self, info):
         """Return this LabManager build info (hash, build timestamp, etc)"""
         # TODO - CUDA version should possibly go in here
@@ -118,10 +120,10 @@ class LabbookQuery(graphene.ObjectType):
 
     def resolve_cuda_available(self, info):
         """Return the CUDA version of the host machine. Non-null implies GPU available"""
-        if Configuration().host_cuda_version:
-            return False
-        else:
+        if os.environ.get('NVIDIA_DRIVER_VERSION'):
             return True
+        else:
+            return False
 
     def resolve_labbook(self, info, owner: str, name: str):
         """Method to return a graphene Labbook instance based on the name

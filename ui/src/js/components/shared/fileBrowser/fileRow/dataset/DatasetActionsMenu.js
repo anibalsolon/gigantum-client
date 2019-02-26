@@ -115,7 +115,7 @@ export default class DatasetActionsMenu extends Component {
    *  @return {}
    */
    _downloadFile(isLocal) {
-     if (!isLocal) {
+     if (!isLocal && !this.state.fileDownloading && !this.props.parentDownloading) {
       const id = uuidv4;
       this.setState({ fileDownloading: true });
       const searchChildren = (parent) => {
@@ -167,6 +167,22 @@ export default class DatasetActionsMenu extends Component {
           labbookOwner,
         };
       }
+      data.successCall = () => {
+        this.setState({ fileDownloading: false });
+        if (this.props.setFolderIsDownloading) {
+          this.props.setFolderIsDownloading(false);
+        }
+      };
+      data.failureCall = () => {
+        this.setState({ fileDownloading: false });
+        if (this.props.setFolderIsDownloading) {
+          this.props.setFolderIsDownloading(true);
+        }
+      };
+
+      if (this.props.setFolderIsDownloading) {
+        this.props.setFolderIsDownloading(true);
+      }
 
       if (this.props.isParent) {
         data.allKeys = true;
@@ -177,8 +193,6 @@ export default class DatasetActionsMenu extends Component {
 
       const callback = (response, error) => {
         if (error) {
-          this.setState({ fileDownloading: false });
-        } else {
           this.setState({ fileDownloading: false });
         }
       };
@@ -207,6 +221,7 @@ export default class DatasetActionsMenu extends Component {
     } else {
       isLocal = this.props.edge.node.isLocal;
     }
+
     const fileIsNotLocal = ((!this.props.edge.node.isLocal || (this.props.folder)) && !isLocal);
     const fileIsLocal = (this.props.edge.node.isLocal && isLocal);
     const blockDownload = this.props.folder ? false : this.props.edge.node.isLocal || isLocal;
@@ -222,13 +237,14 @@ export default class DatasetActionsMenu extends Component {
           removeCSS = classNames({
             'DatasetActionsMenu__item DatasetActionsMenu__item--remove': true,
           }),
+          isLoading = this.state.fileDownloading || ((this.props.parentDownloading || this.props.isDownloading) && !fileIsLocal),
           downloadCSS = classNames({
             DatasetActionsMenu__item: true,
-            'DatasetActionsMenu__item--download': fileIsNotLocal && (this.props.section !== 'data') && !this.state.fileDownloading,
-            'DatasetActionsMenu__item--downloaded': fileIsLocal && (this.props.section !== 'data') && !this.state.fileDownloading,
-            'DatasetActionsMenu__item--download-grey': (fileIsNotLocal) && (this.props.section === 'data') && !this.state.fileDownloading,
-            'DatasetActionsMenu__item--downloaded-grey': fileIsLocal && (this.props.section === 'data') && !this.state.fileDownloading,
-            'DatasetActionsMenu__item--loading': this.state.fileDownloading,
+            'DatasetActionsMenu__item--download': fileIsNotLocal && (this.props.section !== 'data') && !this.state.fileDownloading && !isLoading,
+            'DatasetActionsMenu__item--downloaded': fileIsLocal && (this.props.section !== 'data') && !this.state.fileDownloading && !isLoading,
+            'DatasetActionsMenu__item--download-grey': (fileIsNotLocal) && (this.props.section === 'data') && !this.state.fileDownloading && !isLoading,
+            'DatasetActionsMenu__item--downloaded-grey': fileIsLocal && (this.props.section === 'data') && !this.state.fileDownloading && !isLoading,
+            'DatasetActionsMenu__item--loading': isLoading,
           }),
           downloadText = isLocal ? 'Downloaded' : this.props.isParent ? 'Download All' : this.props.folder ? 'Download Directory' : 'Download',
           unlinkCSS = classNames({

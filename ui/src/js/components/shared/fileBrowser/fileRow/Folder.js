@@ -31,6 +31,7 @@ class Folder extends Component {
             renameEditMode: false,
             isOverChildFile: false,
             renameValue: props.filename,
+            isDownloading: false,
         };
 
         this._setSelected = this._setSelected.bind(this);
@@ -44,6 +45,7 @@ class Folder extends Component {
         this._checkHover = this._checkHover.bind(this);
         this._renameEditMode = this._renameEditMode.bind(this);
         this._updateDropZone = this._updateDropZone.bind(this);
+        this._setFolderIsDownloading = this._setFolderIsDownloading.bind(this);
     }
 
 
@@ -109,7 +111,14 @@ class Folder extends Component {
           },
         );
     }
-
+      /**
+    *  @param {Boolean} isDownloading
+    *  sets parents element's isdownloading state
+    *  @return {}
+    */
+    _setFolderIsDownloading(isDownloading) {
+      this.setState({ isDownloading });
+    }
     /**
     *  @param {}
     *  sets parents element to selected if count matches child length
@@ -560,6 +569,9 @@ class Folder extends Component {
                         renameEditMode={ this._renameEditMode}
                         section={this.props.section}
                         fullEdge={this.props.fileData}
+                        isDownloading={this.state.isDownloading || this.props.isDownloading}
+                        parentDownloading={this.props.parentDownloading}
+                        setFolderIsDownloading={this._setFolderIsDownloading}
                       />
                     }
                     </div>
@@ -603,7 +615,9 @@ class Folder extends Component {
                                       childrenState={this.props.childrenState}
                                       listRef={this.props.listRef}
                                       updateChildState={this.props.updateChildState}
+                                      parentDownloading={this.state.downloadingAll}
                                       section={this.props.section}
+                                      isDownloading={this.state.isDownloading || this.props.isDownloading}
                                       codeDirUpload={this.props.codeDirUpload}>
                                   </FolderDND>
                               );
@@ -627,6 +641,8 @@ class Folder extends Component {
                                     isOverChildFile={this.state.isOverChildFile}
                                     updateParentDropZone={this._updateDropZone}
                                     childrenState={this.props.childrenState}
+                                    parentDownloading={this.state.downloadingAll}
+                                    isDownloading={this.state.isDownloading || this.props.isDownloading}
                                     updateChildState={this.props.updateChildState}>
                                 </File>
                             );

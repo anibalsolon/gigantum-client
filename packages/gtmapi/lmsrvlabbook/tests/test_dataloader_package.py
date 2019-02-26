@@ -65,7 +65,7 @@ class TestDataloaderPackage(object):
         version_list = promise1.get()
         assert len(version_list) == 3
 
-        assert version_list[0] == "8.0"
+        assert version_list[0] == "8.1"
         assert version_list[1] == "2.9.1"
         assert version_list[2] == "3.2.5"
 
@@ -79,7 +79,7 @@ class TestDataloaderPackage(object):
 
         version_list = promise1.get()
         assert len(version_list) == 3
-        assert version_list[0] == "8.0"
+        assert version_list[0] == "8.1"
         assert version_list[1] == "2.9.1"
         assert version_list[2] == "3.2.5"
 
@@ -93,7 +93,7 @@ class TestDataloaderPackage(object):
 
         version_list = promise1.get()
         assert len(version_list) == 3
-        assert version_list[0] == "8.0"
+        assert version_list[0] == "8.1"
         assert version_list[1] == "0.12.4"
         assert version_list[2] == "3.2.5"
 

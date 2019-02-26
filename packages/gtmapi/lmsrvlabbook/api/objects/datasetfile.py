@@ -57,7 +57,7 @@ class DatasetFile(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepos
     def get_node(cls, info, id):
         """Method to resolve the object based on it's Node ID"""
         # Parse the key
-        owner, name, section, key = id.split("&")
+        owner, name, key = id.split("&")
 
         return DatasetFile(id=f"{owner}&{name}&{key}", name=name, owner=owner, key=key)
 

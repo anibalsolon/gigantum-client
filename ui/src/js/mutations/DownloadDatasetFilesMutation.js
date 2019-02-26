@@ -3,17 +3,13 @@ import {
   graphql,
 } from 'react-relay';
 import environment from 'JS/createRelayEnvironment';
-
+// utils
+import FooterUtils from 'Components/common/footer/FooterUtils';
 
 const mutation = graphql`
 mutation DownloadDatasetFilesMutation($input: DownloadDatasetFilesInput!){
     downloadDatasetFiles(input: $input){
-        updatedFileEdges{
-            node{
-              isLocal
-            }
-        }
-        statusMessage
+        backgroundJobKey
         clientMutationId
     }
 }
@@ -27,6 +23,8 @@ export default function DownloadDatasetFilesMutation(
   datasetName,
   labbookName,
   labbookOwner,
+  successCall,
+  failureCall,
   keys,
   allKeys,
   callback,
@@ -57,6 +55,8 @@ export default function DownloadDatasetFilesMutation(
       if (error) {
         console.log(error);
       }
+      FooterUtils.getJobStatus(response, 'downloadDatasetFiles', 'backgroundJobKey', successCall, failureCall);
+
       callback(error);
     },
     onError: err => console.error(err),

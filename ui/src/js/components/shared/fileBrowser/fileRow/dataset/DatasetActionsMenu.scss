@@ -117,7 +117,7 @@
         border-top: 2px solid $azure;
         border-radius: 50%;
         animation: spin 2s linear infinite;
-
+        cursor: auto;
         &:hover:after {
             display: none !important;
         }

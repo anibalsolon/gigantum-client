@@ -7,6 +7,8 @@ import { setForceRefetch, setRefetchPending } from 'JS/redux/reducers/labbook/en
 // mutations
 import FetchLabbookEdgeMutation from 'Mutations/FetchLabbookEdgeMutation';
 import FetchDatasetEdgeMutation from 'Mutations/FetchDatasetEdgeMutation';
+import FetchDatasetFilesMutation from 'Mutations/FetchDatasetFilesMutation';
+import FetchLabbookDatasetFilesMutation from 'Mutations/FetchLabbookDatasetFilesMutation';
 
 const ansi_up = new AnsiUp();
 
@@ -97,7 +99,7 @@ const FooterUtils = {
                     },
                   )
                   :
-                  FetchDatasetEdgeMutation(
+                  FetchLabbookDatasetFilesMutation(
                     owner,
                     labbookName,
                     (error) => {
@@ -106,9 +108,35 @@ const FooterUtils = {
                       }
                     },
                   );
+              } else if (type === 'downloadDatasetFiles') {
+                const successKeys = JSON.parse(response.data.jobStatus.jobMetadata).success_keys;
+                const metaDataArr = JSON.parse(response.data.jobStatus.jobMetadata).dataset.split('|');
+                const isLabbookSection = metaDataArr[3] === 'LINKED';
+                if (!isLabbookSection) {
+                  const owner = metaDataArr[1];
+                  const labbookName = metaDataArr[2];
+                  FetchDatasetFilesMutation(
+                    owner,
+                    labbookName,
+                    () => {
+                      successCall();
+                    },
+                    );
+                } else {
+                  const owner = metaDataArr[1];
+                  const labbookName = metaDataArr[2];
+                  FetchLabbookDatasetFilesMutation(
+                    owner,
+                    labbookName,
+                    () => {
+                      successCall();
+                    },
+                    );
+                }
               }
             } else if (response.data.jobStatus.status === 'failed') {
               const method = JSON.parse(response.data.jobStatus.jobMetadata).method;
+              let reportedFailureMessage = response.data.jobStatus.failureMessage;
               let errorMessage = response.data.jobStatus.failureMessage;
               if (method === 'build_image') {
                 errorMessage = 'Project failed to build: Check for and remove invalid dependencies and try again.';
@@ -116,7 +144,38 @@ const FooterUtils = {
               if ((type === 'syncLabbook') || (type === 'publishLabbook')) {
                 failureCall(response.data.jobStatus.failureMessage);
               }
-              html += `\n<span style="color:rgb(255,85,85)">${response.data.jobStatus.failureMessage}</span>`;
+              if (type === 'downloadDatasetFiles') {
+                const successKeys = JSON.parse(response.data.jobStatus.jobMetadata).success_keys;
+                const failureKeys = JSON.parse(response.data.jobStatus.jobMetadata).failure_keys;
+                const totalAmount = successKeys.length + failureKeys.length;
+                const metaDataArr = JSON.parse(response.data.jobStatus.jobMetadata).dataset.split('|');
+                const isLabbookSection = metaDataArr[3] === 'LINKED';
+                if (!isLabbookSection) {
+                  const owner = metaDataArr[1];
+                  const labbookName = metaDataArr[2];
+                  FetchDatasetFilesMutation(
+                    owner,
+                    labbookName,
+                    () => {
+                      failureCall();
+                    },
+                    );
+                } else {
+                  const owner = metaDataArr[1];
+                  const labbookName = metaDataArr[2];
+                  FetchDatasetFilesMutation(
+                    owner,
+                    labbookName,
+                    () => {
+                      failureCall();
+                    },
+                    );
+                }
+                errorMessage = `Failed to download ${failureKeys.length} of ${totalAmount} Files.`;
+                reportedFailureMessage = 'Failed to download the following Files:';
+                failureKeys.forEach(failedKey => reportedFailureMessage = `${reportedFailureMessage}\n${failedKey}`);
+              }
+              html += `\n<span style="color:rgb(255,85,85)">${reportedFailureMessage}</span>`;
               setMultiInfoMessage(response.data.jobStatus.id, errorMessage, true, true, [{ message: html }]);
             } else {
               // refetch status data not ready

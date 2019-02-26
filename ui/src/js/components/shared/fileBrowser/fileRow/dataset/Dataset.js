@@ -23,6 +23,7 @@ class Dataset extends Component {
             isOver: false,
             prevIsOverState: false,
             addFolderVisible: this.props.childrenState[this.props.fileData.edge.node.key].isAddingFolder || false,
+            isDownloading: false,
         };
 
         this._setSelected = this._setSelected.bind(this);
@@ -30,6 +31,7 @@ class Dataset extends Component {
         this._checkParent = this._checkParent.bind(this);
         this._setState = this._setState.bind(this);
         this._addFolderVisible = this._addFolderVisible.bind(this);
+        this._setFolderIsDownloading = this._setFolderIsDownloading.bind(this);
     }
 
 
@@ -48,7 +50,14 @@ class Dataset extends Component {
         isIncomplete,
       };
     }
-
+    /**
+    *  @param {Boolean} isDownloading
+    *  sets parents element's isdownloading state
+    *  @return {}
+    */
+   _setFolderIsDownloading(isDownloading) {
+    this.setState({ isDownloading });
+  }
     /**
     *  @param {string} key
     *  @param {string || boolean} value - updates key value in state
@@ -348,6 +357,8 @@ class Dataset extends Component {
                         renameEditMode={ this._renameEditMode}
                         fullEdge={this.props.fileData}
                         isParent
+                        setFolderIsDownloading={this._setFolderIsDownloading}
+                        isDownloading={this.state.isDownloading || this.props.isDownloading}
                       />
                     </div>
                 </div>
@@ -378,7 +389,9 @@ class Dataset extends Component {
                                       childrenState={this.props.childrenState}
                                       listRef={this.props.listRef}
                                       updateChildState={this.props.updateChildState}
-                                      codeDirUpload={this.props.codeDirUpload}>
+                                      isDownloading={this.state.isDownloading || this.props.isDownloading}
+                                      codeDirUpload={this.props.codeDirUpload}
+                                      >
                                   </Folder>
                               );
                           } else if ((children && children[file] && children[file].edge && !children[file].edge.node.isDir)) {
@@ -400,6 +413,8 @@ class Dataset extends Component {
                                     isOverChildFile={this.state.isOverChildFile}
                                     updateParentDropZone={this._updateDropZone}
                                     childrenState={this.props.childrenState}
+                                    isDownloading={this.state.isDownloading || this.props.isDownloading}
+                                    parentDownloading={this.props.parentDownloading}
                                     updateChildState={this.props.updateChildState}>
                                 </File>
                             );

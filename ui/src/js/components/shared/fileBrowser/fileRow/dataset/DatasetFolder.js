@@ -18,6 +18,7 @@ class Folder extends Component {
             isSelected: (props.isSelected || this.props.childrenState[this.props.fileData.edge.node.key].isSelected) || false,
             isIncomplete: this.props.childrenState[this.props.fileData.edge.node.key].isIncomplete || false,
             addFolderVisible: this.props.childrenState[this.props.fileData.edge.node.key].isAddingFolder || false,
+            isDownloading: false,
         };
 
         this._setSelected = this._setSelected.bind(this);
@@ -26,6 +27,7 @@ class Folder extends Component {
         this._checkRefs = this._checkRefs.bind(this);
         this._setState = this._setState.bind(this);
         this._addFolderVisible = this._addFolderVisible.bind(this);
+        this._setFolderIsDownloading = this._setFolderIsDownloading.bind(this);
     }
 
 
@@ -52,6 +54,14 @@ class Folder extends Component {
     _setState(key, value) {
        this.setState({ [key]: value });
     }
+    /**
+    *  @param {Boolean} isDownloading
+    *  sets parents element's isdownloading state
+    *  @return {}
+    */
+   _setFolderIsDownloading(isDownloading) {
+    this.setState({ isDownloading });
+  }
     /**
     *  @param {boolean} isSelected
     *  sets child elements to be selected and current folder item
@@ -341,6 +351,8 @@ class Folder extends Component {
                         folder
                         renameEditMode={ this._renameEditMode}
                         fullEdge={this.props.fileData}
+                        isDownloading={this.state.isDownloading || this.props.isDownloading}
+                        setFolderIsDownloading={this._setFolderIsDownloading}
                       />
                     </div>
                 </div>
@@ -371,6 +383,7 @@ class Folder extends Component {
                                       childrenState={this.props.childrenState}
                                       listRef={this.props.listRef}
                                       updateChildState={this.props.updateChildState}
+                                      isDownloading={this.state.isDownloading || this.props.isDownloading}
                                       codeDirUpload={this.props.codeDirUpload}>
                                   </Folder>
                               );
@@ -392,6 +405,7 @@ class Folder extends Component {
                                     setParentDragTrue={this._checkHover}
                                     isOverChildFile={this.state.isOverChildFile}
                                     updateParentDropZone={this._updateDropZone}
+                                    isDownloading={this.state.isDownloading || this.props.isDownloading}
                                     childrenState={this.props.childrenState}
                                     updateChildState={this.props.updateChildState}>
                                 </File>

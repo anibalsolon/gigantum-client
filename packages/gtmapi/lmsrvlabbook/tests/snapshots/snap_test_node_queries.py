@@ -120,3 +120,26 @@ snapshots['TestNodeQueries.test_favorites_node 2'] = {
         }
     }
 }
+
+snapshots['TestNodeQueries.test_nodes 1'] = {
+    'data': {
+        'nodes': [
+            {
+                'activeBranch': {
+                    'refName': 'gm.workspace-default'
+                },
+                'description': 'Test cat labbook from obj',
+                'id': 'TGFiYm9vazpkZWZhdWx0JmNhdC1sYWItYm9vazE=',
+                'name': 'cat-lab-book1'
+            },
+            {
+                'activeBranch': {
+                    'refName': 'gm.workspace-default'
+                },
+                'description': 'Test pupper labbook from obj',
+                'id': 'TGFiYm9vazpkZWZhdWx0JnB1cHBlci1sYWItYm9vazE=',
+                'name': 'pupper-lab-book1'
+            }
+        ]
+    }
+}

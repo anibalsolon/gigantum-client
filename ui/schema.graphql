@@ -1,5 +1,5 @@
 # source: http://localhost:10000/api/labbook/
-# timestamp: Fri Feb 22 2019 14:41:08 GMT-0500 (Eastern Standard Time)
+# timestamp: Fri Feb 22 2019 15:57:01 GMT-0500 (Eastern Standard Time)
 
 schema {
   query: LabbookQuery
@@ -467,7 +467,7 @@ type DatasetList implements Node {
 
 """
 A type representing the overview of a Dataset
-    
+
 """
 type DatasetOverview implements Node & GitRepository {
   """The ID of the object."""
@@ -616,8 +616,7 @@ input DownloadDatasetFilesInput {
 }
 
 type DownloadDatasetFilesPayload {
-  updatedFileEdges: [DatasetFileEdge]
-  statusMessage: String
+  backgroundJobKey: String
   clientMutationId: String
 }
 
@@ -769,7 +768,7 @@ type JobStatus implements Node {
 }
 
 """
-A Connection for paging through all background jobs the system is aware of. 
+A Connection for paging through all background jobs the system is aware of.
 """
 type JobStatusConnection {
   pageInfo: PageInfo!
@@ -1010,6 +1009,7 @@ type LabbookOverview implements Node & GitRepository {
 type LabbookQuery {
   """The ID of the object"""
   node(id: ID!): Node
+  nodes(ids: [String]): [Node]
   buildInfo: String
   cudaAvailable: Boolean
   labbook(owner: String, name: String): Labbook
@@ -1052,7 +1052,7 @@ type LabbookRefEdge {
 
 """
 A type representing a section within a LabBook (i.e., code, input, output)
-    
+
 """
 type LabbookSection implements Node & GitRepository {
   """The ID of the object."""
@@ -1102,7 +1102,7 @@ input MergeFromBranchInput {
 }
 
 """
-Merge from another branch into the current active branch. Force if necessary. 
+Merge from another branch into the current active branch. Force if necessary.
 """
 type MergeFromBranchPayload {
   labbook: Labbook

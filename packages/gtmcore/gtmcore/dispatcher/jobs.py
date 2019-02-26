@@ -17,21 +17,17 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-import datetime
 import importlib
 import json
 import os
 import time
-from typing import Optional
-import subprocess
-import shutil
+from typing import Optional, List
+import base64
+import sys
 
 from rq import get_current_job
 
 from gtmcore.activity.monitors.devenv import DevEnvMonitorManager
-from gtmcore.configuration import Configuration
-from gtmcore.configuration.utils import call_subprocess
-from gtmcore.labbook import LabBook
 
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.inventory import Repository
@@ -42,6 +38,8 @@ from gtmcore.container.core import (build_docker_image as build_image,
                                      start_labbook_container as start_container,
                                      stop_labbook_container as stop_container)
 
+from gtmcore.dataset.manifest import Manifest
+from gtmcore.dataset.io.manager import IOManager
 
 # PLEASE NOTE -- No global variables!
 #
@@ -77,7 +75,7 @@ def publish_repository(repository: Repository, username: str, access_token: str,
 
 
 def sync_repository(repository: Repository, username: str, remote: str = "origin",
-                 force: bool = False, access_token: str = None, id_token: str = None) -> int:
+                    force: bool = False, access_token: str = None, id_token: str = None) -> int:
     p = os.getpid()
     logger = LMLogger.get_logger()
     logger.info(f"(Job {p}) Starting sync_repository({str(repository)})")
@@ -417,4 +415,81 @@ def test_incr(path):
             logger.info("Set amt = {} in {}".format(amt_dict['amt'], path))
     except Exception as e:
         logger.error("Error on test_incr in pid {}: {}".format(os.getpid(), e))
+        raise
+
+
+def download_dataset_files(logged_in_username: str, access_token: str, id_token: str,
+                           dataset_owner: str, dataset_name: str,
+                           labbook_owner: Optional[str] = None, labbook_name: Optional[str] = None,
+                           all_keys: Optional[bool] = False, keys: Optional[List[str]] = None):
+    """Method to import a dataset from a zip file
+
+    Args:
+        logged_in_username: username for the currently logged in user
+        access_token: bearer token
+        id_token: identity token
+        dataset_owner: Owner of the dataset containing the files to download
+        dataset_name: Name of the dataset containing the files to download
+        labbook_owner: Owner of the labbook if this dataset is linked
+        labbook_name: Name of the labbook if this dataset is linked
+        all_keys: Boolean indicating if all remaining files should be downloaded
+        keys: List if file keys to download
+
+    Returns:
+        str: directory path of imported labbook
+    """
+    def update_meta(msg):
+        job = get_current_job()
+        if not job:
+            return
+        if 'feedback' not in job.meta:
+            job.meta['feedback'] = msg
+        else:
+            job.meta['feedback'] = job.meta['feedback'] + f'\n{msg}'
+        job.save_meta()
+
+    logger = LMLogger.get_logger()
+
+    try:
+        p = os.getpid()
+        logger.info(f"(Job {p}) Starting download_dataset_files(logged_in_username={logged_in_username},"
+                    f"dataset_owner={dataset_owner}, dataset_name={dataset_name}, labbook_owner={labbook_owner},"
+                    f" labbook_name={labbook_name}, all_keys={all_keys}, keys={keys}")
+
+        im = InventoryManager()
+
+        if labbook_owner is not None and labbook_name is not None:
+            # This is a linked dataset, load repo from the Project
+            lb = im.load_labbook(logged_in_username, labbook_owner, labbook_name)
+            dataset_dir = os.path.join(lb.root_dir, '.gigantum', 'datasets', dataset_owner, dataset_name)
+            ds = im.load_dataset_from_directory(dataset_dir)
+        else:
+            # this is a normal dataset. Load repo from working dir
+            ds = im.load_dataset(logged_in_username, dataset_owner, dataset_name)
+
+        ds.namespace = dataset_owner
+        ds.backend.set_default_configuration(logged_in_username, access_token, id_token)
+        m = Manifest(ds, logged_in_username)
+        iom = IOManager(ds, m)
+
+        if all_keys:
+            result = iom.pull_all(status_update_fn=update_meta)
+        elif keys:
+            result = iom.pull_objects(keys=keys, status_update_fn=update_meta)
+        else:
+            raise ValueError("Must provide a list of keys or set all_keys=True")
+
+        # Save the Relay node IDs to the job metadata so the UI can re-fetch as needed
+        job = get_current_job()
+        if job:
+            job.meta['success_keys'] = [x.dataset_path for x in result.success]
+            job.meta['failure_keys'] = [x.dataset_path for x in result.failure]
+            job.save_meta()
+
+        if len(result.failure) > 0:
+            # If any downloads failed, exit non-zero to the UI knows there was an error
+            sys.exit(-1)
+
+    except Exception as err:
+        logger.exception(err)
         raise

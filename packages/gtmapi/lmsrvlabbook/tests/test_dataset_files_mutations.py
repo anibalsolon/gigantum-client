@@ -2,8 +2,7 @@ import pytest
 import os
 import uuid
 import flask
-from aioresponses import aioresponses
-import snappy
+from mock import patch
 
 from snapshottest import snapshot
 from lmsrvlabbook.tests.fixtures import fixture_working_dir_env_repo_scoped, fixture_working_dir
@@ -11,135 +10,97 @@ from lmsrvlabbook.tests.fixtures import fixture_working_dir_env_repo_scoped, fix
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.dataset.io.manager import IOManager
 from gtmcore.dataset.manifest import Manifest
+from gtmcore.dispatcher import Dispatcher
 
 from gtmcore.fixtures.datasets import mock_dataset_with_cache_dir, mock_dataset_with_manifest, helper_append_file, \
     helper_compress_file
 
 
+class JobResponseMock(object):
+    def __init__(self, key):
+        self.key_str = key
+
+
 class TestDatasetFilesMutations(object):
     def test_download_dataset_files(self, fixture_working_dir, snapshot):
-        # Create a bunch of lab books
+
+        def dispatcher_mock(self, function_ref, kwargs, metadata):
+            assert kwargs['logged_in_username'] == 'default'
+            assert kwargs['access_token'] == 'asdf'
+            assert kwargs['id_token'] == '1234'
+            assert kwargs['dataset_owner'] == 'default'
+            assert kwargs['dataset_name'] == 'dataset100'
+            assert kwargs['labbook_owner'] is None
+            assert kwargs['labbook_name'] is None
+            assert kwargs['all_keys'] is None
+            assert kwargs['keys'] == ["test1.txt"]
+
+            assert metadata['dataset'] == 'default|default|dataset100'
+            assert metadata['labbook'] is None
+            assert metadata['method'] == 'download_dataset_files'
+
+            return JobResponseMock("rq:job:00923477-d46b-479c-ad0c-2b66f90b6b10")
+
         im = InventoryManager(fixture_working_dir[0])
         ds = im.create_dataset('default', 'default', "dataset100", storage_type="gigantum_object_v1", description="100")
-        m = Manifest(ds, 'default')
-        iom = IOManager(ds, m)
 
         flask.g.access_token = "asdf"
         flask.g.id_token = "1234"
 
-        os.makedirs(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, "other_dir"))
-        helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, "test1.txt", "asdfadfsdf")
-        helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, "test2.txt", "fdsfgfd")
-        m.sweep_all_changes()
-
-        obj_to_push = iom.objects_to_push()
-        assert len(obj_to_push) == 2
-        _, obj_id_1 = obj_to_push[0].object_path.rsplit('/', 1)
-        _, obj_id_2 = obj_to_push[1].object_path.rsplit('/', 1)
-        obj1_target = obj_to_push[0].object_path
-        obj2_target = obj_to_push[1].object_path
-
-        obj1_source = os.path.join('/tmp', uuid.uuid4().hex)
-        obj2_source = os.path.join('/tmp', uuid.uuid4().hex)
-
-        assert os.path.exists(obj1_target) is True
-        assert os.path.exists(obj2_target) is True
-        helper_compress_file(obj1_target, obj1_source)
-        helper_compress_file(obj2_target, obj2_source)
-        assert os.path.isfile(obj1_target) is False
-        assert os.path.isfile(obj2_target) is False
-        assert os.path.isfile(obj1_source) is True
-        assert os.path.isfile(obj2_source) is True
-
-        with aioresponses() as mocked_responses:
-            mocked_responses.get(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj_id_1}',
-                                 payload={
-                                         "presigned_url": f"https://dummyurl.com/{obj_id_1}?params=1",
-                                         "namespace": ds.namespace,
-                                         "obj_id": obj_id_1,
-                                         "dataset": ds.name
-                                 },
-                                 status=200)
-
-            with open(obj1_source, 'rb') as data1:
-                mocked_responses.get(f"https://dummyurl.com/{obj_id_1}?params=1",
-                                     body=data1.read(), status=200,
-                                     content_type='application/octet-stream')
-
-            mocked_responses.get(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj_id_2}',
-                                 payload={
-                                         "presigned_url": f"https://dummyurl.com/{obj_id_2}?params=1",
-                                         "namespace": ds.namespace,
-                                         "obj_id": obj_id_2,
-                                         "dataset": ds.name
-                                 },
-                                 status=200)
-
-            with open(obj2_source, 'rb') as data2:
-                mocked_responses.get(f"https://dummyurl.com/{obj_id_2}?params=1",
-                                     body=data2.read(), status=200,
-                                     content_type='application/octet-stream')
-            iom.dataset.backend.set_default_configuration("default", "abcd", '1234')
+        with patch.object(Dispatcher, 'dispatch_task', dispatcher_mock):
 
             query = """
                        mutation myMutation {
                          downloadDatasetFiles(input: {datasetOwner: "default", datasetName: "dataset100", keys: ["test1.txt"]}) {
-                             updatedFileEdges {
-                               node {
-                                 name
-                                 key
-                                 isLocal
-                                 size
-                               }
-                             }
+                             backgroundJobKey 
                          }
                        }
                        """
-            snapshot.assert_match(fixture_working_dir[2].execute(query))
+            r = fixture_working_dir[2].execute(query)
+            assert 'errors' not in r
+            assert isinstance(r['data']['downloadDatasetFiles']['backgroundJobKey'], str)
+            assert "rq:" in r['data']['downloadDatasetFiles']['backgroundJobKey']
 
-            assert os.path.isfile(obj1_target) is True
-            assert os.path.isfile(obj2_target) is False
+    def test_download_dataset_files_linked(self, fixture_working_dir, snapshot):
 
-            decompressor = snappy.StreamDecompressor()
-            with open(obj1_source, 'rb') as dd:
-                source1 = decompressor.decompress(dd.read())
-                source1 += decompressor.flush()
-            with open(obj1_target, 'rt') as dd:
-                dest1 = dd.read()
-            assert source1.decode("utf-8") == dest1
+        def dispatcher_mock(self, function_ref, kwargs, metadata):
+            assert kwargs['logged_in_username'] == 'default'
+            assert kwargs['access_token'] == 'asdf'
+            assert kwargs['id_token'] == '1234'
+            assert kwargs['dataset_owner'] == 'default'
+            assert kwargs['dataset_name'] == 'dataset100'
+            assert kwargs['labbook_owner'] == 'default'
+            assert kwargs['labbook_name'] == 'test-lb'
+            assert kwargs['all_keys'] is None
+            assert kwargs['keys'] == ["test1.txt"]
+
+            assert metadata['dataset'] == 'default|default|test-lb|LINKED|default|default|dataset100'
+            assert metadata['labbook'] == 'default|default|test-lb'
+            assert metadata['method'] == 'download_dataset_files'
+
+            return JobResponseMock("rq:job:00923477-d46b-479c-ad0c-2b66f90b6b10")
+
+        im = InventoryManager(fixture_working_dir[0])
+        ds = im.create_dataset('default', 'default', "dataset100", storage_type="gigantum_object_v1", description="100")
+        lb = im.create_labbook('default', 'default', "test-lb", description="tester")
+        im.link_dataset_to_labbook(f"{ds.root_dir}/.git", 'default', 'dataset100', lb)
+
+        flask.g.access_token = "asdf"
+        flask.g.id_token = "1234"
+
+        with patch.object(Dispatcher, 'dispatch_task', dispatcher_mock):
 
             query = """
                        mutation myMutation {
-                         downloadDatasetFiles(input: {datasetOwner: "default", datasetName: "dataset100", keys: ["test2.txt"]}) {
-                             updatedFileEdges {
-                               node {
-                                 id
-                                 name
-                                 isLocal
-                                 size
-                               }
-                             }
+                         downloadDatasetFiles(input: {datasetOwner: "default", datasetName: "dataset100", keys: ["test1.txt"], labbookOwner: "default", labbookName: "test-lb"}){
+                             backgroundJobKey 
                          }
                        }
                        """
-            snapshot.assert_match(fixture_working_dir[2].execute(query))
-
-            assert os.path.isfile(obj1_target) is True
-            assert os.path.isfile(obj2_target) is True
-
-            with open(obj1_source, 'rb') as dd:
-                source1 = decompressor.decompress(dd.read())
-                source1 += decompressor.flush()
-            with open(obj1_target, 'rt') as dd:
-                dest1 = dd.read()
-            assert source1.decode("utf-8") == dest1
-
-            with open(obj2_source, 'rb') as dd:
-                source1 = decompressor.decompress(dd.read())
-                source1 += decompressor.flush()
-            with open(obj2_target, 'rt') as dd:
-                dest1 = dd.read()
-            assert source1.decode("utf-8") == dest1
+            r = fixture_working_dir[2].execute(query)
+            assert 'errors' not in r
+            assert isinstance(r['data']['downloadDatasetFiles']['backgroundJobKey'], str)
+            assert "rq:" in r['data']['downloadDatasetFiles']['backgroundJobKey']
 
     def test_delete_dataset_files(self, fixture_working_dir, snapshot):
         im = InventoryManager(fixture_working_dir[0])

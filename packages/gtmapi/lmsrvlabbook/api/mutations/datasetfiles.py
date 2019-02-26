@@ -7,7 +7,7 @@ import flask
 
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.logging import LMLogger
-from gtmcore.dataset.io.manager import IOManager
+from gtmcore.dispatcher import Dispatcher, jobs
 
 from lmsrvcore.auth.user import get_logged_in_username, get_logged_in_author
 from lmsrvcore.api.mutations import ChunkUploadMutation, ChunkUploadInput
@@ -135,45 +135,50 @@ class DownloadDatasetFiles(graphene.relay.ClientIDMutation):
         all_keys = graphene.Boolean()
         keys = graphene.List(graphene.String)
 
-    updated_file_edges = graphene.List(DatasetFileConnection.Edge)
-    status_message = graphene.String()
+    background_job_key = graphene.String()
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, dataset_owner, dataset_name, labbook_name=None, labbook_owner=None,
                                all_keys=None, keys=None, client_mutation_id=None):
         logged_in_username = get_logged_in_username()
 
+        lb = None
+        im = InventoryManager()
         if labbook_name:
             # This is a linked dataset, load repo from the Project
-            lb = InventoryManager().load_labbook(logged_in_username, labbook_owner, labbook_name)
+            lb = im.load_labbook(logged_in_username, labbook_owner, labbook_name)
             dataset_dir = os.path.join(lb.root_dir, '.gigantum', 'datasets', dataset_owner, dataset_name)
-            ds = InventoryManager().load_dataset_from_directory(dataset_dir, author=get_logged_in_author())
+            ds = im.load_dataset_from_directory(dataset_dir)
         else:
             # this is a normal dataset. Load repo from working dir
-            ds = InventoryManager().load_dataset(logged_in_username, dataset_owner, dataset_name,
-                                                 author=get_logged_in_author())
-        ds.namespace = dataset_owner
-        ds.backend.set_default_configuration(logged_in_username, flask.g.access_token, flask.g.id_token)
-        m = Manifest(ds, logged_in_username)
-        iom = IOManager(ds, m)
+            ds = im.load_dataset(logged_in_username, dataset_owner, dataset_name)
 
-        if all_keys:
-            result = iom.pull_all()
-        else:
-            result = iom.pull_objects(keys=keys)
+        d = Dispatcher()
+        dl_kwargs = {
+            'logged_in_username': logged_in_username,
+            'access_token': flask.g.access_token,
+            'id_token': flask.g.id_token,
+            'dataset_owner': dataset_owner,
+            'dataset_name': dataset_name,
+            'labbook_owner': labbook_owner,
+            'labbook_name': labbook_name,
+            'all_keys': all_keys,
+            'keys': keys
+        }
 
-        edge_objs = list()
-        # Prime the dataset loader with the dataset object. This handles making sure if loaded from the Project it
-        # is the correct repository.
-        info.context.dataset_loader.prime(f"{get_logged_in_username()}&{dataset_owner}&{dataset_name}", ds)
-        for cnt, r in enumerate(result.success):
-            create_data = {"owner": dataset_owner,
-                           "name": dataset_name,
-                           "key": r.dataset_path}
-            cursor = base64.b64encode("{}".format(cnt).encode("UTF-8")).decode("UTF-8")
-            edge_objs.append(DatasetFileConnection.Edge(node=DatasetFile(**create_data), cursor=cursor))
+        # Gen unique keys for tracking jobs
+        lb_key = f"{logged_in_username}|{labbook_owner}|{labbook_name}" if lb else None
+        ds_key = f"{logged_in_username}|{dataset_owner}|{dataset_name}"
+        if lb_key:
+            ds_key = f"{lb_key}|LINKED|{ds_key}"
 
-        return DownloadDatasetFiles(updated_file_edges=edge_objs, status_message=result.message)
+        metadata = {'dataset': ds_key,
+                    'labbook': lb_key,
+                    'method': 'download_dataset_files'}
+
+        res = d.dispatch_task(jobs.download_dataset_files, kwargs=dl_kwargs, metadata=metadata)
+
+        return DownloadDatasetFiles(background_job_key=res.key_str)
 
 
 class DeleteDatasetFiles(graphene.ClientIDMutation):

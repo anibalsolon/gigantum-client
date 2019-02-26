@@ -17,23 +17,20 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-import getpass
 import os
 import pprint
 import pytest
 import shutil
 import tempfile
-import uuid
-
-import docker
 
 from gtmcore.configuration import get_docker_client
 from gtmcore.dispatcher import jobs
 import gtmcore.fixtures
+from gtmcore.fixtures.datasets import helper_append_file, helper_compress_file
+
 from gtmcore.fixtures import mock_config_file, mock_config_with_repo
-from gtmcore.environment import ComponentManager, RepositoryManager
-from gtmcore.labbook import LabBook
-from gtmcore.inventory.inventory  import InventoryManager
+from gtmcore.environment import ComponentManager
+from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.imagebuilder import ImageBuilder
 
 

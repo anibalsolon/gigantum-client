@@ -57,6 +57,7 @@ class FileBrowser extends Component {
         popupVisible: false,
         fileSizePromptVisible: false,
         showLinkModal: false,
+        downloadingAll: false,
       };
 
       this._deleteSelectedFiles = this._deleteSelectedFiles.bind(this);
@@ -183,11 +184,15 @@ class FileBrowser extends Component {
           datasetName: labbookName,
           allKeys: true,
         };
+        data.successCall = () => {
+          this.setState({ downloadingAll: false });
+        };
+        data.failureCall = () => {
+          this.setState({ downloadingAll: false });
+        };
 
         const callback = (response, error) => {
           if (error) {
-            this.setState({ downloadingAll: false });
-          } else {
             this.setState({ downloadingAll: false });
           }
         };
@@ -831,6 +836,7 @@ class FileBrowser extends Component {
                     childrenState={this.state.childrenState}
                     section={this.props.section}
                     updateChildState={this._updateChildState}
+                    parentDownloading={this.state.downloadingAll}
                     codeDirUpload={this._codeDirUpload}>
                   </Folder>);
                 } else if (isFile) {
@@ -847,6 +853,7 @@ class FileBrowser extends Component {
                     section={this.props.section}
                     isOverChildFile={this.state.isOverChildFile}
                     updateParentDropZone={this._updateDropZone}
+                    parentDownloading={this.state.downloadingAll}
                     updateChildState={this._updateChildState}>
                   </File>);
                 } else if (children[file]) {
