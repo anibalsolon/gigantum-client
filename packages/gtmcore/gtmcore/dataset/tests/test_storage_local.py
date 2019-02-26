@@ -19,12 +19,10 @@ def helper_write_object(directory, object_id, contents):
     return object_file
 
 
-def updater(msg):
-    print(msg)
-
-
 @pytest.fixture()
 def mock_dataset_with_local_dir(mock_dataset_with_cache_dir_local):
+    """A mock when testing local filesystem backend and you need local contents to add to the dataset"""
+
     ds = mock_dataset_with_cache_dir_local[0]
     working_dir = mock_dataset_with_cache_dir_local[1]
     ds.backend.set_default_configuration(USERNAME, 'asdf', '1234')
@@ -42,6 +40,10 @@ def mock_dataset_with_local_dir(mock_dataset_with_cache_dir_local):
 
     yield mock_dataset_with_cache_dir_local
     shutil.rmtree(test_dir)
+
+
+def updater(msg):
+    print(msg)
 
 
 class TestStorageBackendLocalFilesystem(object):

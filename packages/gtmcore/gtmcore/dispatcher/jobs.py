@@ -498,7 +498,7 @@ def download_dataset_files(logged_in_username: str, access_token: str, id_token:
 
 def update_unmanaged_dataset_from_remote(logged_in_username: str, access_token: str, id_token: str,
                                          dataset_owner: str, dataset_name: str) -> None:
-    """Method to update/populate an unmanaged dataset from it's remote automatically
+    """Method to update/populate an unmanaged dataset from its remote automatically
 
     Args:
         logged_in_username: username for the currently logged in user
@@ -524,7 +524,7 @@ def update_unmanaged_dataset_from_remote(logged_in_username: str, access_token: 
 
     try:
         p = os.getpid()
-        logger.info(f"(Job {p}) Starting download_dataset_files(logged_in_username={logged_in_username},"
+        logger.info(f"(Job {p}) Starting update_unmanaged_dataset_from_remote(logged_in_username={logged_in_username},"
                     f"dataset_owner={dataset_owner}, dataset_name={dataset_name}")
 
         im = InventoryManager()
@@ -540,6 +540,53 @@ def update_unmanaged_dataset_from_remote(logged_in_username: str, access_token: 
             raise ValueError("Storage backend cannot update automatically from remote.")
 
         ds.backend.update_from_remote(ds, update_meta)
+
+    except Exception as err:
+        logger.exception(err)
+        raise
+
+
+def update_unmanaged_dataset_from_local(logged_in_username: str, access_token: str, id_token: str,
+                                        dataset_owner: str, dataset_name: str) -> None:
+    """Method to update/populate an unmanaged dataset from it local state
+
+    Args:
+        logged_in_username: username for the currently logged in user
+        access_token: bearer token
+        id_token: identity token
+        dataset_owner: Owner of the dataset containing the files to download
+        dataset_name: Name of the dataset containing the files to download
+
+    Returns:
+
+    """
+    def update_meta(msg):
+        job = get_current_job()
+        if not job:
+            return
+        if 'feedback' not in job.meta:
+            job.meta['feedback'] = msg
+        else:
+            job.meta['feedback'] = job.meta['feedback'] + f'\n{msg}'
+        job.save_meta()
+
+    logger = LMLogger.get_logger()
+
+    try:
+        p = os.getpid()
+        logger.info(f"(Job {p}) Starting update_unmanaged_dataset_from_local(logged_in_username={logged_in_username},"
+                    f"dataset_owner={dataset_owner}, dataset_name={dataset_name}")
+
+        im = InventoryManager()
+        ds = im.load_dataset(logged_in_username, dataset_owner, dataset_name)
+
+        ds.namespace = dataset_owner
+        ds.backend.set_default_configuration(logged_in_username, access_token, id_token)
+
+        if not isinstance(ds.backend, UnmanagedStorageBackend):
+            raise ValueError("Can only auto-update unmanaged dataset types")
+
+        ds.backend.update_from_local(ds, update_meta)
 
     except Exception as err:
         logger.exception(err)

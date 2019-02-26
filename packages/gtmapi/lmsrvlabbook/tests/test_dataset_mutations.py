@@ -606,3 +606,95 @@ class TestDatasetMutations(object):
         assert "errors" not in result
         assert "rq:job" in result['data']['configureDataset']['backgroundJobKey']
         assert result['data']['configureDataset']['isConfigured'] is True
+
+    def test_update_unmanaged_dataset_local_errors(self, fixture_working_dir):
+        im = InventoryManager(fixture_working_dir[0])
+        ds = im.create_dataset('default', 'default', "adataset", storage_type="local_filesystem", description="100")
+        dataset_dir = ds.root_dir
+        assert os.path.exists(dataset_dir) is True
+        flask.g.access_token = "asdf"
+        flask.g.id_token = "1234"
+
+        query = """
+                    mutation myMutation{
+                      updateUnmanagedDataset(input: {datasetOwner: "default", datasetName: "adataset"}) {
+                          backgroundJobKey
+                      }
+                    }
+                """
+        result = fixture_working_dir[2].execute(query)
+        assert "errors" in result
+
+        # not configured
+        query = """
+                    mutation myMutation{
+                      updateUnmanagedDataset(input: {datasetOwner: "default", datasetName: "adataset",
+                       fromLocal: true}) {
+                          backgroundJobKey
+                      }
+                    }
+                """
+        result = fixture_working_dir[2].execute(query)
+        assert "errors" in result
+
+    def test_update_unmanaged_dataset_local(self, fixture_working_dir):
+        im = InventoryManager(fixture_working_dir[0])
+        ds = im.create_dataset('default', 'default', "adataset", storage_type="local_filesystem", description="100")
+        dataset_dir = ds.root_dir
+        assert os.path.exists(dataset_dir) is True
+        flask.g.access_token = "asdf"
+        flask.g.id_token = "1234"
+
+        # configure backend and local dir
+        working_dir = fixture_working_dir[1]
+        ds.backend.set_default_configuration('default', 'asdf', '1234')
+        current_config = ds.backend_config
+        current_config['Data Directory'] = "test_dir"
+        ds.backend_config = current_config
+        test_dir = os.path.join(working_dir, "local_data", "test_dir")
+        os.makedirs(test_dir)
+        with open(os.path.join(test_dir, "test.txt"), 'wt') as temp:
+            temp.write(f'dummy data: asdfasdf')
+
+        query = """
+                    mutation myMutation{
+                      updateUnmanagedDataset(input: {datasetOwner: "default", datasetName: "adataset",
+                       fromLocal: true}) {
+                          backgroundJobKey
+                      }
+                    }
+                """
+        result = fixture_working_dir[2].execute(query)
+        assert "errors" not in result
+        assert "rq:job" in result['data']['updateUnmanagedDataset']['backgroundJobKey']
+
+    def test_update_unmanaged_dataset_remote(self, fixture_working_dir):
+        im = InventoryManager(fixture_working_dir[0])
+        ds = im.create_dataset('default', 'default', "adataset", storage_type="local_filesystem", description="100")
+        dataset_dir = ds.root_dir
+        assert os.path.exists(dataset_dir) is True
+        flask.g.access_token = "asdf"
+        flask.g.id_token = "1234"
+
+        # configure backend and local dir
+        working_dir = fixture_working_dir[1]
+        ds.backend.set_default_configuration('default', 'asdf', '1234')
+        current_config = ds.backend_config
+        current_config['Data Directory'] = "test_dir"
+        ds.backend_config = current_config
+        test_dir = os.path.join(working_dir, "local_data", "test_dir")
+        os.makedirs(test_dir)
+        with open(os.path.join(test_dir, "test.txt"), 'wt') as temp:
+            temp.write(f'dummy data: asdfasdf')
+
+        query = """
+                    mutation myMutation{
+                      updateUnmanagedDataset(input: {datasetOwner: "default", datasetName: "adataset",
+                       fromRemote: true}) {
+                          backgroundJobKey
+                      }
+                    }
+                """
+        result = fixture_working_dir[2].execute(query)
+        assert "errors" not in result
+        assert "rq:job" in result['data']['updateUnmanagedDataset']['backgroundJobKey']

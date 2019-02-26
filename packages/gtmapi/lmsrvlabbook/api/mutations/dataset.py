@@ -172,6 +172,74 @@ class ConfigureDataset(graphene.relay.ClientIDMutation):
                                 background_job_key=background_job_key)
 
 
+class UpdateUnmanagedDataset(graphene.relay.ClientIDMutation):
+    """Mutation to update the manifest for a local dataset based on changes either locally or via the remote the
+    dataset is linked to
+    """
+
+    class Input:
+        dataset_owner = graphene.String(required=True, description="Owner of the dataset to configure")
+        dataset_name = graphene.String(required=True, description="Name of the dataset to configure")
+        from_local = graphene.Boolean(description="If true, update the dataset based on local state of the dataset")
+        from_remote = graphene.Boolean(description="If true, update the dataset based on remote state of the dataset."
+                                                   " This effectivelly also updates the local state, so the"
+                                                   " `fromLocal` argument is ignored")
+
+    dataset = graphene.Field(Dataset)
+    background_job_key = graphene.String(description="Background job key to query on for feedback if needed")
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, dataset_owner, dataset_name, from_local=False, from_remote=False,
+                               client_mutation_id=None):
+        logged_in_username = get_logged_in_username()
+        im = InventoryManager()
+        ds = im.load_dataset(logged_in_username, dataset_owner, dataset_name, get_logged_in_author())
+        ds.backend.set_default_configuration(logged_in_username,
+                                             bearer_token=flask.g.access_token,
+                                             id_token=flask.g.id_token)
+
+        if not ds.backend.is_configured:
+            raise ValueError("Dataset is not fully configured. Cannot update.")
+
+        d = Dispatcher()
+        kwargs = {
+            'logged_in_username': logged_in_username,
+            'access_token': flask.g.access_token,
+            'id_token': flask.g.id_token,
+            'dataset_owner': dataset_owner,
+            'dataset_name': dataset_name,
+        }
+
+        background_job_key = None
+
+        if from_remote is True:
+            if ds.backend.can_update_from_remote:
+                # Gen unique keys for tracking jobs
+                metadata = {'dataset': f"{logged_in_username}|{dataset_owner}|{dataset_name}",
+                            'method': 'update_unmanaged_dataset_from_remote'}
+
+                job_response = d.dispatch_task(jobs.update_unmanaged_dataset_from_remote,
+                                               kwargs=kwargs, metadata=metadata)
+                background_job_key = job_response.key_str
+            else:
+                raise ValueError("This dataset type does not support automatic update via querying its remote")
+
+        elif from_local is True:
+            # Gen unique keys for tracking jobs
+            metadata = {'dataset': f"{logged_in_username}|{dataset_owner}|{dataset_name}",
+                        'method': 'update_unmanaged_dataset_from_local'}
+
+            job_response = d.dispatch_task(jobs.update_unmanaged_dataset_from_local,
+                                           kwargs=kwargs, metadata=metadata)
+            background_job_key = job_response.key_str
+        else:
+            ValueError("Either `fromRemote` or `fromLocal` must be True.")
+
+        return ConfigureDataset(dataset=Dataset(id="{}&{}".format(dataset_owner, dataset_name),
+                                                name=dataset_name, owner=dataset_owner),
+                                background_job_key=background_job_key)
+
+
 class FetchDatasetEdge(graphene.relay.ClientIDMutation):
     class Input:
         owner = graphene.String(required=True)

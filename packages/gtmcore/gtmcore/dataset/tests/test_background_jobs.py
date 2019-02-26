@@ -337,3 +337,48 @@ class TestDatasetBackgroundJobs(object):
         assert os.path.isfile(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, 'test2.txt'))
         assert os.path.isfile(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, 'subdir', 'test3.txt'))
 
+    def test_update_from_local(self, mock_dataset_with_local_dir):
+        ds = mock_dataset_with_local_dir[0]
+        m = Manifest(ds, 'tester')
+        assert len(m.manifest.keys()) == 0
+
+        ds.backend.update_from_remote(ds, lambda x: print(x))
+
+        m = Manifest(ds, 'tester')
+        assert len(m.manifest.keys()) == 4
+        assert os.path.isfile(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, 'test1.txt'))
+        assert os.path.isfile(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, 'test2.txt'))
+        assert os.path.isfile(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, 'subdir', 'test3.txt'))
+
+        modified_items = ds.backend.verify_contents(ds, lambda x: print(x))
+        assert len(modified_items) == 0
+
+        test_dir = os.path.join(mock_dataset_with_local_dir[1], "local_data", "test_dir")
+        with open(os.path.join(test_dir, 'test1.txt'), 'wt') as tf:
+            tf.write("This file got changed in the filesystem")
+
+        modified_items = ds.backend.verify_contents(ds, lambda x: print(x))
+        assert len(modified_items) == 1
+        assert 'test1.txt' in modified_items
+
+        kwargs = {
+            'logged_in_username': "tester",
+            'access_token': "asdf",
+            'id_token': "1234",
+            'dataset_owner': "tester",
+            'dataset_name': 'dataset-1'
+        }
+
+        jobs.update_unmanaged_dataset_from_local(**kwargs)
+
+        assert len(m.manifest.keys()) == 4
+        assert os.path.isfile(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, 'test1.txt'))
+        assert os.path.isfile(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, 'test2.txt'))
+        assert os.path.isfile(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, 'subdir', 'test3.txt'))
+
+        modified_items = ds.backend.verify_contents(ds, lambda x: print(x))
+        assert len(modified_items) == 0
+
+        with open(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, 'test1.txt'), 'rt') as tf:
+            assert tf.read() == "This file got changed in the filesystem"
+

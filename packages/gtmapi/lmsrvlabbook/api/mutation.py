@@ -35,6 +35,7 @@ from lmsrvlabbook.api.mutations import (CreateLabbook, BuildImage, StartContaine
                                         CompleteBatchUploadTransaction, SetVisibility, FetchLabbookEdge,
                                         CreateDataset, DeleteDataset, AddDatasetFile, CompleteDatasetUploadTransaction,
                                         DeleteDatasetFiles, MoveDatasetFile, MakeDatasetDirectory,
+                                        UpdateUnmanagedDataset,
                                         FetchDatasetEdge, SetDatasetVisibility, SyncDataset, ConfigureDataset,
                                         AddDatasetCollaborator, DeleteDatasetCollaborator, DownloadDatasetFiles,
                                         ModifyDatasetLink, WriteDatasetReadme, SetDatasetDescription)
@@ -176,6 +177,9 @@ class LabbookMutations(graphene.ObjectType):
 
     # Configure a dataset storage backend
     configure_dataset = ConfigureDataset.Field()
+
+    # Update the manifest of an unmanaged dataset
+    update_unmanaged_dataset = UpdateUnmanagedDataset.Field()
 
     # Delete a dataset
     delete_dataset = DeleteDataset.Field()
