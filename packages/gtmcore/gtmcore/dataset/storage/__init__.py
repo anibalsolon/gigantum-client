@@ -4,7 +4,8 @@ from gtmcore.exceptions import GigantumException
 from gtmcore.dataset.storage.backend import ManagedStorageBackend, UnmanagedStorageBackend
 
 SUPPORTED_STORAGE_BACKENDS = {"gigantum_object_v1": ("gtmcore.dataset.storage.gigantum", "GigantumObjectStore"),
-                              "local_filesystem": ("gtmcore.dataset.storage.local", "LocalFilesystem")}
+                              "local_filesystem": ("gtmcore.dataset.storage.local", "LocalFilesystem"),
+                              "public_s3_bucket": ("gtmcore.dataset.storage.s3", "PublicS3Bucket")}
 
 
 def get_storage_backend(storage_type: str) -> Union[ManagedStorageBackend, UnmanagedStorageBackend]:

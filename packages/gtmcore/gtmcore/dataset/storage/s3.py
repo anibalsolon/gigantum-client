@@ -2,6 +2,7 @@ from gtmcore.dataset import Dataset
 from gtmcore.dataset.storage.backend import UnmanagedStorageBackend
 from typing import List, Dict, Callable, Optional
 import os
+import json
 
 from gtmcore.dataset.io import PullResult, PullObject
 from gtmcore.logging import LMLogger
@@ -81,13 +82,8 @@ Due to the possibility of storing lots of data, when updating you can optionally
                  }
                 ]
 
-    def confirm_configuration(self, dataset, status_update_fn: Callable) -> Optional[str]:
-        """Method to verify a configuration and optionally allow the user to confirm before proceeding
-
-        Should return the desired confirmation message if there is one. If no confirmation is required/possible,
-        return None
-
-        """
+    def _get_s3_config(self):
+        """Method to get the bucket configuration"""
         bucket = self.configuration.get("Bucket Name")
         if not bucket:
             raise ValueError("Bucket Name required to confirm configuration")
@@ -97,7 +93,18 @@ Due to the possibility of storing lots of data, when updating you can optionally
         else:
             prefix = self.configuration.get("Prefix")
 
+        return bucket, prefix
+
+    def confirm_configuration(self, dataset, status_update_fn: Callable) -> Optional[str]:
+        """Method to verify a configuration and optionally allow the user to confirm before proceeding
+
+        Should return the desired confirmation message if there is one. If no confirmation is required/possible,
+        return None
+
+        """
+        bucket, prefix = self._get_s3_config()
         client = boto3.client('s3')
+
         # Confirm bucket exists and is public
         try:
             client.head_bucket(Bucket=bucket)
@@ -125,19 +132,6 @@ Due to the possibility of storing lots of data, when updating you can optionally
 
         return confirm_message
 
-    def _get_local_data_dir(self) -> str:
-        """Method to get the local data directory inside the current container
-
-        Returns:
-            str
-        """
-        working_dir = Configuration().config['git']['working_directory']
-        data_dir = self.configuration.get("Data Directory")
-        if not data_dir:
-            raise ValueError("Data Directory must be specified.")
-
-        return os.path.join(working_dir, 'local_data', data_dir)
-
     def prepare_pull(self, dataset, objects: List[PullObject], status_update_fn: Callable) -> None:
         """Gigantum Object Service only requires that the user's tokens have been set
 
@@ -150,12 +144,36 @@ Due to the possibility of storing lots of data, when updating you can optionally
             None
         """
         if not self.is_configured:
-            raise ValueError("Local filesystem backend must be fully configured before running pull.")
+            raise ValueError("S3 backend must be fully configured before running pull.")
 
-        status_update_fn(f"Ready to link files for {dataset.namespace}/{dataset.name}")
+        status_update_fn(f"Ready to download files for {dataset.namespace}/{dataset.name}")
 
     def finalize_pull(self, dataset, status_update_fn: Callable) -> None:
         pass
+
+    def _get_etag_file(self, dataset) -> str:
+        """Helper to get the etag file, tracking S3 object hashes"""
+        return os.path.join(dataset.root_dir, '.gigantum', 'etag_cache.json')
+
+    def _load_etag_data(self, dataset) -> dict:
+        """Helper to load the saved etag data
+
+        Returns:
+
+        """
+        etag_file = self._get_etag_file(dataset)
+        if os.path.exists(etag_file):
+            with open(etag_file, 'rt') as ef:
+                data = json.load(ef)
+        else:
+            data = dict()
+
+        return data
+
+    def _save_etag_data(self, dataset, etag_data: dict) -> None:
+        etag_file = self._get_etag_file(dataset)
+        with open(etag_file, 'wt') as ef:
+            json.dump(etag_data, ef)
 
     def pull_objects(self, dataset: Dataset, objects: List[PullObject], status_update_fn: Callable) -> PullResult:
         """High-level method to simply link files from the source dir to the object directory to the revision directory
@@ -168,20 +186,45 @@ Due to the possibility of storing lots of data, when updating you can optionally
         Returns:
             PushResult
         """
-        # Link from local data directory to the object directory
+        client = boto3.client('s3')
+        bucket, prefix = self._get_s3_config()
+
+        chunk_size = 4096
+        success = list()
+        failure = list()
+        message = f"Downloaded {len(objects)} objects successfully."
+
         for obj in objects:
-            if os.path.islink(obj.object_path):
-                # Re-link to make 100% sure all links are consistent if a link already exists
-                os.remove(obj.object_path)
-            os.symlink(os.path.join(self._get_local_data_dir(), obj.dataset_path), obj.object_path)
+            # Get object
+            response = client.get_object(Bucket=bucket,
+                                         Key=os.path.join(prefix, obj.dataset_path))
+
+            if response['ResponseMetadata']['HTTPStatusCode'] == 200:
+                # Save file
+                with open(obj.object_path, 'wb') as out_file:
+                    for cnt, chunk in enumerate(response['Body'].iter_chunks(chunk_size=chunk_size)):
+                        out_file.write(chunk)
+
+                        if (cnt + 1) % 10000:
+                            current_mb = cnt * chunk_size * (10 ** -6)
+                            total_mb = response['ContentLength'] * (10 ** -6)
+                            status_update_fn(f"{obj.dataset_path}: downloaded {current_mb} of {total_mb} MB")
+
+                status_update_fn(f"{obj.dataset_path}: download complete")
+                success.append(obj)
+            else:
+                failure.append(obj)
+
+        if len(failure) > 0:
+            message = f"Downloaded {len(success)} objects successfully, but {len(failure)} failed. Check results."
 
         # link from object dir through to revision dir
         m = Manifest(dataset, self.configuration.get('username'))
         m.link_revision()
 
-        return PullResult(success=objects,
-                          failure=[],
-                          message="Linked data directory. All files from the manifest should be available")
+        return PullResult(success=success,
+                          failure=failure,
+                          message=message)
 
     def can_update_from_remote(self) -> bool:
         """Property indicating if this backend can automatically update its contents to the latest on the remote
@@ -206,42 +249,52 @@ Due to the possibility of storing lots of data, when updating you can optionally
             raise ValueError("Dataset storage backend requires current logged in username to verify contents")
         m = Manifest(dataset, self.configuration.get('username'))
 
-        # walk the local source dir, looking for additions/deletions
+        # Walk remote checking etags with cached versions
+        etag_data = self._load_etag_data(dataset)
+
+        bucket, prefix = self._get_s3_config()
+        client = boto3.client('s3')
+
+        paginator = client.get_paginator('list_objects_v2')
+        response_iterator = paginator.paginate(Bucket=bucket, Prefix=prefix)
+
         all_files = list()
         added_files = list()
-        local_data_dir = self._get_local_data_dir()
-        for root, dirs, files in os.walk(local_data_dir):
-            _, folder = root.split(local_data_dir)
-            if len(folder) > 0:
-                if folder[0] == os.path.sep:
-                    folder = folder[1:]
+        modified_files = list()
+        print_cnt = 0
+        for x in response_iterator:
+            if print_cnt == 0:
+                status_update_fn("Processing Bucket Contents, please wait.")
+                print_cnt += 1
+            if print_cnt == 1:
+                status_update_fn("Processing Bucket Contents, please wait..")
+                print_cnt += 1
+            else:
+                status_update_fn("Processing Bucket Contents, please wait...")
+                print_cnt = 0
 
-            for d in dirs:
-                # TODO: Check for ignored
-                rel_path = os.path.join(folder, d) + os.path.sep  # All folders are represented with a trailing slash
-                all_files.append(rel_path)
-                if rel_path not in m.manifest:
-                    added_files.append(rel_path)
-                    # Create dir in current revision for linking to work
-                    os.makedirs(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, rel_path), exist_ok=True)
-
-            for file in files:
-                # TODO: Check for ignored
-                if file in ['.smarthash', '.DS_STORE', '.DS_Store']:
-                    continue
-
-                rel_path = os.path.join(folder, file)
-                all_files.append(rel_path)
-                if rel_path not in m.manifest:
-                    added_files.append(rel_path)
-                    # Symlink into current revision for downstream linking to work
-                    os.symlink(os.path.join(root, file),
-                               os.path.join(m.cache_mgr.cache_root, m.dataset_revision, rel_path))
+            for item in x.get("Contents"):
+                key = item['Key']
+                all_files.append(key)
+                if key in m.manifest:
+                    # Object already tracked
+                    if etag_data[key] != item['ETag']:
+                        # Object has been modified since last update
+                        modified_files.append(key)
+                else:
+                    # New Object
+                    etag_data[key] = item['ETag']
+                    added_files.append(key)
 
         deleted_files = sorted(list(set(m.manifest.keys()).difference(all_files)))
 
+        # TODO: Download files, keep if desired, or hash and delete? Maybe remove streaming complexity
+
+
         # Create StatusResult to force modifications
-        status = StatusResult(created=added_files, modified=[], deleted=deleted_files)
+        status = StatusResult(created=added_files, modified=modified_files, deleted=deleted_files)
+
+        self._save_etag_data(dataset, etag_data)
 
         # Run local update
         self.update_from_local(dataset, status_update_fn, status_result=status)
