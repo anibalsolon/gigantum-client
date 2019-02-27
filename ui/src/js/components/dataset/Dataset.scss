@@ -75,6 +75,9 @@
 .Dataset__config-parameter {
   font-weight: bold;
   font-size: 18px;
+  input {
+    margin-left: 10px;
+  }
 }
 
 .Dataset__config-description {
@@ -91,11 +94,17 @@
 }
 
 .Dataset__configs {
-  height: 246px;
+  height: 215px;
   overflow: auto;
 }
 
 .Dataset__config-container{
   height: 250px;
   @include flex(space-between, column)
+}
+.Dataset__config-buttons{
+  @include flex(space-around, row);
+}
+.Dataset__config-error {
+  color: $crimson;
 }

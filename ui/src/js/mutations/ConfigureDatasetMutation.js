@@ -37,6 +37,8 @@ export default function ConfigureDatasetMutation(
   datasetName,
   parameters,
   confirm,
+  successCall,
+  failureCall,
   callback,
 ) {
   const variables = {
@@ -49,7 +51,7 @@ export default function ConfigureDatasetMutation(
   if (confirm !== null) {
     variables.input.confirm = confirm;
   }
-  console.log(variables)
+
   commitMutation(environment, {
     mutation,
     variables,
@@ -58,7 +60,9 @@ export default function ConfigureDatasetMutation(
         console.log(error);
       }
       callback(response, error);
-      FooterUtils.getJobStatus(response, 'configureDataset', 'backgroundJobKey');
+      if (response.configureDataset && response.configureDataset.backgroundJobKey) {
+        FooterUtils.getJobStatus(response, 'configureDataset', 'backgroundJobKey', successCall, failureCall);
+      }
     },
     onError: err => console.error(err),
   });

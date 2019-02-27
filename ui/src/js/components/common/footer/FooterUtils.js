@@ -7,6 +7,7 @@ import { setForceRefetch, setRefetchPending } from 'JS/redux/reducers/labbook/en
 // mutations
 import FetchLabbookEdgeMutation from 'Mutations/FetchLabbookEdgeMutation';
 import FetchDatasetEdgeMutation from 'Mutations/FetchDatasetEdgeMutation';
+import FetchCompleteDatasetEdgeMutation from 'Mutations/FetchCompleteDatasetEdgeMutation';
 import FetchDatasetFilesMutation from 'Mutations/FetchDatasetFilesMutation';
 import FetchLabbookDatasetFilesMutation from 'Mutations/FetchLabbookDatasetFilesMutation';
 
@@ -109,7 +110,6 @@ const FooterUtils = {
                     },
                   );
               } else if (type === 'downloadDatasetFiles') {
-                const successKeys = JSON.parse(response.data.jobStatus.jobMetadata).success_keys;
                 const metaDataArr = JSON.parse(response.data.jobStatus.jobMetadata).dataset.split('|');
                 const isLabbookSection = metaDataArr[3] === 'LINKED';
                 if (!isLabbookSection) {
@@ -133,6 +133,13 @@ const FooterUtils = {
                     },
                     );
                 }
+              } else if (type === 'configureDataset') {
+                FetchCompleteDatasetEdgeMutation(
+                  owner,
+                  labbookName,
+                  () => {
+                  },
+                  );
               }
             } else if (response.data.jobStatus.status === 'failed') {
               const method = JSON.parse(response.data.jobStatus.jobMetadata).method;
@@ -174,6 +181,9 @@ const FooterUtils = {
                 errorMessage = `Failed to download ${failureKeys.length} of ${totalAmount} Files.`;
                 reportedFailureMessage = 'Failed to download the following Files:';
                 failureKeys.forEach(failedKey => reportedFailureMessage = `${reportedFailureMessage}\n${failedKey}`);
+              }
+              if (type === 'configureDataset') {
+                failureCall();
               }
               html += `\n<span style="color:rgb(255,85,85)">${reportedFailureMessage}</span>`;
               setMultiInfoMessage(response.data.jobStatus.id, errorMessage, true, true, [{ message: html }]);

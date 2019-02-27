@@ -33,7 +33,7 @@ class DatasetQueryContainer extends Component {
           {
             name: parentProps.datasetName,
             owner: parentProps.owner,
-            first: 2,
+            first: 10,
             // hasNext: false,
           }
         }
