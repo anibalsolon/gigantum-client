@@ -11,6 +11,8 @@ from gtmcore.dataset.manifest.manifest import Manifest, StatusResult
 
 import boto3
 import botocore
+from botocore.client import Config
+from botocore import UNSIGNED
 
 logger = LMLogger.get_logger()
 
@@ -95,6 +97,9 @@ Due to the possibility of storing lots of data, when updating you can optionally
 
         return bucket, prefix
 
+    def _get_client(self):
+        return boto3.client('s3', config=Config(signature_version=UNSIGNED))
+
     def confirm_configuration(self, dataset, status_update_fn: Callable) -> Optional[str]:
         """Method to verify a configuration and optionally allow the user to confirm before proceeding
 
@@ -103,7 +108,7 @@ Due to the possibility of storing lots of data, when updating you can optionally
 
         """
         bucket, prefix = self._get_s3_config()
-        client = boto3.client('s3')
+        client = self._get_client()
 
         # Confirm bucket exists and is public
         try:
@@ -186,7 +191,7 @@ Due to the possibility of storing lots of data, when updating you can optionally
         Returns:
             PushResult
         """
-        client = boto3.client('s3')
+        client = self._get_client()
         bucket, prefix = self._get_s3_config()
 
         chunk_size = 4096
@@ -253,7 +258,7 @@ Due to the possibility of storing lots of data, when updating you can optionally
         etag_data = self._load_etag_data(dataset)
 
         bucket, prefix = self._get_s3_config()
-        client = boto3.client('s3')
+        client = self._get_client()
 
         paginator = client.get_paginator('list_objects_v2')
         response_iterator = paginator.paginate(Bucket=bucket, Prefix=prefix)
