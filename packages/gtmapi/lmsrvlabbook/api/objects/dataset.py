@@ -1,6 +1,6 @@
 import graphene
 import base64
-
+import flask
 from gtmcore.activity import ActivityStore
 
 from lmsrvcore.auth.identity import parse_token
@@ -450,14 +450,22 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         return info.context.dataset_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
             lambda dataset: self.helper_resolve_default_remote(dataset))
 
+    @staticmethod
+    def _helper_configure_default_parameters(dataset):
+        """Helper to load the default configuration at runtime"""
+        dataset.backend.set_default_configuration(get_logged_in_username(),
+                                                  flask.g.get('access_token', None),
+                                                  flask.g.get('id_token', None))
+        return dataset
+
     def resolve_backend_is_configured(self, info):
         """Field to check if a dataset backend is fully configured"""
         return info.context.dataset_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
-            lambda dataset: dataset.backend.is_configured)
+            lambda dataset: self._helper_configure_default_parameters(dataset).backend.is_configured)
 
-    @staticmethod
-    def helper_resolve_backend_configuration(dataset):
+    def helper_resolve_backend_configuration(self, dataset):
         """Helper populate backend configuration fields"""
+        dataset = self._helper_configure_default_parameters(dataset)
         missing_config = list()
         for item in dataset.backend.safe_current_configuration:
             missing_config.append(DatasetConfigurationParameter(parameter=item['parameter'],
