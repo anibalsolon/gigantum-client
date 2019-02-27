@@ -7,15 +7,21 @@ import HTML5Backend from 'react-dnd-html5-backend';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
 import Loadable from 'react-loadable';
+import { boundMethod } from 'autobind-decorator';
 // components
+import ButtonLoader from 'Components/common/ButtonLoader';
 import DatasetHeader from '../shared/header/Header';
 import Login from 'Components/login/Login';
 import Loader from 'Components/common/Loader';
 import ErrorBoundary from 'Components/common/ErrorBoundary';
+import Modal from 'Components/common/Modal';
+// mutations
+import ConfigureDatasetMutation from 'Mutations/ConfigureDatasetMutation';
 // store
 import store from 'JS/redux/store';
 import { setStickyState } from 'JS/redux/reducers/dataset/dataset';
 import { setCallbackRoute } from 'JS/redux/reducers/routes';
+import { setErrorMessage } from 'JS/redux/reducers/footer';
 // utils
 import { getFilesFromDragEvent } from 'JS/utils/html-dir-content';
 // assets
@@ -48,11 +54,16 @@ class Dataset extends Component {
   	super(props);
 
     localStorage.setItem('owner', store.getState().routes.owner);
-    this.state = {};
+    this.state = {
+      buttonState: '',
+      configValues: new Map(),
+      configModalVisible: !this.props.dataset.backendIsConfigured,
+    };
     // bind functions here
     this._setBuildingState = this._setBuildingState.bind(this);
     this._toggleBranchesView = this._toggleBranchesView.bind(this);
     this._branchViewClickedOff = this._branchViewClickedOff.bind(this);
+    this._configureDataset = this._configureDataset.bind(this);
     setCallbackRoute(props.location.pathname);
     const { labbookName, owner } = store.getState().routes;
     document.title = `${owner}/${labbookName}`;
@@ -168,18 +179,119 @@ class Dataset extends Component {
   _scrollToTop() {
     window.scrollTo(0, 0);
   }
+  /**
+    @param {Event} evt
+    @param {String} parameter
+    updates configstate with input
+  */
+  _setDatasetConfig = (evt, parameter) => {
+      const input = evt.target.value;
+      const newConfig = this.state.configValues;
+      if (input.length) {
+        newConfig.set(parameter, input);
+      } else {
+        newConfig.delete(parameter);
+      }
+      this.setState({ configValues: newConfig });
+  }
+  /**
+   * @param {Boolean} confirm
+    calls configure dataset mutation
+  */
+  _configureDataset = (confirm = null) => {
+    const { labbookName, owner } = store.getState().routes;
+    const parameters = this.props.dataset.backendConfiguration.map(({ parameter, parameterType }) => {
+      const value = this.state.configValues.get(parameter);
+      return {
+        parameter,
+        parameterType,
+        value,
+      };
+    });
+    this.setState({ buttonState: 'loading' });
+    ConfigureDatasetMutation(
+      owner,
+      labbookName,
+      parameters,
+      confirm,
+      (response, error) => {
+        if (error) {
+          console.log(error);
+        } else if (response.configureDataset.errorMessage) {
+          setErrorMessage('Failed to configure Dataset', [{ message: response.configureDataset.errorMessage }]);
+          this.setState({ buttonState: 'error' });
+          setTimeout(() => {
+              this.setState({ buttonState: '' });
+          }, 2000);
+        } else if (response.configureDataset.isConfigured && !response.configureDataset.shouldConfirm && !response.configureDataset.backgroundJobKey) {
+          this._configureDataset(true);
+          this.setState({ configModalVisible: false });
+        }
+      },
+    );
+  }
 
   render() {
     if (this.props.dataset) {
       const { dataset } = this.props;
+      console.log(dataset.backendIsConfigured)
+      console.log(dataset.backendConfiguration)
       const datasetCSS = classNames({
         Dataset: true,
         'Dataset--detail-mode': this.props.detailMode,
         'Dataset--demo-mode': window.location.hostname === Config.demoHostName,
       });
-
+      const allFieldsfilled = this.state.configValues.size === dataset.backendConfiguration.length;
       return (
         <div className={datasetCSS}>
+          {
+            this.state.configModalVisible &&
+            <Modal
+              header="Configure Dataset"
+              size="large"
+              renderContent={() => {
+                let x = 2;
+                return (<div className="Dataset__config-modal">
+                  <p>This dataset needs to be configured before it is ready for use.</p>
+                  <div className="Dataset__config-container">
+                    <div className="Dataset__configs">
+                      {
+                        dataset.backendConfiguration.map(({ description, parameter, parameterType }) => (
+                          <div
+                            className="Dataset__config-section"
+                            key={parameter}
+                          >
+                            <div className="Dataset__config-parameter">{parameter}</div>
+                            <div className="Dataset__config-description">{description}</div>
+                            {
+                              parameterType === 'str' ?
+                              <input
+                                type="text"
+                                className="Dataset__config-textInput"
+                                onKeyUp={(evt) => { this._setDatasetConfig(evt, parameter); }}
+                                onChange={(evt) => { this._setDatasetConfig(evt, parameter); }}
+                              /> :
+                              <input
+                                type="checkbox"
+                              />
+                            }
+                          </div>
+                        ))
+                      }
+                    </div>
+                  <ButtonLoader
+                      buttonState={this.state.buttonState}
+                      buttonText="Save Configuration"
+                      className=""
+                      params={{}}
+                      buttonDisabled={!allFieldsfilled}
+                      clicked={() => this._configureDataset()}
+                  />
+                </div>
+                </div>);
+              }}
+            />
+          }
 
           <div className="Dataset__spacer flex flex--column">
 
@@ -320,6 +432,13 @@ const DatasetFragmentContainer = createFragmentContainer(
           modifiedOnUtc
           defaultRemote
           visibility
+          backendIsConfigured
+          backendConfiguration{
+            parameter
+            description
+            parameterType
+            value
+          }
           datasetType {
               name
               storageType

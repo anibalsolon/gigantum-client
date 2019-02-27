@@ -1,5 +1,5 @@
 # source: http://localhost:10000/api/labbook/
-# timestamp: Fri Feb 22 2019 15:57:01 GMT-0500 (Eastern Standard Time)
+# timestamp: Wed Feb 27 2019 10:56:09 GMT-0500 (Eastern Standard Time)
 
 schema {
   query: LabbookQuery
@@ -308,6 +308,55 @@ type CompleteDatasetUploadTransactionPayload {
   clientMutationId: String
 }
 
+input ConfigureDatasetInput {
+  """Owner of the dataset to configure"""
+  datasetOwner: String!
+
+  """Name of the dataset to configure"""
+  datasetName: String!
+  parameters: [DatasetConfigurationParameterInput]
+
+  """
+  Set to true so confirm the configuration and continue. False will clear the configuration to start over
+  """
+  confirm: Boolean
+  clientMutationId: String
+}
+
+"""
+Mutation to configure a dataset backend if needed.
+
+Workflow to configure a dataset:
+- TODO
+"""
+type ConfigureDatasetPayload {
+  dataset: Dataset
+
+  """If true, all parameters a set and OK to continue"""
+  isConfigured: Boolean
+
+  """
+  If true, should confirm configuration with the user and resubmit with confirm=True to finalize
+  """
+  shouldConfirm: Boolean
+
+  """Configuration error message to display to the user"""
+  errorMessage: String
+
+  """Confirmation message to display to the user"""
+  confirmMessage: String
+
+  """
+  If true, this backend type requires background work after confirmation. Check
+  complete_background_key for key to provide user feedback.
+  """
+  hasBackgroundJob: Boolean
+
+  """Background job key to query on for feedback if needed"""
+  backgroundJobKey: String
+  clientMutationId: String
+}
+
 """An enumeration for container image status"""
 enum ContainerStatus {
   NOT_RUNNING
@@ -403,6 +452,25 @@ type Dataset implements Node & GitRepository {
   visibility: String
   defaultRemote: String
   overview: DatasetOverview
+  backendIsConfigured: Boolean
+  backendConfiguration: [DatasetConfigurationParameter]
+  contentHashMismatches: [String]
+}
+
+"""
+A simple type that represents a Dataset configuration parameter from a storage backend class
+"""
+type DatasetConfigurationParameter {
+  parameter: String
+  description: String
+  parameterType: String
+  value: String
+}
+
+input DatasetConfigurationParameterInput {
+  parameter: String!
+  parameterType: String!
+  value: String!
 }
 
 """A Connection for paging through datasets that exist locally. """
@@ -467,7 +535,7 @@ type DatasetList implements Node {
 
 """
 A type representing the overview of a Dataset
-
+    
 """
 type DatasetOverview implements Node & GitRepository {
   """The ID of the object."""
@@ -488,6 +556,7 @@ type DatasetType implements Node {
   name: String
   storageType: String
   isManaged: Boolean
+  canUpdateUnmanagedFromRemote: Boolean
   description: String
   readme: String
   tags: [String]
@@ -768,7 +837,7 @@ type JobStatus implements Node {
 }
 
 """
-A Connection for paging through all background jobs the system is aware of.
+A Connection for paging through all background jobs the system is aware of. 
 """
 type JobStatusConnection {
   pageInfo: PageInfo!
@@ -970,6 +1039,8 @@ type LabbookMutations {
   setVisibility(input: SetVisibilityInput!): SetVisibilityPayload
   fetchLabbookEdge(input: FetchLabbookEdgeInput!): FetchLabbookEdgePayload
   createDataset(input: CreateDatasetInput!): CreateDatasetPayload
+  configureDataset(input: ConfigureDatasetInput!): ConfigureDatasetPayload
+  updateUnmanagedDataset(input: UpdateUnmanagedDatasetInput!): UpdateUnmanagedDatasetPayload
   deleteDataset(input: DeleteDatasetInput!): DeleteDatasetPayload
   addDatasetFile(input: AddDatasetFileInput!): AddDatasetFilePayload
   completeDatasetUploadTransaction(input: CompleteDatasetUploadTransactionInput!): CompleteDatasetUploadTransactionPayload
@@ -1052,7 +1123,7 @@ type LabbookRefEdge {
 
 """
 A type representing a section within a LabBook (i.e., code, input, output)
-
+    
 """
 type LabbookSection implements Node & GitRepository {
   """The ID of the object."""
@@ -1102,7 +1173,7 @@ input MergeFromBranchInput {
 }
 
 """
-Merge from another branch into the current active branch. Force if necessary.
+Merge from another branch into the current active branch. Force if necessary. 
 """
 type MergeFromBranchPayload {
   labbook: Labbook
@@ -1505,6 +1576,36 @@ input UpdateLabbookFavoriteInput {
 
 type UpdateLabbookFavoritePayload {
   updatedFavoriteEdge: LabbookFavoriteEdge
+  clientMutationId: String
+}
+
+input UpdateUnmanagedDatasetInput {
+  """Owner of the dataset to configure"""
+  datasetOwner: String!
+
+  """Name of the dataset to configure"""
+  datasetName: String!
+
+  """If true, update the dataset based on local state of the dataset"""
+  fromLocal: Boolean
+
+  """
+  If true, update the dataset based on remote state of the dataset. This
+  effectivelly also updates the local state, so the `fromLocal` argument is ignored
+  """
+  fromRemote: Boolean
+  clientMutationId: String
+}
+
+"""
+Mutation to update the manifest for a local dataset based on changes either locally or via the remote the
+dataset is linked to
+"""
+type UpdateUnmanagedDatasetPayload {
+  dataset: Dataset
+
+  """Background job key to query on for feedback if needed"""
+  backgroundJobKey: String
   clientMutationId: String
 }
 

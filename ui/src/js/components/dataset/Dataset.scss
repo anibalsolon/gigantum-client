@@ -71,3 +71,31 @@
     margin: 20px 35px;
   }
 }
+
+.Dataset__config-parameter {
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.Dataset__config-description {
+  font-size: 14px;
+}
+
+.Dataset__config-textInput {
+  border: 1px solid $romanSilver !important;
+  height: 30px;
+}
+
+.Dataset__config-section{
+  margin-bottom: 10px;
+}
+
+.Dataset__configs {
+  height: 246px;
+  overflow: auto;
+}
+
+.Dataset__config-container{
+  height: 250px;
+  @include flex(space-between, column)
+}
