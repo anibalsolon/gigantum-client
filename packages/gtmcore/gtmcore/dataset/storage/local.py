@@ -161,6 +161,9 @@ more, check out the docs here: [https://docs.gigantum.com](https://docs.gigantum
         all_files = list()
         added_files = list()
         local_data_dir = self._get_local_data_dir()
+
+        os.makedirs(os.path.join(m.cache_mgr.cache_root, m.dataset_revision), exist_ok=True)
+
         for root, dirs, files in os.walk(local_data_dir):
             _, folder = root.split(local_data_dir)
             if len(folder) > 0:
@@ -186,6 +189,7 @@ more, check out the docs here: [https://docs.gigantum.com](https://docs.gigantum
                 if rel_path not in m.manifest:
                     added_files.append(rel_path)
                     # Symlink into current revision for downstream linking to work
+                    logger.warning(os.path.join(root, file))
                     os.symlink(os.path.join(root, file),
                                os.path.join(m.cache_mgr.cache_root, m.dataset_revision, rel_path))
 

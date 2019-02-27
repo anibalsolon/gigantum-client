@@ -4,7 +4,9 @@ import aiofiles
 from typing import List, Optional
 import pickle
 import os
+from gtmcore.logging import LMLogger
 
+logger = LMLogger.get_logger()
 
 class SmartHash(object):
     """Class to handle file hashing that is operationally optimized for Gigantum"""
@@ -165,17 +167,20 @@ class SmartHash(object):
             str
         """
         h = blake2b()
+        try:
 
-        abs_path = self.get_abs_path(path)
-        if os.path.isfile(abs_path):
-            async with aiofiles.open(abs_path, 'rb') as fh:
-                chunk = await fh.read(blocksize)
-                while chunk:
-                    h.update(chunk)
+            abs_path = self.get_abs_path(path)
+            if os.path.isfile(abs_path):
+                async with aiofiles.open(abs_path, 'rb') as fh:
                     chunk = await fh.read(blocksize)
-        else:
-            # If a directory, just hash the path as an alternative
-            h.update(abs_path.encode('utf-8'))
+                    while chunk:
+                        h.update(chunk)
+                        chunk = await fh.read(blocksize)
+            else:
+                # If a directory, just hash the path as an alternative
+                h.update(abs_path.encode('utf-8'))
+        except Exception as err:
+            logger.exception(err)
 
         return h.hexdigest()
 

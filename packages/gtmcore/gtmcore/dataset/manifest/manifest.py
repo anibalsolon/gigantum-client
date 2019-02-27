@@ -239,7 +239,10 @@ class Manifest(object):
             # Move file to new object
             shutil.move(source, destination)
         # Link object back
-        os.link(destination, source)
+        try:
+            os.link(destination, source)
+        except PermissionError:
+            os.symlink(destination, source)
 
     async def _move_to_object_cache(self, relative_path, hash_str):
         """
