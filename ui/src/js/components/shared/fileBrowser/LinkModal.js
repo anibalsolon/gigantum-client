@@ -26,6 +26,7 @@ export const LinkModalQuery = graphql`
                 name
                 description
                 owner
+                backendIsConfigured
                 #createdOnUtc
                 modifiedOnUtc
                 defaultRemote
@@ -119,7 +120,7 @@ export default class LinkModal extends Component {
                         console.log(error);
                     } else if (props) {
                         const existingDatasets = this.props.linkedDatasets.map(dataset => dataset.name);
-                        const localDatasetEdges = props.datasetList.localDatasets.edges.filter(dataset => existingDatasets.indexOf(dataset.node.name) === -1);
+                        const localDatasetEdges = props.datasetList.localDatasets.edges.filter(dataset => existingDatasets.indexOf(dataset.node.name) === -1 && dataset.node.backendIsConfigured);
                         return (
                             <div className="LinkModal__flex flex flex--column justify--space-between">
                                 <div className="LinkModal__container">
