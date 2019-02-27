@@ -228,20 +228,23 @@ class Dataset extends Component {
       successCall,
       failureCall,
       (response, error) => {
+        const configureDataset = response && response.configureDataset;
         if (error) {
           console.log(error);
           this.setState({ buttonState: 'error' });
           setTimeout(() => {
               this.setState({ buttonState: '' });
           }, 2000);
-        } else if (response.configureDataset.errorMessage) {
-          setErrorMessage('Failed to configure Dataset', [{ message: response.configureDataset.errorMessage }]);
-          this.setState({ buttonState: 'error', latestError: response.configureDataset.errorMessage });
+        } else if (configureDataset.errorMessage) {
+          setErrorMessage('Failed to configure Dataset', [{ message: configureDataset.errorMessage }]);
+          this.setState({ buttonState: 'error', latestError: configureDataset.errorMessage });
           setTimeout(() => {
               this.setState({ buttonState: '' });
           }, 2000);
-        } else if (response.configureDataset.isConfigured && !response.configureDataset.shouldConfirm && !response.configureDataset.backgroundJobKey) {
+        } else if (configureDataset.isConfigured && !configureDataset.shouldConfirm && !configureDataset.backgroundJobKey) {
           this._configureDataset(true);
+        } else if (configureDataset.isConfigured && configureDataset.shouldConfirm && !confirm) {
+          this.setState({ confirmMessage: configureDataset.confirmMessage });
         } else if (confirm) {
           this.setState({ buttonState: 'finished' });
           this.closeModal = setTimeout(() => {
@@ -258,6 +261,14 @@ class Dataset extends Component {
   */
   _handleRedirect() {
     this.props.history.push('/datasets/local');
+  }
+
+  /**
+    @param {}
+    cancels confirm on configure dataset
+  */
+  _confirmCancelConfigure() {
+    this.setState({ confirmMessage: '', buttonState: '' });
   }
 
   render() {
@@ -277,6 +288,30 @@ class Dataset extends Component {
               header="Configure Dataset"
               size="large"
               renderContent={() => (<div className="Dataset__config-modal">
+              {
+                this.state.confirmMessage &&
+                <Modal
+                  size="small"
+                  renderContent={() => (
+                    <div>
+                      {this.state.confirmMessage}
+                      <div>
+                        <button
+                          onClick={() => this._confirmCancelConfigure()}
+                          className="button--flat"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={() => this._configureDataset(true)}
+                        >
+                          Confirm
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                />
+              }
                   <p>This dataset needs to be configured before it is ready for use.</p>
                   {
                     this.state.latestError &&
