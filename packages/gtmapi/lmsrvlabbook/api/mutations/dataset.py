@@ -154,12 +154,6 @@ class ConfigureDataset(graphene.relay.ClientIDMutation):
                     # Gen unique keys for tracking jobs
                     metadata = {'dataset': f"{logged_in_username}|{dataset_owner}|{dataset_name}",
                                 'method': 'update_unmanaged_dataset_from_remote'}
-
-
-
-                    from gtmcore.dispatcher import jobs
-                    jobs.update_unmanaged_dataset_from_remote(**kwargs)
-
                     job_response = d.dispatch_task(jobs.update_unmanaged_dataset_from_remote,
                                                    kwargs=kwargs, metadata=metadata)
 

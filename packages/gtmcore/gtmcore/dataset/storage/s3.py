@@ -75,12 +75,6 @@ Due to the possibility of storing lots of data, when updating you can optionally
                 {'parameter': "Prefix",
                  'description': "Optional prefix inside the bucket (e.g. `prefix1/sub3/`)",
                  'type': "str"
-                 },
-                {'parameter': "Discard During Update",
-                 'description': "A flag indicating if files should be kept locally during automatic updating "
-                                "(unchecked), or that files should be discarded after hashed and added to the"
-                                " Dataset (checked).",
-                 'type': "bool"
                  }
                 ]
 
@@ -127,13 +121,8 @@ Due to the possibility of storing lots of data, when updating you can optionally
                 num_bytes += int(item.get('Size'))
                 num_objects += 1
 
-        confirm_message = f"Updating this dataset will download {num_objects} files and {float(num_bytes)/(10**9)} GB."
-
-        if self.configuration.get("Discard During Update") is True:
-            confirm_message = f"{confirm_message} New files will be discarded during update. Do you wish to continue?"
-        else:
-            confirm_message = f"{confirm_message} New files will be kept and use {float(num_bytes)/(10**9)} GB of" \
-                f" local storage. Do you wish to continue?"
+        confirm_message = f"Creating this dataset will download {num_objects:.2f}" \
+            f" files and consume {(float(num_bytes)/(10**9)):.2f} GB of local storage. Do you wish to continue?"
 
         return confirm_message
 
@@ -267,11 +256,13 @@ Due to the possibility of storing lots of data, when updating you can optionally
         added_files = list()
         modified_files = list()
         print_cnt = 0
+
+        revision_dir = os.path.join(m.cache_mgr.cache_root, m.dataset_revision)
         for x in response_iterator:
             if print_cnt == 0:
                 status_update_fn("Processing Bucket Contents, please wait.")
                 print_cnt += 1
-            if print_cnt == 1:
+            elif print_cnt == 1:
                 status_update_fn("Processing Bucket Contents, please wait..")
                 print_cnt += 1
             else:
@@ -286,15 +277,27 @@ Due to the possibility of storing lots of data, when updating you can optionally
                     if etag_data[key] != item['ETag']:
                         # Object has been modified since last update
                         modified_files.append(key)
+                        if os.path.exists(os.path.join(revision_dir, key)):
+                            # Delete current version
+                            os.remove(os.path.join(revision_dir, key))
+
+                        if key[-1] == "/":
+                            # is a "directory
+                            os.makedirs(os.path.join(revision_dir, key), exist_ok=True)
+                        else:
+                            client.download_file(bucket, key, os.path.join(revision_dir, key))
                 else:
                     # New Object
                     etag_data[key] = item['ETag']
                     added_files.append(key)
 
+                    if key[-1] == "/":
+                        # is a "directory
+                        os.makedirs(os.path.join(revision_dir, key), exist_ok=True)
+                    else:
+                        client.download_file(bucket, key, os.path.join(revision_dir, key))
+
         deleted_files = sorted(list(set(m.manifest.keys()).difference(all_files)))
-
-        # TODO: Download files, keep if desired, or hash and delete? Maybe remove streaming complexity
-
 
         # Create StatusResult to force modifications
         status = StatusResult(created=added_files, modified=modified_files, deleted=deleted_files)
