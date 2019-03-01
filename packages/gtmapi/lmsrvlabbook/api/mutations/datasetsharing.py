@@ -255,8 +255,18 @@ class AddDatasetCollaborator(graphene.relay.ClientIDMutation):
 
         # Add collaborator to remote service
         mgr = GitLabManager(default_remote, admin_service, token)
-        mgr.add_collaborator(owner, dataset_name, username, perm)
 
+        existing_collabs = mgr.get_collaborators(owner, dataset_name)
+
+        if username not in [n[1] for n in existing_collabs]:
+            logger.info(f"Adding user {username} to {owner}/{dataset_name}"
+                        f"with permission {perm}")
+            mgr.add_collaborator(owner, dataset_name, username, perm)
+        else:
+            logger.warning(f"Changing permission of {username} on"
+                           f"{owner}/{dataset_name} to {perm}")
+            mgr.delete_collaborator(owner, dataset_name, username)
+            mgr.add_collaborator(owner, dataset_name, username, perm)
         create_data = {"owner": owner,
                        "name": dataset_name}
 

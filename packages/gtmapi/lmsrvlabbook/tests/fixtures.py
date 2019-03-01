@@ -462,6 +462,7 @@ def fixture_test_file():
     except:
         pass
 
+
 @pytest.fixture()
 def property_mocks_fixture():
     """A pytest fixture that returns a GitLabRepositoryManager instance"""
