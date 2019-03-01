@@ -726,10 +726,6 @@ class AddLabbookCollaborator(graphene.relay.ClientIDMutation):
             mgr.delete_collaborator(owner, labbook_name, username)
             mgr.add_collaborator(owner, labbook_name, username, perm)
 
-        # Prime dataloader with labbook you just created
-        dataloader = LabBookLoader()
-        dataloader.prime(f"{logged_in_username}&{owner}&{lb.name}", lb)
-
         create_data = {"owner": owner,
                        "name": labbook_name}
 
