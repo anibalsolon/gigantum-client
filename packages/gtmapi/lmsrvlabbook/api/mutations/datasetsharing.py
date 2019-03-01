@@ -9,7 +9,7 @@ from gtmcore.dispatcher import Dispatcher, jobs
 from gtmcore.configuration import Configuration
 from gtmcore.logging import LMLogger
 from gtmcore.workflows.gitlab import GitLabManager, ProjectPermissions
-from gtmcore.workflows import DatasetWorkflow
+from gtmcore.workflows import DatasetWorkflow, MergeOverride
 
 from lmsrvcore.api import logged_mutation
 from lmsrvcore.auth.identity import parse_token
@@ -71,7 +71,8 @@ class SyncDataset(graphene.relay.ClientIDMutation):
 
     @classmethod
     @logged_mutation
-    def mutate_and_get_payload(cls, root, info, owner, dataset_name, force=False, client_mutation_id=None):
+    def mutate_and_get_payload(cls, root, info, owner, dataset_name, pull_only=False,
+                               override_method="abort", client_mutation_id=None):
         # Load Dataset
         username = get_logged_in_username()
         ds = InventoryManager().load_dataset(username, owner, dataset_name,
@@ -100,11 +101,13 @@ class SyncDataset(graphene.relay.ClientIDMutation):
         mgr = GitLabManager(default_remote, admin_service, access_token=token)
         mgr.configure_git_credentials(default_remote, username)
 
+        override = MergeOverride(override_method)
         job_metadata = {'method': 'sync_dataset',
                         'dataset': ds.key}
         job_kwargs = {'repository': ds,
                       'username': username,
-                      'force': force,
+                      'pull_only': pull_only,
+                      'override': override,
                       'access_token': token,
                       'id_token': flask.g.id_token}
 
