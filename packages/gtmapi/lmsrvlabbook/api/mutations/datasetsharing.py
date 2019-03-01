@@ -65,7 +65,8 @@ class SyncDataset(graphene.relay.ClientIDMutation):
     class Input:
         owner = graphene.String(required=True)
         dataset_name = graphene.String(required=True)
-        force = graphene.Boolean(required=False)
+        pull_only = graphene.Boolean(required=False)
+        override_method = graphene.String(required=False)
 
     job_key = graphene.String()
 
