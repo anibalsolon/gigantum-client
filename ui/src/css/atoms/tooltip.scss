@@ -1,5 +1,7 @@
 .Tooltip-data {
-
+    &:disabled {
+      overflow: initial !important;
+    }
     position: relative;
 
     cursor: pointer;

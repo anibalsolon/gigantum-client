@@ -161,6 +161,8 @@ class BranchesMutations {
    */
    syncDataset(data, callback) {
      const {
+       overrideMethod,
+       pullOnly,
        force,
        successCall,
        failureCall,
@@ -170,7 +172,8 @@ class BranchesMutations {
     SyncDatasetMutation(
       owner,
       name,
-      force,
+      overrideMethod || null,
+      pullOnly,
       successCall,
       failureCall,
       callback,

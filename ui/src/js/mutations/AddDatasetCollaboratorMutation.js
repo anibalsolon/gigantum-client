@@ -30,6 +30,7 @@ export default function AddCollaboratorMutation(
   datasetName,
   owner,
   username,
+  permissions,
   callback,
 ) {
   const variables = {
@@ -37,6 +38,7 @@ export default function AddCollaboratorMutation(
       datasetName,
       owner,
       username,
+      permissions,
       clientMutationId: tempID++,
     },
   };

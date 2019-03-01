@@ -279,7 +279,7 @@ class BranchMenu extends Component {
   */
   @boundMethod
   _toggleSyncDropdown(allowSyncPull) {
-    if (allowSyncPull && !this.state.isDataset) {
+    if (allowSyncPull) {
       const { state } = this;
       this.setState({ syncMenuVisible: !state.syncMenuVisible });
     }
@@ -355,7 +355,6 @@ class BranchMenu extends Component {
                 self._toggleSyncModal();
               }
             },
-            force: false,
             pullOnly: pullOnly || false,
           };
 
@@ -478,14 +477,14 @@ class BranchMenu extends Component {
           }),
           syncMenuDropdownButtonCSS = classNames({
             'BranchMenu__btn BranchMenu__btn--sync-dropdown': true,
-            'BranchMenu__btn--sync-dropdown--disabled': !allowSyncPull || state.isDataset,
+            'BranchMenu__btn--sync-dropdown--disabled': !allowSyncPull,
             'BranchMenu__btn--sync-open': state.syncMenuVisible,
           }),
           syncCSS = classNames({
             'BranchMenu__btn BranchMenu__btn--sync': true,
             'BranchMenu__btn--sync--upToDate': upToDate || activeBranch.commitsAhead === undefined,
             'BranchMenu__btn--sync--disabled': !allowSync,
-            'Tooltip-data Tooltip-data': !allowSync || smallWidth || state.isDataset,
+            'Tooltip-data Tooltip-data': !allowSync || smallWidth,
           }),
           manageCSS = classNames({
             'BranchMenu__btn BranchMenu__btn--manage': true,

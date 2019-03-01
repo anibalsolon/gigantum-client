@@ -36,19 +36,17 @@ function sharedUpdater(store, parentId, deletedId, connectionKey) {
 export default function DeleteRemoteLabbookMutation(
   labbookName,
   owner,
+  confirm,
   nodeID,
   parentID,
   connection,
-  local,
-  remote,
   callback,
 ) {
   const variables = {
     input: {
       labbookName,
       owner,
-      local,
-      remote,
+      confirm,
       clientMutationId: `${tempID++}`,
     },
   };
@@ -65,7 +63,7 @@ export default function DeleteRemoteLabbookMutation(
         callback(response, error);
       },
       updater: (store, response) => {
-        if (parentId) {
+        if (parentID) {
           sharedUpdater(store, parentID, nodeID, connection);
         }
       },

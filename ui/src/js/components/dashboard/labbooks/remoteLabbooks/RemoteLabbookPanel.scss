@@ -93,10 +93,7 @@
 /*****************************
   RemoteLabbooks cloud
 ******************************/
-.RemoteLabbooks__icon,
-.RemoteLabbooks__icon:hover,
-.RemoteLabbooks__icon:focus,
-.RemoteLabbooks__icon:disabled{
+.RemoteLabbooks__icon{
   width: 20px;
   height: 20px;
   margin-left: 5px;
@@ -169,23 +166,6 @@
     padding: 2px 0 2px 21px;
     border: 1px solid $romanSilver;
   }
-  &:hover:after{
-    content: attr(data-tooltip);
-    position: absolute;
-    min-width: 100px;
-    font-weight: 100;
-    line-height: 1.3em;
-    font-size: 16px;
-    margin: 0;
-    background: $azure;
-    color: $white;
-    padding: 5px;
-    border-radius: 5px;
-    left: 30px;
-    top: 50px;
-    z-index: 1;
-    font-size: .7em;
-  }
 }
 
 .RemoteLabbooks__icon--delete{
@@ -223,24 +203,6 @@
   border-radius: 0;
   padding: 2px 0 2px 21px;
   border: 1px solid $romanSilver;
-
-  &:hover:after{
-    content: attr(data-tooltip);
-    position: absolute;
-    min-width: 100px;
-    font-weight: 100;
-    line-height: 1.3em;
-    font-size: 16px;
-    margin: 0;
-    background: $azure;
-    color: $white;
-    padding: 5px;
-    border-radius: 5px;
-    left: 30px;
-    top: 50px;
-    z-index: 1;
-    font-size: .7em;
-  }
 }
 
 .RemoteDatasets__description--blank{

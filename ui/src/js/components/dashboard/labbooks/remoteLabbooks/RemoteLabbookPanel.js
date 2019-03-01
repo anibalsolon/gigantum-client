@@ -181,6 +181,7 @@ export default class RemoteLabbookPanel extends Component {
    });
    const deleteCSS = classNames({
      RemoteLabbooks__icon: true,
+     'Tooltip-data Tooltip-data--small': localStorage.getItem('username') !== edge.node.owner,
      'RemoteLabbooks__icon--delete': localStorage.getItem('username') === edge.node.owner,
      'RemoteLabbooks__icon--delete-disabled': localStorage.getItem('username') !== edge.node.owner,
    });
@@ -197,7 +198,7 @@ export default class RemoteLabbookPanel extends Component {
          {
           this.props.existsLocally ?
             <button
-              className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud"
+              className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud Tooltip-data Tooltip-data--small"
               data-tooltip="Project exists locally"
               disabled
             >
@@ -266,7 +267,7 @@ export default class RemoteLabbookPanel extends Component {
          </p>
        </div>
        { !(edge.node.visibility === 'local') &&
-       <div data-tooltip={`${edge.node.visibility}`} className={`Tooltip-Listing RemoteLabbooks__${edge.node.visibility}`} />
+       <div data-tooltip={`${edge.node.visibility}`} className={`Tooltip-Listing RemoteLabbooks__${edge.node.visibility}   Tooltip-data Tooltip-data--small`} />
         }
        {
           this.state.isImporting &&

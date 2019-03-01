@@ -224,7 +224,8 @@ export default class CollaboratorsModal extends Component {
       AddDatasetCollaboratorMutation(
         labbookName,
         owner,
-        newCollaborator,
+        collaboratorName || newCollaborator,
+        permissionOverride || newPermissions,
         (response, error) => {
           const { buttonLoaderRemoveCollaborator } = this.state;
 
