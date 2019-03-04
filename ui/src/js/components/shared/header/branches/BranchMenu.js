@@ -324,11 +324,12 @@ class BranchMenu extends Component {
   *  @param {Boolean} - pullOnly
   *  @param {Boolean} - allowSync
   *  @param {Boolean} - allowSyncPull
+  *  @param {Function} - passedSuccessCall
   *  handles syncing or publishing the project
   *  @return {}
   */
   @boundMethod
-  _handleSyncButton(pullOnly, allowSync, allowSyncPull) {
+  _handleSyncButton(pullOnly, allowSync, allowSyncPull, passedSuccessCall) {
     this.setState({ syncMenuVisible: false });
     if (allowSync || (pullOnly && allowSyncPull)) {
       if (!this.props.defaultRemote) {
@@ -383,6 +384,9 @@ class BranchMenu extends Component {
                 this.state.branchMutations.syncLabbook(data, (response, error) => {
                   if (error) {
                     data.failureCall(error);
+                  }
+                  if (passedSuccessCall) {
+                    passedSuccessCall();
                   }
                 });
               } else {

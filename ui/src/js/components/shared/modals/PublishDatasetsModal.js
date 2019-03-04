@@ -43,7 +43,7 @@ export default class PublishDatasetsModal extends Component {
   static getDerivedStateFromProps(nextProps, nextState) {
     const NewVisibilityStatus = Object.assign({}, nextState.visibilityStatus);
     nextProps.localDatasets.forEach(({ owner, name }) => {
-      if (!NewVisibilityStatus[`${owner}/${name}`]) {
+      if (NewVisibilityStatus[`${owner}/${name}`] === undefined) {
         NewVisibilityStatus[`${owner}/${name}`] = null;
       }
       if (nextProps.header === 'Sync') {
@@ -65,7 +65,7 @@ export default class PublishDatasetsModal extends Component {
   */
   _setPublic(name, isPublic) {
     const NewVisibilityStatus = Object.assign({}, this.state.visibilityStatus);
-    NewVisibilityStatus[name] = isPublic ? 'public' : 'private';
+    NewVisibilityStatus[name] = isPublic;
     this.setState({ visibilityStatus: NewVisibilityStatus });
   }
 
@@ -108,6 +108,13 @@ export default class PublishDatasetsModal extends Component {
                     self.props.toggleSyncModal();
                   }
                 }
+              };
+
+              const passedSuccessCall = () => {
+                const successProgress = Object.assign({}, this.state.progress);
+                successProgress.project = { step: 3 };
+                this.setState({ progress: successProgress });
+                setTimeout(() => this.props.toggleModal(false, true), 2000);
               };
 
               const successCall = () => {
@@ -200,7 +207,7 @@ export default class PublishDatasetsModal extends Component {
                                           },
                                         );
                                       } else {
-                                        this.props.handleSync(false, true, true);
+                                        this.props.handleSync(false, true, true, passedSuccessCall);
                                       }
                                     }
                                   }
