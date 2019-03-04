@@ -28,6 +28,7 @@ export default class TitleSection extends Component {
           visibilityIconCSS = classNames({
             [`TitleSection__${visibility}`]: true,
             [`TitleSection__${visibility}--sticky`]: props.isSticky,
+            'Tooltip-data Tooltip-data--small': true,
           }),
           title = `${section.owner} / ${section.name}`;
     return (
@@ -36,7 +37,10 @@ export default class TitleSection extends Component {
         <div className="TitleSection__namespace">
           <div className="TitleSection__namespace-title">{title}</div>
           { ((visibility === 'private') || (visibility === 'public'))
-              && <div className={visibilityIconCSS} />
+              && <div
+                className={visibilityIconCSS}
+                data-tooltip={visibility}
+              />
           }
         </div>
 
