@@ -188,7 +188,7 @@ class ImportRemoteLabbook(graphene.relay.ClientIDMutation):
         labbook_name = graphene.String(required=True)
         remote_url = graphene.String(required=True)
 
-    new_labbook_edge = graphene.Field(LabbookConnection.Edge)
+    job_key = graphene.String()
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, owner, labbook_name, remote_url, client_mutation_id=None):
@@ -211,13 +211,18 @@ class ImportRemoteLabbook(graphene.relay.ClientIDMutation):
         gl_mgr = GitLabManager(default_remote, admin_service=admin_service, access_token=token)
         gl_mgr.configure_git_credentials(default_remote, username)
 
-        wf = LabbookWorkflow.import_from_remote(remote_url, username=username)
-        import_owner = InventoryManager().query_owner(wf.labbook)
-        # TODO: Fix cursor implementation, this currently doesn't make sense
-        cursor = base64.b64encode(f"{0}".encode('utf-8'))
-        lbedge = LabbookConnection.Edge(node=LabbookObject(owner=import_owner, name=wf.labbook.name),
-                                        cursor=cursor)
-        return ImportRemoteLabbook(new_labbook_edge=lbedge)
+        job_metadata = {'method': 'import_labbook_from_remote'}
+        job_kwargs = {
+            'remote_url': remote_url,
+            'username': username
+        }
+
+        dispatcher = Dispatcher()
+        job_key = dispatcher.dispatch_task(jobs.import_labbook_from_remote, metadata=job_metadata,
+                                           kwargs=job_kwargs)
+        logger.info(f"Dispatched import_labbook_from_remote({remote_url}) to Job {job_key}")
+
+        return ImportRemoteLabbook(job_key=job_key.key_str)
 
 
 class AddLabbookRemote(graphene.relay.ClientIDMutation):
