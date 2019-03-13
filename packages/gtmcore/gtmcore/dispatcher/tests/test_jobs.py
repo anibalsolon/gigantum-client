@@ -35,9 +35,8 @@ from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.imagebuilder import ImageBuilder
 
 
-def _mock_import_labbook_from_remote(*args, **kwargs):
-    config_file, work_dir = mock_config_with_repo()
-    lb = InventoryManager(config_file).create_labbook('unittester', 'unittester', 'unittest-job-jb')
+def _mock_import_labbook_from_remote(remote_url, username, config_file):
+    lb = InventoryManager(config_file).create_labbook(username, username, remote_url.split('/')[-1])
     return lb.root_dir
 
 
@@ -118,8 +117,10 @@ class TestJobs(object):
     @patch('gtmcore.dispatcher.jobs.import_labbook_from_remote', new=_mock_import_labbook_from_remote)
     def test_import_labbook_from_remote(self, mock_config_with_repo):
         # Mock out actual import, as it's already tested in workflows.
-        root_dir = jobs.import_labbook_from_remote('http://mocked-url.com/unittester/mock-labbook', 'unittester')
+        root_dir = jobs.import_labbook_from_remote('http://mocked-url.com/unittester/mock-labbook', 'unittester',
+                                                   config_file=mock_config_with_repo[0])
         assert '/labbooks/' in root_dir
+        assert 'mock-labbook' == root_dir.split('/')[-1]
 
     def test_success_import_export_lbk(self, mock_config_with_repo):
         """Test legacy .lbk extension still works"""
