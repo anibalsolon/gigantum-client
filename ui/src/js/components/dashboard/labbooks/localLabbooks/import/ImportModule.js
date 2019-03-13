@@ -749,7 +749,7 @@ const ImportMain = ({ self }) => {
                 </button>
                 <button
                   onClick={() => { self.importLabbook(); }}
-                  disabled={!self.state.readyLabbook}
+                  disabled={!self.state.readyLabbook || self.state.isImporting}
                 >
                   Import
                 </button>

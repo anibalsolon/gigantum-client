@@ -407,7 +407,7 @@ export default class ImportModule extends Component {
   *  @return {}
   */
   _clearState = () => {
-    this.setState({ files: [], isImporting: false, readyDataset: null });
+    this.setState({ files: [], isImporting: false });
   }
 
   /**
@@ -499,6 +499,7 @@ export default class ImportModule extends Component {
     const self = this;
 
     ImportRemoteDatasetMutation(owner, datasetName, remote, (response, error) => {
+
       this._clearState();
       if (error) {
         console.error(error);
@@ -636,7 +637,7 @@ const ImportMain = ({ self }) => {
                 </button>
                 <button
                   onClick={() => { self.importDataset(); }}
-                  disabled={!self.state.readyDataset}
+                  disabled={!self.state.readyDataset || self.state.isImporting}
                 >
                   Import
                 </button>
