@@ -15,6 +15,8 @@ import {
   setModalVisible,
   setUpdateDetailView,
 } from 'JS/redux/reducers/labbook/labbook';
+// config
+import config from 'JS/config';
 // components
 import ToolTip from 'Components/common/ToolTip';
 // assets
@@ -37,11 +39,15 @@ class SidePanel extends Component {
 
   render() {
     const { props, state } = this,
+           isPushedDownTwice = (window.location.hostname === config.demoHostName) && props.isDeprecated,
+           isPushedDownOnce = ((window.location.hostname === config.demoHostName) || props.isDeprecated) && !isPushedDownTwice,
            sidePanelCSS = classNames({
              SidePanel: true,
              'SidePanel--sticky': props.isSticky && !props.isDeprecated,
-             'SidePanel--is-deprecated': props.isDeprecated && !props.isSticky,
-             'SidePanel--is-deprecated-sticky': props.isDeprecated && props.isSticky,
+             'SidePanel--is-deprecated': isPushedDownOnce && !props.isSticky,
+             'SidePanel--is-deprecated-demo': isPushedDownTwice && !props.isSticky,
+             'SidePanel--is-deprecated-demo-sticky': isPushedDownTwice && props.isSticky,
+             'SidePanel--is-deprecated-sticky': isPushedDownOnce && props.isSticky,
            });
     return (
       ReactDom.createPortal(

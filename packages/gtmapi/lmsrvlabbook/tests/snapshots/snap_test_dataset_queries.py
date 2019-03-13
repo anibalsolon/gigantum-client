@@ -775,7 +775,7 @@ snapshots['TestDatasetQueries.test_get_dataset_all_fields 1'] = {
                     }
                 ],
                 'pageInfo': {
-                    'hasNextPage': True,
+                    'hasNextPage': False,
                     'hasPreviousPage': False
                 }
             },

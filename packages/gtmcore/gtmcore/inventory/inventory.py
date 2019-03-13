@@ -21,7 +21,6 @@ from gtmcore.labbook.labbook import LabBook
 from gtmcore.dataset.dataset import Dataset
 from gtmcore.inventory import Repository
 from gtmcore.dataset.storage import SUPPORTED_STORAGE_BACKENDS
-from gtmcore.dataset.manifest import Manifest
 from gtmcore.activity import ActivityStore, ActivityDetailRecord, ActivityDetailType, ActivityRecord, ActivityType, \
     ActivityAction
 from gtmcore.dataset import Manifest
@@ -649,21 +648,57 @@ class InventoryManager(object):
         Returns:
 
         """
-        # add submodule and init
-        submodules_root = os.path.join(labbook.root_dir, '.gigantum', 'datasets')
-        submodule_dir = os.path.join(submodules_root, dataset_namespace, dataset_name)
-        if not os.path.exists(os.path.join(submodules_root, dataset_namespace)):
-            pathlib.Path(os.path.join(submodules_root, dataset_namespace)).mkdir(parents=True, exist_ok=True)
+        def _clean_submodule():
+            """Helper method to clean a submodule reference from a repository"""
+            if os.path.exists(absolute_submodule_dir):
+                logger.warning(f"Cleaning {relative_submodule_dir} from parent git repo")
+                try:
+                    call_subprocess(['git', 'rm', '-f', '--cached', relative_submodule_dir], cwd=labbook.root_dir)
+                except subprocess.CalledProcessError:
+                    logger.warning(f"git rm on {relative_submodule_dir} failed. Continuing...")
+                    pass
 
-        subprocess.run(['git', 'submodule', 'add', '--name', f"{dataset_namespace}&{dataset_name}", dataset_url,
-                        os.path.join('.gigantum', 'datasets', dataset_namespace, dataset_name)],
-                       check=True, cwd=labbook.root_dir, stderr=subprocess.STDOUT)
+            if os.path.exists(absolute_submodule_dir):
+                logger.warning(f"Removing {absolute_submodule_dir} directory")
+                shutil.rmtree(absolute_submodule_dir)
+
+            if os.path.exists(git_module_dir):
+                logger.warning(f"Removing {git_module_dir} directory")
+                shutil.rmtree(git_module_dir)
+
+        relative_submodule_dir = os.path.join('.gigantum', 'datasets', dataset_namespace, dataset_name)
+        absolute_submodule_dir = os.path.join(labbook.root_dir, relative_submodule_dir)
+        absolute_submodule_root = os.path.join(labbook.root_dir, '.gigantum', 'datasets', dataset_namespace)
+        git_module_dir = os.path.join(labbook.root_dir, '.git', 'modules', f"{dataset_namespace}&{dataset_name}")
+
+        if not os.path.exists(absolute_submodule_root):
+            pathlib.Path(absolute_submodule_root).mkdir(parents=True, exist_ok=True)
+
+        if os.path.exists(absolute_submodule_dir) and os.path.exists(git_module_dir):
+            # Seem to be trying to link a dataset after a reset removed the dataset. Clean up first.
+            _clean_submodule()
+
+        try:
+            # Link dataset via submodule reference
+            call_subprocess(['git', 'submodule', 'add', '--name', f"{dataset_namespace}&{dataset_name}", dataset_url,
+                            relative_submodule_dir], cwd=labbook.root_dir)
+
+        except subprocess.CalledProcessError:
+            logger.warning("Failed to link dataset. Attempting to repair repository and link again.")
+            _clean_submodule()
+
+            # Try to add again 1 more time, allowing a failure to raise an exception
+            call_subprocess(['git', 'submodule', 'add', '--name', f"{dataset_namespace}&{dataset_name}", dataset_url,
+                            relative_submodule_dir], cwd=labbook.root_dir)
+
+            # If you got here, repair worked and link OK
+            logger.info("Repository repair and linking retry successful.")
 
         labbook.git.add_all()
         commit = labbook.git.commit(f"adding submodule ref to link dataset {dataset_namespace}/{dataset_name}")
         labbook.git.update_submodules(init=True)
 
-        ds = self.load_dataset_from_directory(submodule_dir)
+        ds = self.load_dataset_from_directory(absolute_submodule_dir)
         dataset_revision = ds.git.repo.head.commit.hexsha
 
         # Add Activity Record
@@ -693,15 +728,17 @@ class InventoryManager(object):
         Returns:
 
         """
-        # add submodule and init
         submodule_dir = os.path.join('.gigantum', 'datasets', dataset_namespace, dataset_name)
+        call_subprocess(['git', 'rm', '-f', submodule_dir], cwd=labbook.root_dir)
 
-        subprocess.run(['git', 'submodule', 'deinit', '-f', submodule_dir],
-                       check=True, cwd=labbook.root_dir)
+        git_module_dir = os.path.join(labbook.root_dir, '.git', 'modules', f"{dataset_namespace}&{dataset_name}")
+        if os.path.exists(git_module_dir):
+            shutil.rmtree(git_module_dir)
 
-        shutil.rmtree(os.path.join(labbook.root_dir, '.git', 'modules', f"{dataset_namespace}&{dataset_name}"))
-
-        subprocess.run(['git', 'rm', '-f', submodule_dir], check=True, cwd=labbook.root_dir)
+        absolute_submodule_dir = os.path.join(labbook.root_dir, '.gigantum', 'datasets', dataset_namespace,
+                                              dataset_name)
+        if os.path.exists(absolute_submodule_dir):
+            shutil.rmtree(absolute_submodule_dir)
 
         labbook.git.add_all()
         commit = labbook.git.commit("removing submodule ref")

@@ -12,6 +12,12 @@
     &--is-deprecated-sticky{
       top: 160px !important;
     }
+    &--is-deprecated-demo{
+      top: 301px !important;
+    }
+    &--is-deprecated-demo-sticky{
+      top: 210px !important;
+    }
   }
 }
 
@@ -31,6 +37,12 @@
   }
   &--is-deprecated-sticky{
     top: 170px;
+  }
+  &--is-deprecated-demo{
+    top: 251px;
+  }
+  &--is-deprecated-demo-sticky{
+    top: 251px;
   }
 
   &--sticky{
