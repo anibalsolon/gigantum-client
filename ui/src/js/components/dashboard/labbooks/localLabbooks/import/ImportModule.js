@@ -614,40 +614,39 @@ export default class ImportModule extends Component {
   */
   _importRemoteProject(owner, labbookName, remote, id) {
     const self = this;
-
-    ImportRemoteLabbookMutation(owner, labbookName, remote, (response, error) => {
+    const sucessCall = () => {
       this._clearState();
+      store.dispatch({
+        type: 'MULTIPART_INFO_MESSAGE',
+        payload: {
+          id,
+          message: `Successfully imported remote Project ${labbookName}`,
+          isLast: true,
+          error: false,
+        },
+      });
 
+      self._buildImage(labbookName, owner, id);
+
+      self.props.history.replace(`/projects/${owner}/${labbookName}`);
+    };
+
+    const failureCall = (error) => {
+      this._clearState();
+      console.error(error);
+      store.dispatch({
+        type: 'MULTIPART_INFO_MESSAGE',
+        payload: {
+          id,
+          message: 'ERROR: Could not import remote Project',
+          messageBody: error,
+          error: true,
+        },
+      });
+    };
+    ImportRemoteLabbookMutation(owner, labbookName, remote, sucessCall, failureCall, (response, error) => {
       if (error) {
-        console.error(error);
-        store.dispatch({
-          type: 'MULTIPART_INFO_MESSAGE',
-          payload: {
-            id,
-            message: 'ERROR: Could not import remote Project',
-            messageBody: error,
-            error: true,
-          },
-        });
-      } else if (response) {
-        store.dispatch({
-          type: 'MULTIPART_INFO_MESSAGE',
-          payload: {
-            id,
-            message: `Successfully imported remote Project ${labbookName}`,
-            isLast: true,
-            error: false,
-          },
-        });
-
-        const { owner } = response.importRemoteLabbook.newLabbookEdge.node;
-
-        self._buildImage(labbookName, owner, id);
-
-        self.props.history.replace(`/projects/${owner}/${labbookName}`);
-      } else {
-        const owner = localStorage.getItem('username');
-        self._buildImage(labbookName, owner, id);
+        failurecall(error);
       }
     });
   }

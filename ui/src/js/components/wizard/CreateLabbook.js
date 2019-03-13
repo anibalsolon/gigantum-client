@@ -5,9 +5,6 @@ import uuidv4 from 'uuid/v4';
 import validation from 'JS/utils/Validation';
 // components
 import LoginPrompt from 'Components/shared/modals/LoginPrompt';
-// mutations
-import ImportRemoteLabbookMutation from 'Mutations/ImportRemoteLabbookMutation';
-import BuildImageMutation from 'Mutations/container/BuildImageMutation';
 // queries
 import UserIdentity from 'JS/Auth/UserIdentity';
 // store
@@ -45,73 +42,7 @@ export default class CreateLabbook extends React.Component {
   * */
   continueSave = (evt) => {
     const { name, description } = this.state;
-    const id = uuidv4();
-
-    const self = this;
-
     if (this.state.remoteURL.length > 0) {
-      const labbookName = this.state.remoteURL.split('/')[this.state.remoteURL.split('/').length - 1];
-      const owner = this.state.remoteURL.split('/')[this.state.remoteURL.split('/').length - 2];
-      const remote = this.state.remoteURL.indexOf('https://') > -1 ? `${this.state.remoteURL}.git` : `https://${this.state.remoteURL}.git`;
-
-      UserIdentity.getUserIdentity().then((response) => {
-        if (navigator.onLine) {
-          if (response.data) {
-            if (response.data.userIdentity.isSessionValid) {
-              setMultiInfoMessage(id, 'Importing Project please wait', false, false);
-              ImportRemoteLabbookMutation(
-                owner,
-                labbookName,
-                remote,
-                (response, error) => {
-                  if (error) {
-                    console.error(error);
-                    setMultiInfoMessage(id, 'ERROR: Could not import remote Project', null, true, error);
-                  } else if (response) {
-                    const labbookName = response.importRemoteLabbook.newLabbookEdge.node.name;
-                    const owner = response.importRemoteLabbook.newLabbookEdge.node.owner;
-                    setMultiInfoMessage(id, `Successfully imported remote Project ${labbookName}`, true, false);
-
-                    BuildImageMutation(
-                      owner,
-                      labbookName,
-                      false,
-                      (response, error) => {
-                        if (error) {
-                          console.error(error);
-                          setMultiInfoMessage(id, `ERROR: Failed to build ${labbookName}`, null, true, error);
-                        }
-                      },
-                    );
-                    self.props.history.replace(`/projects/${owner}/${labbookName}`);
-                  } else {
-                    BuildImageMutation(
-                      localStorage.getItem('username'),
-                      labbookName,
-                      false,
-                      (response, error) => {
-                        if (error) {
-                          console.error(error);
-                          setMultiInfoMessage(id, `ERROR: Failed to build ${labbookName}`, null, true, error);
-                        }
-                      },
-                    );
-                  }
-                },
-              );
-            } else {
-              this.props.auth.renewToken(true, () => {
-                setMultiInfoMessage(id, 'ERROR: User session not valid for remote import', null, true, [{ message: 'User must be authenticated to perform this action.' }]);
-                this.setState({ showLoginPrompt: true });
-              }, () => {
-                this.continueSave();
-              });
-            }
-          }
-        } else {
-          this.setState({ showLoginPrompt: true });
-        }
-      });
     } else {
       this.props.createLabbookCallback(name, description);
     }

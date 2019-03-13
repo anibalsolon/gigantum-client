@@ -3,16 +3,13 @@ import {
   graphql,
 } from 'react-relay';
 import environment from 'JS/createRelayEnvironment';
+// utils
+import FooterUtils from 'Components/common/footer/FooterUtils';
 
 const mutation = graphql`
   mutation ImportRemoteLabbookMutation($input: ImportRemoteLabbookInput!){
     importRemoteLabbook(input: $input){
-      newLabbookEdge{
-        node{
-          owner
-          name
-        }
-      }
+      jobKey
       clientMutationId
     }
   }
@@ -24,6 +21,8 @@ export default function ImportRemoteLabbookMutation(
   owner,
   labbookName,
   remoteUrl,
+  successCall,
+  failureCall,
   callback,
 ) {
   const variables = {
@@ -44,6 +43,9 @@ export default function ImportRemoteLabbookMutation(
         if (error) {
           console.log(error);
         }
+
+        FooterUtils.getJobStatus(response, 'importRemoteLabbook', 'jobKey', successCall, failureCall);
+
         callback(response, error);
       },
       onError: err => console.error(err),

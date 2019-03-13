@@ -120,47 +120,40 @@ export default class RemoteLabbookPanel extends Component {
          if (response.data.userIdentity.isSessionValid) {
            this._importingState();
            setMultiInfoMessage(id, 'Importing Project please wait', false, false);
+           const successCall = () => {
+            this._clearState();
+
+            setMultiInfoMessage(id, `Successfully imported remote Project ${labbookName}`, true, false);
+
+
+            BuildImageMutation(
+              owner,
+              labbookName,
+              false,
+              (response, error) => {
+                if (error) {
+                  console.error(error);
+                  setMultiInfoMessage(id, `ERROR: Failed to build ${labbookName}`, null, true, error);
+                }
+              },
+            );
+
+            self.props.history.replace(`/projects/${owner}/${labbookName}`);
+           };
+           const failureCall = (error) => {
+            this._clearState();
+            setMultiInfoMessage(id, 'ERROR: Could not import remote Project', null, true, error);
+           };
+
            ImportRemoteLabbookMutation(
              owner,
              labbookName,
              remote,
+             successCall,
+             failureCall,
              (response, error) => {
-               this._clearState();
-
                if (error) {
-                 console.error(error);
-                 setMultiInfoMessage(id, 'ERROR: Could not import remote Project', null, true, error);
-               } else if (response) {
-                 const labbookName = response.importRemoteLabbook.newLabbookEdge.node.name;
-                 const owner = response.importRemoteLabbook.newLabbookEdge.node.owner;
-                 setMultiInfoMessage(id, `Successfully imported remote Project ${labbookName}`, true, false);
-
-
-                 BuildImageMutation(
-                   owner,
-                   labbookName,
-                   false,
-                   (response, error) => {
-                     if (error) {
-                       console.error(error);
-                       setMultiInfoMessage(id, `ERROR: Failed to build ${labbookName}`, null, true, error);
-                     }
-                   },
-                 );
-
-                 self.props.history.replace(`/projects/${owner}/${labbookName}`);
-               } else {
-                 BuildImageMutation(
-                   localStorage.getItem('username'),
-                   labbookName,
-                   false,
-                   (response, error) => {
-                     if (error) {
-                       console.error(error);
-                       setMultiInfoMessage(id, `ERROR: Failed to build ${labbookName}`, null, true, error);
-                     }
-                   },
-                 );
+                 failurecall(error);
                }
              },
            );

@@ -134,6 +134,8 @@ const FooterUtils = {
                     },
                     );
                 }
+              } else if (type === 'importRemoteLabbook') {
+                successCall();
               }
             } else if (response.data.jobStatus.status === 'failed') {
               const method = JSON.parse(response.data.jobStatus.jobMetadata).method;
@@ -158,7 +160,7 @@ const FooterUtils = {
                     owner,
                     labbookName,
                     () => {
-                      failureCall();
+                      failureCall(response.data.jobStatus.failureMessage);
                     },
                     );
                 } else {
@@ -168,13 +170,15 @@ const FooterUtils = {
                     owner,
                     labbookName,
                     () => {
-                      failureCall();
+                      failureCall(response.data.jobStatus.failureMessage);
                     },
                     );
                 }
                 errorMessage = `Failed to download ${failureKeys.length} of ${totalAmount} Files.`;
                 reportedFailureMessage = 'Failed to download the following Files:';
                 failureKeys.forEach(failedKey => reportedFailureMessage = `${reportedFailureMessage}\n${failedKey}`);
+              } else if (type === 'importRemoteLabbook') {
+                failureCall();
               }
               html += `\n<span style="color:rgb(255,85,85)">${reportedFailureMessage}</span>`;
               setMultiInfoMessage(id || response.data.jobStatus.id, errorMessage, true, true, [{ message: html }]);
