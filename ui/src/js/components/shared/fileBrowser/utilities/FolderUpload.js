@@ -56,26 +56,6 @@ const fileExistenceQuery = graphql`
 *  @return {promise}
 */
 const checkIfFolderExists = (variables, section, type) => {
-  if (type !== 'dataset') {
-    const promise = new Promise((resolve, reject) => {
-      const fetchData = function () {
-        fetchQuery(fileExistenceQuery(), variables).then((response) => {
-          if (response.data) {
-            resolve({ labbook: response.data.labbook, variables });
-          } else {
-            reject(response.error);
-          }
-        }).catch((error) => {
-          console.log(error);
-          reject(error);
-        });
-      };
-
-      fetchData();
-    });
-
-    return promise;
-  }
   return new Promise((resolve, reject) => {
     resolve({ labbook: null, variables });
   });

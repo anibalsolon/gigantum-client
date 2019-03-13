@@ -76,6 +76,7 @@ const Environment = Loadable({
 class Labbook extends Component {
   constructor(props) {
   	super(props);
+
     localStorage.setItem('owner', store.getState().routes.owner);
     // bind functions here
     this._toggleBranchesView = this._toggleBranchesView.bind(this);
@@ -107,7 +108,7 @@ class Labbook extends Component {
 
   static getDerivedStateFromProps(nextProps, state) {
     setCallbackRoute(nextProps.location.pathname);
-    const propBranches = nextProps.labbook ? nextProps.labbook.branches : [];
+    const propBranches = nextProps.labbook && nextProps.labbook.branches ? nextProps.labbook.branches : [];
     const stateBranches = state.branches;
     const branchMap = new Map();
     const mergedBranches = [];

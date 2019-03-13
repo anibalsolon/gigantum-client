@@ -81,7 +81,8 @@ export default function AddDatasetFileMutation(
   callback,
 ) {
   const uploadables = [chunk.blob, accessToken];
-
+  const date = new Date();
+  const modifiedAt = (date.getTime() / 1000);
   const id = uuidv4();
   const optimisticId = uuidv4();
 
@@ -127,12 +128,12 @@ export default function AddDatasetFileMutation(
       onError: err => console.error(err),
       optimisticUpdater: (store) => {
         const node = store.create(optimisticId, 'DatasetFile');
-
+        const chunkSize = chunk.chunkSize === 48000000 ? chunk.fileSizeKb : chunk.chunkSize;
         node.setValue(optimisticId, 'id');
         node.setValue(false, 'isDir');
         node.setValue(filePath, 'key');
-        node.setValue(0, 'modifiedAt');
-        node.setValue(chunk.chunkSize, 'size');
+        node.setValue(modifiedAt, 'modifiedAt');
+        node.setValue(chunkSize, 'size');
 
         sharedUpdater(store, datasetId, connectionKey, node);
       },

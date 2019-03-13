@@ -296,3 +296,29 @@ class TestInventoryDatasets(object):
 
         assert len(data) == 0
 
+    def test_link_unlink_dataset_with_repair(self, mock_labbook):
+        inv_manager = InventoryManager(mock_labbook[0])
+        lb = mock_labbook[2]
+        ds = inv_manager.create_dataset("test", "test", "dataset100", "gigantum_object_v1", description="my dataset")
+
+        # Fake publish to a local bare repo
+        _MOCK_create_remote_repo2(ds, 'test', None, None)
+
+        assert os.path.exists(os.path.join(lb.root_dir, '.gitmodules')) is False
+
+        dataset_submodule_dir = os.path.join(lb.root_dir, '.gigantum', 'datasets', 'test', 'dataset100')
+        git_module_dir = os.path.join(lb.root_dir, '.git', 'modules', f"test&dataset100")
+
+        # Add dirs as if lingering submodule config
+        os.makedirs(dataset_submodule_dir)
+        os.makedirs(git_module_dir)
+
+        inv_manager.link_dataset_to_labbook(ds.remote, 'test', 'dataset100', lb)
+
+        assert os.path.exists(os.path.join(lb.root_dir, '.gitmodules')) is True
+        assert os.path.exists(dataset_submodule_dir) is True
+        assert os.path.exists(os.path.join(dataset_submodule_dir, '.gigantum')) is True
+        with open(os.path.join(lb.root_dir, '.gitmodules'), 'rt') as mf:
+            data = mf.read()
+
+        assert len(data) > 0
