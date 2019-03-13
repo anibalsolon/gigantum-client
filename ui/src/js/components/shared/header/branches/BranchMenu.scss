@@ -184,6 +184,7 @@ $dropBoxWidth: 250px;
     align-items: center;
     background: transparent;
     color: $azure;
+    border-radius: 3px 0 0 3px;
     &:hover {
       padding: 0 10px 0 10px;
 
@@ -275,7 +276,7 @@ $dropBoxWidth: 250px;
     padding: 2px;
     background: url(~Images/icons/down-arrow-azure.svg) no-repeat center center;
     background-size: 20px;
-
+    border-radius: 0 3px 3px 0;
     &:hover, &:focus {
       background: $azure url(~Images/icons/down-arrow-white.svg) no-repeat center center;
       background-size: 20px;

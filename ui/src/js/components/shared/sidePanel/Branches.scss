@@ -92,6 +92,7 @@
     &--sync-dropdown {
         margin-left: -4px;
         width: 15px;
+        border-radius: 0 4px 4px 0;
         background: url(~Images/icons/branches/chevron.svg) no-repeat center center;
         background-size: 20px;
 
@@ -163,6 +164,7 @@
     &--sync {
         background: $white url('~Images/icons/branches/sync.svg') no-repeat center center;
         background-size: cover;
+        border-radius: 4px 0 0 4px;
         &:hover, &:focus {
             background: $azure url('~Images/icons/branches/sync-hover.svg') no-repeat center center;
             background-size: cover;
@@ -172,6 +174,7 @@
     &--push {
         background: $white url('~Images/icons/branches/push.svg') no-repeat center center;
         background-size: cover;
+        border-radius: 4px 0 0 4px;
         &:hover, &:focus {
             background: $azure url('~Images/icons/branches/push-hover.svg') no-repeat center center;
             background-size: cover;
@@ -181,6 +184,7 @@
     &--pull {
         background: $white url('~Images/icons/branches/pull.svg') no-repeat center center;
         background-size: cover;
+        border-radius: 4px 0 0 4px;
         &:hover, &:focus {
             background: $azure url('~Images/icons/branches/pull-hover.svg') no-repeat center center;
             background-size: cover;
