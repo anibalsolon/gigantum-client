@@ -35,6 +35,7 @@ from gtmcore.fixtures import remote_labbook_repo, mock_config_file
 from gtmcore.inventory.branching import BranchManager
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.configuration import Configuration
+from gtmcore.dispatcher import Dispatcher, JobKey
 from gtmcore.files import FileOperations
 
 @pytest.fixture()
@@ -67,6 +68,10 @@ class TestLabbookSharing(object):
 
         monkeypatch.setattr(Configuration, 'find_default_config', lambda x : fixture_working_dir[0])
 
+        def mock_dispatch(*args, **kwargs):
+            return JobKey('rq:job:000-000-000')
+        monkeypatch.setattr(Dispatcher, 'dispatch_task', mock_dispatch)
+
         query = f"""
         mutation importFromRemote {{
           importRemoteLabbook(
@@ -80,101 +85,8 @@ class TestLabbookSharing(object):
         }}
         """
         r = fixture_working_dir[2].execute(query, context_value=req)
-        time.sleep(1)
-
-        query = f"""
-        {{
-            labbook(name: "sample-repo-lb", owner: "default") {{
-                name
-                owner
-                activeBranchName
-            }}
-        }}
-        """
-        r = fixture_working_dir[2].execute(query)
-        pprint.pprint(remote_labbook_repo)
-        pprint.pprint(r)
-        assert False
-
-
-        assert r['data']['labbook']['newLabbookEdge']['node']['name'] == 'sample-repo-lb'
         assert 'errors' not in r
-
-        # TODO - Need to make sure logic to change owner is correct.
-        new_owner = r['data']['importRemoteLabbook']['newLabbookEdge']['node']['owner']
-
-        ## Now we want to validate that when we import a labbook from a remote url, we also track the default branch.
-        list_all_branches_q = f"""
-        {{
-            labbook(name: "sample-repo-lb", owner: "{new_owner}") {{
-                activeBranchName
-                branches {{
-                    branchName
-                }}
-            }}
-        }}
-        """
-        r = fixture_working_dir[2].execute(list_all_branches_q, context_value=req)
-        pprint.pprint(r)
-        assert 'errors' not in r
-        assert r['data']['labbook']['activeBranchName'] == 'master'
-        nodes = r['data']['labbook']['branches']
-        for n in [x['branchName'] for x in nodes]:
-            # Make sure that the user's local branch was created
-            if n == f'master':
-                break
-        else:
-            assert False, f"Branch master should exist but does not"
-
-
-        # Make sure the labbook cloned into the correct directory
-        assert os.path.exists(os.path.join(fixture_working_dir[1], 'default', new_owner, 'labbooks', 'sample-repo-lb'))
-
-        # Now do a quick test for default_remote
-        get_default_remote_q = f"""
-        {{
-            labbook(name: "sample-repo-lb", owner: "{new_owner}") {{
-                defaultRemote
-            }}
-        }}
-        """
-        r = fixture_working_dir[2].execute(get_default_remote_q, context_value=req)
-        #assert r['data']['labbook']['defaultRemote'] == remote_labbook_repo
-        assert 'errors' not in r
-
-    def test_import_remote_labbook_from_same_user(self, remote_labbook_repo, fixture_working_dir):
-        # Create a labbook by the "default" user
-        # TODO: enable LFS when integration tests support it
-        conf_file, working_dir = _create_temp_work_dir(lfs_enabled=False)
-        lb = InventoryManager(conf_file).create_labbook("default", "default", "default-owned-repo-lb",
-                                                        description="my first labbook")
-        bm = BranchManager(lb, username='default')
-        labbook_dir = lb.root_dir
-
-        # Mock the request context so a fake authorization header is present
-        builder = EnvironBuilder(path='/labbook', method='POST', headers={'Authorization': 'Bearer AJDFHASD'})
-        env = builder.get_environ()
-        req = Request(environ=env)
-
-        query = f"""
-        mutation importFromRemote {{
-          importRemoteLabbook(
-            input: {{
-              owner: "default",
-              labbookName: "default-owned-repo-lb",
-              remoteUrl: "{labbook_dir}"
-            }}) {{
-                jobKey
-            }}
-        }}
-        """
-        r = fixture_working_dir[2].execute(query, context_value=req)
-        pprint.pprint(r)
-        assert 'errors' not in r
-        # We might not always want to use master as the default branch, but keep it here for now.
-        # TODO: Reintroduce this test -- cannot work in existing fixture as remote_url doesnt follow pattern
-        #assert r['data']['importRemoteLabbook']['newLabbookEdge']['node']['owner'] == 'default'
-        assert r['data']['importRemoteLabbook']['newLabbookEdge']['node']['name'] == 'default-owned-repo-lb'
+        assert r['data']['importRemoteLabbook']['jobKey'] == 'rq:job:000-000-000'
 
     def test_can_checkout_branch(self, mock_create_labbooks, remote_labbook_repo, fixture_working_dir):
         """Test whether there are uncommitted changes or anything that would prevent
