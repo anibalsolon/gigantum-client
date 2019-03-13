@@ -32,7 +32,6 @@ from werkzeug.test import EnvironBuilder
 from werkzeug.wrappers import Request
 
 from gtmcore.fixtures import remote_labbook_repo, mock_config_file
-from gtmcore.inventory.branching import BranchManager
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.configuration import Configuration
 from gtmcore.dispatcher import Dispatcher, JobKey

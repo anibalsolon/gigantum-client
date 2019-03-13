@@ -22,7 +22,6 @@ import json
 import os
 import time
 from typing import Optional, List
-import base64
 import sys
 
 from rq import get_current_job

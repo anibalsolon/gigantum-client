@@ -18,13 +18,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import graphene
-import abc
 
 import os
 import tempfile
 from gtmcore.logging import LMLogger
-from werkzeug.utils import secure_filename
-
 
 logger = LMLogger.get_logger()
 
