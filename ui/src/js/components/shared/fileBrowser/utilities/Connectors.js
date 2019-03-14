@@ -21,7 +21,7 @@ const checkFileSize = (files, promptType) => {
   const tenMB = 10 * 1000 * 1000;
   const oneHundredMB = 100 * 1000 * 1000;
   const fiveHundredMB = oneHundredMB * 5;
-  const fourGigs = oneHundredMB * 40;
+  const fiveGigs = oneHundredMB * 50;
   const fileSizePrompt = [];
   const fileSizeNotAllowed = [];
 
@@ -54,7 +54,7 @@ const checkFileSize = (files, promptType) => {
                 fileSizePrompt.push(file);
               }
 
-        } else if (file.size > fourGigs) {
+        } else if (file.size > fiveGigs) {
           fileSizeNotAllowed.push(file);
         }
       }

@@ -8,12 +8,6 @@ import { boundMethod } from 'autobind-decorator';
 // store
 import store from 'JS/redux/store';
 import {
-  setLatestFetched,
-  setForceRefetch,
-  setForceCancelRefetch,
-  setLatestPackages,
-  setRefetchOccuring,
-  setRefetchQueued,
   setPackageMenuVisible,
 } from 'JS/redux/reducers/labbook/environment/packageDependencies';
 import { setErrorMessage, setWarningMessage } from 'JS/redux/reducers/footer';
@@ -57,58 +51,41 @@ class PackageDependencies extends Component {
       disableInstall: false,
       installDependenciesButtonState: '',
       hardDisable: false,
-      latestVersion: store.getState().packageDependencies.latestPackages,
       removalPackages: {},
       updatePackages: {},
+      latestVersionPackages: [],
       currentPackages: this.props.environment.packageDependencies,
     };
   }
 
   static getDerivedStateFromProps(props, state) {
-    return state;
+
+    const packages = props.environment.packageDependencies.edges;
+
+    let latestVersionPackages = packages.map((edge) => {
+      let packageObject = { ...edge.node };
+      if (props.packageLatestVersions.length > 0) {
+        props.packageLatestVersions.forEach((latestVersionEdge) => {
+          if ((packageObject.manager === latestVersionEdge.node.manager) && (packageObject.package === latestVersionEdge.node.package)) {
+            packageObject.latestVersion = latestVersionEdge.node.latestVersion;
+          }
+        });
+      }
+      return packageObject;
+    });
+
+    return {
+      ...state,
+      latestVersionPackages,
+    };
   }
 
   componentDidUpdate() {
     const { props, state } = this;
-    if (props.forceRefetch) {
-      this._refetch();
-      props.setForceRefetch(false);
-    }
-    if (props.forceCancelRefetch) {
-      if (this.pendingRefetch) {
-        this.pendingRefetch.dispose();
-      }
-      props.setForceCancelRefetch(false);
-    }
-
     const newPackages = this.props.environment.packageDependencies;
 
     if (newPackages.edges && newPackages.edges.length < 3 && newPackages.pageInfo.hasNextPage) {
       this._loadMore();
-    }
-
-    if (newPackages.edges && newPackages.edges[0] && newPackages.edges[0].node.latestVersion) {
-      const latestPackages = {};
-
-      newPackages.edges.forEach(({ node }) => {
-        if (latestPackages[node.manager]) {
-          latestPackages[node.manager][node.package] = node.latestVersion;
-        } else {
-          latestPackages[node.manager] = { [node.package]: node.latestVersion };
-        }
-
-        if (updateCheck[node.manager] && updateCheck[node.manager][node.package]) {
-          if (updateCheck[node.manager][node.package].oldVersion !== node.latestVersion) {
-            updateCheck[node.manager][node.package].version = node.latestVersion;
-          } else {
-            delete updateCheck[node.manager][node.package];
-          }
-        }
-      });
-      if (JSON.stringify(latestPackages) !== JSON.stringify(this.props.latestPackages)) {
-         props.setLatestPackages(latestPackages);
-         props.setLatestFetched(true)
-      }
     }
 
     const newUpdatePackages = Object.assign({}, this.state.updatePackages, updateCheck);
@@ -134,8 +111,6 @@ class PackageDependencies extends Component {
 
     if (props.environment.packageDependencies.pageInfo.hasNextPage) {
       this._loadMore(); // routes query only loads 2, call loadMore
-    } else if (!store.getState().packageDependencies.latestFetched) {
-      this._refetch();
     }
 
     if (state.selectedTab === '') {
@@ -167,8 +142,6 @@ class PackageDependencies extends Component {
           if (props.environment.packageDependencies &&
            props.environment.packageDependencies.pageInfo.hasNextPage) {
             self._loadMore();
-          } else {
-            self._refetch();
           }
         },
         {
@@ -177,45 +150,7 @@ class PackageDependencies extends Component {
       );
     }
   }
-  /*
-    @param
-    refetches package dependencies
-  */
-  @boundMethod
-  _refetch() {
-    const {
-        latestFetched,
-        refetchOccuring,
-      } = store.getState().packageDependencies,
-      self = this,
-      { props } = this,
-      { relay } = props;
 
-    if (!refetchOccuring && !latestFetched) {
-      const packageDependencies = props.environment.packageDependencies;
-      if (packageDependencies.edges.length > 0) {
-        props.setRefetchOccuring(true);
-
-        self.pendingRefetch = relay.refetchConnection(
-          packageDependencies.edges.length,
-          (response) => {
-            props.setRefetchOccuring(false);
-            if (store.getState().packageDependencies.refetchQueued) {
-              props.setRefetchQueued(false);
-            }
-            self.setState({ forceRender: true });
-          },
-          {
-            first: 1000,
-            hasNext: true,
-            cursor: null,
-          },
-        );
-      }
-    } else {
-      props.setRefetchQueued(true);
-    }
-  }
   /**
   *  @param {Object}
   *  hides packagemanager modal
@@ -231,23 +166,6 @@ class PackageDependencies extends Component {
       packageMenuVisible,
       packages,
     });
-  }
-  /**
-  *  @param {Object}
-  *  hides packagemanager modal
-  */
-  _filterPackageDependencies(packageDependencies) {
-    const { props, state } = this,
-          searchValue = state.searchValue && state.searchValue.toLowerCase();
-
-    const packages = packageDependencies.edges.filter(edge => edge && edge.node && (edge.node.manager === state.selectedTab)).filter((edge) => {
-      const name = edge && edge.node && edge.node.package ? edge.node.package.toLowerCase() : '';
-      const searchMatch = ((searchValue === '') || (name.indexOf(searchValue) > -1));
-
-      return searchMatch;
-    });
-
-    return packages;
   }
   /**
   *  @param {object} node
@@ -398,12 +316,13 @@ class PackageDependencies extends Component {
   */
   @boundMethod
   _addPackageComponentsMutation() {
+    const { props } = this;
     let self = this,
       { packages } = this.state,
       filteredInput = [];
 
     const { labbookName, owner } = store.getState().routes,
-      { environmentId } = this.props;
+          { environmentId } = props;
 
     packages = packages.map((pkg) => {
       pkg.validity = 'checking';
@@ -422,10 +341,10 @@ class PackageDependencies extends Component {
     });
 
     setBuildingState(true);
-    this.props.setLookingUpPackagesState(true);
+    props.setLookingUpPackagesState(true);
 
     PackageLookup.query(labbookName, owner, filteredInput).then((response) => {
-      this.props.setLookingUpPackagesState(false);
+      props.setLookingUpPackagesState(false);
       if (response.errors) {
         packages = packages.map((pkg) => {
           pkg.validity = 'valid';
@@ -435,7 +354,7 @@ class PackageDependencies extends Component {
         setTimeout(() => {
           self.setState({ installDependenciesButtonState: '' });
         }, 2000);
-        this.props.setErrorMessage('Error occured looking up packages', response.errors);
+        props.setErrorMessage('Error occured looking up packages', response.errors);
 
         setBuildingState(false);
       } else {
@@ -456,14 +375,20 @@ class PackageDependencies extends Component {
 
         if (invalidCount) {
           const message = invalidCount === 1 ? `Unable to find package '${lastInvalid.package}'.` : `Unable to find ${invalidCount} packages.`;
-          this.props.setErrorMessage('Packages could not be installed', [{ message }]);
+
+          props.setErrorMessage('Packages could not be installed', [{ message }]);
+
           setBuildingState(false);
-          this.setState({ disableInstall: false, installDependenciesButtonState: '' });
+          this.setState({
+            disableInstall: false,
+            installDependenciesButtonState: '',
+          });
         } else {
           filteredInput = [];
-          const flatPackages = [];
-          const versionReference = {};
-          const existingPackages = this.props.environment.packageDependencies;
+          const flatPackages = [],
+                versionReference = {},
+                existingPackages = props.environment.packageDependencies;
+
           resPackages.forEach((pkg) => {
             flatPackages.push(pkg.package);
           });
@@ -483,7 +408,6 @@ class PackageDependencies extends Component {
           });
 
           if (filteredInput.length) {
-
             AddPackageComponentsMutation(
               labbookName,
               owner,
@@ -494,19 +418,23 @@ class PackageDependencies extends Component {
               duplicates,
               (response, error) => {
                 if (error) {
-                  this.setState({ disableInstall: false, installDependenciesButtonState: 'error' });
+                  self.setState({
+                    disableInstall: false,
+                    installDependenciesButtonState: 'error',
+                  });
+
                   setTimeout(() => {
                     self.setState({ installDependenciesButtonState: '' });
                   }, 2000);
-                  this.props.setErrorMessage('Error adding packages.', error);
+
+                  props.setErrorMessage('Error adding packages.', error);
                 } else {
-                  self.props.buildCallback(true);
-                  self.props.setLatestFetched(false)
                   self.setState({
                     disableInstall: false,
                     packages: [],
                     installDependenciesButtonState: 'finished',
                   });
+                  props.fetchPackageVersion();
                   setTimeout(() => {
                     self.setState({ installDependenciesButtonState: '' });
                   }, 2000);
@@ -557,12 +485,12 @@ class PackageDependencies extends Component {
   *  @param {String, String} pkg manager
   *  adds to removalpackages state pending removal of packages
   * */
-  _addRemovalPackage(edge, updateAvailable, version, oldVersion) {
-    const { manager, id } = edge.node;
-    const pkg = edge.node.package;
-
-    const newRemovalPackages = Object.assign({}, this.state.removalPackages);
-    const newUpdatePackages = Object.assign({}, this.state.updatePackages);
+  _addRemovalPackage(node) {
+    const { manager, id, version } = node,
+          pkg = node.package,
+          newRemovalPackages = Object.assign({}, this.state.removalPackages),
+          newUpdatePackages = Object.assign({}, this.state.updatePackages),
+          updateAvailable = node.latestVersion && (node.version !== node.latestVersion);
 
     if (newRemovalPackages[manager]) {
       const index = Object.keys(newRemovalPackages[manager]).indexOf(pkg);
@@ -576,25 +504,25 @@ class PackageDependencies extends Component {
       newRemovalPackages[manager] = { [pkg]: id };
     }
 
-    if (!version) {
+    if (!node.version) {
       if (updateCheck[manager]) {
-        updateCheck[manager][pkg] = { id, oldVersion };
+        updateCheck[manager][pkg] = { id, oldVersion: node.version };
       } else {
-        updateCheck[manager] = { [pkg]: { id, oldVersion } };
+        updateCheck[manager] = { [pkg]: { id, oldVersion: node.version } };
       }
     }
 
-    if (updateAvailable && version) {
+    if (updateAvailable) {
       if (newUpdatePackages[manager]) {
         const index = Object.keys(newUpdatePackages[manager]).indexOf(pkg);
 
         if (index > -1) {
           delete newUpdatePackages[manager][pkg];
         } else {
-          newUpdatePackages[manager][pkg] = { id, version };
+          newUpdatePackages[manager][pkg] = { id, version: node.latestVersion };
         }
       } else {
-        newUpdatePackages[manager] = { [pkg]: { id, version } };
+        newUpdatePackages[manager] = { [pkg]: { id, version: node.latestVersion } };
       }
     }
     this.setState({ removalPackages: newRemovalPackages, updatePackages: newUpdatePackages });
@@ -661,6 +589,22 @@ class PackageDependencies extends Component {
     }
   }
 
+  /**
+  *  @param {Object}
+  *  hides packagemanager modal
+  */
+  _filterPackageDependencies(packageDependencies) {
+    const { props, state } = this,
+          searchValue = state.searchValue && state.searchValue.toLowerCase();
+
+    const packages = state.latestVersionPackages.filter((node) => {
+      const name = node && node.package ? node.package.toLowerCase() : '',
+            searchMatch = ((searchValue === '') || (name.indexOf(searchValue) > -1));
+      return (searchMatch && (node.manager === state.selectedTab));
+    });
+
+    return packages;
+  }
 
   render() {
     const { props, state } = this,
@@ -673,8 +617,8 @@ class PackageDependencies extends Component {
             'PackageDependencies__remove-button--half': updateButtonAvailable,
           });
 
-    if (packageDependencies) {
-      const filteredPackageDependencies = this._filterPackageDependencies(packageDependencies);
+    if (state.latestVersionPackages) {
+      const filteredPackageDependencies = this._filterPackageDependencies(state.latestVersionPackages);
       const packageMenu = classNames({
         PackageDependencies__menu: true,
         'PackageDependencies__menu--min-height': !props.packageMenuVisible,
@@ -762,7 +706,7 @@ class PackageDependencies extends Component {
                   <table>
                     <tbody>
                       {
-                        this.state.packages.map((node, index) => {
+                        state.packages.map((node, index) => {
                           const version = node.version === '' ? 'latest' : `${node.version}`;
                           const versionText = `${version === 'latest' ? node.validity === 'checking' ? 'retrieving latest version' : 'latest version' : `${version}`}`;
                           return (
@@ -847,7 +791,7 @@ class PackageDependencies extends Component {
                 </thead>
                 <tbody>
                   {
-                    filteredPackageDependencies.filter(edge => edge.node).map((edge, index) => (this._packageRow(edge, index)))
+                    filteredPackageDependencies.map((node, index) => (this._packageRow(node, index)))
                   }
                 </tbody>
               </table>
@@ -858,49 +802,37 @@ class PackageDependencies extends Component {
     return (<Loader />);
   }
 
-  _packageRow(edge, index) {
-    const installer = edge.node.fromBase ? 'System' : 'User',
-      { version, latestVersion } = edge.node,
+  _packageRow(node, index) {
+    const installer = node.fromBase ? 'System' : 'User',
+      { version, latestVersion } = node,
       versionText = version || '',
-      isSelected = this.state.removalPackages[edge.node.manager] && Object.keys(this.state.removalPackages[edge.node.manager]).indexOf(edge.node.package) > -1;
-
-    let latestVersionText = latestVersion || null;
-
-    const updateAvailable = latestVersionText && (latestVersionText !== versionText) && !edge.node.fromBase;
-
-    if (!latestVersionText) {
-      if (this.state.latestVersion[edge.node.manager] && this.state.latestVersion[edge.node.manager][edge.node.package]) {
-        latestVersionText = this.state.latestVersion[edge.node.manager][edge.node.package];
-      }
-    }
-
-    const buttonCSS = classNames({
+      isSelected = this.state.removalPackages[node.manager] && Object.keys(this.state.removalPackages[node.manager]).indexOf(node.package) > -1,
+      updateAvailable = node.version !== node.latestVersion,
+      buttonCSS = classNames({
         'PackageDependencies__btn--round PackageDependencies__btn--remove': !isSelected,
         'PackageDependencies__btn--round PackageDependencies__btn--remove--selected': isSelected,
-
       }),
-
-      trCSS = classNames({
-        'PackageDependencies__cell--optimistic-updating': edge.node.id === undefined,
+      tableRowCSS = classNames({
+        'PackageDependencies__cell--optimistic-updating': node.id === undefined,
       });
 
     return (
       <tr
-        className={trCSS}
-        key={edge.node.package + edge.node.manager + index}>
-        <td>{edge.node.package}</td>
+        className={tableRowCSS}
+        key={node.package + node.manager + index}>
+        <td>{node.package}</td>
 
         <td>
-          {versionText}
+          {node.version}
         </td>
 
         <td className="PackageDependencies__cell--latest-column">
 
           <span>
-            {latestVersionText}
+            {node.latestVersion}
           </span>
           {
-            latestVersionText && (latestVersionText !== versionText) && !edge.node.fromBase &&
+            node.latestVersion && (node.latestVersion !== node.version) && !node.fromBase &&
             <div className="PackageDependencies__updateAvailable" />
           }
         </td>
@@ -911,8 +843,8 @@ class PackageDependencies extends Component {
 
           <button
             className={buttonCSS}
-            disabled={edge.node.fromBase || (edge.node.id === undefined)}
-            onClick={() => this._addRemovalPackage(edge, updateAvailable, latestVersionText, versionText)}
+            disabled={node.fromBase || (node.id === undefined)}
+            onClick={() => this._addRemovalPackage(node)}
           />
         </td>
       </tr>);
@@ -922,12 +854,6 @@ class PackageDependencies extends Component {
 const mapStateToProps = (state, ownProps) => state.packageDependencies;
 
 const mapDispatchToProps = dispatch => ({
-  setLatestFetched,
-  setForceRefetch,
-  setForceCancelRefetch,
-  setLatestPackages,
-  setRefetchOccuring,
-  setRefetchQueued,
   setPackageMenuVisible,
   setErrorMessage,
   setContainerMenuWarningMessage,

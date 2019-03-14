@@ -163,6 +163,12 @@ class BranchMenu extends Component {
         self.setState({ switchingBranch: false });
         this._toggleCover(null);
         props.updateMigationState(response);
+
+        state.branchMutations.buildImage((response, error) => {
+            if (error) {
+              setErrorMessage('Failed to switch branches.', error);
+            }
+        });
       });
   }
   /**

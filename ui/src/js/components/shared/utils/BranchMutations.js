@@ -224,7 +224,7 @@ class BranchesMutations {
         name,
         false,
         (response, error) => {
-          callback();
+          callback(response, error);
         },
       );
     }

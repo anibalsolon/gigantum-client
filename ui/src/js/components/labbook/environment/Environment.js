@@ -3,7 +3,6 @@ import React, { Component } from 'react';
 import { createFragmentContainer, graphql } from 'react-relay';
 // store
 import { setErrorMessage } from 'JS/redux/reducers/footer';
-import { setRefetchPending } from 'JS/redux/reducers/labbook/environment/packageDependencies';
 import { setBuildingState } from 'JS/redux/reducers/labbook/labbook';
 import store from 'JS/redux/store';
 // mutations
@@ -39,10 +38,10 @@ class Environment extends Component {
   }
 
   /**
-  *  @param {None}
+  *  @param {}
   *  callback that triggers buildImage mutation
   */
-  _buildCallback = (refetchPending) => {
+  _buildCallback = () => {
     const { labbookName, owner } = this.state;
 
     setBuildingState(true);
@@ -64,9 +63,6 @@ class Environment extends Component {
                   setErrorMessage(`${labbookName} failed to build`, error);
                 }
 
-                if (refetchPending) {
-                  setRefetchPending(true);
-                }
 
                 return 'finished';
               },
@@ -83,12 +79,6 @@ class Environment extends Component {
           if (error) {
             setErrorMessage(`${labbookName} failed to build`, error);
           }
-
-          if (refetchPending) {
-            setRefetchPending(true);
-          }
-
-
           return 'finished';
         },
       );
@@ -147,6 +137,8 @@ class Environment extends Component {
               overview={props.overview}
               base={base}
               isLocked={props.isLocked}
+              packageLatestVersions={props.packageLatestVersions}
+              fetchPackageVersion={props.fetchPackageVersion}
             />
           </ErrorBoundary>
           <CustomDockerfile

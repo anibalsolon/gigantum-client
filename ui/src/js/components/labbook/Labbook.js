@@ -17,7 +17,6 @@ import store from 'JS/redux/store';
 import { setContainerMenuWarningMessage } from 'JS/redux/reducers/labbook/environment/environment';
 import { setMergeMode, setBuildingState, setStickyDate } from 'JS/redux/reducers/labbook/labbook';
 import { setCallbackRoute } from 'JS/redux/reducers/routes';
-import { setLatestPackages } from 'JS/redux/reducers/labbook/environment/packageDependencies';
 import { setInfoMessage } from 'JS/redux/reducers/footer';
 // utils
 import { getFilesFromDragEvent } from 'JS/utils/html-dir-content';
@@ -36,7 +35,8 @@ import LabbookContainerStatusMutation from 'Mutations/LabbookContainerStatusMuta
 import LabbookLookupMutation from 'Mutations/LabbookLookupMutation';
 import MigrateProjectMutation from 'Mutations/MigrateProjectMutation';
 // query
-import fetchMigrationInfoQuery from './fetchMigrationInfoQuery'
+import fetchMigrationInfoQuery from './queries/fetchMigrationInfoQuery';
+import fetchPagkageLatestVersion from './queries/fetchPackageLatestVersionQuery';
 // assets
 import './Labbook.scss';
 
@@ -104,6 +104,10 @@ class Labbook extends Component {
     isDeprecated: null,
     shouldMigrate: null,
     buttonState: '',
+    packageLatestVersions: [],
+    isFetchingPackages: false,
+    queuePackageFetch: false,
+    activeBranchName: this.props.labbook.activeBranchName
   }
 
   static getDerivedStateFromProps(nextProps, state) {
@@ -166,6 +170,8 @@ class Labbook extends Component {
 
     this._fetchMigrationInfo();
 
+    this._fetchPackageVersion();
+
     this._setStickHeader();
     this._fetchStatus(true);
 
@@ -173,16 +179,61 @@ class Labbook extends Component {
     window.addEventListener('click', this._branchViewClickedOff);
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    const { props, state } = this,
+          { activeBranchName } = props.labbook;
+
+    if (activeBranchName !== state.activeBranchName) {
+      this.setState({ activeBranchName });
+
+      this._fetchPackageVersion();
+    }
+  }
+
   /**
     @param {}
     removes event listeners
   */
   componentWillUnmount() {
-    setLatestPackages({});
     this.mounted = false;
     window.removeEventListener('scroll', this._setStickHeader);
 
     window.removeEventListener('click', this._branchViewClickedOff);
+  }
+
+
+  /**
+    @param {}
+    gets latest version for packages
+  */
+  @boundMethod
+  _fetchPackageVersion() {
+    const { props, state } = this,
+          { owner, name } = props.labbook;
+
+    if (!state.isFetchingPackages) {
+      this.setState({ isFetchingPackages: true });
+      fetchPagkageLatestVersion.getPackageVersions(owner, name, 1000, null).then((response) => {
+        if (response.labbook) {
+          const packageLatestVersions = response.labbook.environment.packageDependencies.edges;
+          this.setState({ packageLatestVersions });
+        }
+        if (this.state.queuePackageFetch) {
+          this.setState({
+            isFetchingPackages: false,
+            queuePackageFetch: false,
+          });
+          this._fetchPackageVersion();
+        } else {
+          this.setState({
+            isFetchingPackages: false,
+            queuePackageFetch: false,
+          });
+        }
+      });
+    } else {
+      this.setState({ queuePackageFetch: true });
+    }
   }
 
   /**
@@ -690,6 +741,8 @@ class Labbook extends Component {
                                containerStatus={this.refs.ContainerStatus}
                                overview={labbook.overview}
                                isLocked={isLocked}
+                               packageLatestVersions={state.packageLatestVersions}
+                               fetchPackageVersion={this._fetchPackageVersion}
                                {...props}
                              />
                         </ErrorBoundary>)}

@@ -3,7 +3,6 @@ import JobStatus from 'JS/utils/JobStatus';
 import store from 'JS/redux/store';
 import AnsiUp from 'ansi_up';
 import { setMultiInfoMessage, setErrorMessage } from 'JS/redux/reducers/footer';
-import { setForceRefetch, setRefetchPending } from 'JS/redux/reducers/labbook/environment/packageDependencies';
 // mutations
 import FetchLabbookEdgeMutation from 'Mutations/FetchLabbookEdgeMutation';
 import FetchDatasetEdgeMutation from 'Mutations/FetchDatasetEdgeMutation';
@@ -69,11 +68,6 @@ const FooterUtils = {
               }
 
               message = fullMessage.slice(res[res.length - 2], res[res.length - 1]);
-            }
-
-            if ((response.data.jobStatus.status === 'started' || response.data.jobStatus.status === 'finished') && store.getState().packageDependencies.refetchPending) {
-              setForceRefetch(true);
-              setRefetchPending(false);
             }
 
             if (response.data.jobStatus.status === 'started') {
